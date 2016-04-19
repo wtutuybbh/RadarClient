@@ -10,7 +10,7 @@
 
 #include "Util.h"
 
-#include "FreeImage.h"
+
 
 #include "glm/glm.hpp"
 
@@ -22,7 +22,6 @@
 
 #define DATFILE_MAXLINELENGTH 256
 
-#define TEXSIZE 2048
 
 
 CMesh::CMesh(CScene *scn)
@@ -254,7 +253,7 @@ AltitudeMap* CMesh::GetAltitudeMap(const char *fileName, double lon1, double lat
 bool CMesh::LoadHeightmap()
 {
 		
-	float flHeightScale = 2.0;
+	//float flHeightScale = 2.0;
 
 
 	iMapH = GetImageMapHeader(scn->imgFile.data(), scn->datFile.data());
@@ -273,7 +272,7 @@ bool CMesh::LoadHeightmap()
 	int bottom = top + texsize;
 	int right = left + texsize;
 
-	FIBITMAP *subimage = FreeImage_Copy((FIBITMAP*)bitmap, left, top, right, bottom);
+	subimage = FreeImage_Copy((FIBITMAP*)bitmap, left, top, right, bottom);
 
 	double px = (iMapH->imgLon1 - iMapH->imgLon0) / iMapH->sizeX;
 	double py = (iMapH->imgLat1 - iMapH->imgLat0) / iMapH->sizeY;
@@ -377,6 +376,41 @@ bool CMesh::LoadHeightmap()
 		//aMap = NULL;
 	}
 	return true;
+}
+
+bool CMesh::PrepareAndBuildMinimapVBO()
+{
+	float minimapTexSize = 512;
+
+	MiniMapImage = FreeImage_Rescale(subimage, minimapTexSize, minimapTexSize, FILTER_BSPLINE);
+	glGenTextures(1, &MiniMapTextureId);							// Get An Open ID
+	glBindTexture(GL_TEXTURE_2D, MiniMapTextureId);				// Bind The Texture
+
+
+															//ofstream outfile 
+															//unsigned char * tmpdata = new unsigned char[aMap->sizeX * aMap->sizeY * 3];
+
+															/*for (int i = 0; i < aMap->sizeX * aMap->sizeY; i++) {
+															tmpdata[i * 3] = aMap->data[i]*255.0 / maxheight;
+															tmpdata[i * 3 + 1] = tmpdata[i * 3];
+															tmpdata[i * 3 + 2] = tmpdata[i * 3];
+															}*/
+
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, minimapTexSize, minimapTexSize, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(MiniMapImage));
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+	MiniMapVBOBuffer.push_back({ glm::vec4(1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
+	MiniMapVBOBuffer.push_back({ glm::vec4(1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
+	MiniMapVBOBuffer.push_back({ glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	MiniMapVBOBuffer.push_back({ glm::vec4(-1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
+
+	MiniMapVBOBufferSize = MiniMapVBOBuffer.size();
+
+
+
+	return false;
 }
 
 float CMesh::PtHeight(int nX, int nY)

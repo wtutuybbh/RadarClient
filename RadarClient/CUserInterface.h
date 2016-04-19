@@ -64,11 +64,11 @@ private:
 
 	glm::vec3 GetDirection();
 
+public:
 	int Column1X, Column2X;
 	int VStep, VStepGrp;
 	int MinimapSize, PanelWidth;
 	int ButtonHeight, ControlWidth, ControlWidthL, ControlWidthXL;
-public:
 	HWND ParentHWND;
 
 	

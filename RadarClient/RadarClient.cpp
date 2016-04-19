@@ -47,6 +47,7 @@
 //#include "FreeImage.h"
 
 #include "ViewPortControl.h"
+#include "CMinimap.h"
 
 #include "CUserInterface.h"
 
@@ -78,6 +79,7 @@ std::string g_altFile, g_imgFile, g_datFile;
 HWND g_ViewPortControl_hWnd;
 
 ViewPortControl *g_vpControl;
+CMinimap *g_Minimap;
 CUserInterface *g_UI;
 CRCSocket *g_Socket;
 
@@ -355,8 +357,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		g_UI = new CUserInterface(hWnd, g_vpControl, g_Socket, PANEL_WIDTH);
 
-		
-		
+		g_Minimap->Add(hWnd, 0, 0, g_UI->MinimapSize, g_UI->MinimapSize);
+		g_Minimap->InitGL();
+
 		//g_Socket->Connect();
 		/*g_ViewPortControl_hWnd = CreateWindowEx(
 			WS_EX_CLIENTEDGE, // give it a standard border
@@ -463,6 +466,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		break;
 	case CM_POSTDATA: {
 		g_Socket->PostData(wParam, lParam);
+		g_vpControl->MakeCurrent();
 		g_vpControl->Scene->RefreshSector(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit);
 	}
 	break;
@@ -539,7 +543,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		g_texsize = std::stoi(v[4]);
 	}
 
-	g_vpControl = new ViewPortControl;
+	g_vpControl = new ViewPortControl("VP3D");
+	g_Minimap = new CMinimap("VPMiniMap");
+
 
 	//g_vpControl->Register();
 
@@ -636,10 +642,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 							Draw();							
 
-							if (g_vpControl->hDC) {
+							if (g_vpControl->hRC) {
 								g_vpControl->MakeCurrent();
 								g_vpControl->Draw();
 								SwapBuffers(g_vpControl->hDC);					// Swap Buffers (Double Buffering)
+							}
+							if (g_Minimap->hRC) {
+								g_Minimap->MakeCurrent();
+								g_Minimap->Draw();
+								SwapBuffers(g_Minimap->hDC);
 							}
 						}
 					}

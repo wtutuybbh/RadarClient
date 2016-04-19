@@ -20,7 +20,7 @@ void ViewPortControl::Paint()
 	hdc = BeginPaint(hWnd, &ps);
 	SetTextColor(hdc, RGB(0, 0, 0));
 	SetBkMode(hdc, TRANSPARENT);
-	DrawText(hdc, _T("RadarClient"), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+	DrawText(hdc, _T("Loading..."), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 	EndPaint(hWnd, &ps);
 }
 
@@ -114,7 +114,7 @@ void ViewPortControl::Add(HWND parent, int x, int y, int w, int h)
 {
 	hWnd = CreateWindowEx(
 		WS_EX_CLIENTEDGE, // give it a standard border
-		VIEW_PORT_WC,
+		ClassName,
 		_T("A viewport control"),
 		WS_VISIBLE | WS_CHILD,
 		x, y, w, h,
@@ -126,8 +126,10 @@ void ViewPortControl::SetPosition(int x, int y, int w, int h)
 {
 	SetWindowPos(hWnd, NULL, x, y, w, h, 0);
 }
-ViewPortControl::ViewPortControl()
+ViewPortControl::ViewPortControl(LPCSTR className)
 {
+	ClassName = className;
+
 	hRC = NULL;
 	hDC = NULL;
 	Init();
@@ -137,16 +139,7 @@ ViewPortControl::ViewPortControl()
 	UI = NULL;
 	Register();
 }
-ViewPortControl::ViewPortControl(CScene *scn, CCamera *cam)
-{
-	hRC = NULL;
-	hDC = NULL;
-	Init();
-	Scene = scn;
-	Camera = cam;
-	UI = NULL;
-	Register();
-}
+
 
 ViewPortControl::~ViewPortControl()
 {
@@ -202,7 +195,7 @@ bool ViewPortControl::Register(void)
 	wc.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc = (WNDPROC)stWinMsgHandler;// ViewPortControlProc;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.lpszClassName = VIEW_PORT_WC;
+	wc.lpszClassName = ClassName;
 
 	wc.hInstance = GetModuleHandle(0);
 	wc.hIcon = 0;
@@ -232,7 +225,7 @@ void ViewPortControl::Init()
 
 void ViewPortControl::Unregister(void)
 {
-	UnregisterClass(VIEW_PORT_WC, NULL);
+	UnregisterClass(ClassName, NULL);
 }
 
 bool ViewPortControl::InitGL()
@@ -345,6 +338,7 @@ void ViewPortControl::ReshapeGL(int width, int height)									// Reshape The Wi
 		Scene->height = height;
 	}
 	if (hDC && hRC) {
+		MakeCurrent();
 		glViewport(0, 0, (GLsizei)(width), (GLsizei)(height));				// Reset The Current Viewport
 		glMatrixMode(GL_PROJECTION);										// Select The Projection Matrix
 		glLoadIdentity();													// Reset The Projection Matrix

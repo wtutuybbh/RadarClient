@@ -34,8 +34,7 @@ public:
 	HDC hDC;
 	HGLRC hRC;
 
-	ViewPortControl();
-	ViewPortControl(CScene*, CCamera*);
+	ViewPortControl(LPCSTR className);
 	~ViewPortControl();
 	/* Register/unregister the window class */
 	
@@ -43,7 +42,7 @@ public:
 
 	bool InitGL();
 
-	void ReshapeGL(int width, int height);
+	virtual void ReshapeGL(int width, int height);
 
 	virtual LRESULT ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -58,6 +57,8 @@ public:
 	int DisplayPoints, DisplaySeries, DisplayRLIs, DisplayMap, DisplayLandscape;
 
 	bool MakeCurrent();
+
+	LPCSTR ClassName;
 private:
 	static LRESULT CALLBACK stWinMsgHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	bool Register(void);
