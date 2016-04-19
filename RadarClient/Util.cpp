@@ -1,0 +1,191 @@
+#include "Util.h"
+#include "glm/glm.hpp"
+
+#include <string>
+#include <sstream>
+#include <vector>
+
+#include <GL/glew.h>
+#include <GL/freeglut.h>
+
+namespace cnvrt {
+	double latdg2m(double dg, double lat) {
+		if (lat < 5) return dg * 110579;
+		if (lat < 10) return dg * 110596;
+		if (lat < 15) return dg * 110629;
+		if (lat < 20) return dg * 110676;
+		if (lat < 25) return dg * 110739;
+		if (lat < 30) return dg * 110814;
+		if (lat < 35) return dg * 110898;
+		if (lat < 40) return dg * 110989;
+		if (lat < 45) return dg * 111085;
+		if (lat < 50) return dg * 111182;
+		if (lat < 55) return dg * 111278;
+		if (lat < 60) return dg * 111370;
+		if (lat < 65) return dg * 111455;
+		if (lat < 70) return dg * 111531;
+		if (lat < 75) return dg * 111594;
+		if (lat < 80) return dg * 111643;
+		if (lat < 85) return dg * 111677;
+		return dg * 111694;
+	}
+
+	double londg2m(double dg, double lat) {
+		if (lat < 1) return dg * 111321;
+		if (lat < 2) return dg * 111305;
+		if (lat < 3) return dg * 111254;
+		if (lat < 4) return dg * 111170;
+		if (lat < 5) return dg * 111052;
+		if (lat < 6) return dg * 110901;
+		if (lat < 7) return dg * 110716;
+		if (lat < 8) return dg * 110497;
+		if (lat < 9) return dg * 110245;
+		if (lat < 10) return dg * 109960;
+		if (lat < 11) return dg * 109641;
+		if (lat < 12) return dg * 109289;
+		if (lat < 13) return dg * 108904;
+		if (lat < 14) return dg * 108487;
+		if (lat < 15) return dg * 108036;
+		if (lat < 16) return dg * 107552;
+		if (lat < 17) return dg * 107036;
+		if (lat < 18) return dg * 106488;
+		if (lat < 19) return dg * 105907;
+		if (lat < 20) return dg * 105294;
+		if (lat < 21) return dg * 104649;
+		if (lat < 22) return dg * 103972;
+		if (lat < 23) return dg * 103264;
+		if (lat < 24) return dg * 102524;
+		if (lat < 25) return dg * 101753;
+		if (lat < 26) return dg * 100952;
+		if (lat < 27) return dg * 100119;
+		if (lat < 28) return dg * 99257;
+		if (lat < 29) return dg * 98364;
+		if (lat < 30) return dg * 97441;
+		if (lat < 31) return dg * 96488;
+		if (lat < 32) return dg * 95506;
+		if (lat < 33) return dg * 94495;
+		if (lat < 34) return dg * 93455;
+		if (lat < 35) return dg * 92386;
+		if (lat < 36) return dg * 91290;
+		if (lat < 37) return dg * 90165;
+		if (lat < 38) return dg * 89013;
+		if (lat < 39) return dg * 87834;
+		if (lat < 40) return dg * 86628;
+		if (lat < 41) return dg * 85395;
+		if (lat < 42) return dg * 84137;
+		if (lat < 43) return dg * 82852;
+		if (lat < 44) return dg * 81542;
+		if (lat < 45) return dg * 80208;
+		if (lat < 46) return dg * 78848;
+		if (lat < 47) return dg * 77465;
+		if (lat < 48) return dg * 76057;
+		if (lat < 49) return dg * 74627;
+		if (lat < 50) return dg * 73173;
+		if (lat < 51) return dg * 71697;
+		if (lat < 52) return dg * 70199;
+		if (lat < 53) return dg * 68679;
+		if (lat < 54) return dg * 67138;
+		if (lat < 55) return dg * 65577;
+		if (lat < 56) return dg * 63995;
+		if (lat < 57) return dg * 62394;
+		if (lat < 58) return dg * 60773;
+		if (lat < 59) return dg * 59134;
+		if (lat < 60) return dg * 57476;
+		if (lat < 61) return dg * 55801;
+		if (lat < 62) return dg * 54108;
+		if (lat < 63) return dg * 52399;
+		if (lat < 64) return dg * 50674;
+		if (lat < 65) return dg * 48933;
+		if (lat < 66) return dg * 47176;
+		if (lat < 67) return dg * 45405;
+		if (lat < 68) return dg * 43621;
+		if (lat < 69) return dg * 41822;
+		if (lat < 70) return dg * 40011;
+		if (lat < 71) return dg * 38187;
+		if (lat < 72) return dg * 36352;
+		if (lat < 73) return dg * 34505;
+		if (lat < 74) return dg * 32647;
+		if (lat < 75) return dg * 30780;
+		if (lat < 76) return dg * 28902;
+		if (lat < 77) return dg * 27016;
+		if (lat < 78) return dg * 25122;
+		if (lat < 79) return dg * 23219;
+		if (lat < 80) return dg * 21310;
+		if (lat < 81) return dg * 19394;
+		if (lat < 82) return dg * 17472;
+		if (lat < 83) return dg * 15544;
+		if (lat < 84) return dg * 13612;
+		if (lat < 85) return dg * 11675;
+		if (lat < 86) return dg * 9735;
+		if (lat < 87) return dg * 7791;
+		if (lat < 88) return dg * 5846;
+		if (lat < 89) return dg * 3898;
+		if (lat < 90) return dg * 1949;
+		return 0;
+	}
+	std::string float2str(float number)
+	{
+		std::ostringstream buff;
+		buff << number;
+		return buff.str();
+	}
+}
+namespace rcutils {
+	void takeminmax(float value, float *min, float *max) {
+		if (*max < value) *max = value;
+		if (*min > value) *min = value;
+	}
+	std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
+		std::stringstream ss(s);
+		std::string item;
+		while (std::getline(ss, item, delim)) {
+			elems.push_back(item);
+		}
+		return elems;
+	}
+
+
+	std::vector<std::string> split(const std::string &s, char delim) {
+		std::vector<std::string> elems;
+		split(s, delim, elems);
+		return elems;
+	}
+	
+}
+void BitmapString(float x, float y, float z, std::string s)
+{
+	glRasterPos3f(x, y, z);
+	for (int n = 0; n<s.size(); ++n) {
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, s[n]);
+	}
+	//glutBitmapString(GLUT_BITMAP_HELVETICA_18, (unsigned char *)s);
+}
+
+void BitmapString2D(float x, float y, std::string s)
+{
+	glRasterPos2f(x, y);
+	for (int n = 0; n<s.size(); ++n) {
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, s[n]);
+	}
+}
+
+CVec GetCVec(glm::vec3 v)
+{
+	CVec* cv = new CVec;
+	cv->x = v.x;
+	cv->y = v.y;
+	cv->z = v.z;
+	return *cv;
+}
+
+unsigned long getFileLength(std::ifstream& file)
+{
+	if (!file.good()) return 0;
+
+	unsigned long pos = file.tellg();
+	file.seekg(0, std::ios::end);
+	unsigned long len = file.tellg();
+	file.seekg(std::ios::beg);
+
+	return len;
+}
