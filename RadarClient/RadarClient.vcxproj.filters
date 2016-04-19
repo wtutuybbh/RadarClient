@@ -94,5 +94,7 @@
     <None Include="ClassDiagram.cd" />
     <None Include="GLSL\Minimap.v.glsl" />
     <None Include="GLSL\Minimap.f.glsl" />
+    <None Include="GLSL\CRCPoint.f.glsl" />
+    <None Include="GLSL\CRCPoint.v.glsl" />
   </ItemGroup>
 </Project>

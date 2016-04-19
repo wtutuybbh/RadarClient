@@ -49,7 +49,7 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	maxE = 30;
 	minDist = 100;
 	maxDist = 5000;
-	rayDensity = 10;
+	rayDensity = 1;
 
 
 	vertexCount_Ray = (rayDensity + 1) * (rayDensity + 1) * 2;
@@ -96,13 +96,7 @@ bool CScene::DrawScene()
 	//goto shader_debug;
 	mesh->Draw();
 
-	if (UI->GetCheckboxState_Points()) {
-		CRCPoint::UseProgram();
-		for (int i = 0; i < Points.size(); i++) {
-			Points[i].Draw(Camera);
-		}
-		glUseProgram(0);
-	}
+	
 	
 	glDisable(GL_DEPTH_TEST);									// Disable Depth Testing
 
@@ -170,6 +164,15 @@ bool CScene::DrawScene()
 	BitmapString(60 * markDistance / mpph, y0 + markDistance, 0, "W");
 	BitmapString(-60 * markDistance / mpph, y0 + markDistance, 0, "E");
 
+	glEnable(GL_DEPTH_TEST);
+
+	if (UI->GetCheckboxState_Points()) {
+		CRCPoint::UseProgram();
+		for (int i = 0; i < Points.size(); i++) {
+			Points[i].Draw(Camera);
+		}
+		glUseProgram(0);
+	}
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -191,7 +194,7 @@ bool CScene::DrawScene()
 		glColorPointer(4, GL_FLOAT, 0, 0);
 
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
-		glDrawElements(GL_TRIANGLES, rayArraySize, GL_UNSIGNED_SHORT, ray);
+		glDrawElements(GL_LINE_LOOP, rayArraySize, GL_UNSIGNED_SHORT, ray);
 	}
 	//glRasterPos3f
 

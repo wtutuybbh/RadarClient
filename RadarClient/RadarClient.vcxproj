@@ -105,7 +105,7 @@
       <Command>xcopy /y "$(SolutionDir)gdal\x86\Debug\gdal*.dll" "$(OutDir)"
 xcopy /y "$(SolutionDir)freeglut\bin\*.dll" "$(OutDir)"
 xcopy /y "$(SolutionDir)glew\bin\Release\Win32\*.dll" "$(OutDir)"
-xcopy /y "$(ProjectDir)*.glsl" "$(OutDir)"
+xcopy /y "$(ProjectDir)GLSL\*.glsl" "$(OutDir)"
 xcopy /y "$(SolutionDir)Data\*.*" "$(OutDir)"
 xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
@@ -160,7 +160,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
       <Command>xcopy /y "$(SolutionDir)gdal\x86\Debug\gdal*.dll" "$(OutDir)"
 xcopy /y "$(SolutionDir)freeglut\bin\*.dll" "$(OutDir)"
 xcopy /y "$(SolutionDir)glew\bin\Release\Win32\*.dll" "$(OutDir)"
-xcopy /y "$(ProjectDir)*.glsl" "$(OutDir)"
+xcopy /y "$(ProjectDir)GLSL\*.glsl" "$(OutDir)"
 xcopy /y "$(SolutionDir)Data\*.*" "$(OutDir)"
 xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
@@ -212,6 +212,8 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+    <None Include="GLSL\CRCPoint.f.glsl" />
+    <None Include="GLSL\CRCPoint.v.glsl" />
     <None Include="GLSL\Minimap.f.glsl" />
     <None Include="GLSL\Minimap.v.glsl" />
   </ItemGroup>
