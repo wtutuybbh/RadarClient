@@ -54,7 +54,7 @@
 
 #define VIEW_PORT_CONTROL_ID     100
 
-#define PANEL_WIDTH 350
+#define PANEL_WIDTH 450
 #define INFO_HEIGHT 250
 
 
@@ -353,7 +353,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		
 		g_Socket = new CRCSocket(hWnd);
 
-		g_UI = new CUserInterface(hWnd, g_vpControl, g_Socket);
+		g_UI = new CUserInterface(hWnd, g_vpControl, g_Socket, PANEL_WIDTH);
 
 		
 		

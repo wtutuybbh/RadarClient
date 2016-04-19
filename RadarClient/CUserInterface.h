@@ -64,6 +64,10 @@ private:
 
 	glm::vec3 GetDirection();
 
+	int Column1X, Column2X;
+	int VStep, VStepGrp;
+	int MinimapSize, PanelWidth;
+	int ButtonHeight, ControlWidth, ControlWidthL, ControlWidthXL;
 public:
 	HWND ParentHWND;
 
@@ -87,7 +91,8 @@ public:
 
 	virtual LRESULT Wnd_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	CUserInterface(HWND parentHWND, ViewPortControl *vpControl,	CRCSocket *Socket);
+
+	CUserInterface(HWND parentHWND, ViewPortControl *vpControl,	CRCSocket *Socket, int panelWidth);
 	~CUserInterface();	
 
 	void ConnectionStateChanged(bool IsConnected);

@@ -160,38 +160,66 @@ LRESULT CUserInterface::Trackbar_CameraDirection_Turn(HWND hwnd, UINT uMsg, WPAR
 	return LRESULT();
 }
 //TRACKBAR_CLASS
-CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCSocket *socket)
+CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
 {
 	this->ParentHWND = parentHWND;
 	this->VPControl = vpControl;
 	this->Socket = socket;
 	this->CurrentID = 1;
 
+	/*int Column1X, Column2X;
+	int VStep, VStepGrp;
+	int MinimapSize, PanelWidth;*/
 
-	IsConnected_ID = InsertElement(_T("STATIC"), TEXT_LABEL_NOT_CONNECTED, WS_VISIBLE | WS_CHILD, 10, 10, 270, 30, NULL);
-	Button_Connect_ID = InsertElement(_T("BUTTON"), TEXT_BUTTON_CONNECT, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 50, 180, 30, &CUserInterface::Button_Connect);
+	Column1X = 10;
+	PanelWidth = panelWidth;
+	Column2X = panelWidth / 2;
+	VStep = 22;
+	VStepGrp = 30;
+	MinimapSize = PanelWidth - VStepGrp;
+	ButtonHeight = 20, ControlWidth = 110, ControlWidthL = 180, ControlWidthXL = 270;
 
-	InsertElement(_T("STATIC"), TEXT_LABEL_SHOW, WS_VISIBLE | WS_CHILD, 10, 110, 270, 30, NULL);
-	ObjOptions_ID[0] = InsertElement(_T("BUTTON"), TEXT_CHECKBOX_POINTS, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, 10, 150, 270, 30, &CUserInterface::Checkbox_ObjOptions);
-	ObjOptions_ID[1] = InsertElement(_T("BUTTON"), TEXT_CHECKBOX_SERIES, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, 10, 180, 270, 30, &CUserInterface::Checkbox_ObjOptions);
-	ObjOptions_ID[2] = InsertElement(_T("BUTTON"), TEXT_CHECKBOX_RLI, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, 10, 210, 270, 30, &CUserInterface::Checkbox_ObjOptions);
+	int CurrentY = 0;
+
+
+	//new view port control should be here
+
+	CameraDirection_ID[0] = InsertElement(TRACKBAR_CLASS, TEXT_LABEL_CAMERA_POSITION, WS_VISIBLE | WS_CHILD | TBS_VERT | TBS_RIGHT, MinimapSize, CurrentY, VStepGrp, MinimapSize, &CUserInterface::Trackbar_CameraDirection_VTilt);
+	CurrentY += MinimapSize;
+	CameraDirection_ID[1] = InsertElement(TRACKBAR_CLASS, TEXT_LABEL_CAMERA_POSITION, WS_VISIBLE | WS_CHILD | TBS_HORZ | TBS_BOTTOM, 0, CurrentY, MinimapSize, VStepGrp, &CUserInterface::Trackbar_CameraDirection_Turn);
+
+	CurrentY += VStepGrp + VStep;
+
+	Button_Connect_ID = InsertElement(_T("BUTTON"), TEXT_BUTTON_CONNECT, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, Column1X, CurrentY, ControlWidthL, ButtonHeight, &CUserInterface::Button_Connect);
+	IsConnected_ID = InsertElement(_T("STATIC"), TEXT_LABEL_NOT_CONNECTED, WS_VISIBLE | WS_CHILD, Column2X, CurrentY, ControlWidthL, ButtonHeight, NULL);
 	
+	CurrentY += VStepGrp;
 
-	InsertElement(_T("STATIC"), TEXT_LABEL_VIEW, WS_VISIBLE | WS_CHILD, 10, 270, 270, 30, NULL);
-	MapOptions_ID[0] = InsertElement(_T("BUTTON"), TEXT_CHECKBOX_LANDSCAPE, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, 10, 310, 270, 30, &CUserInterface::Checkbox_MapOptions);
-	MapOptions_ID[1] = InsertElement(_T("BUTTON"), TEXT_CHECKBOX_MAP, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, 10, 340, 270, 30, &CUserInterface::Checkbox_MapOptions);
+	InsertElement(_T("STATIC"), TEXT_LABEL_SHOW, WS_VISIBLE | WS_CHILD, Column1X, CurrentY, ControlWidth, ButtonHeight, NULL);
+	InsertElement(_T("STATIC"), TEXT_LABEL_VIEW, WS_VISIBLE | WS_CHILD, Column2X, CurrentY, ControlWidth, ButtonHeight, NULL);
+	CurrentY += VStep;
+	ObjOptions_ID[0] = InsertElement(_T("BUTTON"), TEXT_CHECKBOX_POINTS, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_ObjOptions);
+	MapOptions_ID[0] = InsertElement(_T("BUTTON"), TEXT_CHECKBOX_LANDSCAPE, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MapOptions);
+	CurrentY += VStep;
+	ObjOptions_ID[1] = InsertElement(_T("BUTTON"), TEXT_CHECKBOX_SERIES, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_ObjOptions);
+	MapOptions_ID[1] = InsertElement(_T("BUTTON"), TEXT_CHECKBOX_MAP, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MapOptions);
+	CurrentY += VStep;
+	ObjOptions_ID[2] = InsertElement(_T("BUTTON"), TEXT_CHECKBOX_RLI, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_ObjOptions);
+	
+	CurrentY += VStepGrp;
 
-	InsertElement(_T("STATIC"), TEXT_LABEL_CAMERA_POSITION, WS_VISIBLE | WS_CHILD, 10, 400, 270, 30, NULL);
-	CameraPosition_ID[0] = InsertElement(_T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_RADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_GROUP, 10, 440, 300, 30, &CUserInterface::RadioGroup_CameraPosition);
-	CameraPosition_ID[1] = InsertElement(_T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_5KM_ABOVE_RADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 10, 470, 300, 30, &CUserInterface::RadioGroup_CameraPosition);
-	CameraPosition_ID[2] = InsertElement(_T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_5KM_ABOVE_RADAR_5KM_NORTH, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 10, 500, 300, 30, &CUserInterface::RadioGroup_CameraPosition);
+	InsertElement(_T("STATIC"), TEXT_LABEL_CAMERA_POSITION, WS_VISIBLE | WS_CHILD, Column1X, CurrentY, ControlWidth, ButtonHeight, NULL);
+	CameraPosition_ID[0] = InsertElement(_T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_RADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_GROUP, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
+	CurrentY += VStep;
+	CameraPosition_ID[1] = InsertElement(_T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_5KM_ABOVE_RADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
+	CurrentY += VStep;
+	CameraPosition_ID[2] = InsertElement(_T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_5KM_ABOVE_RADAR_5KM_NORTH, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
+	CurrentY += VStep;
 
-	CameraDirectionValue_ID[0] = InsertElement(_T("STATIC"), _T(""), WS_VISIBLE | WS_CHILD, 10, 530, 100, 30, NULL);
-	CameraDirectionValue_ID[1] = InsertElement(_T("STATIC"), _T(""), WS_VISIBLE | WS_CHILD, 110, 530, 100, 30, NULL);
+	//CameraDirectionValue_ID[0] = InsertElement(_T("STATIC"), _T(""), WS_VISIBLE | WS_CHILD, 10, 530, 100, 30, NULL);
+	//CameraDirectionValue_ID[1] = InsertElement(_T("STATIC"), _T(""), WS_VISIBLE | WS_CHILD, 110, 530, 100, 30, NULL);
 
-	CameraDirection_ID[0] = InsertElement(TRACKBAR_CLASS, TEXT_LABEL_CAMERA_POSITION, WS_VISIBLE | WS_CHILD | TBS_VERT | TBS_RIGHT, 300, 400, 50, 230, &CUserInterface::Trackbar_CameraDirection_VTilt);
-	CameraDirection_ID[1] = InsertElement(TRACKBAR_CLASS, TEXT_LABEL_CAMERA_POSITION, WS_VISIBLE | WS_CHILD | TBS_HORZ | TBS_BOTTOM, 10, 600, 230, 50, &CUserInterface::Trackbar_CameraDirection_Turn);
-
+	
 	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
 		it->second->hWnd = CreateWindowEx(NULL,
 			it->second->Class,
