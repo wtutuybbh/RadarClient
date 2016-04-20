@@ -343,6 +343,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		window = (GL_Window*)(creation->lpCreateParams);
 		SetWindowLong(hWnd, GWL_USERDATA, (LONG)(window));
 
+		HANDLE hIcon = LoadImage(0, _T("radar.ico"), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+		if (hIcon) {
+			//Change both icons to the same icon handle.
+			SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+			SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+
+			//This will ensure that the application icon gets changed too.
+			SendMessage(GetWindow(hWnd, GW_OWNER), WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+			SendMessage(GetWindow(hWnd, GW_OWNER), WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+		}
 
 
 		/*CreateWindowEx((DWORD)VIEW_PORT_WC, NULL, NULL, WS_CHILD | WS_VISIBLE,

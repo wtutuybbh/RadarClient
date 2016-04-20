@@ -208,6 +208,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CCamera.h" />
     <ClInclude Include="CMesh.h" />
     <ClInclude Include="CScene.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="ShaderUtils.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="ViewPortControl.h" />
@@ -220,6 +221,12 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <None Include="GLSL\Minimap.v.glsl" />
     <None Include="GLSL\MiniMapPointer.f.glsl" />
     <None Include="GLSL\MiniMapPointer.v.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RadarClient.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Data\radar.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
