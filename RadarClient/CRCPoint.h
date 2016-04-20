@@ -10,6 +10,7 @@
 #include <vector>
 #include "Util.h"
 #include "CCamera.h"
+#include "C3DObject.h"
 
 #define _USE_MATH_DEFINES 
 #include <math.h>
@@ -20,11 +21,11 @@
 
 class CScene;
 
-class CRCPoint
+class CRCPoint : C3DObject
 {
 private:
 	static void CreateSphereR1(int level);
-	static std::vector<VBOData> VBOBuffer;
+	
 	static int VBOBufferSize;
 	static unsigned int VBOName, VAOName;
 	static GLuint program;
@@ -46,5 +47,7 @@ public:
 	static void PrepareVBO();
 	static void BuildVBO();
 	void Draw(CCamera *cam);
+
+	CVec * GetBounds();
 };
 

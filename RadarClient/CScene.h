@@ -85,7 +85,7 @@ public:
 	CRCSocket *Socket;
 	CUserInterface *UI;
 
-	bool VBOisBuilt, RayVBOisBuilt;
+	bool VBOisBuilt, RayVBOisBuilt, MiniMapVBOisBuilt;
 
 public:
 	CScene(float lonc, float latc);
@@ -97,6 +97,8 @@ public:
 	
 	bool PrepareVBOs();
 	bool PrepareRayVBO(RDR_INITCL* init);
+
+	bool PrepareAndBuildMinimapVBO();
 
 	bool BuildVBOs();
 	bool BuildRayVBO();

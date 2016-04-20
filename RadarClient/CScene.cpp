@@ -76,7 +76,7 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	Ray_VBOName = 0;
 	Ray_VBOName_c = 0;
 
-	RayVBOisBuilt = VBOisBuilt = false;
+	RayVBOisBuilt = VBOisBuilt = MiniMapVBOisBuilt = false;
 }
 CScene::~CScene() {
 	delete markup;
@@ -506,6 +506,12 @@ bool CScene::PrepareRayVBO(RDR_INITCL * init)
 		ray[k3++] = i + 1;
 	}
 	return true;
+}
+
+bool CScene::PrepareAndBuildMinimapVBO()
+{
+
+	return false;
 }
 
 bool CScene::BuildVBOs()

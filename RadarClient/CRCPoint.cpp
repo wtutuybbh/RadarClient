@@ -196,3 +196,8 @@ void CRCPoint::Draw(CCamera *cam)
 	glBindVertexArray(0);
 	
 }
+
+CVec * CRCPoint::GetBounds()
+{
+	return nullptr;
+}

@@ -51,6 +51,9 @@
     <ClCompile Include="CMinimap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CMinimapPointer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CMesh.h">
@@ -87,6 +90,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CMinimap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CMinimapPointer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

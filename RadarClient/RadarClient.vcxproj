@@ -184,6 +184,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CMinimap.cpp" />
+    <ClCompile Include="CMinimapPointer.cpp" />
     <ClCompile Include="CRCPoint.cpp" />
     <ClCompile Include="CRCSocket.cpp" />
     <ClCompile Include="CUserInterface.cpp" />
@@ -198,6 +199,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CMinimap.h" />
+    <ClInclude Include="CMinimapPointer.h" />
     <ClInclude Include="CRCPoint.h" />
     <ClInclude Include="CRCSocket.h" />
     <ClInclude Include="CUserInterface.h" />
