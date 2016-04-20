@@ -7,10 +7,10 @@ class CMinimapPointer : C3DObject
 {/*
 private:
 	VBOBuffer*/
+private:
+	//bool MiniMapVBOReady;
 public:
-
-	void Draw();
-	bool PrepareAndBuildMinimapVBO();
+	void CMinimapPointer::DrawMiniMap();
 
 	CMinimapPointer();
 	~CMinimapPointer();

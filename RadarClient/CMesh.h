@@ -72,8 +72,7 @@ public:
 	CVert*			m_pVertices;								// Vertex Data
 	CTexCoord*		m_pTexCoords;								// Texture Coordinates
 	unsigned int	m_nTextureId;								// Texture ID
-	unsigned int	MiniMapTextureId;
-	unsigned int	MiniMapSampler;
+	
 
 																// Vertex Buffer Object Names
 	unsigned int	m_nVBOVertices;								// Vertex VBO Name
@@ -98,12 +97,8 @@ public:
 
 	int texsize;
 
-	FIBITMAP *subimage, *MiniMapImage;
-	std::vector<VBOData> MiniMapVBOBuffer;
-	int MiniMapVBOBufferSize;
-	unsigned int MiniMapVBOName, MiniMapVAOName;
-	GLuint MiniMapProgram;
-	bool MinimapVBOPrepared;
+	FIBITMAP *subimage;
+	
 public:
 	CMesh(CScene *scn);													// Mesh Constructor
 	~CMesh();													// Mesh Deconstructor
@@ -112,7 +107,10 @@ public:
 	AltitudeMapHeader* GetAltitudeMapHeader(const char *fileName, double lon1, double lat1, double lon2, double lat2);
 																// Heightmap Loader
 	bool LoadHeightmap();
-	bool PrepareAndBuildMinimapVBO();
+	//bool PrepareAndBuildMinimapVBO();
+
+	void BindTextureImage();
+
 	// Single Point Height
 	float PtHeight(int nX, int nY);
 	// VBO Build Function

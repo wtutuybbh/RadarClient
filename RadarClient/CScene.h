@@ -23,6 +23,7 @@ class CCamera;
 
 #include "CRCSocket.h"
 #include "CUserInterface.h"
+#include "CMinimapPointer.h"
 
 class CScene {
 public:
@@ -87,8 +88,10 @@ public:
 
 	bool VBOisBuilt, RayVBOisBuilt, MiniMapVBOisBuilt;
 
+	CMinimapPointer *MiniMapPointer;
+
 public:
-	CScene(float lonc, float latc);
+	/*CScene(float lonc, float latc);*/
 	CScene(std::string alfFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize);
 	~CScene();
 

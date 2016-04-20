@@ -25,12 +25,12 @@ class CRCPoint : C3DObject
 {
 private:
 	static void CreateSphereR1(int level);
-	
-	static int VBOBufferSize;
-	static unsigned int VBOName, VAOName;
-	static GLuint program;
-	static GLuint mvp_unif_loc;
-	static GLuint norm_unif_loc;
+	static std::vector<VBOData> VBOBuffer_s;
+	static int VBOBufferSize_s;
+	static unsigned int VBOName_s, VAOName_s;
+	static GLuint ProgramID_s;
+	static GLuint MVPUniformLoc_s;
+	static GLuint NormUniformLoc_s;
 
 
 	glm::mat4 model, mvp;

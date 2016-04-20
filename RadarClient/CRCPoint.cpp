@@ -8,12 +8,12 @@
 
 //#include "CScene.h"
 
-GLuint CRCPoint::program;
-std::vector<VBOData> CRCPoint::VBOBuffer;
-unsigned int CRCPoint::VBOName, CRCPoint::VAOName;
-GLuint CRCPoint::mvp_unif_loc;
-GLuint CRCPoint::norm_unif_loc;
-int CRCPoint::VBOBufferSize;
+GLuint CRCPoint::ProgramID_s;
+std::vector<VBOData> CRCPoint::VBOBuffer_s;
+unsigned int CRCPoint::VBOName_s, CRCPoint::VAOName_s;
+GLuint CRCPoint::MVPUniformLoc_s;
+GLuint CRCPoint::NormUniformLoc_s;
+int CRCPoint::VBOBufferSize_s;
 
 
 void CRCPoint::CreateSphereR1(int level)
@@ -26,37 +26,37 @@ void CRCPoint::CreateSphereR1(int level)
 	VBOBuffer.push_back({ glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f) });*/
 
 	
-	VBOBuffer.push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 	
-	VBOBuffer.push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 
-	VBOBuffer.push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 
-	VBOBuffer.push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });	
-	VBOBuffer.push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });	
+	VBOBuffer_s.push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 
-	VBOBuffer.push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 	
-	VBOBuffer.push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 	
-	VBOBuffer.push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 	
-	VBOBuffer.push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	VBOBuffer.push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	VBOBuffer_s.push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 	
 	
 	if (level == 0)
@@ -69,33 +69,33 @@ void CRCPoint::CreateSphereR1(int level)
 
 	for (int i = 0; i < N; i++) {
 		
-		VBOData d01 = { mat4_05*(VBOBuffer[0].vert + VBOBuffer[1].vert), mat3_05*(VBOBuffer[0].norm + VBOBuffer[1].norm), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) };
-		VBOData d12 = { mat4_05*(VBOBuffer[2].vert + VBOBuffer[1].vert), mat3_05*(VBOBuffer[2].norm + VBOBuffer[1].norm), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) };
-		VBOData d20 = { mat4_05*(VBOBuffer[0].vert + VBOBuffer[2].vert), mat3_05*(VBOBuffer[0].norm + VBOBuffer[2].norm), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) };
+		VBOData d01 = { mat4_05*(VBOBuffer_s[0].vert + VBOBuffer_s[1].vert), mat3_05*(VBOBuffer_s[0].norm + VBOBuffer_s[1].norm), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) };
+		VBOData d12 = { mat4_05*(VBOBuffer_s[2].vert + VBOBuffer_s[1].vert), mat3_05*(VBOBuffer_s[2].norm + VBOBuffer_s[1].norm), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) };
+		VBOData d20 = { mat4_05*(VBOBuffer_s[0].vert + VBOBuffer_s[2].vert), mat3_05*(VBOBuffer_s[0].norm + VBOBuffer_s[2].norm), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) };
 
-		VBOBuffer.push_back(VBOBuffer[0]);
-		VBOBuffer.push_back(d01);
-		VBOBuffer.push_back(d20);
+		VBOBuffer_s.push_back(VBOBuffer_s[0]);
+		VBOBuffer_s.push_back(d01);
+		VBOBuffer_s.push_back(d20);
 
-		VBOBuffer.push_back(d01);
-		VBOBuffer.push_back(VBOBuffer[1]);
-		VBOBuffer.push_back(d12);
+		VBOBuffer_s.push_back(d01);
+		VBOBuffer_s.push_back(VBOBuffer_s[1]);
+		VBOBuffer_s.push_back(d12);
 
-		VBOBuffer.push_back(d12);
-		VBOBuffer.push_back(VBOBuffer[2]);
-		VBOBuffer.push_back(d20);
+		VBOBuffer_s.push_back(d12);
+		VBOBuffer_s.push_back(VBOBuffer_s[2]);
+		VBOBuffer_s.push_back(d20);
 
-		VBOBuffer.push_back(d01);
-		VBOBuffer.push_back(d12);
-		VBOBuffer.push_back(d20);
+		VBOBuffer_s.push_back(d01);
+		VBOBuffer_s.push_back(d12);
+		VBOBuffer_s.push_back(d20);
 
-		VBOBuffer.erase(VBOBuffer.begin(), VBOBuffer.begin()+3);
+		VBOBuffer_s.erase(VBOBuffer_s.begin(), VBOBuffer_s.begin()+3);
 	}
-	for (int i = 0; i < VBOBuffer.size(); i++) {
-		VBOBuffer[i].vert = glm::vec4(glm::normalize(glm::vec3(VBOBuffer[i].vert)), 1);
-		VBOBuffer[i].norm = glm::normalize(VBOBuffer[i].norm);
+	for (int i = 0; i < VBOBuffer_s.size(); i++) {
+		VBOBuffer_s[i].vert = glm::vec4(glm::normalize(glm::vec3(VBOBuffer_s[i].vert)), 1);
+		VBOBuffer_s[i].norm = glm::normalize(VBOBuffer_s[i].norm);
 	}
-	VBOBufferSize = VBOBuffer.size();
+	VBOBufferSize_s = VBOBuffer_s.size();
 }
 
 CRCPoint::CRCPoint(float y0, float mpph, float mppv, float r, float a, float e)
@@ -122,13 +122,13 @@ CRCPoint::~CRCPoint()
 void CRCPoint::LoadShaders()
 {
 	//GLuint CRCPoint::program;
-	program = create_program("CRCPoint.v.glsl", "CRCPoint.f.glsl");
+	ProgramID_s = create_program("CRCPoint.v.glsl", "CRCPoint.f.glsl");
 	
 }
 
 void CRCPoint::UseProgram()
 {
-	glUseProgram(program);
+	glUseProgram(ProgramID_s);
 
 	
 }
@@ -143,22 +143,22 @@ void CRCPoint::BuildVBO()
 {
 	CRCPoint::LoadShaders();
 
-	glGenVertexArrays(1, &VAOName);
-	glBindVertexArray(VAOName);
+	glGenVertexArrays(1, &VAOName_s);
+	glBindVertexArray(VAOName_s);
 
-	glGenBuffers(1, &VBOName);
-	glBindBuffer(GL_ARRAY_BUFFER, VBOName);	
-	glBufferData(GL_ARRAY_BUFFER, VBOBuffer.size() * sizeof(VBOData), &VBOBuffer[0], GL_STATIC_DRAW);
+	glGenBuffers(1, &VBOName_s);
+	glBindBuffer(GL_ARRAY_BUFFER, VBOName_s);	
+	glBufferData(GL_ARRAY_BUFFER, VBOBuffer_s.size() * sizeof(VBOData), &VBOBuffer_s[0], GL_STATIC_DRAW);
 	
-	VBOBuffer.clear(); //destroy all vbo buffer objects
-	std::vector<VBOData>().swap(VBOBuffer); //free memory used by vector itself
+	VBOBuffer_s.clear(); //destroy all vbo buffer objects
+	std::vector<VBOData>().swap(VBOBuffer_s); //free memory used by vector itself
 
 	GLuint vertex_attr_loc;
 	GLuint normal_attr_loc;
 	
 
-	vertex_attr_loc = glGetAttribLocation(program, "vertex");
-	normal_attr_loc = glGetAttribLocation(program, "normal");
+	vertex_attr_loc = glGetAttribLocation(ProgramID_s, "vertex");
+	normal_attr_loc = glGetAttribLocation(ProgramID_s, "normal");
 
 	
 
@@ -169,8 +169,7 @@ void CRCPoint::BuildVBO()
 	glEnableVertexAttribArray(vertex_attr_loc);
 	glEnableVertexAttribArray(normal_attr_loc);
 
-	mvp_unif_loc = glGetUniformLocation(program, "mvp");
-	norm_unif_loc = glGetUniformLocation(program, "norm");
+	
 	
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -179,19 +178,20 @@ void CRCPoint::BuildVBO()
 
 void CRCPoint::Draw(CCamera *cam)
 {
-	glBindVertexArray(VAOName);
+	glBindVertexArray(VAOName_s);
 	
 	glm::mat4 mv = cam->GetView() * model;
 	mvp = cam->GetProjection() * mv;
 	norm = glm::mat3(glm::transpose(glm::inverse(mv)));
 		//glm::mat3(1.0f);
 
-	
+	MVPUniformLoc_s = glGetUniformLocation(ProgramID_s, "mvp");
+	NormUniformLoc_s = glGetUniformLocation(ProgramID_s, "norm");
 
-	glUniformMatrix4fv(CRCPoint::mvp_unif_loc, 1, GL_FALSE, glm::value_ptr(mvp));
-	glUniformMatrix3fv(CRCPoint::norm_unif_loc, 1, GL_FALSE, glm::value_ptr(norm));
+	glUniformMatrix4fv(CRCPoint::MVPUniformLoc_s, 1, GL_FALSE, glm::value_ptr(mvp));
+	glUniformMatrix3fv(CRCPoint::NormUniformLoc_s, 1, GL_FALSE, glm::value_ptr(norm));
 
-	glDrawArrays(GL_TRIANGLES, 0, CRCPoint::VBOBufferSize);
+	glDrawArrays(GL_TRIANGLES, 0, CRCPoint::VBOBufferSize_s);
 
 	glBindVertexArray(0);
 	

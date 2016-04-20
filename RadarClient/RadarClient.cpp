@@ -57,7 +57,7 @@
 
 #define VIEW_PORT_CONTROL_ID     100
 
-#define PANEL_WIDTH 450
+#define PANEL_WIDTH 700
 #define INFO_HEIGHT 250
 
 
@@ -677,59 +677,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 }																		// End Of WinMain()
 
 
-/*
-*/
-/************************************************************************/
-/*                                main()                                */
-/************************************************************************/
-
-/*int main(int argc, char ** argv)
-
-{
-
-	HINSTANCE hDLL;               // Handle to DLL
-	LPFNDLLFUNC1 lpfnDllFunc1;    // Function pointer
-	double LL[8];
-	int size[2];
-	short result[1];
-	short *data;
-
-
-	hDLL = LoadLibrary("GeoDataProvider.dll");
-	if (hDLL != NULL)
-	{
-		lpfnDllFunc1 = (LPFNDLLFUNC1)GetProcAddress(hDLL, "gdpAltitudeMap");
-		if (!lpfnDllFunc1)
-		{
-			// handle the error
-			FreeLibrary(hDLL);
-			return 1;
-		}
-		else
-		{
-			//set lat lon of the fragment corners
-			LL[0] = 54.74; LL[1] = 37.52; LL[2] = 54.84; LL[3] = 37.75;
-			data = lpfnDllFunc1("n54_e037_1arc_v3.dt2", LL, size, result);
-
-			LL[0] = 55.74; LL[1] = 37.52; LL[2] = 55.84; LL[3] = 37.75;
-			data = lpfnDllFunc1("n55_e037_1arc_v3.dt2", LL, size, result);
-			//data = lpfnDllFunc1("test.txt", LL, size, result);
-
-		}
-
-	}
-}*/
-
-
-//=====================================================================================
-//=====================================================================================
-//=====================================================================================
-
-
-
-
-
-																//~TUTORIAL
+														
 
 GL_Window*	g_window;
 Keys*		g_keys;

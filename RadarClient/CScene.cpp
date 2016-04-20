@@ -16,10 +16,10 @@
 #include <vector>
 
 
-CScene::CScene(float lonc, float latc) {
+/*CScene::CScene(float lonc, float latc) {
 	geocenter.x = lonc;
 	geocenter.y = latc;
-}
+}*/
 CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize) {
 	this->Camera = new CCamera();
 
@@ -77,6 +77,8 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	Ray_VBOName_c = 0;
 
 	RayVBOisBuilt = VBOisBuilt = MiniMapVBOisBuilt = false;
+
+	MiniMapPointer = new CMinimapPointer();
 }
 CScene::~CScene() {
 	delete markup;
@@ -254,6 +256,7 @@ bool CScene::DrawScene()
 bool CScene::DrawMiniMap()
 {
 	mesh->DrawMiniMap();
+	MiniMapPointer->DrawMiniMap();
 	return true;
 }
 

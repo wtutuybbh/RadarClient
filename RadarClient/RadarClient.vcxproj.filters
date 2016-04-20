@@ -102,5 +102,7 @@
     <None Include="GLSL\Minimap.f.glsl" />
     <None Include="GLSL\CRCPoint.f.glsl" />
     <None Include="GLSL\CRCPoint.v.glsl" />
+    <None Include="GLSL\MiniMapPointer.v.glsl" />
+    <None Include="GLSL\MiniMapPointer.f.glsl" />
   </ItemGroup>
 </Project>

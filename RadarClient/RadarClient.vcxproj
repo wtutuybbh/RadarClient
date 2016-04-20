@@ -218,6 +218,8 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <None Include="GLSL\CRCPoint.v.glsl" />
     <None Include="GLSL\Minimap.f.glsl" />
     <None Include="GLSL\Minimap.v.glsl" />
+    <None Include="GLSL\MiniMapPointer.f.glsl" />
+    <None Include="GLSL\MiniMapPointer.v.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
