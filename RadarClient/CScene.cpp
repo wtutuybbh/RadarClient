@@ -251,6 +251,12 @@ bool CScene::DrawScene()
 	return true;
 }
 
+bool CScene::DrawMiniMap()
+{
+	mesh->DrawMiniMap();
+	return true;
+}
+
 bool CScene::PrepareVBOs()
 {	
 	mesh->LoadHeightmap();

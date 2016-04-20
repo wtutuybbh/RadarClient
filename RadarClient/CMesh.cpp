@@ -31,7 +31,8 @@ CMesh::CMesh(CScene *scn)
 	m_pVertices = NULL;
 	m_pTexCoords = NULL;
 	m_nVertexCount = 0;
-	m_nVBOVertices = m_nVBOTexCoords = m_nTextureId = 0;
+	MiniMapVBOName = MiniMapVAOName = MiniMapProgram = m_nVBOVertices = m_nVBOTexCoords = m_nTextureId = 0;
+	MinimapVBOPrepared = false;
 
 	this->scn = scn;
 	this->texsize = scn->texsize;
@@ -131,6 +132,103 @@ void CMesh::Draw()
 	glDisableClientState(GL_VERTEX_ARRAY);					// Disable Vertex Arrays
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);				// Disable Texture Coord Arrays
 	glDisable(GL_TEXTURE_2D);
+}
+bool CMesh::PrepareAndBuildMinimapVBO()
+{
+
+	MiniMapVBOBuffer.push_back({ glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	MiniMapVBOBuffer.push_back({ glm::vec4(-1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
+	MiniMapVBOBuffer.push_back({ glm::vec4(1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
+
+	MiniMapVBOBuffer.push_back({ glm::vec4(1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
+	MiniMapVBOBuffer.push_back({ glm::vec4(1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
+	MiniMapVBOBuffer.push_back({ glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+
+
+	MiniMapVBOBufferSize = MiniMapVBOBuffer.size();
+
+	if (!MiniMapProgram) {
+		MiniMapProgram = create_program("Minimap.v.glsl", "Minimap.f.glsl");
+	}
+
+	glGenVertexArrays(1, &MiniMapVAOName);
+	glBindVertexArray(MiniMapVAOName);
+
+	glGenBuffers(1, &MiniMapVBOName);
+	glBindBuffer(GL_ARRAY_BUFFER, MiniMapVBOName);
+	glBufferData(GL_ARRAY_BUFFER, MiniMapVBOBufferSize * sizeof(VBOData), &MiniMapVBOBuffer[0], GL_STATIC_DRAW);
+
+	MiniMapVBOBuffer.clear(); //destroy all vbo buffer objects
+	std::vector<VBOData>().swap(MiniMapVBOBuffer); //free memory used by vector itself
+
+
+	GLuint vertex_attr_loc;
+	GLuint texcoor_attr_loc;
+
+
+	vertex_attr_loc = glGetAttribLocation(MiniMapProgram, "vertex");
+	texcoor_attr_loc = glGetAttribLocation(MiniMapProgram, "texcoor");
+
+	glVertexAttribPointer(vertex_attr_loc, 4, GL_FLOAT, GL_FALSE, sizeof(VBOData), (void*)0);
+	glVertexAttribPointer(texcoor_attr_loc, 2, GL_FLOAT, GL_FALSE, sizeof(VBOData), (void*)(sizeof(float) * 11));
+
+	glEnableVertexAttribArray(vertex_attr_loc);
+	glEnableVertexAttribArray(texcoor_attr_loc);
+
+	int minimapTexSize = 512;
+
+	MiniMapImage = FreeImage_Rescale(subimage, minimapTexSize, minimapTexSize, FILTER_BSPLINE);
+	// Get An Open ID
+
+	
+
+
+	glGenTextures(1, &MiniMapTextureId);
+	glBindTexture(GL_TEXTURE_2D, MiniMapTextureId);
+
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, minimapTexSize, minimapTexSize, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(MiniMapImage));
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	/*glGenerateMipmap(GL_TEXTURE_2D);
+	*/
+
+	/*glGenSamplers(1, &MiniMapSampler);
+
+	glSamplerParameteri(MiniMapSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glSamplerParameteri(MiniMapSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);*/
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	return true;
+}
+void CMesh::DrawMiniMap()
+{
+	if (!MinimapVBOPrepared) {
+		MinimapVBOPrepared = PrepareAndBuildMinimapVBO();
+	}
+
+	
+
+	//glEnable(GL_TEXTURE_2D);
+	glUseProgram(MiniMapProgram);
+	glBindVertexArray(MiniMapVAOName);
+	
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, MiniMapTextureId);
+	//glBindSampler(GL_TEXTURE_2D, iSamplerLoc);
+
+	int iSamplerLoc = glGetUniformLocation(MiniMapProgram, "tex");
+	glUniform1i(iSamplerLoc, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, MiniMapVBOBufferSize);
+	glBindVertexArray(0);
+	glUseProgram(0);
+	//glDisable(GL_TEXTURE_2D);
 }
 AltitudeMapHeader* CMesh::GetAltitudeMapHeader(const char *fileName, double lon1, double lat1, double lon2, double lat2) {
 	HINSTANCE hDLL;               // Handle to DLL
@@ -378,40 +476,7 @@ bool CMesh::LoadHeightmap()
 	return true;
 }
 
-bool CMesh::PrepareAndBuildMinimapVBO()
-{
-	float minimapTexSize = 512;
 
-	MiniMapImage = FreeImage_Rescale(subimage, minimapTexSize, minimapTexSize, FILTER_BSPLINE);
-	glGenTextures(1, &MiniMapTextureId);							// Get An Open ID
-	glBindTexture(GL_TEXTURE_2D, MiniMapTextureId);				// Bind The Texture
-
-
-															//ofstream outfile 
-															//unsigned char * tmpdata = new unsigned char[aMap->sizeX * aMap->sizeY * 3];
-
-															/*for (int i = 0; i < aMap->sizeX * aMap->sizeY; i++) {
-															tmpdata[i * 3] = aMap->data[i]*255.0 / maxheight;
-															tmpdata[i * 3 + 1] = tmpdata[i * 3];
-															tmpdata[i * 3 + 2] = tmpdata[i * 3];
-															}*/
-
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, minimapTexSize, minimapTexSize, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(MiniMapImage));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
-	MiniMapVBOBuffer.push_back({ glm::vec4(1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
-	MiniMapVBOBuffer.push_back({ glm::vec4(1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
-	MiniMapVBOBuffer.push_back({ glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	MiniMapVBOBuffer.push_back({ glm::vec4(-1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
-
-	MiniMapVBOBufferSize = MiniMapVBOBuffer.size();
-
-
-
-	return false;
-}
 
 float CMesh::PtHeight(int nX, int nY)
 {

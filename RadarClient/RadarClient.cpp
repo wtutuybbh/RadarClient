@@ -2,6 +2,8 @@
 //
 ///#pragma once
 
+///git add -u .
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -779,7 +781,7 @@ BOOL Initialize(GL_Window* window, Keys* keys)					// Any GL Init Code & User In
 	g_vpControl->UI = g_UI;
 	g_vpControl->Camera = g_vpControl->Scene->Camera;
 	
-
+	g_Minimap->Scene = g_vpControl->Scene;
 	
 
 /*	if (!g_vpControl->Scene->PrepareVBOs())

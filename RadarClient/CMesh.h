@@ -37,6 +37,7 @@ PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB = NULL;			// VBO Deletion Procedure
 #include "FreeImage.h"
 #include "Util.h"
 #include <vector>
+#include "ShaderUtils.h"
 
 class CScene;
 
@@ -71,7 +72,8 @@ public:
 	CVert*			m_pVertices;								// Vertex Data
 	CTexCoord*		m_pTexCoords;								// Texture Coordinates
 	unsigned int	m_nTextureId;								// Texture ID
-	unsigned int	MiniMapTextureId;								// Texture ID
+	unsigned int	MiniMapTextureId;
+	unsigned int	MiniMapSampler;
 
 																// Vertex Buffer Object Names
 	unsigned int	m_nVBOVertices;								// Vertex VBO Name
@@ -101,6 +103,7 @@ public:
 	int MiniMapVBOBufferSize;
 	unsigned int MiniMapVBOName, MiniMapVAOName;
 	GLuint MiniMapProgram;
+	bool MinimapVBOPrepared;
 public:
 	CMesh(CScene *scn);													// Mesh Constructor
 	~CMesh();													// Mesh Deconstructor
@@ -118,6 +121,7 @@ public:
 	ImageMapHeader* GetImageMapHeader(const char *imgFile, const char *datFile);
 
 	void Draw();
+	void DrawMiniMap();
 };
 
 

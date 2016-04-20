@@ -93,6 +93,7 @@ public:
 	~CScene();
 
 	bool DrawScene();
+	bool DrawMiniMap();
 	
 	bool PrepareVBOs();
 	bool PrepareRayVBO(RDR_INITCL* init);
