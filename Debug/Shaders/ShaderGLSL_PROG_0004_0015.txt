@@ -1,0 +1,51 @@
+
+//== PROGRAM LINK STATUS = TRUE
+//== PROGRAM VALIDATE STATUS = TRUE
+/*== INFO LOG ==
+Vertex shader(s) linked, fragment shader(s) linked.
+  == INFO LOG END ==*/
+
+//======================================================
+//   Vertex Shader 5 
+//======================================================
+
+//== SHADER COMPILE STATUS = TRUE
+/*== INFO LOG ==
+Vertex shader was successfully compiled to run on hardware.
+  == INFO LOG END ==*/
+#version 120
+#define lowp   
+#define mediump
+#define highp  
+attribute vec4 vertex;
+attribute vec2 texcoor;
+
+uniform mat4 mvp;
+
+varying vec2 tc;
+
+void main(void)
+{
+	gl_Position = mvp * vertex;
+	tc = texcoor;
+}
+//======================================================
+//   Fragment Shader 6
+//======================================================
+
+//== SHADER COMPILE STATUS = TRUE
+/*== INFO LOG ==
+Fragment shader was successfully compiled to run on hardware.
+  == INFO LOG END ==*/
+#version 120
+#define lowp   
+#define mediump
+#define highp  
+varying vec2 tc;
+
+uniform sampler2D tex;
+
+void main(void)
+{
+    gl_FragColor = texture2D(tex, tc);
+}
