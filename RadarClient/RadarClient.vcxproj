@@ -228,6 +228,10 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <Image Include="..\Data\radar.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\glew\lib\Release\Win32\glew32.lib" />
+    <Library Include="..\glew\lib\Release\Win32\glew32s.lib" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

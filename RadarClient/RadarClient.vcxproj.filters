@@ -118,4 +118,8 @@
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\glew\lib\Release\Win32\glew32.lib" />
+    <Library Include="..\glew\lib\Release\Win32\glew32s.lib" />
+  </ItemGroup>
 </Project>
