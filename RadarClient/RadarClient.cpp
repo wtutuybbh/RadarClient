@@ -57,7 +57,7 @@
 
 #define VIEW_PORT_CONTROL_ID     100
 
-#define PANEL_WIDTH 700
+#define PANEL_WIDTH 500
 #define INFO_HEIGHT 250
 
 
