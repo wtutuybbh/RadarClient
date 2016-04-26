@@ -91,7 +91,7 @@ LRESULT ViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam
 					float r = glm::length(Camera->Direction);
 					float e = acos(Camera->Direction.y / r);
 
-					float a = sgn(Camera->Direction.x) *  acos(Camera->Direction.z / sqrt(r*r - Camera->Direction.y*Camera->Direction.y));
+					float a = Camera->GetAzimut();
 
 					UI->SetTrackbarValue_Turn(50 * a / M_PI + 50);
 					UI->SetTrackbarValue_VTilt(100 * e / M_PI);
@@ -333,6 +333,8 @@ bool ViewPortControl::InitGL()
 
 void ViewPortControl::ReshapeGL(int width, int height)									// Reshape The Window When It's Moved Or Resized
 {
+	Height = height;
+	Width = width;
 	if (Scene) {
 		Scene->width = width;
 		Scene->height = height;

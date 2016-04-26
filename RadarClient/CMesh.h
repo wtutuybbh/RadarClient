@@ -86,8 +86,8 @@ public:
 	AltitudeMapHeader* aMapH;
 	ImageMapHeader* iMapH;
 
-	CVec * m_Bounds;
-	CVec * CMesh::GetBounds();
+	glm::vec3 * m_Bounds;
+	glm::vec3 * CMesh::GetBounds();
 
 	void *bitmap;
 

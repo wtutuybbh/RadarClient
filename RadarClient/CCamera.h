@@ -32,7 +32,8 @@ public:
 		float speed);
 
 	void SetProjection(float fovy, float aspect, float zNear, float zFar);
-
+	void SetPosition(float x, float y, float z);
+	void SetPositionXZ(float x, float z);
 	void LookAt();
 	void MoveByView(double shift);
 	void Rotate(float amount, glm::vec3& axis);
@@ -41,6 +42,11 @@ public:
 
 	glm::mat4 GetView();
 	glm::mat4 GetProjection();
+
+	glm::mat4 GetMiniMapView();
+	glm::mat4 GetMiniMapProjection();
+
+	float GetAzimut();
 private:
 	LookAtCallback lookAt;
 };

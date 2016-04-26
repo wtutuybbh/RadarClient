@@ -56,7 +56,7 @@ CMesh :: ~CMesh()
 
 
 }
-CVec * CMesh::GetBounds() {
+glm::vec3 * CMesh::GetBounds() {
 	return m_Bounds;
 }
 ImageMapHeader* CMesh::GetImageMapHeader(const char *imgFile, const char *datFile) {
@@ -330,7 +330,7 @@ bool CMesh::LoadHeightmap()
 		if (aMap->data[i] > maxheight) maxheight = aMap->data[i];
 		if (aMap->data[i] < minheight) minheight = aMap->data[i];
 	}
-	m_Bounds = new CVec[2];
+	m_Bounds = new glm::vec3[2];
 	m_Bounds[0].x = m_Bounds[0].y = m_Bounds[0].z = FLT_MAX;
 	m_Bounds[1].x = m_Bounds[1].y = m_Bounds[1].z = FLT_MIN;
 

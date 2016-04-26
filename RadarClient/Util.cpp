@@ -189,3 +189,121 @@ unsigned long getFileLength(std::ifstream& file)
 
 	return len;
 }
+#ifdef _DEBUG
+HWND OpenDebugWindow(HINSTANCE hInst, int nShowCmd, HWND mainWindow, DebugWindowInfo *dwi) {
+	WNDCLASSEX windowclassforwindow2;
+	ZeroMemory(&windowclassforwindow2, sizeof(WNDCLASSEX));
+	windowclassforwindow2.cbClsExtra = NULL;
+	windowclassforwindow2.cbSize = sizeof(WNDCLASSEX);
+	windowclassforwindow2.cbWndExtra = NULL;
+	windowclassforwindow2.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	windowclassforwindow2.hCursor = LoadCursor(NULL, IDC_ARROW);
+	windowclassforwindow2.hIcon = NULL;
+	windowclassforwindow2.hIconSm = NULL;
+	windowclassforwindow2.hInstance = hInst;
+	windowclassforwindow2.lpfnWndProc = (WNDPROC)DebugWndProc;
+	windowclassforwindow2.lpszClassName = _T("Debug window");
+	windowclassforwindow2.lpszMenuName = NULL;
+	windowclassforwindow2.style = CS_HREDRAW | CS_VREDRAW;
+
+	if (!RegisterClassEx(&windowclassforwindow2))
+	{
+		int nResult = GetLastError();
+		MessageBox(NULL,
+			_T("Window class creation failed for window 2"),
+			_T("Window Class Failed"),
+			MB_ICONERROR);
+	}
+
+	HWND handleforwindow2 = CreateWindowEx(NULL,
+		windowclassforwindow2.lpszClassName,
+		_T("Debug Window"),
+		WS_OVERLAPPEDWINDOW,
+		200,
+		150,
+		640,
+		480,
+		NULL,
+		NULL,
+		hInst, dwi);
+
+	if (!handleforwindow2)
+	{
+		int nResult = GetLastError();
+
+		MessageBox(NULL,
+			_T("Window creation failed"),
+			_T("Window Creation Failed"),
+			MB_ICONERROR);
+	}
+
+	ShowWindow(handleforwindow2, nShowCmd);
+	//SetParent(handleforwindow2, mainWindow);
+	SetWindowLong(handleforwindow2, GWL_HWNDPARENT, (long)mainWindow);
+
+	//SetWindowLong(handleforwindow2, GWL_USERDATA, (long)dwi);
+
+	dwi->hWnd = handleforwindow2;
+
+	return handleforwindow2;
+}
+
+LRESULT CALLBACK DebugWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (msg == WM_NCCREATE)
+	{
+		// get the pointer to the window from
+		// lpCreateParams which was set in CreateWindow
+		SetWindowLong(hWnd, GWL_USERDATA, (long)((LPCREATESTRUCT(lParam))->lpCreateParams));
+	}
+	DebugWindowInfo *dwi = (DebugWindowInfo*)GetWindowLong(hWnd, GWL_USERDATA);
+	switch (msg)
+	{
+	case WM_DESTROY: {
+		/*MessageBox(NULL,
+			_T("Window 2 closed"),
+			_T("Message"),
+			MB_ICONINFORMATION);*/
+		return 0;
+	}
+					 break;
+	case WM_CREATE: {
+		if (dwi) {
+			dwi->Edit_hWnd = CreateWindowEx(NULL,
+				_T("EDIT"),
+				NULL,
+				WS_CHILD | WS_VISIBLE | WS_VSCROLL |
+				ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL,
+				0,
+				0,
+				0,
+				0,
+				hWnd,
+				(HMENU)dwi->DebugEdit_ID,
+				GetModuleHandle(NULL),
+				NULL);
+			return 0;
+		}
+	}
+		break;
+	case WM_SIZE:
+		if (dwi) {
+			MoveWindow(dwi->Edit_hWnd,
+				0, 0,                  // starting x- and y-coordinates 
+				LOWORD(lParam),        // width of client area 
+				HIWORD(lParam),        // height of client area 
+				TRUE);                 // repaint window 
+			return 0;
+		}
+	}
+
+	return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+void DebugMessage(DebugWindowInfo *dwi, std::string Text)
+{
+	Text = Text + "\r\n";
+	int idx = GetWindowTextLength(dwi->Edit_hWnd);
+	SendMessage(dwi->Edit_hWnd, EM_SETSEL, (WPARAM)idx, (LPARAM)idx);
+	SendMessage(dwi->Edit_hWnd, EM_REPLACESEL, 0, (LPARAM)Text.c_str());
+}
+#endif

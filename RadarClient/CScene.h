@@ -23,7 +23,9 @@ class CCamera;
 
 #include "CRCSocket.h"
 #include "CUserInterface.h"
-#include "CMinimapPointer.h"
+
+class C3DObject;
+class CMinimapPointer;
 
 class CScene {
 public:
@@ -32,7 +34,7 @@ public:
 	glm::tvec2<float, glm::precision::defaultp> geocenter; //geographic coordinates of center point (place of the radar)
 	int msize; // area square's side length in meters
 	CMesh *mesh;
-	CVec *meshBounds;
+	glm::vec3 *meshBounds;
 
 	std::string altFile, imgFile, datFile;
 	
@@ -107,4 +109,10 @@ public:
 	bool BuildRayVBO();
 
 	void RefreshSector(RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init);
+
+	void SetCameraPositionFromMiniMapXY(float x, float y, float direction);
+
+	C3DObject *GetObjectAtMiniMapPosition(float x, float y);
+
+	glm::vec2 CameraXYForMiniMap();
 };

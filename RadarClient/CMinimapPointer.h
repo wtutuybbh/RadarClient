@@ -1,18 +1,21 @@
 #pragma once
 #include "C3DObject.h"
-#include "Util.h"
 #include <vector>
 
-class CMinimapPointer : C3DObject
+class CMinimapPointer : public C3DObject
 {/*
 private:
 	VBOBuffer*/
 private:
 	//bool MiniMapVBOReady;
-public:
-	void CMinimapPointer::DrawMiniMap();
 
-	CMinimapPointer();
+public:
+	glm::vec2 Position;
+	float Direction; //azimuth angle
+	void CMinimapPointer::DrawMiniMap();
+	void CMinimapPointer::BuildMinimapVBO();
+	CMinimapPointer(CScene *scene);
 	~CMinimapPointer();
+
 };
 

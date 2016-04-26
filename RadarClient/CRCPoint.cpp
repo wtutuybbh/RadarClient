@@ -197,7 +197,7 @@ void CRCPoint::Draw(CCamera *cam)
 	
 }
 
-CVec * CRCPoint::GetBounds()
+glm::vec3 * CRCPoint::GetBounds()
 {
 	return nullptr;
 }

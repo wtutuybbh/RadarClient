@@ -4,6 +4,7 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/rotate_vector.hpp"
 
+#include "Util.h"
 
 CCamera::CCamera() //empty constructor. camera depends on scene, scene depends on camera... oh shit!
 {
@@ -64,6 +65,16 @@ void CCamera::SetProjection(float fovy, float aspect, float zNear, float zFar)
 	this->zFar = zFar;
 }
 
+void CCamera::SetPosition(float x, float y, float z)
+{
+	Position = glm::vec3(x, y, z);
+}
+
+void CCamera::SetPositionXZ(float x, float z)
+{
+	Position = glm::vec3(x, Position.y, z);
+}
+
 void CCamera::LookAt() {
 	//m_view = glm::lookAt(m_position, m_position + m_direction, m_up);
 	glm::vec3 to = Position + Direction;
@@ -112,4 +123,20 @@ glm::mat4 CCamera::GetView()
 glm::mat4 CCamera::GetProjection()
 {
 	return glm::perspective(glm::radians(fovy), aspect, zNear, zFar);
+}
+
+glm::mat4 CCamera::GetMiniMapView()
+{
+	return glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+}
+
+glm::mat4 CCamera::GetMiniMapProjection()
+{
+	return glm::ortho(-1, 1, -1, 1);
+}
+
+float CCamera::GetAzimut()
+{
+	float r = glm::length(Direction);
+	return sgn(Direction.x) *  acos(Direction.z / sqrt(r*r - Direction.y*Direction.y));
 }

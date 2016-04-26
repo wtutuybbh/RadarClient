@@ -42,8 +42,9 @@ typedef LRESULT (CUserInterface::*UIWndProc)(HWND hwnd, UINT uMsg, WPARAM wParam
 
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 
-typedef struct {
+typedef struct {	
 	int ID;
+	DWORD XStyle;
 	LPCSTR Class;
 	LPCSTR Text;
 	DWORD Style;
@@ -64,6 +65,8 @@ private:
 
 	glm::vec3 GetDirection();
 
+	
+
 public:
 	int Column1X, Column2X;
 	int VStep, VStepGrp;
@@ -78,7 +81,7 @@ public:
 	ViewPortControl *VPControl;
 	CRCSocket *Socket;
 
-	int InsertElement(LPCSTR Class,LPCSTR Text, DWORD Style, int X, int Y, int Width, int Height, UIWndProc Action);
+	int InsertElement(DWORD xStyle, LPCSTR Class,LPCSTR Text, DWORD Style, int X, int Y, int Width, int Height, UIWndProc Action);
 	
 
 	virtual LRESULT Button_Connect(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -91,6 +94,8 @@ public:
 
 	virtual LRESULT Wnd_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	virtual LRESULT Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	CUserInterface(HWND parentHWND, ViewPortControl *vpControl,	CRCSocket *Socket, int panelWidth);
 	~CUserInterface();	

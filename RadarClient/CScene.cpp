@@ -8,12 +8,16 @@
 #include "CRCPoint.h"
 #include "CScene.h"
 #include "CMesh.h"
+
+#include "CMinimapPointer.h"
+
 #include "Util.h"
 #define _USE_MATH_DEFINES 
 #include <math.h>
 
 #include "CCamera.h"
 #include <vector>
+
 
 
 /*CScene::CScene(float lonc, float latc) {
@@ -78,7 +82,7 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 
 	RayVBOisBuilt = VBOisBuilt = MiniMapVBOisBuilt = false;
 
-	MiniMapPointer = new CMinimapPointer();
+	MiniMapPointer = new CMinimapPointer(this);
 }
 CScene::~CScene() {
 	delete markup;
@@ -269,7 +273,7 @@ bool CScene::PrepareVBOs()
 	AxisGrid = new CVec[vertexCount];
 	
 
-	CVec *b = meshBounds = mesh->GetBounds();
+	glm::vec3 *b = meshBounds = mesh->GetBounds();
 
 	//y0 - is a height of a radar, in OpenGl units ("pixels"), above the sea level
 	switch (zeroLevel) {
@@ -595,5 +599,30 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 		/*p.PrepareVBO();
 		p.BuildVBO();*/
 	}
+}
+
+void CScene::SetCameraPositionFromMiniMapXY(float x, float y, float direction) /* x and y from -1 to 1 */
+{
+	glm::vec3 *b = mesh->GetBounds();
+	Camera->SetPositionXZ((b[0].x + b[1].x)/2 - x * (b[1].x - b[0].x)/2, (b[0].z + b[1].z) / 2 + y * (b[1].z - b[0].z) / 2);
+}
+C3DObject * CScene::GetObjectAtMiniMapPosition(float x, float y)
+{
+	glm::vec3 orig(x, y, 1);
+	glm::vec3 dir(0, 0, 1);
+	glm::vec3 pos;
+	if (MiniMapPointer->IntersectLine(orig, dir, pos)) {
+		return MiniMapPointer;
+	}
+	return NULL;
+}
+
+glm::vec2 CScene::CameraXYForMiniMap()
+{
+	glm::vec3 *b = mesh->GetBounds();
+	if (b) {
+		return glm::vec2(- 2 * (Camera->Position.x - b[0].x) / (b[1].x - b[0].x) + 1, -1 + 2 * (Camera->Position.z - b[0].z) / (b[1].z - b[0].z));
+	}
+	return glm::vec2(0);
 }
 

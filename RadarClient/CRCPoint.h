@@ -48,6 +48,6 @@ public:
 	static void BuildVBO();
 	void Draw(CCamera *cam);
 
-	CVec * GetBounds();
+	glm::vec3 * GetBounds();
 };
 

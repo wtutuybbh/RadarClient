@@ -1,6 +1,7 @@
 //#include "stdafx.h"
 #include "C3DObject.h"
-
+#include "glm/glm.hpp"
+#include "glm/gtx/intersect.hpp"
 
 C3DObject::C3DObject()
 {
@@ -18,12 +19,14 @@ C3DObject::C3DObject(bool initMap)
 	MiniMapProgramID = 0;
 	MiniMapVBOBuffer.clear(); //destroy all vbo buffer objects
 	std::vector<VBOData>().swap(MiniMapVBOBuffer); //free memory used by vector itself
+
+	MiniMapVBOClearAfter = true;
 }
 C3DObject::~C3DObject()
 {
 }
 
-CVec * C3DObject::GetBounds()
+glm::vec3 * C3DObject::GetBounds()
 {
 	return nullptr;
 }
@@ -39,7 +42,7 @@ bool C3DObject::PrepareAndBuildMinimapVBO(const char * vShaderFile, const char *
 	UnbindAll();*/
 
 	C3DObject *obj = this;
-	for (PointersMap::iterator it = map.begin(); it != map.end(); ++it) {
+	for (PtrToMethodMap::iterator it = map.begin(); it != map.end(); ++it) {
 		CALL_MEMBER_FN(*obj, it->second)();
 	}
 	
@@ -67,8 +70,10 @@ void C3DObject::PrepareMinimapVBO()
 	glBindBuffer(GL_ARRAY_BUFFER, MiniMapVBOName);
 	glBufferData(GL_ARRAY_BUFFER, MiniMapVBOBufferSize * sizeof(VBOData), &MiniMapVBOBuffer[0], GL_STATIC_DRAW);
 
-	MiniMapVBOBuffer.clear(); //destroy all vbo buffer objects
-	std::vector<VBOData>().swap(MiniMapVBOBuffer); //free memory used by vector itself
+	if (MiniMapVBOClearAfter) {
+		MiniMapVBOBuffer.clear(); //destroy all vbo buffer objects
+		std::vector<VBOData>().swap(MiniMapVBOBuffer); //free memory used by vector itself
+	}
 }
 void C3DObject::MiniMapAttribBind()
 {
@@ -154,15 +159,15 @@ void C3DObject::DrawMiniMap()
 	int iSamplerLoc = glGetUniformLocation(MiniMapProgramID, "tex");
 	glUniform1i(iSamplerLoc, 0);
 
-	glm::mat4 mvp = glm::scale(glm::vec3(0.1, 0.1, 0.1));
+	
 	//mvp = cam->GetProjection() * mv;
 	//norm = glm::mat3(glm::transpose(glm::inverse(mv)));
 	//glm::mat3(1.0f);
 
 	int mvpUniformLoc = glGetUniformLocation(MiniMapProgramID, "mvp");
 	//int normUniformLoc = glGetUniformLocation(MiniMapProgramID, "norm");
-
-	glUniformMatrix4fv(mvpUniformLoc, 1, GL_FALSE, glm::value_ptr(mvp));
+	MiniMapMVP = MiniMapProj * MiniMapView * MiniMapModel;
+	glUniformMatrix4fv(mvpUniformLoc, 1, GL_FALSE, glm::value_ptr(MiniMapMVP));
 	//glUniformMatrix3fv(normUniformLoc, 1, GL_FALSE, glm::value_ptr(norm));
 	
 	glEnable(GL_BLEND);
@@ -171,4 +176,18 @@ void C3DObject::DrawMiniMap()
 	glDrawArrays(GL_TRIANGLES, 0, MiniMapVBOBufferSize);
 	glBindVertexArray(0);
 	glUseProgram(0);
+}
+
+bool C3DObject::IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position)
+{
+	glm::vec3 vert0, vert1, vert2;
+	for (int i = 0; i < MiniMapVBOBuffer.size(); i += 3) {
+		vert0 = glm::vec3(MiniMapModel*MiniMapVBOBuffer[i].vert);
+		vert1 = glm::vec3(MiniMapModel*MiniMapVBOBuffer[i + 1].vert);
+		vert2 = glm::vec3(MiniMapModel*MiniMapVBOBuffer[i + 2].vert);
+		if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, position)) {
+			return true;
+		}
+	}
+	return false;
 }

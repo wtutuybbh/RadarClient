@@ -172,6 +172,8 @@ ClientBin/
 *.lastbuildstate
 *.tlog
 *.ipdb
+Release/
+Debug/
 GeoDataProvider.dll
 GeoDataProvider.lib
 GeoDataProvider.exp

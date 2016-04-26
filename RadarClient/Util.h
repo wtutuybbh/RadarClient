@@ -13,6 +13,12 @@
 #include <fstream>
 #include <iostream>
 
+#include <Windows.h>
+#include <windowsx.h>
+#include <WinBase.h>
+
+#include <tchar.h>
+
 namespace cnvrt {
 	inline double dg2rad(double dg) {
 		return dg*M_PI / 180.0;
@@ -82,3 +88,14 @@ struct VBOData_ext {
 template <typename T> int sgn(T val) {
 	return (T(0) < val) - (val < T(0));
 }
+
+#ifdef _DEBUG
+typedef struct {
+	HWND hWnd;
+	HWND Edit_hWnd;
+	int DebugEdit_ID;
+} DebugWindowInfo;
+LRESULT CALLBACK DebugWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+HWND OpenDebugWindow(HINSTANCE hInst, int nShowCmd, HWND mainWindow, DebugWindowInfo *dwi);
+void DebugMessage(DebugWindowInfo *dwi, std::string Text);
+#endif
