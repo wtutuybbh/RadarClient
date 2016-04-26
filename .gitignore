@@ -167,6 +167,14 @@ ClientBin/
 [Ss]tyle[Cc]op.*
 #~$*
 #*~
+*.exe
+*.iobj
+*.lastbuildstate
+*.tlog
+*.ipdb
+GeoDataProvider.dll
+GeoDataProvider.lib
+GeoDataProvider.exp
 *.dbmdl
 *.opendb
 *.dbproj.schemaview
