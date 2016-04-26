@@ -593,7 +593,7 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 	}
 
 	//add new points
-	for (int i = 0; i < info_p->N; i++) {
+	for (int i = 0; i < 1/*info_p->N*/; i++) {
 		CRCPoint p(y0, mpph, mppv, pts[i].R * init->dR, init->begAzm + pts[i].B * init->dAzm, ZERO_ELEVATION + init->begElv + pts[i].E * init->dElv);
 		Points.push_back(p);
 		/*p.PrepareVBO();

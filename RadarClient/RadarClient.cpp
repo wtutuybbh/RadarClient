@@ -404,7 +404,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		RECT clientRect;
 		GetClientRect(hWnd, &clientRect);
 		g_vpControl->SetPosition(PANEL_WIDTH, 0, (clientRect.right - clientRect.left) - PANEL_WIDTH, clientRect.bottom - clientRect.top - INFO_HEIGHT);
-
+		g_UI->Resize();
 		switch (wParam)												// Evaluate Size Action
 		{
 		case SIZE_MINIMIZED:									// Was Window Minimized?

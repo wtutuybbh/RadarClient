@@ -124,6 +124,10 @@ void ViewPortControl::Add(HWND parent, int x, int y, int w, int h)
 }
 void ViewPortControl::SetPosition(int x, int y, int w, int h)
 {
+	Width = w;
+	Height = h;
+	X = x;
+	Y = y;
 	SetWindowPos(hWnd, NULL, x, y, w, h, 0);
 }
 ViewPortControl::ViewPortControl(LPCSTR className)

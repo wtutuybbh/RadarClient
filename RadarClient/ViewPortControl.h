@@ -62,6 +62,8 @@ public:
 
 	int Height;
 	int Width;
+	int X;
+	int Y;
 private:
 	static LRESULT CALLBACK stWinMsgHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	bool Register(void);

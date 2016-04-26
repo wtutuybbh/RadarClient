@@ -1,4 +1,5 @@
 #pragma once
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <windowsx.h>
@@ -34,6 +35,8 @@
 #define TEXT_CHECKBOX_LANDSCAPE _T("Ландшафт")
 #define TEXT_CHECKBOX_MAP _T("Карта")
 
+#define TEXT_GRID_NAME _T("Список траекторий")
+
 class ViewPortControl;
 class CRCSocket;
 
@@ -41,6 +44,8 @@ class CUserInterface;
 typedef LRESULT (CUserInterface::*UIWndProc)(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
+
+struct _BGCELL;
 
 typedef struct {	
 	int ID;
@@ -59,21 +64,21 @@ class CUserInterface
 {
 private:
 	int CurrentID;
-	int IsConnected_ID, Button_Connect_ID;
+	int IsConnected_ID, Button_Connect_ID, Grid_ID;
 	int ObjOptions_ID[3], MapOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2];
 	void SetChecked(int id, bool checked);
 
 	glm::vec3 GetDirection();
 
-	
-
+	_BGCELL *cell;
+	void PutCell(HWND hgrid, int row, int col, long text);
 public:
 	int Column1X, Column2X;
 	int VStep, VStepGrp;
 	int MinimapSize, PanelWidth;
 	int ButtonHeight, ControlWidth, ControlWidthL, ControlWidthXL;
 	HWND ParentHWND;
-
+	HFONT hDlgFont;
 	
 
 	ElementsMap Elements;
@@ -97,6 +102,8 @@ public:
 
 	virtual LRESULT Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+	virtual LRESULT Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
 	CUserInterface(HWND parentHWND, ViewPortControl *vpControl,	CRCSocket *Socket, int panelWidth);
 	~CUserInterface();	
 
@@ -112,5 +119,9 @@ public:
 	void ControlEnable(int ID, bool enable);
 
 	bool IsVistaOrLater();
+
+	void Resize();
+
+	void InitGrid();
 };
 

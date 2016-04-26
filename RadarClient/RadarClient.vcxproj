@@ -189,6 +189,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BabyGrid.cpp" />
     <ClCompile Include="CMinimap.cpp" />
     <ClCompile Include="CMinimapPointer.cpp" />
     <ClCompile Include="CRCPoint.cpp" />
@@ -204,6 +205,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="ViewPortControl.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BabyGrid.h" />
     <ClInclude Include="CMinimap.h" />
     <ClInclude Include="CMinimapPointer.h" />
     <ClInclude Include="CRCPoint.h" />

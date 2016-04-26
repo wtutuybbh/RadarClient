@@ -7,7 +7,7 @@
 #include <CommCtrl.h>
 #include <string>
 
-
+#include "BabyGrid.h"
 
 /*CUserInterface::CUserInterface()
 {
@@ -50,6 +50,11 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	return LRESULT();
 }
 
+LRESULT CUserInterface::Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	return LRESULT();
+}
+
 void CUserInterface::SetChecked(int id, bool checked)
 {
 	HWND hWnd = GetDlgItem(ParentHWND, id);
@@ -61,6 +66,14 @@ glm::vec3 CUserInterface::GetDirection()
 	float a = glm::radians((GetTrackbarValue_Turn() - 50) * 3.6f);
 	float e = glm::radians(1.8 * GetTrackbarValue_VTilt()); //here elevation counts from top-up direction
 	return glm::vec3(-sin(e)*sin(a), cos(e), sin(e)*cos(a));
+}
+
+void CUserInterface::PutCell(HWND hgrid, int row, int col, long text)
+{
+	//worker function to keep from having to send hundreds of SendMessage() with
+	//BGM_SETCELLDATA in the main program.  Just simplifies the main program code
+	SetCell(cell, row, col);
+	SendMessage(hgrid, BGM_SETCELLDATA, (UINT)cell, text);
 }
 
 
@@ -167,6 +180,8 @@ LRESULT CUserInterface::Trackbar_CameraDirection_Turn(HWND hwnd, UINT uMsg, WPAR
 //TRACKBAR_CLASS
 CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
 {
+	cell = new _BGCELL;
+
 	this->ParentHWND = parentHWND;
 	this->VPControl = vpControl;
 	this->Socket = socket;
@@ -223,6 +238,15 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 	//CameraDirectionValue_ID[0] = InsertElement(_T("STATIC"), _T(""), WS_VISIBLE | WS_CHILD, 10, 530, 100, 30, NULL);
 	//CameraDirectionValue_ID[1] = InsertElement(_T("STATIC"), _T(""), WS_VISIBLE | WS_CHILD, 110, 530, 100, 30, NULL);
 
+	int gridX = panelWidth;
+	int gridY = vpControl->Height;
+	RECT clientRect;
+	GetClientRect(parentHWND, &clientRect);
+
+	RegisterGridClass(GetModuleHandle(NULL));
+
+	Grid_ID = InsertElement(NULL, _T("BABYGRID"), TEXT_GRID_NAME, WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX, gridY, vpControl->Width, clientRect.right - panelWidth, &CUserInterface::Grid);
+
 	
 	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
 		it->second->hWnd = CreateWindowEx(NULL,
@@ -267,7 +291,7 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 #endif
 
 	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
-	HFONT hDlgFont = CreateFontIndirect(&(ncm.lfMessageFont));
+	hDlgFont = CreateFontIndirect(&(ncm.lfMessageFont));
 
 	// Set the dialog to use the system message box font
 	//SetFont(m_DlgFont, TRUE);
@@ -276,6 +300,8 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
 		SendMessage(it->second->hWnd, WM_SETFONT, (WPARAM)hDlgFont, TRUE);		
 	}
+
+	InitGrid();
 }
 
 CUserInterface::~CUserInterface()
@@ -336,6 +362,31 @@ bool CUserInterface::IsVistaOrLater()
 	vi.dwOSVersionInfoSize = sizeof vi;
 	GetVersionEx(&vi);
 	return (vi.dwPlatformId == VER_PLATFORM_WIN32_NT  &&  vi.dwMajorVersion >= 6);
+}
+
+void CUserInterface::Resize()
+{
+	RECT clientRect;
+	GetClientRect(ParentHWND, &clientRect);
+	HWND gridHwnd = GetDlgItem(ParentHWND, Grid_ID);
+
+	SetWindowPos(gridHwnd, NULL, PanelWidth, VPControl->Height + 2, VPControl->Width, clientRect.bottom - VPControl->Height - 2, 0);
+}
+
+void CUserInterface::InitGrid()
+{
+	HWND gridHwnd = GetDlgItem(ParentHWND, Grid_ID);
+	SendMessage(gridHwnd, BGM_SETGRIDDIM, 5, 7);
+	SendMessage(gridHwnd, BGM_SETCOLSNUMBERED, FALSE, 0);
+	SendMessage(gridHwnd, BGM_EXTENDLASTCOLUMN, FALSE, 0);
+	SendMessage(gridHwnd, BGM_SETFONT, (WPARAM)hDlgFont, TRUE);
+
+	PutCell(gridHwnd, 0, 1, (long)(new std::string("ID"))->c_str());
+	PutCell(gridHwnd, 0, 2, (long)(new std::string("Начальная точка"))->c_str());
+	PutCell(gridHwnd, 0, 3, (long)"Конечная точка");
+	PutCell(gridHwnd, 0, 4, (long)"Скорость");
+	PutCell(gridHwnd, 0, 5, (long)"Азимут");
+	PutCell(gridHwnd, 0, 6, (long)"Время");
 }
 
 
