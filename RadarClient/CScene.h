@@ -81,7 +81,8 @@ public:
 	int zeroLevel = ZEROLEVEL_ACTUALHEIGHT;
 	float y0;
 
-	std::vector<CRCPoint> Points;
+	std::vector<CRCPoint> *Sectors;
+	int SectorsCount;
 
 	CCamera *Camera;
 
@@ -109,6 +110,7 @@ public:
 	bool BuildRayVBO();
 
 	void RefreshSector(RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init);
+	void ClearSectors();
 
 	void SetCameraPositionFromMiniMapXY(float x, float y, float direction);
 

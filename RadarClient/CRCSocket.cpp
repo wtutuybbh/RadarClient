@@ -58,7 +58,7 @@ void CRCSocket::Init()
 	client = new _client;
 	client->Socket = &Socket;
 	client->offset = 0;
-	client->buff = new char[65535];
+	client->buff = new char[TXRXBUFSIZE];
 
 	ErrorText = "";
 
@@ -94,7 +94,7 @@ int CRCSocket::Read()
 	IsConnected = true;
 	PostMessage(hWnd, CM_CONNECT, IsConnected, NULL);
 
-	char szIncoming[1024];
+	char *szIncoming = new char[TXRXBUFSIZE];
 	ZeroMemory(szIncoming, sizeof(szIncoming));
 
 	_sh *sh;
@@ -107,7 +107,7 @@ int CRCSocket::Read()
 		sizeof(szIncoming) / sizeof(szIncoming[0]),
 		0);*/
 
-	recev = recv(Socket, client->buff + client->offset, 65535, 0);
+	recev = recv(Socket, client->buff + client->offset, TXRXBUFSIZE, 0);
 	/*strncat(szHistory, szIncoming, inDataLength);
 	strcat(szHistory, "\r\n");*/
 	offset = recev + client->offset;
@@ -147,6 +147,7 @@ int CRCSocket::Read()
 	}
 	//приняли меньше чем 1 порция
 	client->offset = offset; //Запомним что что-то приняли
+	delete[] szIncoming;
 	return recev;
 }
 
@@ -156,6 +157,7 @@ int CRCSocket::Close()
 	closesocket(Socket);
 	IsConnected = false;
 	OnceClosed = true;
+	delete[] client->buff;
 	PostMessage(hWnd, CM_CONNECT, IsConnected, NULL);
 	return 0;
 }

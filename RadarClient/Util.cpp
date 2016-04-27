@@ -247,7 +247,7 @@ HWND OpenDebugWindow(HINSTANCE hInst, int nShowCmd, HWND mainWindow, DebugWindow
 
 	return handleforwindow2;
 }
-
+#define CM_POSTDATA (WM_USER + 2)
 LRESULT CALLBACK DebugWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_NCCREATE)
@@ -295,6 +295,10 @@ LRESULT CALLBACK DebugWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				TRUE);                 // repaint window 
 			return 0;
 		}
+	case CM_POSTDATA: {
+		DebugMessage(dwi, "Why we are here?");
+	}
+					  break;
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);

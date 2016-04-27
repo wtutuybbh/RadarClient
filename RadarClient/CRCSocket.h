@@ -63,6 +63,7 @@ using namespace std;
 
 #define MSG_INIT (MSGBASE + 159)
 
+#define TXRXBUFSIZE 4*1024*1024
 
 //---------------------------------------------------------------------------
 typedef struct

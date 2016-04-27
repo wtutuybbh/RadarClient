@@ -86,7 +86,7 @@ CMinimap *g_Minimap;
 CUserInterface *g_UI;
 CRCSocket *g_Socket;
 #ifdef _DEBUG
-DebugWindowInfo g_dwi;
+//DebugWindowInfo g_dwi;
 #endif
 
 void TerminateApplication(GL_Window* window)							// Terminate The Application
@@ -377,7 +377,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		g_Minimap->InitGL();
 
 #ifdef _DEBUG
-		g_Minimap->dwi = &g_dwi;
+		//g_Minimap->dwi = &g_dwi;
 
 #endif // _DEBUG
 
@@ -625,9 +625,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		if (CreateMainWindow(&window) == TRUE)							// Was Window Creation Successful?
 		{
 #ifdef _DEBUG
-			g_dwi.DebugEdit_ID = 1;
+			/*g_dwi.DebugEdit_ID = 1;
 			OpenDebugWindow(hInstance, nCmdShow, window.hWnd, &g_dwi);
-			DebugMessage(&g_dwi, "Hello");
+			DebugMessage(&g_dwi, "Hello");*/
 #endif
 			
 			if (Initialize(&window, &keys) == FALSE)					// Call User Intialization
@@ -642,9 +642,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				{
 					// Success Creating Window.  Check For Window Messages
 #ifdef _DEBUG
-					if (PeekMessage(&msg, g_dwi.hWnd, 0, 0, PM_REMOVE) != 0) {
+					/*if (PeekMessage(&msg, g_dwi.hWnd, 0, 0, PM_REMOVE) != 0) {
 						DispatchMessage(&msg);
-					}
+					}*/
 #endif
 					if (PeekMessage(&msg, window.hWnd, 0, 0, PM_REMOVE) != 0)
 					{

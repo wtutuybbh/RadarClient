@@ -7,7 +7,7 @@
 #include <CommCtrl.h>
 #include <string>
 
-#include "BabyGrid.h"
+#include "ZeeGrid.h"
 
 /*CUserInterface::CUserInterface()
 {
@@ -201,6 +201,12 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 
 	int CurrentY = 0;
 
+	hgridmod = LoadLibrary("ZeeGrid.dll");
+	if (!hgridmod)
+	{
+		MessageBox(parentHWND, "Unable to load ZeeGrid.DLL", "Error", MB_OK);
+		PostQuitMessage(0);
+	}
 
 	//new view port control should be here
 
@@ -245,7 +251,7 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 
 	RegisterGridClass(GetModuleHandle(NULL));
 
-	Grid_ID = InsertElement(NULL, _T("BABYGRID"), TEXT_GRID_NAME, WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX, gridY, vpControl->Width, clientRect.right - panelWidth, &CUserInterface::Grid);
+	Grid_ID = InsertElement(NULL, _T("ZeeGrid"), TEXT_GRID_NAME, WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX, gridY, vpControl->Width, clientRect.right - panelWidth, &CUserInterface::Grid);
 
 	
 	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
@@ -369,14 +375,14 @@ void CUserInterface::Resize()
 	RECT clientRect;
 	GetClientRect(ParentHWND, &clientRect);
 	HWND gridHwnd = GetDlgItem(ParentHWND, Grid_ID);
-
-	SetWindowPos(gridHwnd, NULL, PanelWidth, VPControl->Height + 2, VPControl->Width, clientRect.bottom - VPControl->Height - 2, 0);
+	MoveWindow(gridHwnd, PanelWidth, VPControl->Height + 2, VPControl->Width, clientRect.bottom - VPControl->Height - 2, TRUE);
+	//SetWindowPos(gridHwnd, NULL, PanelWidth, VPControl->Height + 2, VPControl->Width, clientRect.bottom - VPControl->Height - 2, 0);
 }
 
 void CUserInterface::InitGrid()
 {
 	HWND gridHwnd = GetDlgItem(ParentHWND, Grid_ID);
-	SendMessage(gridHwnd, BGM_SETGRIDDIM, 5, 7);
+	/*SendMessage(gridHwnd, BGM_SETGRIDDIM, 5, 7);
 	SendMessage(gridHwnd, BGM_SETCOLSNUMBERED, FALSE, 0);
 	SendMessage(gridHwnd, BGM_EXTENDLASTCOLUMN, FALSE, 0);
 	SendMessage(gridHwnd, BGM_SETFONT, (WPARAM)hDlgFont, TRUE);
@@ -386,7 +392,7 @@ void CUserInterface::InitGrid()
 	PutCell(gridHwnd, 0, 3, (long)"Конечная точка");
 	PutCell(gridHwnd, 0, 4, (long)"Скорость");
 	PutCell(gridHwnd, 0, 5, (long)"Азимут");
-	PutCell(gridHwnd, 0, 6, (long)"Время");
+	PutCell(gridHwnd, 0, 6, (long)"Время");*/
 }
 
 

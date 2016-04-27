@@ -99,3 +99,11 @@ LRESULT CALLBACK DebugWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 HWND OpenDebugWindow(HINSTANCE hInst, int nShowCmd, HWND mainWindow, DebugWindowInfo *dwi);
 void DebugMessage(DebugWindowInfo *dwi, std::string Text);
 #endif
+
+struct ZGNOTIFYSTRUCT {
+	NMHDR header;
+	BOOL CONTROL;
+	BOOL SHIFT;
+	BOOL ALT;
+	int vkey;
+};

@@ -25,6 +25,9 @@
 	geocenter.y = latc;
 }*/
 CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize) {
+	Sectors = NULL;
+	SectorsCount = 0;
+
 	this->Camera = new CCamera();
 
 	geocenter.x = lonc;
@@ -174,9 +177,15 @@ bool CScene::DrawScene()
 
 	if (UI->GetCheckboxState_Points()) {
 		CRCPoint::UseProgram();
-		for (int i = 0; i < Points.size(); i++) {
+		/*for (int i = 0; i < Points.size(); i++) {
 			Points[i].Draw(Camera);
+		}*/
+		for (int i = 0; i < SectorsCount; i++) {			
+			for (vector<CRCPoint>::iterator it = Sectors[i].begin(); it != Sectors[i].end(); ++it) {
+				it->Draw(Camera);
+			}
 		}
+		
 		glUseProgram(0);
 	}
 
@@ -564,8 +573,10 @@ bool CScene::BuildRayVBO()
 
 void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 {
-	if (!info_p)
+	if (!info_p || !pts || !init)
 		return; //do nothing if no RPOINTS structure provided
+	if (init->Nazm <= 0) //TODO: full defence against bad data need to be there
+		return;
 
 	viewAngle = glm::degrees(init->begAzm + init->dAzm * (info_p->d1 + info_p->d2) / 2);
 
@@ -573,14 +584,27 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 		PrepareRayVBO(init);
 		BuildRayVBO();
 	}
+	
+	if(!Sectors) {
+		if (init->Nazm % init->ViewStep != 0) {
+			return;
+			//throw new std::exception("invalid data");
+		}
+		SectorsCount = init->Nazm / init->ViewStep;
+		Sectors = new std::vector<CRCPoint>[SectorsCount];
+	}
+	float min = std::fmin(info_p->d1, info_p->d2);
 
-
+	if (SectorsCount <= 0)
+		return;
+	
+	int currentSector = SectorsCount * (min / init->Nazm);
 
 	float a_start = init->begAzm + info_p->d1 * init->dAzm;
 	float a_end = init->begAzm + info_p->d2 * init->dAzm;
 
 	//removes all points in sector and sets up new points received from serfer
-	for (vector<CRCPoint>::iterator it = Points.begin(); it != Points.end();)
+	/*for (vector<CRCPoint>::iterator it = Points.begin(); it != Points.end();)
 	{
 		if (it->SphericalCoords.y >= a_start && it->SphericalCoords.y <= a_end || it->SphericalCoords.y <= a_start && it->SphericalCoords.y >= a_end)
 		{
@@ -590,15 +614,26 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 		{
 			++it;
 		}
-	}
-
+	}*/
+	Sectors[currentSector].clear(); //destroy all vbo buffer objects
+	//std::vector<VBOData>().swap(Sectors+currentSector);
 	//add new points
-	for (int i = 0; i < 1/*info_p->N*/; i++) {
+	for (int i = 0; i < info_p->N; i++) {
 		CRCPoint p(y0, mpph, mppv, pts[i].R * init->dR, init->begAzm + pts[i].B * init->dAzm, ZERO_ELEVATION + init->begElv + pts[i].E * init->dElv);
-		Points.push_back(p);
-		/*p.PrepareVBO();
-		p.BuildVBO();*/
+		Sectors[currentSector].push_back(p);
 	}
+}
+
+void CScene::ClearSectors()
+{
+	if (!Sectors)
+		return;
+	for (int i = 0; i < SectorsCount; i++) {
+		Sectors[i].clear();
+	}
+	delete[] Sectors;
+	Sectors = NULL;
+	SectorsCount = 0;
 }
 
 void CScene::SetCameraPositionFromMiniMapXY(float x, float y, float direction) /* x and y from -1 to 1 */

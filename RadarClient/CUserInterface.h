@@ -71,6 +71,7 @@ private:
 	glm::vec3 GetDirection();
 
 	_BGCELL *cell;
+	HMODULE hgridmod;
 	void PutCell(HWND hgrid, int row, int col, long text);
 public:
 	int Column1X, Column2X;
