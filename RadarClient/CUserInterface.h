@@ -66,13 +66,12 @@ private:
 	int CurrentID;
 	int IsConnected_ID, Button_Connect_ID, Grid_ID;
 	int ObjOptions_ID[3], MapOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2];
+	//int Info_ID[]
 	void SetChecked(int id, bool checked);
 
 	glm::vec3 GetDirection();
 
-	_BGCELL *cell;
 	HMODULE hgridmod;
-	void PutCell(HWND hgrid, int row, int col, long text);
 public:
 	int Column1X, Column2X;
 	int VStep, VStepGrp;

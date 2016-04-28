@@ -3,6 +3,10 @@
 ///#pragma once
 
 ///git add -u .
+#ifdef _DEBUG
+#define CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -80,13 +84,14 @@ std::string g_altFile, g_imgFile, g_datFile;
 
 HWND g_ViewPortControl_hWnd;
 
+HANDLE g_hIcon;
 
 ViewPortControl *g_vpControl;
 CMinimap *g_Minimap;
 CUserInterface *g_UI;
 CRCSocket *g_Socket;
 #ifdef _DEBUG
-//DebugWindowInfo g_dwi;
+DebugWindowInfo g_dwi;
 #endif
 
 void TerminateApplication(GL_Window* window)							// Terminate The Application
@@ -120,6 +125,7 @@ BOOL ChangeScreenResolution(int width, int height, int bitsPerPixel)	// Change T
 
 BOOL CreateMainWindow(GL_Window* window)									// This Code Creates Window
 {
+	
 	DWORD windowStyle = WS_OVERLAPPEDWINDOW;							// Define Our Window Style
 	DWORD windowExtendedStyle = WS_EX_APPWINDOW;						// Define The Window's Extended Style
 
@@ -272,24 +278,21 @@ BOOL CreateMainWindow(GL_Window* window)									// This Code Creates Window
 																		// Initialization Will Be Done In WM_CREATE
 }
 
-BOOL DestroyWindowGL(GL_Window* window)								// Destroy The OpenGL Window & Release Resources
+BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL Window & Release Resources
 {
-	if (window->hWnd != 0)												// Does The Window Have A Handle?
+	if (hWnd != 0)												// Does The Window Have A Handle?
 	{
-		if (window->hDC != 0)											// Does The Window Have A Device Context?
+		if (hDC != 0)											// Does The Window Have A Device Context?
 		{
-			wglMakeCurrent(window->hDC, 0);							// Set The Current Active Rendering Context To Zero
-			if (window->hRC != 0)										// Does The Window Have A Rendering Context?
+			wglMakeCurrent(hDC, 0);							// Set The Current Active Rendering Context To Zero
+			if (hRC != 0)										// Does The Window Have A Rendering Context?
 			{
-				wglDeleteContext(window->hRC);							// Release The Rendering Context
-				window->hRC = 0;										// Zero The Rendering Context
+				wglDeleteContext(hRC);							// Release The Rendering Context
 
 			}
-			ReleaseDC(window->hWnd, window->hDC);						// Release The Device Context
-			window->hDC = 0;											// Zero The Device Context
+			ReleaseDC(hWnd, hDC);						// Release The Device Context
 		}
-		DestroyWindow(window->hWnd);									// Destroy The Window
-		window->hWnd = 0;												// Zero The Window Handle
+		DestroyWindow(hWnd);									// Destroy The Window
 	}
 
 	/*if (window->init.isFullScreen)										// Is Window In Fullscreen Mode
@@ -343,41 +346,43 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_CREATE:													// Window Creation
 	{
+		
 		CREATESTRUCT* creation = (CREATESTRUCT*)(lParam);			// Store Window Structure Pointer
 		window = (GL_Window*)(creation->lpCreateParams);
 		SetWindowLong(hWnd, GWL_USERDATA, (LONG)(window));
 
-		HANDLE hIcon = LoadImage(0, _T("radar.ico"), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-		if (hIcon) {
+		g_hIcon = LoadImage(0, _T("radar.ico"), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+		if (g_hIcon) {
 			//Change both icons to the same icon handle.
-			SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-			SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+			SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)g_hIcon);
+			SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)g_hIcon);
 
 			//This will ensure that the application icon gets changed too.
-			SendMessage(GetWindow(hWnd, GW_OWNER), WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-			SendMessage(GetWindow(hWnd, GW_OWNER), WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+			SendMessage(GetWindow(hWnd, GW_OWNER), WM_SETICON, ICON_SMALL, (LPARAM)g_hIcon);
+			SendMessage(GetWindow(hWnd, GW_OWNER), WM_SETICON, ICON_BIG, (LPARAM)g_hIcon);
 		}
 
 
 		/*CreateWindowEx((DWORD)VIEW_PORT_WC, NULL, NULL, WS_CHILD | WS_VISIBLE,
 			0, 0, 100, 100, hWnd, (HMENU)VIEW_PORT_CONTROL_ID, window->init.application->hInstance, NULL);*/
-
+		
 		RECT clientRect;
 
 		GetClientRect(hWnd, &clientRect);
 
 		g_vpControl->Add(hWnd, PANEL_WIDTH, 0, (clientRect.right - clientRect.left) - PANEL_WIDTH, clientRect.bottom - clientRect.top - INFO_HEIGHT);
+		
 		g_vpControl->InitGL();
 		
 		g_Socket = new CRCSocket(hWnd);
-
+		
 		g_UI = new CUserInterface(hWnd, g_vpControl, g_Socket, PANEL_WIDTH);
-
+		//return 0;
 		g_Minimap->Add(hWnd, 0, 0, g_UI->MinimapSize, g_UI->MinimapSize);
 		g_Minimap->InitGL();
 
 #ifdef _DEBUG
-		//g_Minimap->dwi = &g_dwi;
+		g_Minimap->dwi = &g_dwi;
 
 #endif // _DEBUG
 
@@ -490,6 +495,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		g_Socket->PostData(wParam, lParam);
 		g_vpControl->MakeCurrent();
 		g_vpControl->Scene->RefreshSector(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit);
+		g_Socket->FreeMemory((char *)wParam);
 	}
 	break;
 	case CM_CONNECT: {
@@ -529,14 +535,24 @@ BOOL RegisterWindowClass(Application* application)						// Register A Window Cla
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	g_hIcon = NULL;
+
 	Application			application;									// Application Structure
 	GL_Window			window;											// Window Structure
 	Keys				keys;											// Key Structure
 	BOOL				isMessagePumpActive;							// Message Pump Active?
 	MSG					msg;											// Window Message Structure
 	DWORD				tickCount;										// Used For The Tick Counter
-
+#ifdef _DEBUG
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	long lBreakAlloc = 0;
+	if (lBreakAlloc > 0)
+	{
+		_CrtSetBreakAlloc(lBreakAlloc);
+	}
+#endif
 	std::ifstream files_txt("files.txt");
+	
 	if (!files_txt) {
 		MessageBox(HWND_DESKTOP, "files.txt not found.", MB_OK, MB_ICONERROR);
 		return 0;
@@ -564,11 +580,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		g_mppv = std::stof(v[3]);
 		g_texsize = std::stoi(v[4]);
 	}
-
+	
 	g_vpControl = new ViewPortControl("VP3D");
 	g_Minimap = new CMinimap("VPMiniMap");
 
-
+	//return Deinitialize();
 	//g_vpControl->Register();
 
 																	// Fill Out Application Data
@@ -601,22 +617,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		MessageBox(HWND_DESKTOP, "Error Registering Window Class!", "Error", MB_OK | MB_ICONEXCLAMATION);
 		return -1;														// Terminate Application
 	}
-
+	
 	char *myargv[1];
 	int myargc = 1;
 	myargv[0] = strdup("RadarClient");
-
+	
 	glutInit(&myargc, myargv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
-
+	free(myargv[0]);
 	// Setup GL States
-
+	//return 0;
 	
 
 
 	g_isProgramLooping = TRUE;											// Program Looping Is Set To TRUE
 	//g_createFullScreen = window.init.isFullScreen;						// g_createFullScreen Is Set To User Default
+	
 	while (g_isProgramLooping)											// Loop Until WM_QUIT Is Received
 	{
 		// Create A Window
@@ -624,10 +641,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		
 		if (CreateMainWindow(&window) == TRUE)							// Was Window Creation Successful?
 		{
+			//
 #ifdef _DEBUG
-			/*g_dwi.DebugEdit_ID = 1;
+			g_dwi.DebugEdit_ID = 1;
 			OpenDebugWindow(hInstance, nCmdShow, window.hWnd, &g_dwi);
-			DebugMessage(&g_dwi, "Hello");*/
+			DebugMessage(&g_dwi, "Hello");
 #endif
 			
 			if (Initialize(&window, &keys) == FALSE)					// Call User Intialization
@@ -635,16 +653,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				// Failure
 				TerminateApplication(&window);							// Close Window, This Will Handle The Shutdown
 			}
+
 			else														// Otherwise (Start The Message Pump)
 			{	// Initialize was a success
 				isMessagePumpActive = TRUE;								// Set isMessagePumpActive To TRUE
+				
 				while (isMessagePumpActive == TRUE)						// While The Message Pump Is Active
 				{
+					
 					// Success Creating Window.  Check For Window Messages
 #ifdef _DEBUG
-					/*if (PeekMessage(&msg, g_dwi.hWnd, 0, 0, PM_REMOVE) != 0) {
+					if (PeekMessage(&msg, g_dwi.hWnd, 0, 0, PM_REMOVE) != 0) {
 						DispatchMessage(&msg);
-					}*/
+					}
 #endif
 					if (PeekMessage(&msg, window.hWnd, 0, 0, PM_REMOVE) != 0)
 					{
@@ -666,11 +687,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						}
 						else											// If Window Is Visible
 						{
+							
 							// Process Application Loop
 							tickCount = GetTickCount();				// Get The Tick Count
 							Update(tickCount - window.lastTickCount);	// Update The Counter
 							window.lastTickCount = tickCount;			// Set Last Count To Current Count
-
+							
 							Draw();							
 
 							if (g_vpControl->hRC) {
@@ -683,15 +705,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 								g_Minimap->Draw();
 								SwapBuffers(g_Minimap->hDC);
 							}
+							
 						}
 					}
 				}														// Loop While isMessagePumpActive == TRUE
 			}															// If (Initialize (...
 
-																		// Application Is Finished
-			/*Deinitialize();*/											// User Defined DeInitialization
+			DestroyWindowGL(g_vpControl->hWnd, g_vpControl->hDC, g_vpControl->hRC);															// Application Is Finished
+			DestroyWindowGL(g_Minimap->hWnd, g_Minimap->hDC, g_Minimap->hRC);
+			//Deinitialize();											// User Defined DeInitialization
 
-			DestroyWindowGL(&window);									// Destroy The Active Window
+												// Destroy The Active Window
 		}
 		else															// If Window Creation Failed
 		{
@@ -700,9 +724,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			g_isProgramLooping = FALSE;									// Terminate The Loop
 		}
 	}																	// While (isProgramLooping)
-
+debugreturn:
+	Deinitialize();
 	UnregisterClass(application.className, application.hInstance);		// UnRegister Window Class
 	return 0;
+	
 }																		// End Of WinMain()
 
 
@@ -771,7 +797,7 @@ BOOL Initialize(GL_Window* window, Keys* keys)					// Any GL Init Code & User In
 
 	g_vpControl->Scene->BuildVBOs();*/									// Build The VBOs
 	
-	g_vpControl->Camera->SetAll(0, 0, 0, 200, 300, -600, 0, 100, 0, 
+	g_vpControl->Camera->SetAll(0, 1, 0, 0, 0, 1, 0, 1, 0, 
 		60.0f, 4.0f/3.0f, 1.0f, 10000.0f,
 		0.01, LookAtCallback_);
 
@@ -782,11 +808,23 @@ BOOL Initialize(GL_Window* window, Keys* keys)					// Any GL Init Code & User In
 	return TRUE;												// Return TRUE (Initialization Successful)
 }
 
-void Deinitialize(void)										// Any User DeInitialization Goes Here
+int Deinitialize(void)										// Any User DeInitialization Goes Here
 {
-	if (g_vpControl)												// Deallocate Our Mesh Data
-		delete g_vpControl;											// And Delete VBOs
-	g_vpControl = NULL;
+
+	if (g_vpControl) {
+		if (g_vpControl->Scene)
+			delete g_vpControl->Scene;
+		delete g_vpControl;
+	}
+	if (g_Minimap)
+		delete g_Minimap;
+	if (g_Socket)
+		delete g_Socket;
+	if (g_UI)
+		delete g_UI;
+	if (g_hIcon)
+		DestroyIcon((HICON)g_hIcon);
+	return 0;
 }
 
 void Update(DWORD milliseconds)								// Perform Motion Updates Here

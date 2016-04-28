@@ -6,6 +6,7 @@
 #include "CCamera.h"
 #include "CScene.h"
 #include "CUserInterface.h"
+#include "C3DObject.h"
 #include "Util.h"
 
 void ViewPortControl::Paint()
@@ -98,6 +99,8 @@ LRESULT ViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam
 				}
 			}
 			Camera->startPosition = Camera->newPosition;
+			
+			
 		}
 		break;
 	case WM_LBUTTONDOWN:
@@ -105,6 +108,7 @@ LRESULT ViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam
 		if (Camera) {
 			Camera->startPosition.x = GET_X_LPARAM(lParam);
 			Camera->startPosition.y = GET_Y_LPARAM(lParam);
+			Get3DObject(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		}
 		break;
 	}
@@ -147,11 +151,25 @@ ViewPortControl::ViewPortControl(LPCSTR className)
 
 ViewPortControl::~ViewPortControl()
 {
-	if (Scene)
-		delete Scene;
-	if (Camera)
-		delete Camera;
+	/*if (Scene)
+		delete Scene;*/
+	/*if (Camera)
+		delete Camera;*/
 	Unregister();
+}
+
+C3DObject ViewPortControl::Get3DObject(int x, int y)
+{
+	glm::vec4 viewport = glm::vec4(0, 0, Width, Height);
+
+	glm::vec3 p0 = glm::unProject(glm::vec3(x, Height - y - 1, 0.0f), Camera->GetView(), Camera->GetProjection(), viewport);
+	glm::vec3 p1 = glm::unProject(glm::vec3(x, Height - y - 1, 1.0f), Camera->GetView(), Camera->GetProjection(), viewport);
+
+	C3DObject *o = Scene->GetFirstObjectBetweenPoints(p0, p1);
+	if (o) {
+		o->Color = glm::vec4(0, 1, 0, 1);
+	}
+	return o;
 }
 
 bool ViewPortControl::MakeCurrent()
@@ -325,7 +343,7 @@ bool ViewPortControl::InitGL()
 		fprintf(stderr, "Error: %s\n", s);
 	}
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);						// Black Background
+	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);						// Black Background
 																//glClearDepth(1.0f);										// Depth Buffer Setup
 	glDepthFunc(GL_LEQUAL);									// The Type Of Depth Testing¸¸¸¸ (Less Or Equal)
 

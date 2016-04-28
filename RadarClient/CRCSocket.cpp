@@ -6,18 +6,46 @@ CRCSocket::CRCSocket(HWND hWnd)
 {
 	this->hWnd = hWnd;
 	OnceClosed = false;
-	Init();
+	
 
 	this->info_p = NULL;
 	this->info_i = NULL;
 
 	this->pts = NULL;
 	this->s_rdrinit = NULL;
+
+	hole = new char[TXRXBUFSIZE];
+
+	ReadBufLength = 0;
+	ReadBuf = NULL;
+
+	s_rdrinit = NULL;
+
+	client = NULL;
+	Init();
 }
 
 
 CRCSocket::~CRCSocket()
 {
+	if (hole)
+		delete[] hole;
+	if (client) {
+		if (client->buff) {
+			delete[] client->buff;
+			client->buff = NULL;
+		}
+
+		delete client;
+		client = NULL;
+
+	}
+	if (s_rdrinit)
+		delete s_rdrinit;
+	for (vector<TRK*>::iterator it = Tracks.begin(); it != Tracks.end(); ++it) {
+		delete *it;
+	}
+	Tracks.clear();
 }
 
 void CRCSocket::Init()
@@ -94,60 +122,71 @@ int CRCSocket::Read()
 	IsConnected = true;
 	PostMessage(hWnd, CM_CONNECT, IsConnected, NULL);
 
-	char *szIncoming = new char[TXRXBUFSIZE];
-	ZeroMemory(szIncoming, sizeof(szIncoming));
+	char *szIncoming = NULL;
+	
 
 	_sh *sh;
 	int recev;
 	unsigned int offset, length;
-	char * OutBuff;
+	char * OutBuff = NULL;
 
 	/*int inDataLength = recv(Socket,
 		(char*)szIncoming,
 		sizeof(szIncoming) / sizeof(szIncoming[0]),
 		0);*/
 
-	recev = recv(Socket, client->buff + client->offset, TXRXBUFSIZE, 0);
-	/*strncat(szHistory, szIncoming, inDataLength);
-	strcat(szHistory, "\r\n");*/
-	offset = recev + client->offset;
-	if (offset < sizeof(_sh)) //приняли меньше шапки
-	{
-		client->offset = offset; //Запомнили что что-то приняли
-		return recev;
-	}
-	sh = (struct _sh*)client->buff;
-	if (sh->word1 != 0xAAAAAAAA || sh->word2 != 0x55555555)   // проверим шапку
-		return recev;
-	length = sh->dlina;
-	while (length <= offset)  // приняли больше или ровно 1 порцию
-	{
-		try // защита на выделение памяти
+	try {
+		szIncoming = NULL;
+		szIncoming = new char[TXRXBUFSIZE];
+		ZeroMemory(szIncoming, sizeof(szIncoming));
+		recev = recv(Socket, client->buff + client->offset, TXRXBUFSIZE, 0);
+		/*strncat(szHistory, szIncoming, inDataLength);
+		strcat(szHistory, "\r\n");*/
+		offset = recev + client->offset;
+		if (offset < sizeof(_sh)) //приняли меньше шапки
 		{
-			OutBuff = new char[length];              // Выделим память под принятую порцию
-			memcpy(OutBuff, client->buff, length); // Скопируем принятые данные
-
-			PostMessage(hWnd, CM_POSTDATA, (WPARAM)OutBuff, 0); //Отошлем в очередь на обработку
-			memcpy(client->buff, &client->buff[length], offset - length);// Перепишем остаток в начало
-
-			offset -= length;
-			length = sh->dlina * 4;
-			if (sh->word1 != 0xAAAAAAAA || sh->word2 != 0x55555555)   // проверим шапку
-			{
-				client->offset = 0;
-				return recev;
-			}
-
-		}
-		catch (std::bad_alloc)
-		{  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
-		   // YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
+			client->offset = offset; //Запомнили что что-то приняли
 			return recev;
 		}
+		sh = (struct _sh*)client->buff;
+		if (sh->word1 != 0xAAAAAAAA || sh->word2 != 0x55555555)   // проверим шапку
+			return recev;
+		length = sh->dlina;
+		while (length <= offset)  // приняли больше или ровно 1 порцию
+		{
+			try // защита на выделение памяти
+			{
+				OutBuff = new char[length];              // Выделим память под принятую порцию
+				memcpy(OutBuff, client->buff, length); // Скопируем принятые данные
+
+				PostMessage(hWnd, CM_POSTDATA, (WPARAM)OutBuff, length); //Отошлем в очередь на обработку
+				memcpy(client->buff, &client->buff[length], offset - length);// Перепишем остаток в начало
+
+				offset -= length;
+				length = sh->dlina;
+				if (sh->word1 != 0xAAAAAAAA || sh->word2 != 0x55555555)   // проверим шапку
+				{
+					client->offset = 0;
+					return recev;
+				}
+
+			}
+			catch (std::bad_alloc)
+			{  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
+			   // YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
+				return recev;
+			}
+		}
+	}
+	catch (std::bad_alloc)
+	{  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
+	   // YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
+		return 0;
 	}
 	//приняли меньше чем 1 порция
 	client->offset = offset; //Запомним что что-то приняли
-	delete[] szIncoming;
+	if (szIncoming)
+		delete[] szIncoming;
 	return recev;
 }
 
@@ -157,7 +196,10 @@ int CRCSocket::Close()
 	closesocket(Socket);
 	IsConnected = false;
 	OnceClosed = true;
-	delete[] client->buff;
+	if (client && client->buff) {
+		delete[] client->buff;
+		client->buff = NULL;
+	}
 	PostMessage(hWnd, CM_CONNECT, IsConnected, NULL);
 	return 0;
 }
@@ -166,7 +208,11 @@ void CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 {
 	try
 	{
+		ReadBuf = (char*)wParam;
+		ReadBufLength = lParam;
+
 		_sh *sh = (_sh*)wParam;
+
 		sh->times = time(NULL);
 		PTR_D = &sh[1];
 
@@ -174,6 +220,8 @@ void CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 		{
 		case MSG_RPOINTS:
 		{
+			
+
 			info_p = (RPOINTS*)(void*)PTR_D;
 			pts = (RPOINT*)(void*)(info_p + 1);
 			//Memo1->Lines->Add("RPOINTS  n=" + IntToStr(info_p->N));
@@ -200,18 +248,27 @@ void CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 		case MSG_PTSTRK:
 			//Memo1->Lines->Add("PTSTRK");
 			break;
-		case MSG_OBJTRK:
+		case MSG_OBJTRK: {
+			int N = *((int*)((void*)PTR_D));
+			RDRTRACK* pTK = (RDRTRACK*)(void*)(((char*)PTR_D) + 4);
+			OnSrvMsg_RDRTRACK(pTK, N);
 			//Memo1->Lines->Add("OBJTRK");
 			break;
-		case MSG_DELTRK:
+		}
+		case MSG_DELTRK: {
 			//Memo1->Lines->Add("DELTRK");
+			int N = *((int*)((void*)PTR_D));
+			int* DTK = (int*)(void*)((char*)PTR_D + 4);
+			OnSrvMsg_DELTRACK(DTK, N);
 			break;
-
+		}
 			// 
 		case MSG_INIT:
 		{
 			//Memo1->Lines->Add("MSGINIT");
-			s_rdrinit = (RDR_INITCL*)(void*)&sh[1];
+			if (!s_rdrinit)
+				s_rdrinit = new RDR_INITCL;
+			memcpy(s_rdrinit, (RDR_INITCL*)(void*)&sh[1], sizeof(RDR_INITCL));
 			//DoInit(s_rdrinit);
 			break;
 		}
@@ -224,4 +281,88 @@ void CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 
 	}
 	//delete[](char*)wParam;
+}
+
+void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
+{
+	for (int i = 0; i < N; i++)
+	{
+		// ищем трек
+		int Idx = FindTrack(info[i].numTrack);
+		RectToPolar2d(info[i].X, info[i].Y, &info[i].X, &info[i].Y);
+		if (-1 == Idx)
+		{
+			//создаём трек
+			TRK* t1 = new TRK(info[i].numTrack);
+			Tracks.push_back(t1);
+			// добавим точки
+			t1->InsertPoints(info + i, 1);
+
+			//UpdateTrackTable();
+			//Memo1->Lines->Add("äîáàâèëè òðåê Id = " + IntToStr(info[i].numTrack));
+		}
+		// уже есть
+		else if (Idx >= 0 && Idx < Tracks.size())
+		{
+			Tracks[Idx]->InsertPoints(info + i, 1);
+			//UpdateTrackTable();
+			//Memo1->Lines->Add("äîáàâèëè òî÷êó ê òðåêó Id = " + IntToStr(info[i].numTrack));
+		}
+	}
+}
+void CRCSocket::OnSrvMsg_DELTRACK(int* deltrackz, int N)
+{
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j<Tracks.size(); j++)
+		{
+			if (Tracks[j]->id == deltrackz[i])
+			{
+				delete Tracks[j];
+				Tracks.erase(Tracks.begin() + j);
+				//break;
+			}
+		}
+	}
+}
+int CRCSocket::FindTrack(int id) // если в массиве trak нашли то вернем индекс, иначе -1
+{
+	for (int i = 0; i < Tracks.size(); i++)
+	{
+		if (Tracks[i]->id == id) return i;
+	}
+	return -1;
+}
+void CRCSocket::RectToPolar2d(double x, double y, double* phi, double* ro)
+{
+	double x1 = x, y1 = y;
+
+	*phi = -120 + 0.02 * 1000 * (atan(x1 / y1)) / M_PI_180;
+	*ro = 0.75 * sqrt(x1*x1 + y1*y1) / 1;
+}
+
+void CRCSocket::FreeMemory(char *readBuf)
+{
+	delete [] readBuf;
+	/*if (ReadBuf && ReadBufLength > 0) {
+		delete [] ReadBuf;
+		ReadBufLength = 0;
+		ReadBuf = NULL;
+	}*/
+}
+
+TRK::TRK(int _id)
+{
+	id = _id;
+}
+TRK::~TRK()
+{
+}
+void TRK::InsertPoints(RDRTRACK* pt, int N)
+{
+	for (int i = 0; i < N; i++)
+	{
+		if (pt->numTrack != this->id) continue;
+		P.push_back(pt[i]);
+	}
 }

@@ -81,7 +81,7 @@ public:
 	int zeroLevel = ZEROLEVEL_ACTUALHEIGHT;
 	float y0;
 
-	std::vector<CRCPoint> *Sectors;
+	std::vector<CRCPoint*> *Sectors;
 	int SectorsCount;
 
 	CCamera *Camera;
@@ -99,12 +99,12 @@ public:
 	~CScene();
 
 	bool DrawScene();
-	bool DrawMiniMap();
+	bool MiniMapDraw();
 	
 	bool PrepareVBOs();
 	bool PrepareRayVBO(RDR_INITCL* init);
 
-	bool PrepareAndBuildMinimapVBO();
+	bool MiniMapPrepareAndBuildVBO();
 
 	bool BuildVBOs();
 	bool BuildRayVBO();
@@ -115,6 +115,7 @@ public:
 	void SetCameraPositionFromMiniMapXY(float x, float y, float direction);
 
 	C3DObject *GetObjectAtMiniMapPosition(float x, float y);
+	C3DObject *GetFirstObjectBetweenPoints(glm::vec3 p0, glm::vec3 p1);
 
 	glm::vec2 CameraXYForMiniMap();
 };

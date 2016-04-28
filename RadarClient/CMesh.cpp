@@ -30,6 +30,9 @@ CMesh::CMesh(CScene *scn) : C3DObject(true)
 	aMap = NULL;
 	m_pVertices = NULL;
 	m_pTexCoords = NULL;
+	m_Bounds = NULL;
+	iMapH = NULL;
+	aMapH = NULL;
 	m_nVertexCount = 0;
 	MiniMapVBOName = MiniMapVAOName = MiniMapProgramID = m_nVBOVertices = m_nVBOTexCoords = m_nTextureId = 0;
 	MiniMapVBOReady = false;
@@ -54,7 +57,20 @@ CMesh :: ~CMesh()
 		delete[] m_pTexCoords;
 	m_pTexCoords = NULL;
 
-
+	if (m_Bounds)
+		delete[] m_Bounds;
+	if (iMapH)
+		delete iMapH;
+	if (aMapH) {
+		if (aMapH->fileName)
+			delete[] aMapH->fileName;		
+		delete aMapH;
+	}
+	if (aMap) {
+		if (aMap->data)
+			delete[] aMap->data;
+		delete aMap;
+	}
 }
 glm::vec3 * CMesh::GetBounds() {
 	return m_Bounds;
@@ -158,10 +174,10 @@ void CMesh::BindTextureImage()
 void CMesh::DrawMiniMap()
 {
 	if (!MiniMapVBOReady) {
-		MiniMapVBOReady = PrepareAndBuildMinimapVBO("Minimap.v.glsl", "Minimap.f.glsl", NULL);
+		MiniMapVBOReady = MiniMapPrepareAndBuildVBO("Minimap.v.glsl", "Minimap.f.glsl", NULL);
 	}	
 	
-	C3DObject::DrawMiniMap();
+	C3DObject::MiniMapDraw();
 }
 AltitudeMapHeader* CMesh::GetAltitudeMapHeader(const char *fileName, double lon1, double lat1, double lon2, double lat2) {
 	HINSTANCE hDLL;               // Handle to DLL
@@ -188,8 +204,13 @@ AltitudeMapHeader* CMesh::GetAltitudeMapHeader(const char *fileName, double lon1
 			LL[3] = lat2;
 			result = gdpAltitudeMap_Sizes(fileName, LL, size);
 			if (result == 0) {
-				aMapH = new AltitudeMapHeader;
-				aMapH->fileName = new char[strlen(fileName) + 1];
+				if (!aMapH) {
+					aMapH = new AltitudeMapHeader;
+					aMapH->fileName = NULL;
+				}
+				if (aMapH->fileName)
+					delete[] aMapH->fileName;
+				aMapH->fileName = new char[strlen(fileName) + 1];				
 				strncpy(aMapH->fileName, fileName, strlen(fileName));
 				aMapH->fileName[strlen(fileName)] = 0;
 				aMapH->sizeX = size[0];
@@ -241,8 +262,12 @@ AltitudeMap* CMesh::GetAltitudeMap(const char *fileName, double lon1, double lat
 			LL[3] = lat2;
 			result = gdpAltitudeMap_Sizes(fileName, LL, size);
 			if (result == 0) {
-				if (!aMapH)
+				if (!aMapH) {
 					aMapH = new AltitudeMapHeader;
+					aMapH->fileName = NULL;
+				}
+				if (aMapH->fileName)
+					delete[] aMapH->fileName;
 				aMapH->fileName = new char[strlen(fileName)+1];
 				strncpy(aMapH->fileName, fileName, strlen(fileName)); 
 				aMapH->fileName[strlen(fileName)] = 0;
@@ -341,7 +366,7 @@ bool CMesh::LoadHeightmap()
 	{
 		for (nX = 0; nX < aMap->sizeX - 1; nX ++)
 		{
-			sprintf(buff, "%d;", aMap->data[((nX % aMap->sizeX) * aMap->sizeY + ((nZ % aMap->sizeY) ))]);
+			//sprintf(buff, "%d;", aMap->data[((nX % aMap->sizeX) * aMap->sizeY + ((nZ % aMap->sizeY) ))]);
 			//outfile.write(buff, strlen(buff));			
 			for (nTri = 0; nTri < 6; nTri++)
 			{
@@ -397,15 +422,7 @@ bool CMesh::LoadHeightmap()
 
 	centerHeight = PtHeight(aMap->sizeX / 2, aMap->sizeY / 2)  /scn->mppv;
 
-	if (aMap)
-	{
-		if (aMap->data)
-			delete aMap->data;
-			//free(aMap->data);
-		//free(aMap);
-		//delete aMap;
-		//aMap = NULL;
-	}
+	
 	return true;
 }
 

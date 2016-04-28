@@ -1,5 +1,6 @@
 #include "Util.h"
 #include "glm/glm.hpp"
+#include "glm/gtx/norm.hpp"
 
 #include <string>
 #include <sstream>
@@ -169,15 +170,6 @@ void BitmapString2D(float x, float y, std::string s)
 	}
 }
 
-CVec GetCVec(glm::vec3 v)
-{
-	CVec* cv = new CVec;
-	cv->x = v.x;
-	cv->y = v.y;
-	cv->z = v.z;
-	return *cv;
-}
-
 unsigned long getFileLength(std::ifstream& file)
 {
 	if (!file.good()) return 0;
@@ -309,5 +301,18 @@ void DebugMessage(DebugWindowInfo *dwi, std::string Text)
 	int idx = GetWindowTextLength(dwi->Edit_hWnd);
 	SendMessage(dwi->Edit_hWnd, EM_SETSEL, (WPARAM)idx, (LPARAM)idx);
 	SendMessage(dwi->Edit_hWnd, EM_REPLACESEL, 0, (LPARAM)Text.c_str());
+}
+float minimum_distance(glm::vec3 v, glm::vec3 w, glm::vec3 p)
+{
+	// Return minimum distance between line segment vw and point p
+	const float l2 = glm::length2(w-v);  // i.e. |w-v|^2 -  avoid a sqrt
+	if (l2 == 0.0) return glm::distance(p, v);   // v == w case
+											// Consider the line extending the segment, parameterized as v + t (w - v).
+											// We find projection of point p onto the line. 
+											// It falls where t = [(p-v) . (w-v)] / |w-v|^2
+											// We clamp t from [0,1] to handle points outside the segment vw.
+	const float t = max(0, min(1, dot(p - v, w - v) / l2));
+	const glm::vec3 projection = v + t * (w - v);  // Projection falls on the segment
+	return glm::distance(p, projection);
 }
 #endif

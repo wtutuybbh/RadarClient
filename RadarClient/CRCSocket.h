@@ -65,6 +65,30 @@ using namespace std;
 
 #define TXRXBUFSIZE 4*1024*1024
 
+// точки траектории
+
+typedef struct
+{
+	int N;
+} RDRTRACKS;
+
+typedef struct
+{
+	int numTrack;// номер траектории
+	float Amp;   // амплитуда последнего измерения
+	double X;     // коорданата X м
+	double Y;     // координата Y м
+	double Z;     // координата Z м
+	double vX;    // скорость, м/сек X
+	double vY;    // Y
+	double vZ;    // Z
+	double time;  // время последнего подтверждения
+	int countTrue;      // счётчик подтверждений
+	int countFalse;      // счётчик отсутствия подтверждений
+	char resv1[8];
+
+} RDRTRACK;
+
 //---------------------------------------------------------------------------
 typedef struct
 {
@@ -362,6 +386,16 @@ typedef struct tagRDR_INITCL
 
 
 
+class TRK
+{
+public:
+	int id; // id 
+	vector<RDRTRACK> P; // точки трека
+	TRK(int _id);
+	void InsertPoints(RDRTRACK* pt, int N);
+	~TRK();
+};
+
 
 
 
@@ -369,6 +403,8 @@ typedef struct tagRDR_INITCL
 class CRCSocket
 {
 	bool OnceClosed;
+	char *hole;
+	vector<TRK*> Tracks;
 public:
 	//used when receiving data:
 	std::string ErrorText;
@@ -381,7 +417,8 @@ public:
 	_client *client;
 
 	//used when processing data:
-	char *tm;
+	char *tm, *ReadBuf;
+	long ReadBufLength;
 	RDR_INITCL* s_rdrinit;
 	RPOINTS* info_p;
 	RPOINT* pts;
@@ -402,7 +439,11 @@ public:
 	int Read();
 	int Close();
 	void PostData(WPARAM wParam, LPARAM lParam);
-
+	void OnSrvMsg_RDRTRACK(RDRTRACK* info, int N);
+	void OnSrvMsg_DELTRACK(int* deltrackz, int N);
+	int FindTrack(int id);
+	void RectToPolar2d(double x, double y, double* phi, double* ro);
+	void FreeMemory(char *ptr);
 	//__event void ConnectionStateChange(bool isConnected);
 };
 

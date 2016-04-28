@@ -54,7 +54,6 @@ public:
 };
 typedef CVert CVec;												// The Definitions Are Synonymous
 
-CVec GetCVec(glm::vec3 v);
 
 class CTexCoord													// Texture Coordinate Class
 {
@@ -107,3 +106,5 @@ struct ZGNOTIFYSTRUCT {
 	BOOL ALT;
 	int vkey;
 };
+
+float minimum_distance(glm::vec3 v, glm::vec3 w, glm::vec3 p);

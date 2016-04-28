@@ -5,7 +5,8 @@
 
 #include "CRCPoint.h"
 #include "ShaderUtils.h"
-
+#include "glm/glm.hpp"
+#include "glm/gtx/intersect.hpp"
 //#include "CScene.h"
 
 GLuint CRCPoint::ProgramID_s;
@@ -111,7 +112,7 @@ CRCPoint::CRCPoint(float y0, float mpph, float mppv, float r, float a, float e)
 	SphericalCoords = glm::vec3(r, a, e); // Well, it's not true spherical coordinates. Vertical axis is Y, angle E is from horizon to R (not from vertical Y). A=0 means that point is on the X=0 plane.
 
 	glm::mat4 tr = glm::translate(CartesianCoords), sc = glm::scale(glm::vec3(POINT_SIZE, POINT_SIZE, POINT_SIZE));
-	model = tr * sc;
+	Model = tr * sc;
 }
 
 
@@ -150,11 +151,12 @@ void CRCPoint::BuildVBO()
 	glBindBuffer(GL_ARRAY_BUFFER, VBOName_s);	
 	glBufferData(GL_ARRAY_BUFFER, VBOBuffer_s.size() * sizeof(VBOData), &VBOBuffer_s[0], GL_STATIC_DRAW);
 	
-	VBOBuffer_s.clear(); //destroy all vbo buffer objects
-	std::vector<VBOData>().swap(VBOBuffer_s); //free memory used by vector itself
+	//VBOBuffer_s.clear(); //destroy all vbo buffer objects
+	//std::vector<VBOData>().swap(VBOBuffer_s); //free memory used by vector itself
 
 	GLuint vertex_attr_loc;
 	GLuint normal_attr_loc;
+
 	
 
 	vertex_attr_loc = glGetAttribLocation(ProgramID_s, "vertex");
@@ -180,16 +182,18 @@ void CRCPoint::Draw(CCamera *cam)
 {
 	glBindVertexArray(VAOName_s);
 	
-	glm::mat4 mv = cam->GetView() * model;
-	mvp = cam->GetProjection() * mv;
+	glm::mat4 mv = cam->GetView() * Model;
+	MVP = cam->GetProjection() * mv;
 	norm = glm::mat3(glm::transpose(glm::inverse(mv)));
 		//glm::mat3(1.0f);
 
 	MVPUniformLoc_s = glGetUniformLocation(ProgramID_s, "mvp");
 	NormUniformLoc_s = glGetUniformLocation(ProgramID_s, "norm");
+	ColorUniformLoc = glGetUniformLocation(ProgramID_s, "color");
 
-	glUniformMatrix4fv(CRCPoint::MVPUniformLoc_s, 1, GL_FALSE, glm::value_ptr(mvp));
+	glUniformMatrix4fv(CRCPoint::MVPUniformLoc_s, 1, GL_FALSE, glm::value_ptr(MVP));
 	glUniformMatrix3fv(CRCPoint::NormUniformLoc_s, 1, GL_FALSE, glm::value_ptr(norm));
+	glUniform4fv(ColorUniformLoc, 1, glm::value_ptr(Color));
 
 	glDrawArrays(GL_TRIANGLES, 0, CRCPoint::VBOBufferSize_s);
 
@@ -200,4 +204,18 @@ void CRCPoint::Draw(CCamera *cam)
 glm::vec3 * CRCPoint::GetBounds()
 {
 	return nullptr;
+}
+
+bool CRCPoint::IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position)
+{
+	glm::vec3 vert0, vert1, vert2;
+	for (int i = 0; i < VBOBuffer_s.size(); i += 3) {
+		vert0 = glm::vec3(Model*VBOBuffer_s[i].vert);
+		vert1 = glm::vec3(Model*VBOBuffer_s[i + 1].vert);
+		vert2 = glm::vec3(Model*VBOBuffer_s[i + 2].vert);
+		if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, position)) {
+			return true;
+		}
+	}
+	return false;
 }

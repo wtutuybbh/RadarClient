@@ -86,9 +86,46 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	RayVBOisBuilt = VBOisBuilt = MiniMapVBOisBuilt = false;
 
 	MiniMapPointer = new CMinimapPointer(this);
+
+	circles = NULL;
+	markup = NULL;
+	info = NULL;
 }
 CScene::~CScene() {
-	delete markup;
+	if (circles) {
+		for (int c = 0; c < numCircles; c++)
+			delete [] circles[c];
+		delete[] circles;
+	}
+	if(markup)
+		delete [] markup;
+	if (AxisGrid)
+		delete[] AxisGrid;
+	if (AxisGridColor)
+		delete[] AxisGridColor;
+	if (Ray)
+		delete[] Ray;
+	if (RayColor)
+		delete[] RayColor;
+	if (Camera)
+		delete Camera;
+	if (mesh)
+		delete mesh;
+	if (MiniMapPointer)
+		delete MiniMapPointer;
+	if (info)
+		delete[] info;
+	if (Sectors) {
+		for (int i = 0; i < SectorsCount; i++) {
+			for (vector<CRCPoint*>::iterator it = Sectors[i].begin(); it != Sectors[i].end(); ++it) {
+				delete *it;
+			}
+			Sectors[i].clear();
+		}
+		
+		delete[] Sectors;
+	}
+
 }
 
 bool CScene::DrawScene()
@@ -96,7 +133,7 @@ bool CScene::DrawScene()
 	if (!VBOisBuilt) {
 		PrepareVBOs();
 		VBOisBuilt = BuildVBOs();
-		Camera->SetAll(0, y0, 0, 200, mesh->m_Bounds[1].y + 300, -600, 0, 100, 0,
+		Camera->SetAll(0, y0+1, 0, 0, y0 + 1, 1, 0, 1, 0,
 			60.0f, 4.0f / 3.0f, 1.0f, 10000.0f,
 			0.01);
 	}
@@ -181,8 +218,8 @@ bool CScene::DrawScene()
 			Points[i].Draw(Camera);
 		}*/
 		for (int i = 0; i < SectorsCount; i++) {			
-			for (vector<CRCPoint>::iterator it = Sectors[i].begin(); it != Sectors[i].end(); ++it) {
-				it->Draw(Camera);
+			for (vector<CRCPoint*>::iterator it = Sectors[i].begin(); it != Sectors[i].end(); ++it) {
+				(*it)->Draw(Camera);
 			}
 		}
 		
@@ -266,7 +303,7 @@ bool CScene::DrawScene()
 	return true;
 }
 
-bool CScene::DrawMiniMap()
+bool CScene::MiniMapDraw()
 {
 	mesh->DrawMiniMap();
 	MiniMapPointer->DrawMiniMap();
@@ -524,7 +561,7 @@ bool CScene::PrepareRayVBO(RDR_INITCL * init)
 	return true;
 }
 
-bool CScene::PrepareAndBuildMinimapVBO()
+bool CScene::MiniMapPrepareAndBuildVBO()
 {
 
 	return false;
@@ -575,7 +612,7 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 {
 	if (!info_p || !pts || !init)
 		return; //do nothing if no RPOINTS structure provided
-	if (init->Nazm <= 0) //TODO: full defence against bad data need to be there
+	if (init->Nazm <= 0 || info_p->N<=0) //TODO: full defence against bad data need to be there
 		return;
 
 	viewAngle = glm::degrees(init->begAzm + init->dAzm * (info_p->d1 + info_p->d2) / 2);
@@ -591,9 +628,15 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 			//throw new std::exception("invalid data");
 		}
 		SectorsCount = init->Nazm / init->ViewStep;
-		Sectors = new std::vector<CRCPoint>[SectorsCount];
+		Sectors = new std::vector<CRCPoint*>[SectorsCount];
 	}
 	float min = std::fmin(info_p->d1, info_p->d2);
+
+	if (min < 0)
+		return;
+
+	if (std::fmax(info_p->d1, info_p->d2) > init->Nazm)
+		return;
 
 	if (SectorsCount <= 0)
 		return;
@@ -615,13 +658,19 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 			++it;
 		}
 	}*/
+	for (vector<CRCPoint*>::iterator it = Sectors[currentSector].begin(); it != Sectors[currentSector].end(); ++it) {
+		delete *it;				
+	}
 	Sectors[currentSector].clear(); //destroy all vbo buffer objects
 	//std::vector<VBOData>().swap(Sectors+currentSector);
 	//add new points
+	
 	for (int i = 0; i < info_p->N; i++) {
-		CRCPoint p(y0, mpph, mppv, pts[i].R * init->dR, init->begAzm + pts[i].B * init->dAzm, ZERO_ELEVATION + init->begElv + pts[i].E * init->dElv);
+		CRCPoint *p = new CRCPoint(y0, mpph, mppv, pts[i].R * init->dR, init->begAzm + pts[i].B * init->dAzm, ZERO_ELEVATION + init->begElv + pts[i].E * init->dElv);
+		float brightness = std::fmin(pts[i].Amp / 1000.0f, 1.0f);	
+		p->Color = glm::vec4(brightness, 0, 0, 1);
 		Sectors[currentSector].push_back(p);
-	}
+	}	
 }
 
 void CScene::ClearSectors()
@@ -646,12 +695,31 @@ C3DObject * CScene::GetObjectAtMiniMapPosition(float x, float y)
 	glm::vec3 orig(x, y, 1);
 	glm::vec3 dir(0, 0, 1);
 	glm::vec3 pos;
-	if (MiniMapPointer->IntersectLine(orig, dir, pos)) {
+	if (MiniMapPointer->MiniMapIntersectLine(orig, dir, pos)) {
 		return MiniMapPointer;
 	}
 	return NULL;
 }
-
+C3DObject * CScene::GetFirstObjectBetweenPoints(glm::vec3 p0, glm::vec3 p1)
+{
+	/*if (MiniMapPointer->MiniMapIntersectLine(orig, dir, pos)) {
+		return MiniMapPointer;
+	}*/
+	CRCPoint *p = NULL;
+	float dist, minDist = FLT_MAX, treshold = 10;
+	for (int i = 0; i < SectorsCount; i++) {
+		for (vector<CRCPoint*>::iterator it = Sectors[i].begin(); it != Sectors[i].end(); ++it) {
+			if ((*it)->DistanceToLine(p0, p1) < treshold) {
+				dist = glm::distance(p0, (*it)->CartesianCoords);
+				if (dist < minDist) {
+					p = *it;
+					minDist = dist;
+				}
+			}
+		}
+	}
+	return p;
+}
 glm::vec2 CScene::CameraXYForMiniMap()
 {
 	glm::vec3 *b = mesh->GetBounds();

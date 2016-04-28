@@ -21,7 +21,7 @@
 
 class CScene;
 
-class CRCPoint : C3DObject
+class CRCPoint : public C3DObject
 {
 private:
 	static void CreateSphereR1(int level);
@@ -32,14 +32,15 @@ private:
 	static GLuint MVPUniformLoc_s;
 	static GLuint NormUniformLoc_s;
 
+	GLuint ColorUniformLoc;
 
-	glm::mat4 model, mvp;
+	//glm::mat4 Model, MVP;
 	glm::mat3 norm;
-
+	
 public:
-	glm::vec3 CartesianCoords, SphericalCoords;
+	
 	float r;
-
+	
 	CRCPoint(float y0, float mpph, float mppv, float r, float a, float e);
 	~CRCPoint();
 	static void LoadShaders();
@@ -49,5 +50,7 @@ public:
 	void Draw(CCamera *cam);
 
 	glm::vec3 * GetBounds();
+
+	bool IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position);
 };
 

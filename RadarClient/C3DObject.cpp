@@ -3,18 +3,19 @@
 #include "glm/glm.hpp"
 #include "glm/gtx/intersect.hpp"
 
+
 C3DObject::C3DObject()
 {
 }
 
 C3DObject::C3DObject(bool initMap)
 {
-	map.insert({ 0, (PtrToMethod)(&C3DObject::CreateProgram) });
-	map.insert({ 1, (PtrToMethod)(&C3DObject::BuildMinimapVBO) });
-	map.insert({ 2, (PtrToMethod)(&C3DObject::PrepareMinimapVBO) });
+	map.insert({ 0, (PtrToMethod)(&C3DObject::MiniMapCreateProgram) });
+	map.insert({ 1, (PtrToMethod)(&C3DObject::MiniMapBuildVBO) });
+	map.insert({ 2, (PtrToMethod)(&C3DObject::MiniMapPrepareVBO) });
 	map.insert({ 3, (PtrToMethod)(&C3DObject::MiniMapAttribBind) });
-	map.insert({ 4, (PtrToMethod)(&C3DObject::BindTextureImage) });
-	map.insert({ 5, (PtrToMethod)(&C3DObject::UnbindAll) });
+	map.insert({ 4, (PtrToMethod)(&C3DObject::MiniMapBindTextureImage) });
+	map.insert({ 5, (PtrToMethod)(&C3DObject::MiniMapUnbindAll) });
 	MiniMapVBOReady = false;
 	MiniMapProgramID = 0;
 	MiniMapVBOBuffer.clear(); //destroy all vbo buffer objects
@@ -24,6 +25,7 @@ C3DObject::C3DObject(bool initMap)
 }
 C3DObject::~C3DObject()
 {
+	map.clear();
 }
 
 glm::vec3 * C3DObject::GetBounds()
@@ -31,7 +33,7 @@ glm::vec3 * C3DObject::GetBounds()
 	return nullptr;
 }
 
-bool C3DObject::PrepareAndBuildMinimapVBO(const char * vShaderFile, const char * fShaderFile, const char * imgFile)
+bool C3DObject::MiniMapPrepareAndBuildVBO(const char * vShaderFile, const char * fShaderFile, const char * imgFile)
 {
 	ImgFile = (char *)imgFile, VShaderFile = (char *)vShaderFile, FShaderFile = (char *)fShaderFile;
 
@@ -49,7 +51,7 @@ bool C3DObject::PrepareAndBuildMinimapVBO(const char * vShaderFile, const char *
 	return true;
 }
 
-void C3DObject::BuildMinimapVBO()
+void C3DObject::MiniMapBuildVBO()
 {
 	MiniMapVBOBuffer.push_back({ glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 	MiniMapVBOBuffer.push_back({ glm::vec4(-1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
@@ -61,7 +63,7 @@ void C3DObject::BuildMinimapVBO()
 
 	MiniMapVBOBufferSize = MiniMapVBOBuffer.size();
 }
-void C3DObject::PrepareMinimapVBO()
+void C3DObject::MiniMapPrepareVBO()
 {
 	glGenVertexArrays(1, &MiniMapVAOName);
 	glBindVertexArray(MiniMapVAOName);
@@ -90,7 +92,7 @@ void C3DObject::MiniMapAttribBind()
 	glEnableVertexAttribArray(texcoor_attr_loc);
 }
 
-void C3DObject::BindTextureImage()
+void C3DObject::MiniMapBindTextureImage()
 {
 	try {
 		MiniMapImage = FreeImage_Load(FreeImage_GetFileType(ImgFile, 0), ImgFile);
@@ -133,21 +135,21 @@ void C3DObject::BindTextureImage()
 	delete bits;
 }
 
-void C3DObject::UnbindAll()
+void C3DObject::MiniMapUnbindAll()
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
 
-void C3DObject::CreateProgram()
+void C3DObject::MiniMapCreateProgram()
 {
 	if (!MiniMapProgramID) {
 		MiniMapProgramID = create_program(VShaderFile, FShaderFile);
 	}
 }
 
-void C3DObject::DrawMiniMap()
+void C3DObject::MiniMapDraw()
 {
 	glUseProgram(MiniMapProgramID);
 	glBindVertexArray(MiniMapVAOName);
@@ -178,7 +180,7 @@ void C3DObject::DrawMiniMap()
 	glUseProgram(0);
 }
 
-bool C3DObject::IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position)
+bool C3DObject::MiniMapIntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position)
 {
 	glm::vec3 vert0, vert1, vert2;
 	for (int i = 0; i < MiniMapVBOBuffer.size(); i += 3) {
@@ -190,4 +192,24 @@ bool C3DObject::IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & pos
 		}
 	}
 	return false;
+}
+
+bool C3DObject::IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position)
+{
+	glm::vec3 vert0, vert1, vert2;
+	for (int i = 0; i < VBOBuffer.size(); i += 3) {
+		vert0 = glm::vec3(Model*VBOBuffer[i].vert);
+		vert1 = glm::vec3(Model*VBOBuffer[i + 1].vert);
+		vert2 = glm::vec3(Model*VBOBuffer[i + 2].vert);
+		if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, position)) {
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+float C3DObject::DistanceToLine(glm::vec3 p0, glm::vec3 p1)
+{
+	return minimum_distance(p0, p1, CartesianCoords);
 }

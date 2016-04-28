@@ -72,7 +72,7 @@ void ToggleFullscreen(GL_Window* window);			// Toggle Fullscreen / Windowed Mode
 													// These Are The Function You Must Provide
 BOOL Initialize(GL_Window* window, Keys* keys);	// Performs All Your Initialization
 
-void Deinitialize(void);							// Performs All Your DeInitialization
+int Deinitialize(void);							// Performs All Your DeInitialization
 
 void Update(DWORD milliseconds);					// Perform Motion Updates
 

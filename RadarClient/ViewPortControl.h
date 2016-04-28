@@ -24,6 +24,7 @@
 class CScene;
 class CCamera;
 class CUserInterface;
+class C3DObject;
 
 class ViewPortControl {
 public:
@@ -55,6 +56,8 @@ public:
 	void SetPosition(int x, int y, int w, int h);
 
 	int DisplayPoints, DisplaySeries, DisplayRLIs, DisplayMap, DisplayLandscape;
+
+	C3DObject Get3DObject(int x, int y);
 
 	bool MakeCurrent();
 

@@ -21,14 +21,14 @@ CMinimapPointer::~CMinimapPointer()
 void CMinimapPointer::DrawMiniMap()
 {
 	if (!C3DObject::MiniMapVBOReady) {
-		C3DObject::MiniMapVBOReady = PrepareAndBuildMinimapVBO("MinimapPointer.v.glsl", "MinimapPointer.f.glsl", "video.png");
+		C3DObject::MiniMapVBOReady = MiniMapPrepareAndBuildVBO("MinimapPointer.v.glsl", "MinimapPointer.f.glsl", "video.png");
 	}
 
 	glm::mat4 rot = glm::rotate(Scene->Camera->GetAzimut() + (float)M_PI / 2, glm::vec3(0, 0, 1));
 
 	MiniMapModel = glm::translate(glm::vec3(Scene->CameraXYForMiniMap(), 0)) * rot * glm::scale(glm::vec3(0.1, 0.05, 0.1));
 
-	C3DObject::DrawMiniMap();
+	C3DObject::MiniMapDraw();
 }
 
 void CMinimapPointer::BuildMinimapVBO()

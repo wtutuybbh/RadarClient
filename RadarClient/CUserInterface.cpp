@@ -68,14 +68,6 @@ glm::vec3 CUserInterface::GetDirection()
 	return glm::vec3(-sin(e)*sin(a), cos(e), sin(e)*cos(a));
 }
 
-void CUserInterface::PutCell(HWND hgrid, int row, int col, long text)
-{
-	//worker function to keep from having to send hundreds of SendMessage() with
-	//BGM_SETCELLDATA in the main program.  Just simplifies the main program code
-	SetCell(cell, row, col);
-	SendMessage(hgrid, BGM_SETCELLDATA, (UINT)cell, text);
-}
-
 
 int CUserInterface::InsertElement(DWORD xStyle, LPCSTR _class, LPCSTR text, DWORD style, int x, int y, int width, int height, UIWndProc action)
 {
@@ -180,7 +172,6 @@ LRESULT CUserInterface::Trackbar_CameraDirection_Turn(HWND hwnd, UINT uMsg, WPAR
 //TRACKBAR_CLASS
 CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
 {
-	cell = new _BGCELL;
 
 	this->ParentHWND = parentHWND;
 	this->VPControl = vpControl;
@@ -249,9 +240,8 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 	RECT clientRect;
 	GetClientRect(parentHWND, &clientRect);
 
-	RegisterGridClass(GetModuleHandle(NULL));
 
-	Grid_ID = InsertElement(NULL, _T("ZeeGrid"), TEXT_GRID_NAME, WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX, gridY, vpControl->Width, clientRect.right - panelWidth, &CUserInterface::Grid);
+	//Grid_ID = InsertElement(NULL, _T("ZeeGrid"), TEXT_GRID_NAME, WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX, gridY, vpControl->Width, clientRect.right - panelWidth, &CUserInterface::Grid);
 
 	
 	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
@@ -312,6 +302,14 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 
 CUserInterface::~CUserInterface()
 {
+	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
+		delete it->second;
+	}
+	Elements.clear();
+	ElementsMap().swap(Elements);
+	if (hgridmod) {
+		FreeLibrary(hgridmod);
+	}
 }
 
 void CUserInterface::ConnectionStateChanged(bool IsConnected)
@@ -381,7 +379,7 @@ void CUserInterface::Resize()
 
 void CUserInterface::InitGrid()
 {
-	HWND gridHwnd = GetDlgItem(ParentHWND, Grid_ID);
+	HWND hg = GetDlgItem(ParentHWND, Grid_ID);
 	/*SendMessage(gridHwnd, BGM_SETGRIDDIM, 5, 7);
 	SendMessage(gridHwnd, BGM_SETCOLSNUMBERED, FALSE, 0);
 	SendMessage(gridHwnd, BGM_EXTENDLASTCOLUMN, FALSE, 0);
@@ -393,6 +391,30 @@ void CUserInterface::InitGrid()
 	PutCell(gridHwnd, 0, 4, (long)"Скорость");
 	PutCell(gridHwnd, 0, 5, (long)"Азимут");
 	PutCell(gridHwnd, 0, 6, (long)"Время");*/
+	SendMessage(hg, ZGM_DIMGRID, 10, 0);
+	SendMessage(hg, ZGM_SHOWROWNUMBERS, TRUE, 0);
+	int j;
+	for (j = 1; j <= 5; j++)
+	{
+		SendMessage(hg, ZGM_APPENDROW, 0, 0);
+	}
+	//set column header titles
+	SendMessage(hg, ZGM_SETCELLTEXT, 1, (LPARAM)"First\nColumn");
+	SendMessage(hg, ZGM_SETCELLTEXT, 2, (LPARAM)"Second\nColumn");
+	SendMessage(hg, ZGM_SETCELLTEXT, 3, (LPARAM)"Third\nColumn");
+	SendMessage(hg, ZGM_SETCELLTEXT, 4, (LPARAM)"Fourth\nColumn");
+	SendMessage(hg, ZGM_SETCELLTEXT, 5, (LPARAM)"Fifth\nColumn");
+	SendMessage(hg, ZGM_SETCELLTEXT, 6, (LPARAM)"Sixth\nColumn");
+	SendMessage(hg, ZGM_SETCELLTEXT, 7, (LPARAM)"Seventh Column is wide");
+	SendMessage(hg, ZGM_SETCELLTEXT, 8, (LPARAM)"Eighth\nColumn");
+	SendMessage(hg, ZGM_SETCELLTEXT, 9, (LPARAM)"Ninth\nColumn");
+	SendMessage(hg, ZGM_SETCELLTEXT, 10, (LPARAM)"Tenth\nand\nlast\nColumn");
+
+	//make column 3 editable by the user
+	SendMessage(hg, ZGM_SETCOLEDIT, 3, 1);
+
+	//auto size all columns
+	SendMessage(hg, ZGM_AUTOSIZE_ALL_COLUMNS, 0, 0);
 }
 
 

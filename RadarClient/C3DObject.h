@@ -50,27 +50,32 @@ protected:
 
 	glm::mat4 MiniMapModel, MiniMapView, MiniMapProj, MiniMapMVP;
 
-	
+	glm::mat4 Model, View, Proj, MVP;
 public:
 	CScene *Scene;
-
+	glm::vec4 Color;
 	C3DObject();
 	C3DObject(bool initMap);
 	~C3DObject();
 	virtual glm::vec3 * GetBounds();
 
-	bool PrepareAndBuildMinimapVBO(const char * vShaderFile, const char * fShaderFile, const char * imgFile);
+	glm::vec3 CartesianCoords, SphericalCoords;
 
-	void BuildMinimapVBO();
-	void PrepareMinimapVBO();
+	bool MiniMapPrepareAndBuildVBO(const char * vShaderFile, const char * fShaderFile, const char * imgFile);
+
+	void MiniMapBuildVBO();
+	void MiniMapPrepareVBO();
 	void MiniMapAttribBind();
-	void BindTextureImage();
-	void UnbindAll();
-	void CreateProgram();
+	void MiniMapBindTextureImage();
+	void MiniMapUnbindAll();
+	void MiniMapCreateProgram();
 
+	void MiniMapDraw();
 
-	void DrawMiniMap();
+	bool MiniMapIntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position);
 
 	bool IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position);
+	
+	float DistanceToLine(glm::vec3 p0, glm::vec3 p1);
 };
 
