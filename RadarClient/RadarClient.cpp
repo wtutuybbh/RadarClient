@@ -495,6 +495,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		g_Socket->PostData(wParam, lParam);
 		g_vpControl->MakeCurrent();
 		g_vpControl->Scene->RefreshSector(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit);
+
+		g_UI->FillGrid(&g_Socket->Tracks);
+
 		g_Socket->FreeMemory((char *)wParam);
 	}
 	break;
@@ -644,7 +647,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			//
 #ifdef _DEBUG
 			g_dwi.DebugEdit_ID = 1;
-			OpenDebugWindow(hInstance, nCmdShow, window.hWnd, &g_dwi);
+			OpenDebugWindow(hInstance, SW_SHOWMINIMIZED, window.hWnd, &g_dwi);
 			DebugMessage(&g_dwi, "Hello");
 #endif
 			
@@ -784,8 +787,9 @@ BOOL Initialize(GL_Window* window, Keys* keys)					// Any GL Init Code & User In
 	g_vpControl->UI = g_UI;
 	g_vpControl->Camera = g_vpControl->Scene->Camera;
 	
-	g_Minimap->Scene = g_vpControl->Scene;
-	
+	g_Minimap->Scene = g_vpControl->Scene;	
+	g_Minimap->UI = g_UI;
+	g_Minimap->Camera = g_vpControl->Scene->Camera;
 
 /*	if (!g_vpControl->Scene->PrepareVBOs())
 	{

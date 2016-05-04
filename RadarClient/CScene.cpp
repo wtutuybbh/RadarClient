@@ -136,6 +136,7 @@ bool CScene::DrawScene()
 		Camera->SetAll(0, y0+1, 0, 0, y0 + 1, 1, 0, 1, 0,
 			60.0f, 4.0f / 3.0f, 1.0f, 10000.0f,
 			0.01);
+		Camera->RadarPosition = glm::vec3(0, y0, 0);
 	}
 
 
@@ -630,6 +631,9 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 		SectorsCount = init->Nazm / init->ViewStep;
 		Sectors = new std::vector<CRCPoint*>[SectorsCount];
 	}
+	if (info_p->d1 == info_p->d2)
+		return;
+
 	float min = std::fmin(info_p->d1, info_p->d2);
 
 	if (min < 0)

@@ -404,8 +404,9 @@ class CRCSocket
 {
 	bool OnceClosed;
 	char *hole;
-	vector<TRK*> Tracks;
+	
 public:
+	vector<TRK*> Tracks;
 	//used when receiving data:
 	std::string ErrorText;
 	WSADATA WsaDat;

@@ -6,7 +6,9 @@
 #include "CScene.h"
 #include <CommCtrl.h>
 #include <string>
-
+#include <sstream>
+#include <iostream>
+#include <iomanip>
 #include "ZeeGrid.h"
 
 /*CUserInterface::CUserInterface()
@@ -127,19 +129,30 @@ LRESULT CUserInterface::Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam,
 	return LRESULT();
 }
 
+LRESULT CUserInterface::Checkbox_FixViewToRadar(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	int ButtonID = LOWORD(wParam);
+	HWND hWnd = GetDlgItem(hwnd, ButtonID);
+	int Checked = !Button_GetCheck(hWnd);
+	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
+
+	this->VPControl->Camera->FixViewOnRadar = Checked;
+	return LRESULT();
+}
+
 LRESULT CUserInterface::RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int ButtonID = LOWORD(wParam);
 	HWND hWnd = GetDlgItem(hwnd, ButtonID);
 
 	if (ButtonID == CameraPosition_ID[0]) { // FROM_RADAR
-		this->VPControl->Camera->Position = glm::vec3(0, this->VPControl->Scene->y0, 0);
+		this->VPControl->Camera->Position = glm::vec3(0, this->VPControl->Scene->y0+1, 0);
 	}
-	if (ButtonID == CameraPosition_ID[1]) { // FROM_5KM_ABOVE_RADAR
-		this->VPControl->Camera->Position = glm::vec3(0, this->VPControl->Scene->y0 + 5000.0f / this->VPControl->Scene->mppv, 0);
+	if (ButtonID == CameraPosition_ID[1]) { // FROM_100M_ABOVE_RADAR
+		this->VPControl->Camera->Position = glm::vec3(0, this->VPControl->Scene->y0 + 100.0f / this->VPControl->Scene->mppv, 0);
 	}
-	if (ButtonID == CameraPosition_ID[2]) { // FROM_5KM_ABOVE_RADAR_5KM_NORTH
-		this->VPControl->Camera->Position = glm::vec3(0, this->VPControl->Scene->y0 + 5000.0f / this->VPControl->Scene->mppv, 5000.0f / this->VPControl->Scene->mpph);
+	if (ButtonID == CameraPosition_ID[2]) { // FROM_1000M_ABOVE_RADAR
+		this->VPControl->Camera->Position = glm::vec3(0, this->VPControl->Scene->y0 + 1000.0f / this->VPControl->Scene->mppv, 0);
 	}
 
 	return LRESULT();
@@ -205,7 +218,11 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 	CurrentY += MinimapSize;
 	CameraDirection_ID[1] = InsertElement(NULL, TRACKBAR_CLASS, TEXT_LABEL_CAMERA_POSITION, WS_VISIBLE | WS_CHILD | TBS_HORZ | TBS_BOTTOM, 0, CurrentY, MinimapSize, VStepGrp, &CUserInterface::Trackbar_CameraDirection_Turn);
 
-	CurrentY += VStepGrp + VStep;
+	CurrentY += VStep+VStep;
+
+	FixViewToRadar_ID = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_FIXVIEWTORADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidthXL, ButtonHeight, &CUserInterface::Checkbox_FixViewToRadar);
+	
+	CurrentY += VStepGrp;
 
 	Button_Connect_ID = InsertElement(NULL, _T("BUTTON"), TEXT_BUTTON_CONNECT, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, Column1X, CurrentY, ControlWidthL, ButtonHeight, &CUserInterface::Button_Connect);
 	IsConnected_ID = InsertElement(NULL, _T("STATIC"), TEXT_LABEL_NOT_CONNECTED, WS_VISIBLE | WS_CHILD, Column2X, CurrentY, ControlWidthL, ButtonHeight, NULL);
@@ -228,9 +245,9 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 	InsertElement(NULL, _T("STATIC"), TEXT_LABEL_CAMERA_POSITION, WS_VISIBLE | WS_CHILD, Column1X, CurrentY, ControlWidth, ButtonHeight, NULL);
 	CameraPosition_ID[0] = InsertElement(NULL, _T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_RADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_GROUP, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
 	CurrentY += VStep;
-	CameraPosition_ID[1] = InsertElement(NULL, _T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_5KM_ABOVE_RADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
+	CameraPosition_ID[1] = InsertElement(NULL, _T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_100M_ABOVE_RADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
 	CurrentY += VStep;
-	CameraPosition_ID[2] = InsertElement(NULL, _T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_5KM_ABOVE_RADAR_5KM_NORTH, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
+	CameraPosition_ID[2] = InsertElement(NULL, _T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_1000M_ABOVE_RADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
 	CurrentY += VStep;
 	//CameraDirectionValue_ID[0] = InsertElement(_T("STATIC"), _T(""), WS_VISIBLE | WS_CHILD, 10, 530, 100, 30, NULL);
 	//CameraDirectionValue_ID[1] = InsertElement(_T("STATIC"), _T(""), WS_VISIBLE | WS_CHILD, 110, 530, 100, 30, NULL);
@@ -241,7 +258,7 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 	GetClientRect(parentHWND, &clientRect);
 
 
-	//Grid_ID = InsertElement(NULL, _T("ZeeGrid"), TEXT_GRID_NAME, WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX, gridY, vpControl->Width, clientRect.right - panelWidth, &CUserInterface::Grid);
+	Grid_ID = InsertElement(NULL, _T("ZeeGrid"), TEXT_GRID_NAME, WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX, gridY, vpControl->Width, clientRect.right - panelWidth, &CUserInterface::Grid);
 
 	
 	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
@@ -272,7 +289,7 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 
 
 	//////////font setting:
-	NONCLIENTMETRICS ncm;
+	/*NONCLIENTMETRICS ncm;
 	ncm.cbSize = sizeof(ncm);
 
 	// If we're compiling with the Vista SDK or later, the NONCLIENTMETRICS struct
@@ -287,16 +304,17 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 #endif
 
 	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
-	hDlgFont = CreateFontIndirect(&(ncm.lfMessageFont));
+	hDlgFont = CreateFontIndirect(&(ncm.lfMessageFont));*/
 
 	// Set the dialog to use the system message box font
 	//SetFont(m_DlgFont, TRUE);
-	
+	Font = GetFont();
 
 	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
-		SendMessage(it->second->hWnd, WM_SETFONT, (WPARAM)hDlgFont, TRUE);		
+		SendMessage(it->second->hWnd, WM_SETFONT, (WPARAM)Font, TRUE);
 	}
 
+	hg = NULL;
 	InitGrid();
 }
 
@@ -379,41 +397,90 @@ void CUserInterface::Resize()
 
 void CUserInterface::InitGrid()
 {
-	HWND hg = GetDlgItem(ParentHWND, Grid_ID);
-	/*SendMessage(gridHwnd, BGM_SETGRIDDIM, 5, 7);
-	SendMessage(gridHwnd, BGM_SETCOLSNUMBERED, FALSE, 0);
-	SendMessage(gridHwnd, BGM_EXTENDLASTCOLUMN, FALSE, 0);
-	SendMessage(gridHwnd, BGM_SETFONT, (WPARAM)hDlgFont, TRUE);
+	if (!hg)
+		hg = GetDlgItem(ParentHWND, Grid_ID);
 
-	PutCell(gridHwnd, 0, 1, (long)(new std::string("ID"))->c_str());
-	PutCell(gridHwnd, 0, 2, (long)(new std::string("Начальная точка"))->c_str());
-	PutCell(gridHwnd, 0, 3, (long)"Конечная точка");
-	PutCell(gridHwnd, 0, 4, (long)"Скорость");
-	PutCell(gridHwnd, 0, 5, (long)"Азимут");
-	PutCell(gridHwnd, 0, 6, (long)"Время");*/
-	SendMessage(hg, ZGM_DIMGRID, 10, 0);
+	SendMessage(hg, ZGM_SETFONT, 2, (LPARAM)Font);
+
+	SendMessage(hg, ZGM_DIMGRID, 7, 0);
 	SendMessage(hg, ZGM_SHOWROWNUMBERS, TRUE, 0);
-	int j;
-	for (j = 1; j <= 5; j++)
-	{
-		SendMessage(hg, ZGM_APPENDROW, 0, 0);
-	}
+
 	//set column header titles
-	SendMessage(hg, ZGM_SETCELLTEXT, 1, (LPARAM)"First\nColumn");
-	SendMessage(hg, ZGM_SETCELLTEXT, 2, (LPARAM)"Second\nColumn");
-	SendMessage(hg, ZGM_SETCELLTEXT, 3, (LPARAM)"Third\nColumn");
-	SendMessage(hg, ZGM_SETCELLTEXT, 4, (LPARAM)"Fourth\nColumn");
-	SendMessage(hg, ZGM_SETCELLTEXT, 5, (LPARAM)"Fifth\nColumn");
-	SendMessage(hg, ZGM_SETCELLTEXT, 6, (LPARAM)"Sixth\nColumn");
-	SendMessage(hg, ZGM_SETCELLTEXT, 7, (LPARAM)"Seventh Column is wide");
-	SendMessage(hg, ZGM_SETCELLTEXT, 8, (LPARAM)"Eighth\nColumn");
-	SendMessage(hg, ZGM_SETCELLTEXT, 9, (LPARAM)"Ninth\nColumn");
-	SendMessage(hg, ZGM_SETCELLTEXT, 10, (LPARAM)"Tenth\nand\nlast\nColumn");
+	SendMessage(hg, ZGM_SETCELLTEXT, 1, (LPARAM)"ID");
+	SendMessage(hg, ZGM_SETCELLTEXT, 2, (LPARAM)"Кол-во точек");
+	SendMessage(hg, ZGM_SETCELLTEXT, 3, (LPARAM)"Начальная точка");
+	SendMessage(hg, ZGM_SETCELLTEXT, 4, (LPARAM)"Конечная точка");
+	SendMessage(hg, ZGM_SETCELLTEXT, 5, (LPARAM)"Скорость");
+	SendMessage(hg, ZGM_SETCELLTEXT, 6, (LPARAM)"Азимут");
+	SendMessage(hg, ZGM_SETCELLTEXT, 7, (LPARAM)"Время");
+
 
 	//make column 3 editable by the user
-	SendMessage(hg, ZGM_SETCOLEDIT, 3, 1);
+	//SendMessage(hg, ZGM_SETCOLEDIT, 3, 1);
 
 	//auto size all columns
+	SendMessage(hg, ZGM_AUTOSIZE_ALL_COLUMNS, 0, 0);
+}
+
+HFONT CUserInterface::GetFont()
+{
+	//////////font setting:
+	NONCLIENTMETRICS ncm;
+	ncm.cbSize = sizeof(ncm);
+
+	// If we're compiling with the Vista SDK or later, the NONCLIENTMETRICS struct
+	// will be the wrong size for previous versions, so we need to adjust it.
+#if(_MSC_VER >= 1500 && WINVER >= 0x0600)
+	if (!IsVistaOrLater())
+	{
+		// In versions of Windows prior to Vista, the iPaddedBorderWidth member
+		// is not present, so we need to subtract its size from cbSize.
+		ncm.cbSize -= sizeof(ncm.iPaddedBorderWidth);
+	}
+#endif
+
+	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
+	return CreateFontIndirect(&(ncm.lfMessageFont));
+}
+
+void CUserInterface::FillGrid(vector<TRK*> *tracks)
+{
+	if (!hg)
+		hg = GetDlgItem(ParentHWND, Grid_ID);
+	int nrows = SendMessage(hg, ZGM_GETROWS, 0, 0);
+	int ncols = SendMessage(hg, ZGM_GETCOLS, 0, 0);
+	int i = 0;
+	int npoints;
+	std::stringstream ss;
+	for (i = 0; i < tracks->size(); i++) {
+		if (i>nrows)
+			SendMessage(hg, ZGM_APPENDROW, 0, 0);
+		int offset = ncols*(i + 1);
+		SendMessage(hg, ZGM_SETCELLINT, offset + 1, (LPARAM)&(tracks->at(i)->id));
+
+		npoints = tracks->at(i)->P.size();
+		SendMessage(hg, ZGM_SETCELLINT, offset + 2, (LPARAM)&npoints);
+
+		ss.str(std::string());
+		ss << std::fixed << std::setprecision(4) << tracks->at(i)->P.at(0).X << "," << tracks->at(i)->P.at(0).Y;
+		SendMessage(hg, ZGM_SETCELLTEXT, offset + 3, (LPARAM)ss.str().c_str());
+		
+		ss.str(std::string());
+		ss << std::fixed << std::setprecision(4) << tracks->at(i)->P.at(npoints-1).X << "," << tracks->at(i)->P.at(npoints - 1).Y;
+		SendMessage(hg, ZGM_SETCELLTEXT, offset + 4, (LPARAM)ss.str().c_str());
+
+		ss.str(std::string());
+		glm::vec3 speed(tracks->at(i)->P.at(npoints - 1).vX, tracks->at(i)->P.at(npoints - 1).vY, tracks->at(i)->P.at(npoints - 1).vZ);
+		ss << std::fixed << std::setprecision(4) <<  glm::length(speed);
+		SendMessage(hg, ZGM_SETCELLTEXT, offset + 5, (LPARAM)ss.str().c_str());
+
+		/*
+		SendMessage(hg, ZGM_SETCELLTEXT, offset + 6, (LPARAM)"Азимут");
+		SendMessage(hg, ZGM_SETCELLTEXT, offset + 7, (LPARAM)"Время");*/
+	}
+	for (; i < nrows; i++) {
+		SendMessage(hg, ZGM_DELETEROW, i, 0);
+	}
 	SendMessage(hg, ZGM_AUTOSIZE_ALL_COLUMNS, 0, 0);
 }
 

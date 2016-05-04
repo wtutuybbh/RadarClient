@@ -357,6 +357,7 @@ TRK::TRK(int _id)
 }
 TRK::~TRK()
 {
+	P.clear();
 }
 void TRK::InsertPoints(RDRTRACK* pt, int N)
 {

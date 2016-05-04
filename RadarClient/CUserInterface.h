@@ -5,6 +5,7 @@
 #include <windowsx.h>
 //#include <CommCtrl.h>
 #include <unordered_map>
+#include <vector>
 #include <tchar.h>
 
 #include "glm/glm.hpp"
@@ -20,8 +21,8 @@
 #define TEXT_BUTTON_DISCONNECT _T("Разорвать соединение")
 
 #define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_RADAR _T("От радара")
-#define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_5KM_ABOVE_RADAR _T("С высоты 5 км над радаром")
-#define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_5KM_ABOVE_RADAR_5KM_NORTH _T("С высоты 5 км в 5км к северу от радара")
+#define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_100M_ABOVE_RADAR _T("С высоты 100 м над радаром")
+#define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_1000M_ABOVE_RADAR _T("С высоты 1 км в над радаром")
 
 #define TEXT_RADIOBUTTON_CAMERA_DIRECTION_FROM_RADAR_TO_NORTH _T("От радара на север")
 #define TEXT_RADIOBUTTON_CAMERA_DIRECTION_TO_RADAR _T("К радару")
@@ -31,6 +32,7 @@
 #define TEXT_CHECKBOX_POINTS _T("Точки")
 #define TEXT_CHECKBOX_SERIES _T("Траектории")
 #define TEXT_CHECKBOX_RLI _T("RLI-изображения")
+#define TEXT_CHECKBOX_FIXVIEWTORADAR _T("Фиксировать камеру на радар")
 
 #define TEXT_CHECKBOX_LANDSCAPE _T("Ландшафт")
 #define TEXT_CHECKBOX_MAP _T("Карта")
@@ -46,6 +48,7 @@ typedef LRESULT (CUserInterface::*UIWndProc)(HWND hwnd, UINT uMsg, WPARAM wParam
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 
 struct _BGCELL;
+class TRK;
 
 typedef struct {	
 	int ID;
@@ -64,14 +67,18 @@ class CUserInterface
 {
 private:
 	int CurrentID;
-	int IsConnected_ID, Button_Connect_ID, Grid_ID;
+	int IsConnected_ID, Button_Connect_ID, Grid_ID, FixViewToRadar_ID;
 	int ObjOptions_ID[3], MapOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2];
 	//int Info_ID[]
 	void SetChecked(int id, bool checked);
 
 	glm::vec3 GetDirection();
 
-	HMODULE hgridmod;
+	HMODULE hgridmod; //ZeeGrid's dll handle
+
+	HFONT Font; // user interface font
+
+	HWND hg; //ZeeGrid's window handle
 public:
 	int Column1X, Column2X;
 	int VStep, VStepGrp;
@@ -93,6 +100,7 @@ public:
 
 	virtual LRESULT Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_FixViewToRadar(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Trackbar_CameraDirection_VTilt(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Trackbar_CameraDirection_Turn(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -123,5 +131,9 @@ public:
 	void Resize();
 
 	void InitGrid();
+
+	HFONT GetFont();
+
+	void FillGrid(std::vector<TRK*> *tracks);
 };
 

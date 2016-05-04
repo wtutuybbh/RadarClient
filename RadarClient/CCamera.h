@@ -17,7 +17,9 @@ public:
 	float zNear;
 	float zFar;
 	float Speed;
-public:
+	glm::vec3 RadarPosition;
+	bool FixViewOnRadar = false;
+
 	CCamera();
 	CCamera(float eyex, float eyey, float eyez, float centerx, float centery, float centerz, float upx, float upy, float upz, 
 		float fovy, float aspect, float zNear, float zFar,
@@ -47,6 +49,8 @@ public:
 	glm::mat4 GetMiniMapProjection();
 
 	float GetAzimut();
+
+	glm::vec3 GetDirection();
 private:
 	LookAtCallback lookAt;
 };

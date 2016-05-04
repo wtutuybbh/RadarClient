@@ -70,7 +70,19 @@ LRESULT CMinimap::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 			SetCursor(LoadCursor(NULL, IDC_ARROW));
 		}
 		if (CameraDrag) {
-			Scene->SetCameraPositionFromMiniMapXY(2.0f*(float)LOWORD(lParam) / (float)Width - 1, 1 - 2.0f * (float)HIWORD(lParam) / (float)Height, 0);
+
+			
+			if (Scene && UI && Camera) {
+				Scene->SetCameraPositionFromMiniMapXY(2.0f*(float)LOWORD(lParam) / (float)Width - 1, 1 - 2.0f * (float)HIWORD(lParam) / (float)Height, 0);
+
+				float r = glm::length(Camera->GetDirection());
+				float e = acos(Camera->GetDirection().y / r);
+
+				float a = Camera->GetAzimut();
+
+				UI->SetTrackbarValue_Turn(50 * a / M_PI + 50);
+				UI->SetTrackbarValue_VTilt(100 * e / M_PI);
+			}
 		}
 
 		break;

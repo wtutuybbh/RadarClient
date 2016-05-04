@@ -86,11 +86,11 @@ LRESULT ViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam
 			Camera->newPosition.y = GET_Y_LPARAM(lParam);
 			if (wParam == MK_LBUTTON) {
 				Camera->Rotate(Camera->newPosition.x - Camera->startPosition.x, glm::vec3(0, -1, 0));
-				Camera->Rotate(Camera->newPosition.y - Camera->startPosition.y, glm::cross(glm::vec3(0, 1, 0), Camera->Direction));
+				Camera->Rotate(Camera->newPosition.y - Camera->startPosition.y, glm::cross(glm::vec3(0, 1, 0), Camera->GetDirection()));
 
 				if (UI) {
-					float r = glm::length(Camera->Direction);
-					float e = acos(Camera->Direction.y / r);
+					float r = glm::length(Camera->GetDirection());
+					float e = acos(Camera->GetDirection().y / r);
 
 					float a = Camera->GetAzimut();
 

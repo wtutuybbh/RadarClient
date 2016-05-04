@@ -14,6 +14,8 @@ CCamera::CCamera(float eyex, float eyey, float eyez, float centerx, float center
 	float fovy, float aspect, float zNear, float zFar, 
 	float speed, LookAtCallback lookAt) {
 	
+	FixViewOnRadar = false;
+
 	Position.x = eyex;
 	Position.y = eyey;
 	Position.z = eyez;
@@ -31,6 +33,8 @@ CCamera::CCamera(float eyex, float eyey, float eyez, float centerx, float center
 
 	this->lookAt = lookAt;
 	Speed = speed;
+
+	
 }
 
 CCamera::~CCamera() {
@@ -67,23 +71,23 @@ void CCamera::SetProjection(float fovy, float aspect, float zNear, float zFar)
 
 void CCamera::SetPosition(float x, float y, float z)
 {
-	Position = glm::vec3(x, y, z);
+	Position = glm::vec3(x, y, z);	
 }
 
 void CCamera::SetPositionXZ(float x, float z)
 {
-	Position = glm::vec3(x, Position.y, z);
+	SetPosition(x, Position.y, z);
 }
 
 void CCamera::LookAt() {
 	//m_view = glm::lookAt(m_position, m_position + m_direction, m_up);
-	glm::vec3 to = Position + Direction;
+	glm::vec3 to = Position + GetDirection();
 	lookAt(Position.x, Position.y, Position.z, to.x, to.y, to.z, Up.x, Up.y, Up.z);
 	//gluLookAt(Position.x, Position.y, Position.z, to.x, to.y, to.z, Up.x, Up.y, Up.z);
 }
 void CCamera::MoveByView(double shift) {
-	Direction = glm::normalize(Direction);
-	Position = glm::mat3(shift) * glm::normalize(Direction) + Position;
+	glm::vec3 dir = glm::normalize(GetDirection());
+	Position = glm::mat3(shift) * dir + Position;
 }
 
 void CCamera::Rotate(float amount, glm::vec3& axis)
@@ -101,23 +105,23 @@ void CCamera::ApplyMovement(MovementType movement)
 	switch (movement)
 	{
 	case FORWARD:
-		Position += Direction;
+		Position += glm::normalize(GetDirection());
 		break;
 	case BACKWARD:
-		Position -= Direction;
+		Position -= glm::normalize(GetDirection());
 		break;
 	case STRAFE_L:
-		Position += glm::cross(Direction, Up);
+		Position += glm::cross(glm::normalize(GetDirection()), Up);
 		break;
 	case STRAFE_R:
-		Position -= glm::cross(Direction, Up);
+		Position -= glm::cross(glm::normalize(GetDirection()), Up);
 		break;
 	}
 }
 
 glm::mat4 CCamera::GetView()
 {
-	return glm::lookAt(Position, Position + Direction, Up);
+	return glm::lookAt(Position, Position + GetDirection(), Up);
 }
 
 glm::mat4 CCamera::GetProjection()
@@ -137,6 +141,15 @@ glm::mat4 CCamera::GetMiniMapProjection()
 
 float CCamera::GetAzimut()
 {
-	float r = glm::length(Direction);
-	return sgn(Direction.x) *  acos(Direction.z / sqrt(r*r - Direction.y*Direction.y));
+	glm::vec3 dir = GetDirection();
+	float r = glm::length(dir);
+	return sgn(dir.x) *  acos(dir.z / sqrt(r*r - dir.y*dir.y));
+}
+
+glm::vec3 CCamera::GetDirection()
+{
+	if (FixViewOnRadar) {
+		return RadarPosition - Position;
+	}
+	return Direction;
 }

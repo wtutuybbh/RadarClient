@@ -136,8 +136,7 @@ void CRCPoint::UseProgram()
 
 void CRCPoint::PrepareVBO()
 {
-	CreateSphereR1(4);
-	//CVec 
+	CreateSphereR1(2);
 }
 
 void CRCPoint::BuildVBO()
