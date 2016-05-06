@@ -138,8 +138,8 @@ extern "C"
 		}
 
 
-		int dataBlockCount = 0, latCount = 0, lonCount = 0;
-		int checksum = 0;
+		/*int dataBlockCount = 0, latCount = 0, lonCount = 0;
+		int checksum = 0;*/
 
 
 

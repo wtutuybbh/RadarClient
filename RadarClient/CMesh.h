@@ -36,8 +36,8 @@ PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB = NULL;			// VBO Deletion Procedure
 //#include "CScene.h"
 #include "FreeImage.h"
 #include "Util.h"
-#include <vector>
-#include "ShaderUtils.h"
+//#include <vector>
+//#include "ShaderUtils.h"
 
 class CScene;
 
@@ -87,7 +87,7 @@ public:
 	ImageMapHeader* iMapH;
 
 	glm::vec3 * m_Bounds;
-	glm::vec3 * CMesh::GetBounds();
+	glm::vec3 * CMesh::GetBounds() override;
 
 	void *bitmap;
 
@@ -109,7 +109,7 @@ public:
 	bool LoadHeightmap();
 	//bool PrepareAndBuildMinimapVBO();
 
-	void BindTextureImage();
+	void MiniMapBindTextureImage() override;
 
 	// Single Point Height
 	float PtHeight(int nX, int nY);
@@ -118,8 +118,8 @@ public:
 
 	ImageMapHeader* GetImageMapHeader(const char *imgFile, const char *datFile);
 
-	void Draw();
-	void DrawMiniMap();
+	void Draw(CCamera *cam) override;
+	void MiniMapDraw(CCamera *cam) override;
 };
 
 

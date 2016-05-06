@@ -7,8 +7,11 @@ typedef void(*LookAtCallback)(double eyex, double eyey, double eyez, double cent
 enum MovementType { FORWARD, BACKWARD, STRAFE_L, STRAFE_R };
 
 class CCamera {
-public:
+private:
 	glm::vec3 Position;
+	glm::vec3 Up0;
+public:
+	
 	glm::vec3 Direction;
 	glm::vec3 Up;
 	glm::vec2 startPosition, newPosition;
@@ -47,6 +50,8 @@ public:
 
 	glm::mat4 GetMiniMapView();
 	glm::mat4 GetMiniMapProjection();
+
+	glm::vec3 GetPosition();
 
 	float GetAzimut();
 

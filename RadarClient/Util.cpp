@@ -303,7 +303,7 @@ void DebugMessage(DebugWindowInfo *dwi, std::string Text)
 	SendMessage(dwi->Edit_hWnd, EM_REPLACESEL, 0, (LPARAM)Text.c_str());
 }
 #endif
-float minimum_distance(glm::vec3 v, glm::vec3 w, glm::vec3 p)
+float MinimumDistance(glm::vec3 v, glm::vec3 w, glm::vec3 p)
 {
 	// Return minimum distance between line segment vw and point p
 	const float l2 = glm::length2(w - v);  // i.e. |w-v|^2 -  avoid a sqrt

@@ -141,7 +141,7 @@ bool CScene::DrawScene()
 
 
 	//goto shader_debug;
-	mesh->Draw();
+	mesh->Draw(Camera);
 
 	
 	
@@ -214,7 +214,7 @@ bool CScene::DrawScene()
 	glEnable(GL_DEPTH_TEST);
 
 	if (UI->GetCheckboxState_Points()) {
-		CRCPoint::UseProgram();
+		CRCPoint::UseProgram_s();
 		/*for (int i = 0; i < Points.size(); i++) {
 			Points[i].Draw(Camera);
 		}*/
@@ -306,8 +306,8 @@ bool CScene::DrawScene()
 
 bool CScene::MiniMapDraw()
 {
-	mesh->DrawMiniMap();
-	MiniMapPointer->DrawMiniMap();
+	mesh->MiniMapDraw(Camera);
+	MiniMapPointer->MiniMapDraw(Camera);
 	return true;
 }
 
@@ -315,7 +315,7 @@ bool CScene::PrepareVBOs()
 {	
 	mesh->LoadHeightmap();
 
-	CRCPoint::PrepareVBO();
+	CRCPoint::PrepareVBO_s();
 
 	AxisGrid = new CVec[vertexCount];
 	
@@ -572,7 +572,7 @@ bool CScene::BuildVBOs()
 {
 	mesh->BuildVBOs();
 
-	CRCPoint::BuildVBO();
+	CRCPoint::BuildVBO_s();
 
 	if (AxisGrid && AxisGridColor) {
 		glGenBuffers(1, &AxisGrid_VBOName);
@@ -689,12 +689,13 @@ void CScene::ClearSectors()
 	SectorsCount = 0;
 }
 
-void CScene::SetCameraPositionFromMiniMapXY(float x, float y, float direction) /* x and y from -1 to 1 */
+void CScene::SetCameraPositionFromMiniMapXY(float x, float y, float direction) const
+/* x and y from -1 to 1 */
 {
 	glm::vec3 *b = mesh->GetBounds();
 	Camera->SetPositionXZ((b[0].x + b[1].x)/2 - x * (b[1].x - b[0].x)/2, (b[0].z + b[1].z) / 2 + y * (b[1].z - b[0].z) / 2);
 }
-C3DObject * CScene::GetObjectAtMiniMapPosition(float x, float y)
+C3DObject * CScene::GetObjectAtMiniMapPosition(float x, float y) const
 {
 	glm::vec3 orig(x, y, 1);
 	glm::vec3 dir(0, 0, 1);
@@ -704,7 +705,7 @@ C3DObject * CScene::GetObjectAtMiniMapPosition(float x, float y)
 	}
 	return NULL;
 }
-C3DObject * CScene::GetFirstObjectBetweenPoints(glm::vec3 p0, glm::vec3 p1)
+C3DObject * CScene::GetFirstObjectBetweenPoints(glm::vec3 p0, glm::vec3 p1) const
 {
 	/*if (MiniMapPointer->MiniMapIntersectLine(orig, dir, pos)) {
 		return MiniMapPointer;
@@ -724,11 +725,11 @@ C3DObject * CScene::GetFirstObjectBetweenPoints(glm::vec3 p0, glm::vec3 p1)
 	}
 	return p;
 }
-glm::vec2 CScene::CameraXYForMiniMap()
+glm::vec2 CScene::CameraXYForMiniMap() const
 {
 	glm::vec3 *b = mesh->GetBounds();
 	if (b) {
-		return glm::vec2(- 2 * (Camera->Position.x - b[0].x) / (b[1].x - b[0].x) + 1, -1 + 2 * (Camera->Position.z - b[0].z) / (b[1].z - b[0].z));
+		return glm::vec2(- 2 * (Camera->GetPosition().x - b[0].x) / (b[1].x - b[0].x) + 1, -1 + 2 * (Camera->GetPosition().z - b[0].z) / (b[1].z - b[0].z));
 	}
 	return glm::vec2(0);
 }

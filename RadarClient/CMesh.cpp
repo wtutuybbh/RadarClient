@@ -40,7 +40,7 @@ CMesh::CMesh(CScene *scn) : C3DObject(true)
 	this->scn = scn;
 	this->texsize = scn->texsize;
 
-	this->map[4] = (PtrToMethod)(&CMesh::BindTextureImage);
+	//this->MiniMapDrawMethodsSequence[4] = (PtrToMethod)(&CMesh::BindTextureImage);
 }
 
 CMesh :: ~CMesh()
@@ -131,7 +131,7 @@ ImageMapHeader* CMesh::GetImageMapHeader(const char *imgFile, const char *datFil
 
 	return iMapH;
 }
-void CMesh::Draw()
+void CMesh::Draw(CCamera *cam)
 {
 	glEnable(GL_DEPTH_TEST);									// Enable Depth Testing
 	glEnable(GL_TEXTURE_2D);
@@ -152,7 +152,7 @@ void CMesh::Draw()
 	glDisable(GL_TEXTURE_2D);
 }
 
-void CMesh::BindTextureImage()
+void CMesh::MiniMapBindTextureImage()
 {
 	int minimapTexSize = 512;
 
@@ -171,13 +171,13 @@ void CMesh::BindTextureImage()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
-void CMesh::DrawMiniMap()
+void CMesh::MiniMapDraw(CCamera *cam)
 {
 	if (!MiniMapVBOReady) {
 		MiniMapVBOReady = MiniMapPrepareAndBuildVBO("Minimap.v.glsl", "Minimap.f.glsl", NULL);
 	}	
 	
-	C3DObject::MiniMapDraw();
+	C3DObject::MiniMapDraw(cam);
 }
 AltitudeMapHeader* CMesh::GetAltitudeMapHeader(const char *fileName, double lon1, double lat1, double lon2, double lat2) {
 	HINSTANCE hDLL;               // Handle to DLL
@@ -349,7 +349,7 @@ bool CMesh::LoadHeightmap()
 
 	int nX, nZ, nTri, nIndex = 0;									// Create Variables
 	float flX, flZ;
-	char buff[100];
+//	char buff[100];
 	short maxheight = 0, minheight = 10000;
 	for (int i = 0; i < aMap->sizeX * aMap->sizeY; i++) {
 		if (aMap->data[i] > maxheight) maxheight = aMap->data[i];

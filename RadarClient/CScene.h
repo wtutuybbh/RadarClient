@@ -112,10 +112,10 @@ public:
 	void RefreshSector(RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init);
 	void ClearSectors();
 
-	void SetCameraPositionFromMiniMapXY(float x, float y, float direction);
+	void SetCameraPositionFromMiniMapXY(float x, float y, float direction) const;
 
-	C3DObject *GetObjectAtMiniMapPosition(float x, float y);
-	C3DObject *GetFirstObjectBetweenPoints(glm::vec3 p0, glm::vec3 p1);
+	C3DObject *GetObjectAtMiniMapPosition(float x, float y) const;
+	C3DObject *GetFirstObjectBetweenPoints(glm::vec3 p0, glm::vec3 p1) const;
 
-	glm::vec2 CameraXYForMiniMap();
+	glm::vec2 CameraXYForMiniMap() const;
 };

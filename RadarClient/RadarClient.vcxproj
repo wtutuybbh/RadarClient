@@ -193,6 +193,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="CMinimapPointer.cpp" />
     <ClCompile Include="CRCPoint.cpp" />
     <ClCompile Include="CRCSocket.cpp" />
+    <ClCompile Include="CTrack.cpp" />
     <ClCompile Include="CUserInterface.cpp" />
     <ClCompile Include="RadarClient.cpp" />
     <ClCompile Include="C3DObject.cpp" />
@@ -208,6 +209,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CMinimapPointer.h" />
     <ClInclude Include="CRCPoint.h" />
     <ClInclude Include="CRCSocket.h" />
+    <ClInclude Include="CTrack.h" />
     <ClInclude Include="CUserInterface.h" />
     <ClInclude Include="RadarClient.h" />
     <ClInclude Include="C3DObject.h" />

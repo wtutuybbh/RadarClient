@@ -57,7 +57,7 @@ public:
 
 	int DisplayPoints, DisplaySeries, DisplayRLIs, DisplayMap, DisplayLandscape;
 
-	C3DObject Get3DObject(int x, int y);
+	C3DObject* Get3DObject(int x, int y) const;
 
 	bool MakeCurrent();
 

@@ -53,6 +53,8 @@ void CCamera::SetAll(float eyex, float eyey, float eyez, float centerx, float ce
 	this->Direction = glm::vec3(centerx - eyex, centery - eyey, centerz - eyez);
 
 	this->Up = glm::vec3(upx, upy, upz);
+	this->Up0 = glm::vec3(0, 1, 0);
+
 
 	this->fovy = fovy;
 	this->aspect = aspect;
@@ -71,6 +73,13 @@ void CCamera::SetProjection(float fovy, float aspect, float zNear, float zFar)
 
 void CCamera::SetPosition(float x, float y, float z)
 {
+	/*glm::vec3 prod = glm::cross(glm::normalize(Up0), glm::normalize(GetDirection()));
+	if (glm::length(prod) < 0.000001) { //collinearity test
+		Up = glm::vec3(0, 0, 1);
+	}
+	else {
+		Up = glm::normalize(glm::normalize(GetDirection()) + Up0);
+	}*/
 	Position = glm::vec3(x, y, z);	
 }
 
@@ -139,11 +148,16 @@ glm::mat4 CCamera::GetMiniMapProjection()
 	return glm::ortho(-1, 1, -1, 1);
 }
 
+glm::vec3 CCamera::GetPosition()
+{
+	return Position;
+}
+
 float CCamera::GetAzimut()
 {
 	glm::vec3 dir = GetDirection();
 	float r = glm::length(dir);
-	return sgn(dir.x) *  acos(dir.z / sqrt(r*r - dir.y*dir.y));
+	return sgn(dir.x) *  acos(min(dir.z / sqrt(r*r - dir.y*dir.y), 1.0f));
 }
 
 glm::vec3 CCamera::GetDirection()

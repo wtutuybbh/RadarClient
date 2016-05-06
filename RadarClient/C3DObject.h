@@ -19,9 +19,8 @@ typedef void (C3DObject::*PtrToMethod)();
 
 typedef std::unordered_map<int, PtrToMethod> PtrToMethodMap;
 
-class CScene;
-class CVert;
-typedef CVert CVec;
+/*class CVert;
+typedef CVert CVec;*/
 class C3DObject
 {
 protected:
@@ -29,11 +28,15 @@ protected:
 	int VBOBufferSize;
 	unsigned int VBOName, VAOName;
 	GLuint ProgramID;
-	bool VBOReady;
+	bool VBOReady, VBOClearAfter;
+	unsigned int TextureId;
 
-	GLuint MVPUniformLoc;
-	GLuint NormUniformLoc;
+	FIBITMAP *Image;
+	char *ImgFile, *VShaderFile, *FShaderFile;
 
+	//PtrToMethodMap DrawMethodsSequence;
+
+	glm::mat4 Model, View, Proj, MVP;
 
 	std::vector<VBOData> MiniMapVBOBuffer;
 	int MiniMapVBOBufferSize;
@@ -44,38 +47,45 @@ protected:
 
 	FIBITMAP *MiniMapImage;
 
-	char *ImgFile, *VShaderFile, *FShaderFile;
+	char *MiniMapImgFile, *MiniMapVShaderFile, *MiniMapFShaderFile;
 
-	PtrToMethodMap map;
+	//PtrToMethodMap MiniMapDrawMethodsSequence;
 
 	glm::mat4 MiniMapModel, MiniMapView, MiniMapProj, MiniMapMVP;
 
-	glm::mat4 Model, View, Proj, MVP;
+	
 public:
 	CScene *Scene;
 	glm::vec4 Color;
 	C3DObject();
-	C3DObject(bool initMap);
-	~C3DObject();
+	explicit C3DObject(bool initMap);
+	virtual ~C3DObject();
 	virtual glm::vec3 * GetBounds();
 
 	glm::vec3 CartesianCoords, SphericalCoords;
 
-	bool MiniMapPrepareAndBuildVBO(const char * vShaderFile, const char * fShaderFile, const char * imgFile);
+	virtual bool MiniMapPrepareAndBuildVBO(const char * vShaderFile, const char * fShaderFile, const char * imgFile);
+	virtual void MiniMapBuildVBO();
+	virtual void MiniMapPrepareVBO();
+	virtual void MiniMapAttribBind();
+	virtual void MiniMapBindTextureImage();
+	virtual void MiniMapUnbindAll();
+	virtual void MiniMapCreateProgram();
+	virtual void MiniMapDraw(CCamera *cam);
 
-	void MiniMapBuildVBO();
-	void MiniMapPrepareVBO();
-	void MiniMapAttribBind();
-	void MiniMapBindTextureImage();
-	void MiniMapUnbindAll();
-	void MiniMapCreateProgram();
+	virtual bool PrepareAndBuildVBO(const char * vShaderFile, const char * fShaderFile, const char * imgFile);
+	virtual void BuildVBO();
+	virtual void PrepareVBO();
+	virtual void AttribBind();
+	virtual void BindTextureImage();
+	virtual void UnbindAll();
+	virtual void CreateProgram();
+	virtual void Draw(CCamera *cam);
 
-	void MiniMapDraw();
 
-	bool MiniMapIntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position);
-
-	bool IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position);
+	virtual bool MiniMapIntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position);
+	virtual bool IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position);
 	
-	float DistanceToLine(glm::vec3 p0, glm::vec3 p1);
+	virtual float DistanceToLine(glm::vec3 p0, glm::vec3 p1);
 };
 

@@ -158,7 +158,7 @@ ViewPortControl::~ViewPortControl()
 	Unregister();
 }
 
-C3DObject ViewPortControl::Get3DObject(int x, int y)
+C3DObject* ViewPortControl::Get3DObject(int x, int y) const
 {
 	glm::vec4 viewport = glm::vec4(0, 0, Width, Height);
 

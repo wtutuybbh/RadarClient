@@ -12,9 +12,9 @@ private:
 public:
 	glm::vec2 Position;
 	float Direction; //azimuth angle
-	void CMinimapPointer::DrawMiniMap();
-	void CMinimapPointer::BuildMinimapVBO();
-	CMinimapPointer(CScene *scene);
+	void CMinimapPointer::MiniMapDraw(CCamera *cam) override;
+	void CMinimapPointer::MiniMapBuildVBO() override;
+	explicit CMinimapPointer(CScene *scene);
 	~CMinimapPointer();
 
 };

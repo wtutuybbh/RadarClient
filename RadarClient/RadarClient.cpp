@@ -538,6 +538,7 @@ BOOL RegisterWindowClass(Application* application)						// Register A Window Cla
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	//MessageBox(HWND_DESKTOP, "Attach WinDbg and press OK", MB_OK, MB_ICONINFORMATION);
 	g_hIcon = NULL;
 
 	Application			application;									// Application Structure

@@ -43,11 +43,11 @@ public:
 	
 	CRCPoint(float y0, float mpph, float mppv, float r, float a, float e);
 	~CRCPoint();
-	static void LoadShaders();
-	static void UseProgram();
-	static void PrepareVBO();
-	static void BuildVBO();
-	void Draw(CCamera *cam);
+	static void LoadShaders_s();
+	static void UseProgram_s();
+	static void PrepareVBO_s();
+	static void BuildVBO_s();
+	void Draw(CCamera *cam) override;
 
 	glm::vec3 * GetBounds();
 

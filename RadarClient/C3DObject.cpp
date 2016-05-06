@@ -10,12 +10,12 @@ C3DObject::C3DObject()
 
 C3DObject::C3DObject(bool initMap)
 {
-	map.insert({ 0, (PtrToMethod)(&C3DObject::MiniMapCreateProgram) });
-	map.insert({ 1, (PtrToMethod)(&C3DObject::MiniMapBuildVBO) });
-	map.insert({ 2, (PtrToMethod)(&C3DObject::MiniMapPrepareVBO) });
-	map.insert({ 3, (PtrToMethod)(&C3DObject::MiniMapAttribBind) });
-	map.insert({ 4, (PtrToMethod)(&C3DObject::MiniMapBindTextureImage) });
-	map.insert({ 5, (PtrToMethod)(&C3DObject::MiniMapUnbindAll) });
+	/*MiniMapDrawMethodsSequence.insert({ 0, PtrToMethod(&C3DObject::MiniMapCreateProgram) });
+	MiniMapDrawMethodsSequence.insert({ 1, (PtrToMethod)(&C3DObject::MiniMapBuildVBO) });
+	MiniMapDrawMethodsSequence.insert({ 2, (PtrToMethod)(&C3DObject::MiniMapPrepareVBO) });
+	MiniMapDrawMethodsSequence.insert({ 3, (PtrToMethod)(&C3DObject::MiniMapAttribBind) });
+	MiniMapDrawMethodsSequence.insert({ 4, (PtrToMethod)(&C3DObject::MiniMapBindTextureImage) });
+	MiniMapDrawMethodsSequence.insert({ 5, (PtrToMethod)(&C3DObject::MiniMapUnbindAll) });*/
 	MiniMapVBOReady = false;
 	MiniMapProgramID = 0;
 	MiniMapVBOBuffer.clear(); //destroy all vbo buffer objects
@@ -25,7 +25,7 @@ C3DObject::C3DObject(bool initMap)
 }
 C3DObject::~C3DObject()
 {
-	map.clear();
+	/*MiniMapDrawMethodsSequence.clear();*/
 }
 
 glm::vec3 * C3DObject::GetBounds()
@@ -35,19 +35,19 @@ glm::vec3 * C3DObject::GetBounds()
 
 bool C3DObject::MiniMapPrepareAndBuildVBO(const char * vShaderFile, const char * fShaderFile, const char * imgFile)
 {
-	ImgFile = (char *)imgFile, VShaderFile = (char *)vShaderFile, FShaderFile = (char *)fShaderFile;
+	MiniMapImgFile = const_cast<char *>(imgFile), MiniMapVShaderFile = const_cast<char *>(vShaderFile), MiniMapFShaderFile = const_cast<char *>(fShaderFile);
 
-	/*CreateProgram();
-	BuildMinimapVBO();
+	MiniMapCreateProgram();
+	MiniMapBuildVBO();
+	MiniMapPrepareVBO();
 	MiniMapAttribBind();
-	BindTextureImage();
-	UnbindAll();*/
+	MiniMapBindTextureImage();
+	MiniMapUnbindAll();
 
-	C3DObject *obj = this;
-	for (PtrToMethodMap::iterator it = map.begin(); it != map.end(); ++it) {
+	/*C3DObject *obj = this;
+	for (PtrToMethodMap::iterator it = MiniMapDrawMethodsSequence.begin(); it != MiniMapDrawMethodsSequence.end(); ++it) {
 		CALL_MEMBER_FN(*obj, it->second)();
-	}
-	
+	}*/
 	return true;
 }
 
@@ -95,7 +95,7 @@ void C3DObject::MiniMapAttribBind()
 void C3DObject::MiniMapBindTextureImage()
 {
 	try {
-		MiniMapImage = FreeImage_Load(FreeImage_GetFileType(ImgFile, 0), ImgFile);
+		MiniMapImage = FreeImage_Load(FreeImage_GetFileType(MiniMapImgFile, 0), MiniMapImgFile);
 	}
 	catch (...) {
 		return;
@@ -145,11 +145,11 @@ void C3DObject::MiniMapUnbindAll()
 void C3DObject::MiniMapCreateProgram()
 {
 	if (!MiniMapProgramID) {
-		MiniMapProgramID = create_program(VShaderFile, FShaderFile);
+		MiniMapProgramID = create_program(MiniMapVShaderFile, MiniMapFShaderFile);
 	}
 }
 
-void C3DObject::MiniMapDraw()
+void C3DObject::MiniMapDraw(CCamera *cam)
 {
 	glUseProgram(MiniMapProgramID);
 	glBindVertexArray(MiniMapVAOName);
@@ -178,6 +178,39 @@ void C3DObject::MiniMapDraw()
 	glDrawArrays(GL_TRIANGLES, 0, MiniMapVBOBufferSize);
 	glBindVertexArray(0);
 	glUseProgram(0);
+}
+
+bool C3DObject::PrepareAndBuildVBO(const char* vShaderFile, const char* fShaderFile, const char* imgFile)
+{
+	return true;
+}
+
+void C3DObject::BuildVBO()
+{
+}
+
+void C3DObject::PrepareVBO()
+{
+}
+
+void C3DObject::AttribBind()
+{
+}
+
+void C3DObject::BindTextureImage()
+{
+}
+
+void C3DObject::UnbindAll()
+{
+}
+
+void C3DObject::CreateProgram()
+{
+}
+
+void C3DObject::Draw(CCamera* cam)
+{
 }
 
 bool C3DObject::MiniMapIntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position)
@@ -211,5 +244,5 @@ bool C3DObject::IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & pos
 
 float C3DObject::DistanceToLine(glm::vec3 p0, glm::vec3 p1)
 {
-	return minimum_distance(p0, p1, CartesianCoords);
+	return MinimumDistance(p0, p1, CartesianCoords);
 }

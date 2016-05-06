@@ -5,11 +5,11 @@ CMinimapPointer::CMinimapPointer(CScene *scene) : C3DObject::C3DObject(true)
 {	
 	//MiniMapVBOReady = false;
 	Scene = scene;
-	this->map[1] = (PtrToMethod)(&CMinimapPointer::BuildMinimapVBO); 
+//	this->MiniMapDrawMethodsSequence[1] = (PtrToMethod)(&CMinimapPointer::BuildMinimapVBO); 
 	MiniMapModel = glm::scale(glm::vec3(0.1, 0.05, 0.1));
 	MiniMapView = Scene->Camera->GetMiniMapView();
 	MiniMapProj = Scene->Camera->GetMiniMapProjection();
-	OutputDebugString("hello there");
+	//OutputDebugString("hello there");
 	MiniMapVBOClearAfter = false;
 }
 
@@ -18,20 +18,21 @@ CMinimapPointer::~CMinimapPointer()
 {
 }
 
-void CMinimapPointer::DrawMiniMap()
+void CMinimapPointer::MiniMapDraw(CCamera *cam)
 {
-	if (!C3DObject::MiniMapVBOReady) {
-		C3DObject::MiniMapVBOReady = MiniMapPrepareAndBuildVBO("MinimapPointer.v.glsl", "MinimapPointer.f.glsl", "video.png");
+	if (!MiniMapVBOReady) {
+		MiniMapVBOReady = MiniMapPrepareAndBuildVBO("MinimapPointer.v.glsl", "MinimapPointer.f.glsl", "video.png");
 	}
 
-	glm::mat4 rot = glm::rotate(Scene->Camera->GetAzimut() + (float)M_PI / 2, glm::vec3(0, 0, 1));
+	float azimut = cam->GetAzimut();
+	glm::mat4 rot = glm::rotate(azimut + (float)M_PI / 2, glm::vec3(0, 0, 1));
 
 	MiniMapModel = glm::translate(glm::vec3(Scene->CameraXYForMiniMap(), 0)) * rot * glm::scale(glm::vec3(0.1, 0.05, 0.1));
 
-	C3DObject::MiniMapDraw();
+	C3DObject::MiniMapDraw(cam);
 }
 
-void CMinimapPointer::BuildMinimapVBO()
+void CMinimapPointer::MiniMapBuildVBO()
 {
 	float t = 0.5f;
 	

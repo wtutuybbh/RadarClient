@@ -107,4 +107,4 @@ struct ZGNOTIFYSTRUCT {
 	int vkey;
 };
 
-float minimum_distance(glm::vec3 v, glm::vec3 w, glm::vec3 p);
+float MinimumDistance(glm::vec3 v, glm::vec3 w, glm::vec3 p);

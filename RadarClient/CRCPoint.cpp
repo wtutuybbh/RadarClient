@@ -120,28 +120,28 @@ CRCPoint::~CRCPoint()
 {
 }
 
-void CRCPoint::LoadShaders()
+void CRCPoint::LoadShaders_s()
 {
 	//GLuint CRCPoint::program;
 	ProgramID_s = create_program("CRCPoint.v.glsl", "CRCPoint.f.glsl");
 	
 }
 
-void CRCPoint::UseProgram()
+void CRCPoint::UseProgram_s()
 {
 	glUseProgram(ProgramID_s);
 
 	
 }
 
-void CRCPoint::PrepareVBO()
+void CRCPoint::PrepareVBO_s()
 {
 	CreateSphereR1(2);
 }
 
-void CRCPoint::BuildVBO()
+void CRCPoint::BuildVBO_s()
 {
-	CRCPoint::LoadShaders();
+	CRCPoint::LoadShaders_s();
 
 	glGenVertexArrays(1, &VAOName_s);
 	glBindVertexArray(VAOName_s);

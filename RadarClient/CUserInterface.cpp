@@ -146,13 +146,13 @@ LRESULT CUserInterface::RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM w
 	HWND hWnd = GetDlgItem(hwnd, ButtonID);
 
 	if (ButtonID == CameraPosition_ID[0]) { // FROM_RADAR
-		this->VPControl->Camera->Position = glm::vec3(0, this->VPControl->Scene->y0+1, 0);
+		this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->y0+1, 0);
 	}
 	if (ButtonID == CameraPosition_ID[1]) { // FROM_100M_ABOVE_RADAR
-		this->VPControl->Camera->Position = glm::vec3(0, this->VPControl->Scene->y0 + 100.0f / this->VPControl->Scene->mppv, 0);
+		this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->y0 + 100.0f / this->VPControl->Scene->mppv, 0);
 	}
 	if (ButtonID == CameraPosition_ID[2]) { // FROM_1000M_ABOVE_RADAR
-		this->VPControl->Camera->Position = glm::vec3(0, this->VPControl->Scene->y0 + 1000.0f / this->VPControl->Scene->mppv, 0);
+		this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->y0 + 1000.0f / this->VPControl->Scene->mppv, 0);
 	}
 
 	return LRESULT();
