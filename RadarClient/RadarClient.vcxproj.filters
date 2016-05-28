@@ -33,9 +33,6 @@
     <ClCompile Include="RadarClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ViewPortControl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CUserInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -57,6 +54,30 @@
     <ClCompile Include="CTrack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CViewPortControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C3DObjectVBO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C3DObjectTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C3DObjectProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CMarkup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CSector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CRImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CMesh.h">
@@ -75,9 +96,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RadarClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ViewPortControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CUserInterface.h">
@@ -107,6 +125,30 @@
     <ClInclude Include="CTrack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CViewPortControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C3DObjectVBO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C3DObjectTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C3DObjectProgram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CMarkup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CSector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CRImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
@@ -116,6 +158,12 @@
     <None Include="GLSL\CRCPoint.v.glsl" />
     <None Include="GLSL\MiniMapPointer.v.glsl" />
     <None Include="GLSL\MiniMapPointer.f.glsl" />
+    <None Include="GLSL\CMesh.frag" />
+    <None Include="GLSL\CMesh.vert" />
+    <None Include="GLSL\CMarkup.f.glsl" />
+    <None Include="GLSL\CMarkup.v.glsl" />
+    <None Include="GLSL\CSector.f.glsl" />
+    <None Include="GLSL\CSector.v.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RadarClient.rc">

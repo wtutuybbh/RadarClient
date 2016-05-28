@@ -2,18 +2,20 @@
 #include "CScene.h"
 #include "CCamera.h"
 
-bool CMinimap::IsCameraHere(int x, int y)
+bool CMinimap::IsCameraHere(int x, int y) const
 {
+	if (!Camera)
+		return false;
 	glm::vec4 viewport = glm::vec4(0, 0, Width, Height);
-	glm::vec3 wincoord = glm::vec3(x, Height - y - 1, 1.0f);
-	glm::vec3 objcoord = glm::unProject(wincoord, Camera->GetMiniMapView(), Camera->GetMiniMapProjection(), viewport);
+	glm::vec3 wincoord0 = glm::vec3(x, Height - y - 1, 0.0f);
+	glm::vec3 p0 = glm::unProject(wincoord0, Camera->GetMiniMapView(), Camera->GetMiniMapProjection(), viewport);
+	glm::vec3 wincoord1 = glm::vec3(x, Height - y - 1, 1.0f);
+	glm::vec3 p1 = glm::unProject(wincoord1, Camera->GetMiniMapView(), Camera->GetMiniMapProjection(), viewport);
 
-	if (Scene->GetObjectAtMiniMapPosition(objcoord.x, objcoord.y)) {
+	if (Scene->GetObjectAtMiniMapPosition(Id, p0, p1)) {
 		return true;
 	}
-	else {
-		return false;
-	}
+	return false;
 }
 
 void CMinimap::Draw()
@@ -21,7 +23,7 @@ void CMinimap::Draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if (Scene) {
-		Scene->MiniMapDraw();
+		Scene->MiniMapDraw(this);
 	}
 }
 
@@ -123,4 +125,22 @@ void CMinimap::ReshapeGL(int width, int height)
 		MakeCurrent();
 		glViewport(0, 0, (GLsizei)(width), (GLsizei)(height));
 	}
+}
+
+glm::mat4 CMinimap::GetProjMatrix() const
+{
+	if (Scene && Scene->Camera)
+	{
+		return Scene->Camera->GetMiniMapProjection();
+	}
+	return glm::mat4(1.0f);
+}
+
+glm::mat4 CMinimap::GetViewMatrix() const
+{
+	if (Scene && Scene->Camera)
+	{
+		return Scene->Camera->GetMiniMapView();
+	}
+	return glm::mat4(1.0f);
 }

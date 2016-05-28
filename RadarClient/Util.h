@@ -45,7 +45,7 @@ namespace rcutils {
 void BitmapString(float x, float y, float z, std::string s);
 void BitmapString2D(float x, float y, std::string s);
 
-class CVert														// Vertex Class
+/*class CVert														// Vertex Class
 {
 public:
 	float x;													// X Component
@@ -60,7 +60,7 @@ class CTexCoord													// Texture Coordinate Class
 public:
 	float u;													// U Component
 	float v;													// V Component
-};
+};*/
 
 class CColorRGBA {
 public:
@@ -108,3 +108,11 @@ struct ZGNOTIFYSTRUCT {
 };
 
 float MinimumDistance(glm::vec3 v, glm::vec3 w, glm::vec3 p);
+
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef max
+#define max(a,b)            (((a) > (b)) ? (a) : (b))
+#endif

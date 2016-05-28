@@ -1,7 +1,7 @@
 #pragma once
 #include "CUserInterface.h"
 #include "CRCSocket.h"
-#include "ViewPortControl.h"
+#include "CViewPortControl.h"
 #include "CCamera.h"
 #include "CScene.h"
 #include <CommCtrl.h>
@@ -10,6 +10,9 @@
 #include <iostream>
 #include <iomanip>
 #include "ZeeGrid.h"
+
+#include "Util.h"
+#include "CMesh.h"
 
 /*CUserInterface::CUserInterface()
 {
@@ -49,10 +52,81 @@ LRESULT CUserInterface::Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
 LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+#ifdef _DEBUG
+	std::stringstream s;
+	glm::vec4 radarPoint = glm::vec4(100, 200, 300, 1);
+	glm::vec4 radarPoint1 = radarPoint + glm::vec4(1, 0, 0, 0);
+	glm::vec4 radarPoint2 = radarPoint + glm::vec4(0, 1, 0, 0);
+	glm::vec4 radarPoint3 = radarPoint + glm::vec4(0, 0, 1, 0);
+	glm::mat4 mvp = VPControl->Camera->GetProjection() * VPControl->Camera->GetView();
+	glm::vec4 screenPoint = mvp * radarPoint;
+	glm::vec4 screenPoint1 = mvp * radarPoint1;
+	glm::vec4 screenPoint2 = mvp * radarPoint2;
+	glm::vec4 screenPoint3 = mvp * radarPoint3;
+	screenPoint = screenPoint / screenPoint.w;
+	screenPoint1 = screenPoint1 / screenPoint1.w;
+	screenPoint2 = screenPoint2 / screenPoint2.w;
+	screenPoint3 = screenPoint3 / screenPoint3.w;
+
+	glm::mat4 model1 = glm::scale(glm::vec3(1 / glm::distance(screenPoint, screenPoint1) / VPControl->Scene->height));
+	glm::mat4 model2 = glm::scale(glm::vec3(1 / glm::distance(screenPoint, screenPoint2) / VPControl->Scene->height));
+	glm::mat4 model3 = glm::scale(glm::vec3(1 / glm::distance(screenPoint, screenPoint3) / VPControl->Scene->height));
+
+	glm::mat4 model = glm::scale(glm::vec3(
+		1 / glm::distance(screenPoint, screenPoint1) / VPControl->Scene->height, 
+		1 / glm::distance(screenPoint, screenPoint2) / VPControl->Scene->height, 
+		1 / glm::distance(screenPoint, screenPoint3) / VPControl->Scene->height));
+
+	glm::vec4 screenPoint1_1 = VPControl->Camera->GetProjection() * VPControl->Camera->GetView() * model1 * radarPoint1;
+	screenPoint1_1 = screenPoint1_1 / screenPoint1_1.w;
+
+	glm::vec4 screenPoint2_1 = VPControl->Camera->GetProjection() * VPControl->Camera->GetView() * model2 * radarPoint2;
+	screenPoint2_1 = screenPoint2_1 / screenPoint2_1.w;
+
+	glm::vec4 screenPoint3_1 = VPControl->Camera->GetProjection() * VPControl->Camera->GetView() * model3 * radarPoint3;
+	screenPoint3_1 = screenPoint3_1 / screenPoint3_1.w;
+
+	glm::vec4 screenPoint1_2 = VPControl->Camera->GetProjection() * VPControl->Camera->GetView() * model * radarPoint1;
+	screenPoint1_2 = screenPoint1_2 / screenPoint1_2.w;
+
+	glm::vec4 screenPoint2_2 = VPControl->Camera->GetProjection() * VPControl->Camera->GetView() * model * radarPoint2;
+	screenPoint2_2 = screenPoint2_2 / screenPoint2_2.w;
+
+	glm::vec4 screenPoint3_2 = VPControl->Camera->GetProjection() * VPControl->Camera->GetView() * model * radarPoint3;
+	screenPoint3_2 = screenPoint3_2 / screenPoint3_2.w;
+
+	/*s << "(0, " << radarPoint.y << ", 0, 1) ->(" << screenPoint.x << ", " << screenPoint.y << ", " << screenPoint.z << ", " << screenPoint.w << ")";
+	DebugMessage(dwi, s.str());
+	s.str(std::string());*/
+	s << glm::distance(screenPoint, screenPoint1)*VPControl->Scene->height << " vs " << glm::distance(screenPoint, screenPoint1_1) * VPControl->Scene->height << " dist " << 1 / glm::length(VPControl->Camera->GetPosition()) << " test " << (1 / glm::distance(screenPoint, screenPoint1) / (glm::length(VPControl->Camera->GetPosition())));
+	DebugMessage(dwi, s.str());
+	s.str(std::string());
+	s << glm::distance(screenPoint, screenPoint2)*VPControl->Scene->height << " vs " << glm::distance(screenPoint, screenPoint2_1) * VPControl->Scene->height << " dist " << 1 / glm::length(VPControl->Camera->GetPosition()) << " test " << (1 / glm::distance(screenPoint, screenPoint2) / (glm::length(VPControl->Camera->GetPosition())));
+	DebugMessage(dwi, s.str());
+	s.str(std::string());
+	s << glm::distance(screenPoint, screenPoint3)*VPControl->Scene->height << " vs " << glm::distance(screenPoint, screenPoint3_1) * VPControl->Scene->height << " dist " << 1 / glm::length(VPControl->Camera->GetPosition()) << " test " << (1 / glm::distance(screenPoint, screenPoint3) / (glm::length(VPControl->Camera->GetPosition())));
+	DebugMessage(dwi, s.str());
+	s.str(std::string());
+	s << glm::distance(screenPoint, screenPoint1)*VPControl->Scene->height << " vs " << glm::distance(screenPoint, screenPoint1_2) * VPControl->Scene->height << " dist " << 1 / glm::length(VPControl->Camera->GetPosition()) << " test " << (1 / glm::distance(screenPoint, screenPoint1) / (glm::length(VPControl->Camera->GetPosition())));
+	DebugMessage(dwi, s.str());
+	s.str(std::string());
+	s << glm::distance(screenPoint, screenPoint2)*VPControl->Scene->height << " vs " << glm::distance(screenPoint, screenPoint2_2) * VPControl->Scene->height << " dist " << 1 / glm::length(VPControl->Camera->GetPosition()) << " test " << (1 / glm::distance(screenPoint, screenPoint2) / (glm::length(VPControl->Camera->GetPosition())));
+	DebugMessage(dwi, s.str());
+	s.str(std::string());
+	s << glm::distance(screenPoint, screenPoint3)*VPControl->Scene->height << " vs " << glm::distance(screenPoint, screenPoint3_2) * VPControl->Scene->height << " dist " << 1 / glm::length(VPControl->Camera->GetPosition()) << " test " << (1 / glm::distance(screenPoint, screenPoint3) / (glm::length(VPControl->Camera->GetPosition())));
+	DebugMessage(dwi, s.str());
+
+	
+#endif // _DEBUG
 	return LRESULT();
 }
 
 LRESULT CUserInterface::Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	return LRESULT();
+}
+
+LRESULT CUserInterface::InfoGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	return LRESULT();
 }
@@ -83,8 +157,7 @@ LRESULT CUserInterface::Button_Connect(HWND hwnd, UINT uMsg, WPARAM wParam, LPAR
 	if (Socket && !Socket->IsConnected)
 		Socket->Connect();
 	if (Socket && Socket->IsConnected)
-		Socket->Close();
-
+		Socket->Close();	
 	return LRESULT();
 }
 
@@ -129,14 +202,34 @@ LRESULT CUserInterface::Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam,
 	return LRESULT();
 }
 
-LRESULT CUserInterface::Checkbox_FixViewToRadar(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CUserInterface::Checkbox_MarkupOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int ButtonID = LOWORD(wParam);
 	HWND hWnd = GetDlgItem(hwnd, ButtonID);
 	int Checked = !Button_GetCheck(hWnd);
 	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
 
-	this->VPControl->Camera->FixViewOnRadar = Checked;
+	return LRESULT();
+}
+
+LRESULT CUserInterface::Checkbox_FixViewToRadar(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	int ButtonID = LOWORD(wParam);
+	HWND hWnd = GetDlgItem(hwnd, ButtonID);
+	int Checked = !Button_GetCheck(hWnd);
+	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
+	if (VPControl && VPControl->Camera)
+		this->VPControl->Camera->FixViewOnRadar = Checked;
+	return LRESULT();
+}
+
+LRESULT CUserInterface::Checkbox_MeasureDistance(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	int ButtonID = LOWORD(wParam);
+	HWND hWnd = GetDlgItem(hwnd, ButtonID);
+	int Checked = !Button_GetCheck(hWnd);
+	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
+
 	return LRESULT();
 }
 
@@ -144,17 +237,18 @@ LRESULT CUserInterface::RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM w
 {
 	int ButtonID = LOWORD(wParam);
 	HWND hWnd = GetDlgItem(hwnd, ButtonID);
-
-	if (ButtonID == CameraPosition_ID[0]) { // FROM_RADAR
-		this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->y0+1, 0);
+	if (VPControl && VPControl->Camera)
+	{
+		if (ButtonID == CameraPosition_ID[0]) { // FROM_RADAR
+			this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->y0 + 1, 0);
+		}
+		if (ButtonID == CameraPosition_ID[1]) { // FROM_100M_ABOVE_RADAR
+			this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->y0 + 100.0f / this->VPControl->Scene->mppv, 0);
+		}
+		if (ButtonID == CameraPosition_ID[2]) { // FROM_1000M_ABOVE_RADAR
+			this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->y0 + 1000.0f / this->VPControl->Scene->mppv, 0);
+		}
 	}
-	if (ButtonID == CameraPosition_ID[1]) { // FROM_100M_ABOVE_RADAR
-		this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->y0 + 100.0f / this->VPControl->Scene->mppv, 0);
-	}
-	if (ButtonID == CameraPosition_ID[2]) { // FROM_1000M_ABOVE_RADAR
-		this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->y0 + 1000.0f / this->VPControl->Scene->mppv, 0);
-	}
-
 	return LRESULT();
 }
 
@@ -165,8 +259,8 @@ LRESULT CUserInterface::Trackbar_CameraDirection_VTilt(HWND hwnd, UINT uMsg, WPA
 	int val = SendMessage(GetDlgItem(hwnd, ID), TBM_GETPOS, 0, 0);
 
 	SetDlgItemText(ParentHWND, CameraDirectionValue_ID[0], std::to_string(val).c_str());
-
-	VPControl->Camera->Direction = GetDirection();
+	if (VPControl && VPControl->Camera)
+		VPControl->Camera->Direction = GetDirection();
 
 	return LRESULT();
 }
@@ -177,13 +271,14 @@ LRESULT CUserInterface::Trackbar_CameraDirection_Turn(HWND hwnd, UINT uMsg, WPAR
 	int val = SendMessage(GetDlgItem(hwnd, ID), TBM_GETPOS, 0, 0);
 
 	SetDlgItemText(ParentHWND, CameraDirectionValue_ID[1], std::to_string(val).c_str());
-
-	VPControl->Camera->Direction = GetDirection();
+	
+	if (VPControl && VPControl->Camera)
+		VPControl->Camera->Direction = GetDirection();
 
 	return LRESULT();
 }
 //TRACKBAR_CLASS
-CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
+CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
 {
 
 	this->ParentHWND = parentHWND;
@@ -197,11 +292,12 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 
 	Column1X = 10;
 	PanelWidth = panelWidth;
-	Column2X = panelWidth / 2;
+	Column2X = panelWidth / 3;
+	Column3X = Column2X * 2;
 	VStep = 22;
 	VStepGrp = 30;
 	MinimapSize = PanelWidth - VStepGrp;
-	ButtonHeight = 20, ControlWidth = 110, ControlWidthL = 180, ControlWidthXL = 270;
+	ButtonHeight = 20, ControlWidth = Column2X - VStepGrp - VStep, ControlWidthL = Column2X - VStep, ControlWidthXL = Column3X;
 
 	int CurrentY = 0;
 
@@ -220,8 +316,12 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 
 	CurrentY += VStep+VStep;
 
-	FixViewToRadar_ID = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_FIXVIEWTORADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidthXL, ButtonHeight, &CUserInterface::Checkbox_FixViewToRadar);
+	FixViewToRadar_ID = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_FIXVIEWTORADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_FixViewToRadar);
+
+	MeasureDistance_ID = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_MEASURE_DISTANCE, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MeasureDistance);
 	
+	Test_ID = InsertElement(NULL, _T("BUTTON"), TEXT_BUTTON_TEST, WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Button_Test);
+
 	CurrentY += VStepGrp;
 
 	Button_Connect_ID = InsertElement(NULL, _T("BUTTON"), TEXT_BUTTON_CONNECT, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, Column1X, CurrentY, ControlWidthL, ButtonHeight, &CUserInterface::Button_Connect);
@@ -231,12 +331,15 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 
 	InsertElement(NULL, _T("STATIC"), TEXT_LABEL_SHOW, WS_VISIBLE | WS_CHILD, Column1X, CurrentY, ControlWidth, ButtonHeight, NULL);
 	InsertElement(NULL, _T("STATIC"), TEXT_LABEL_VIEW, WS_VISIBLE | WS_CHILD, Column2X, CurrentY, ControlWidth, ButtonHeight, NULL);
+	InsertElement(NULL, _T("STATIC"), TEXT_LABEL_MARKUP, WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth, ButtonHeight, NULL);
 	CurrentY += VStep;
 	ObjOptions_ID[0] = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_POINTS, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_ObjOptions);
 	MapOptions_ID[0] = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_LANDSCAPE, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MapOptions);
+	MarkupOptions_ID[0] = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_MARKUP_LINES, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column3X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MarkupOptions);
 	CurrentY += VStep;
 	ObjOptions_ID[1] = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_SERIES, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_ObjOptions);
 	MapOptions_ID[1] = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_MAP, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MapOptions);
+	MarkupOptions_ID[1] = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_MARKUP_LABELS, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column3X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MarkupOptions);
 	CurrentY += VStep;
 	ObjOptions_ID[2] = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_RLI, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_ObjOptions);
 	
@@ -258,7 +361,8 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 	GetClientRect(parentHWND, &clientRect);
 
 
-	Grid_ID = InsertElement(NULL, _T("ZeeGrid"), TEXT_GRID_NAME, WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX, gridY, vpControl->Width, clientRect.right - panelWidth, &CUserInterface::Grid);
+	Grid_ID = InsertElement(NULL, _T("ZeeGrid"), TEXT_GRID_NAME, WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX, gridY, 2 * vpControl->Width / 3, clientRect.right - panelWidth, &CUserInterface::Grid);
+	InfoGrid_ID = InsertElement(NULL, _T("ZeeGrid"), TEXT_INFOGRID_NAME, WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX + 2 * vpControl->Width / 3 + 2, gridY, vpControl->Width / 3 - 2, clientRect.right - panelWidth, &CUserInterface::InfoGrid);
 
 	
 	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
@@ -276,15 +380,17 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 			this);
 	}
 
-	SetChecked(ObjOptions_ID[0], 1);
+	SetChecked(ObjOptions_ID[0], 0);
 	SetChecked(ObjOptions_ID[1], 1);
 	SetChecked(MapOptions_ID[0], 1);
 	SetChecked(MapOptions_ID[1], 1);
+	SetChecked(MarkupOptions_ID[0], 1);
+	SetChecked(MarkupOptions_ID[1], 1);
 
 	SendMessage(GetDlgItem(parentHWND, CameraDirection_ID[0]), TBM_SETPOS, 1, 50);
 	SendMessage(GetDlgItem(parentHWND, CameraDirection_ID[1]), TBM_SETPOS, 1, 50);
 
-	ControlEnable(ObjOptions_ID[1], false);
+	//ControlEnable(ObjOptions_ID[1], false);
 	ControlEnable(ObjOptions_ID[2], false);
 
 
@@ -314,7 +420,7 @@ CUserInterface::CUserInterface(HWND parentHWND, ViewPortControl *vpControl, CRCS
 		SendMessage(it->second->hWnd, WM_SETFONT, (WPARAM)Font, TRUE);
 	}
 
-	hg = NULL;
+	GridHWND = InfoGridHWND = NULL;
 	InitGrid();
 }
 
@@ -330,7 +436,7 @@ CUserInterface::~CUserInterface()
 	}
 }
 
-void CUserInterface::ConnectionStateChanged(bool IsConnected)
+void CUserInterface::ConnectionStateChanged(bool IsConnected) const
 {
 	if (IsConnected) {
 		SetDlgItemText(ParentHWND, IsConnected_ID, TEXT_LABEL_CONNECTED);
@@ -342,9 +448,34 @@ void CUserInterface::ConnectionStateChanged(bool IsConnected)
 	}
 }
 
+bool CUserInterface::GetCheckboxState_Map()
+{
+	return Button_GetCheck(GetDlgItem(ParentHWND, MapOptions_ID[1]));
+}
+
+bool CUserInterface::GetCheckboxState_AltitudeMap()
+{
+	return Button_GetCheck(GetDlgItem(ParentHWND, MapOptions_ID[0]));
+}
+
+bool CUserInterface::GetCheckboxState_MarkupLines()
+{
+	return Button_GetCheck(GetDlgItem(ParentHWND, MarkupOptions_ID[0]));
+}
+
+bool CUserInterface::GetCheckboxState_MarkupLabels()
+{
+	return Button_GetCheck(GetDlgItem(ParentHWND, MarkupOptions_ID[1]));
+}
+
 bool CUserInterface::GetCheckboxState_Points()
 {
 	return Button_GetCheck(GetDlgItem(ParentHWND, ObjOptions_ID[0]));
+}
+
+bool CUserInterface::GetCheckboxState_Tracks()
+{
+	return Button_GetCheck(GetDlgItem(ParentHWND, ObjOptions_ID[1]));
 }
 
 int CUserInterface::GetTrackbarValue_VTilt()
@@ -371,7 +502,7 @@ void CUserInterface::SetTrackbarValue_Turn(int val)
 	SendMessage(GetDlgItem(ParentHWND, CameraDirection_ID[1]), TBM_SETPOS, 1, val);
 }
 
-void CUserInterface::ControlEnable(int ID, bool enable)
+void CUserInterface::ControlEnable(int ID, bool enable) const
 {
 	Button_Enable(GetDlgItem(ParentHWND, ID), enable);
 }
@@ -386,40 +517,57 @@ bool CUserInterface::IsVistaOrLater()
 	return (vi.dwPlatformId == VER_PLATFORM_WIN32_NT  &&  vi.dwMajorVersion >= 6);
 }
 
-void CUserInterface::Resize()
+void CUserInterface::Resize() const
 {
 	RECT clientRect;
 	GetClientRect(ParentHWND, &clientRect);
 	HWND gridHwnd = GetDlgItem(ParentHWND, Grid_ID);
-	MoveWindow(gridHwnd, PanelWidth, VPControl->Height + 2, VPControl->Width, clientRect.bottom - VPControl->Height - 2, TRUE);
+	MoveWindow(gridHwnd, PanelWidth, VPControl->Height + 2, 2* VPControl->Width / 3, clientRect.bottom - VPControl->Height - 2, TRUE);
+
+	gridHwnd = GetDlgItem(ParentHWND, InfoGrid_ID);
+	MoveWindow(gridHwnd, PanelWidth + 2* VPControl->Width / 3 + 2, VPControl->Height + 2, VPControl->Width / 3 - 2, clientRect.bottom - VPControl->Height - 2, TRUE);
 	//SetWindowPos(gridHwnd, NULL, PanelWidth, VPControl->Height + 2, VPControl->Width, clientRect.bottom - VPControl->Height - 2, 0);
 }
 
 void CUserInterface::InitGrid()
 {
-	if (!hg)
-		hg = GetDlgItem(ParentHWND, Grid_ID);
+	if (!GridHWND)
+		GridHWND = GetDlgItem(ParentHWND, Grid_ID);
+	if (!InfoGridHWND)
+		InfoGridHWND = GetDlgItem(ParentHWND, InfoGrid_ID);
 
-	SendMessage(hg, ZGM_SETFONT, 2, (LPARAM)Font);
+	SendMessage(GridHWND, ZGM_SETFONT, 2, (LPARAM)Font);
 
-	SendMessage(hg, ZGM_DIMGRID, 7, 0);
-	SendMessage(hg, ZGM_SHOWROWNUMBERS, TRUE, 0);
+
+	SendMessage(GridHWND, ZGM_DIMGRID, 7, 0);
+	SendMessage(GridHWND, ZGM_SHOWROWNUMBERS, TRUE, 0);
 
 	//set column header titles
-	SendMessage(hg, ZGM_SETCELLTEXT, 1, (LPARAM)"ID");
-	SendMessage(hg, ZGM_SETCELLTEXT, 2, (LPARAM)"Кол-во точек");
-	SendMessage(hg, ZGM_SETCELLTEXT, 3, (LPARAM)"Начальная точка");
-	SendMessage(hg, ZGM_SETCELLTEXT, 4, (LPARAM)"Конечная точка");
-	SendMessage(hg, ZGM_SETCELLTEXT, 5, (LPARAM)"Скорость");
-	SendMessage(hg, ZGM_SETCELLTEXT, 6, (LPARAM)"Азимут");
-	SendMessage(hg, ZGM_SETCELLTEXT, 7, (LPARAM)"Время");
+	SendMessage(GridHWND, ZGM_SETCELLTEXT, 1, (LPARAM)"ID");
+	SendMessage(GridHWND, ZGM_SETCELLTEXT, 2, (LPARAM)"Кол-во точек");
+	SendMessage(GridHWND, ZGM_SETCELLTEXT, 3, (LPARAM)"Начальная точка");
+	SendMessage(GridHWND, ZGM_SETCELLTEXT, 4, (LPARAM)"Конечная точка");
+	SendMessage(GridHWND, ZGM_SETCELLTEXT, 5, (LPARAM)"Скорость");
+	SendMessage(GridHWND, ZGM_SETCELLTEXT, 6, (LPARAM)"Азимут");
+	SendMessage(GridHWND, ZGM_SETCELLTEXT, 7, (LPARAM)"Время");
 
 
 	//make column 3 editable by the user
-	//SendMessage(hg, ZGM_SETCOLEDIT, 3, 1);
+	//SendMessage(GridHWND, ZGM_SETCOLEDIT, 3, 1);
 
 	//auto size all columns
-	SendMessage(hg, ZGM_AUTOSIZE_ALL_COLUMNS, 0, 0);
+	SendMessage(GridHWND, ZGM_AUTOSIZE_ALL_COLUMNS, 0, 0);
+
+
+
+	SendMessage(InfoGridHWND, ZGM_SETFONT, 2, (LPARAM)Font);
+	SendMessage(InfoGridHWND, ZGM_DIMGRID, 2, 0);
+	SendMessage(InfoGridHWND, ZGM_SHOWROWNUMBERS, FALSE, 0);
+	SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, 1, (LPARAM)"Параметр");
+	SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, 2, (LPARAM)"Значение");
+	SendMessage(InfoGridHWND, ZGM_AUTOSIZE_ALL_COLUMNS, 0, 0);
+	
+	FillInfoGrid(NULL);
 }
 
 HFONT CUserInterface::GetFont()
@@ -445,43 +593,100 @@ HFONT CUserInterface::GetFont()
 
 void CUserInterface::FillGrid(vector<TRK*> *tracks)
 {
-	if (!hg)
-		hg = GetDlgItem(ParentHWND, Grid_ID);
-	int nrows = SendMessage(hg, ZGM_GETROWS, 0, 0);
-	int ncols = SendMessage(hg, ZGM_GETCOLS, 0, 0);
+	if (!GridHWND)
+		GridHWND = GetDlgItem(ParentHWND, Grid_ID);
+	int nrows = SendMessage(GridHWND, ZGM_GETROWS, 0, 0);
+	int ncols = SendMessage(GridHWND, ZGM_GETCOLS, 0, 0);
 	int i = 0;
 	int npoints;
 	std::stringstream ss;
 	for (i = 0; i < tracks->size(); i++) {
 		if (i>nrows)
-			SendMessage(hg, ZGM_APPENDROW, 0, 0);
+			SendMessage(GridHWND, ZGM_APPENDROW, 0, 0);
 		int offset = ncols*(i + 1);
-		SendMessage(hg, ZGM_SETCELLINT, offset + 1, (LPARAM)&(tracks->at(i)->id));
+		SendMessage(GridHWND, ZGM_SETCELLINT, offset + 1, (LPARAM)&(tracks->at(i)->id));
 
 		npoints = tracks->at(i)->P.size();
-		SendMessage(hg, ZGM_SETCELLINT, offset + 2, (LPARAM)&npoints);
+		SendMessage(GridHWND, ZGM_SETCELLINT, offset + 2, (LPARAM)&npoints);
 
 		ss.str(std::string());
 		ss << std::fixed << std::setprecision(4) << tracks->at(i)->P.at(0).X << "," << tracks->at(i)->P.at(0).Y;
-		SendMessage(hg, ZGM_SETCELLTEXT, offset + 3, (LPARAM)ss.str().c_str());
+		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 3, (LPARAM)ss.str().c_str());
 		
 		ss.str(std::string());
 		ss << std::fixed << std::setprecision(4) << tracks->at(i)->P.at(npoints-1).X << "," << tracks->at(i)->P.at(npoints - 1).Y;
-		SendMessage(hg, ZGM_SETCELLTEXT, offset + 4, (LPARAM)ss.str().c_str());
+		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 4, (LPARAM)ss.str().c_str());
 
 		ss.str(std::string());
 		glm::vec3 speed(tracks->at(i)->P.at(npoints - 1).vX, tracks->at(i)->P.at(npoints - 1).vY, tracks->at(i)->P.at(npoints - 1).vZ);
 		ss << std::fixed << std::setprecision(4) <<  glm::length(speed);
-		SendMessage(hg, ZGM_SETCELLTEXT, offset + 5, (LPARAM)ss.str().c_str());
+		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 5, (LPARAM)ss.str().c_str());
 
 		/*
-		SendMessage(hg, ZGM_SETCELLTEXT, offset + 6, (LPARAM)"Азимут");
-		SendMessage(hg, ZGM_SETCELLTEXT, offset + 7, (LPARAM)"Время");*/
+		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 6, (LPARAM)"Азимут");
+		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 7, (LPARAM)"Время");*/
 	}
 	for (; i < nrows; i++) {
-		SendMessage(hg, ZGM_DELETEROW, i, 0);
+		SendMessage(GridHWND, ZGM_DELETEROW, i, 0);
 	}
-	SendMessage(hg, ZGM_AUTOSIZE_ALL_COLUMNS, 0, 0);
+	SendMessage(GridHWND, ZGM_AUTOSIZE_ALL_COLUMNS, 0, 0);
 }
 
+void CUserInterface::FillInfoGrid(CScene* scene)
+{
+	if (!scene)
+	{
+		return;
+	}
+	if (!InfoGridHWND)
+		InfoGridHWND = GetDlgItem(ParentHWND, InfoGrid_ID);
+	int nrows = SendMessage(InfoGridHWND, ZGM_GETROWS, 0, 0);
+	int ncols = SendMessage(InfoGridHWND, ZGM_GETCOLS, 0, 0);
 
+	SendMessage(InfoGridHWND, ZGM_EMPTYGRID, 1, 0);
+
+	/*int N = 2;
+
+	if (scene->Socket->IsConnected)
+	{
+		N += 7;
+	}
+
+	N += scene->Selection.size();*/
+	
+	/*for (int i = nrows; i < N; i++)
+	{
+		SendMessage(InfoGridHWND, ZGM_APPENDROW, 0, 0);
+	}*/
+	
+	std::stringstream ss;
+	int r = 1;
+	SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 1, (LPARAM)"Местоположение радара");
+	ss.str(std::string());
+	ss << std::fixed << std::setprecision(4) << scene->geocenter.x << ", " << scene->geocenter.y;
+	SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, (LPARAM)ss.str().c_str());
+
+	if (scene->Socket->IsConnected) {
+		r++;
+		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 1, (LPARAM)"Угол места, от");
+		ss.str(std::string());
+		ss << std::fixed << std::setprecision(4) << scene->minE;
+		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, (LPARAM)ss.str().c_str());
+
+		r++;
+		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 1, (LPARAM)"Угол места, до");
+		ss.str(std::string());
+		ss << std::fixed << std::setprecision(4) << scene->maxE;
+		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, (LPARAM)ss.str().c_str());
+
+		
+	}
+
+	SendMessage(InfoGridHWND, ZGM_AUTOSIZE_ALL_COLUMNS, 0, 0);
+}
+
+bool CUserInterface::MeasureDistance() const
+{
+	HWND hWnd = GetDlgItem(ParentHWND, MeasureDistance_ID);
+	return Button_GetCheck(hWnd);
+}

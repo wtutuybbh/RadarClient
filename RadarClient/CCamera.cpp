@@ -8,9 +8,20 @@
 
 CCamera::CCamera() //empty constructor. camera depends on scene, scene depends on camera... oh shit!
 {
+	flag0 = 1;
+
+	left = -1;
+	right = 1;
+	bottom = -1;
+	top = 1;
+	znear = -1;
+	zfar = 15000;
+	mmPosition = glm::vec3(0.0f, 1000.0f, 0.0f);
+	mmTo = glm::vec3(0.0f, 0.0f, 0.0f);
+	mmUp = glm::vec3(0.0f, 0.0f, 1.0f);
 }
 
-CCamera::CCamera(float eyex, float eyey, float eyez, float centerx, float centery, float centerz, float upx, float upy, float upz,
+/*CCamera::CCamera(float eyex, float eyey, float eyez, float centerx, float centery, float centerz, float upx, float upy, float upz,
 	float fovy, float aspect, float zNear, float zFar, 
 	float speed, LookAtCallback lookAt) {
 	
@@ -35,7 +46,7 @@ CCamera::CCamera(float eyex, float eyey, float eyez, float centerx, float center
 	Speed = speed;
 
 	
-}
+}*/
 
 CCamera::~CCamera() {
 
@@ -104,9 +115,18 @@ void CCamera::Rotate(float amount, glm::vec3& axis)
 	Direction = glm::rotate(Direction, amount * Speed, axis);
 }
 
-void CCamera::Translate(glm::vec3 & direction)
+void CCamera::Move(glm::vec3 const & direction, bool preserveDirection)
 {
-	Position += direction;
+	if (!preserveDirection) {
+		glm::vec3 to = Position + GetDirection();
+		Position += direction;
+		Direction = to - Position;
+	}
+	else 
+	{
+		Position += direction;
+	}
+
 }
 
 void CCamera::ApplyMovement(MovementType movement)
@@ -139,13 +159,20 @@ glm::mat4 CCamera::GetProjection()
 }
 
 glm::mat4 CCamera::GetMiniMapView()
-{
-	return glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+{	
+	return glm::lookAt(mmPosition, mmTo, mmUp);
+
+	return glm::lookAt(glm::vec3(0.0f, 1000.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 glm::mat4 CCamera::GetMiniMapProjection()
 {
-	return glm::ortho(-1, 1, -1, 1);
+	if (flag0 == 0) {
+		return glm::ortho(-1, 1, -1, 1);
+	}
+	else {
+		return glm::ortho(-MeshSize.x/2, MeshSize.x/2, -MeshSize.z/2, MeshSize.z/2, znear, zfar);
+	}
 }
 
 glm::vec3 CCamera::GetPosition()

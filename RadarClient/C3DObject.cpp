@@ -2,20 +2,23 @@
 #include "C3DObject.h"
 #include "glm/glm.hpp"
 #include "glm/gtx/intersect.hpp"
+#include "CUserInterface.h"
+#include "CViewPortControl.h"
+#include "C3DObjectProgram.h"
+#include "ShaderUtils.h"
 
-
-C3DObject::C3DObject()
+old_C3DObject::old_C3DObject()
 {
 }
 
-C3DObject::C3DObject(bool initMap)
+old_C3DObject::old_C3DObject(bool initMap)
 {
-	/*MiniMapDrawMethodsSequence.insert({ 0, PtrToMethod(&C3DObject::MiniMapCreateProgram) });
-	MiniMapDrawMethodsSequence.insert({ 1, (PtrToMethod)(&C3DObject::MiniMapBuildVBO) });
-	MiniMapDrawMethodsSequence.insert({ 2, (PtrToMethod)(&C3DObject::MiniMapPrepareVBO) });
-	MiniMapDrawMethodsSequence.insert({ 3, (PtrToMethod)(&C3DObject::MiniMapAttribBind) });
-	MiniMapDrawMethodsSequence.insert({ 4, (PtrToMethod)(&C3DObject::MiniMapBindTextureImage) });
-	MiniMapDrawMethodsSequence.insert({ 5, (PtrToMethod)(&C3DObject::MiniMapUnbindAll) });*/
+	/*MiniMapDrawMethodsSequence.insert({ 0, PtrToMethod(&old_C3DObject::MiniMapCreateProgram) });
+	MiniMapDrawMethodsSequence.insert({ 1, (PtrToMethod)(&old_C3DObject::MiniMapBuildVBO) });
+	MiniMapDrawMethodsSequence.insert({ 2, (PtrToMethod)(&old_C3DObject::MiniMapPrepareVBO) });
+	MiniMapDrawMethodsSequence.insert({ 3, (PtrToMethod)(&old_C3DObject::MiniMapAttribBind) });
+	MiniMapDrawMethodsSequence.insert({ 4, (PtrToMethod)(&old_C3DObject::MiniMapBindTextureImage) });
+	MiniMapDrawMethodsSequence.insert({ 5, (PtrToMethod)(&old_C3DObject::MiniMapUnbindAll) });*/
 	MiniMapVBOReady = false;
 	MiniMapProgramID = 0;
 	MiniMapVBOBuffer.clear(); //destroy all vbo buffer objects
@@ -23,17 +26,17 @@ C3DObject::C3DObject(bool initMap)
 
 	MiniMapVBOClearAfter = true;
 }
-C3DObject::~C3DObject()
+old_C3DObject::~old_C3DObject()
 {
 	/*MiniMapDrawMethodsSequence.clear();*/
 }
 
-glm::vec3 * C3DObject::GetBounds()
+glm::vec3 * old_C3DObject::GetBounds()
 {
 	return nullptr;
 }
 
-bool C3DObject::MiniMapPrepareAndBuildVBO(const char * vShaderFile, const char * fShaderFile, const char * imgFile)
+bool old_C3DObject::MiniMapPrepareAndBuildVBO(const char * vShaderFile, const char * fShaderFile, const char * imgFile)
 {
 	MiniMapImgFile = const_cast<char *>(imgFile), MiniMapVShaderFile = const_cast<char *>(vShaderFile), MiniMapFShaderFile = const_cast<char *>(fShaderFile);
 
@@ -44,14 +47,14 @@ bool C3DObject::MiniMapPrepareAndBuildVBO(const char * vShaderFile, const char *
 	MiniMapBindTextureImage();
 	MiniMapUnbindAll();
 
-	/*C3DObject *obj = this;
+	/*old_C3DObject *obj = this;
 	for (PtrToMethodMap::iterator it = MiniMapDrawMethodsSequence.begin(); it != MiniMapDrawMethodsSequence.end(); ++it) {
 		CALL_MEMBER_FN(*obj, it->second)();
 	}*/
 	return true;
 }
 
-void C3DObject::MiniMapBuildVBO()
+void old_C3DObject::MiniMapBuildVBO()
 {
 	MiniMapVBOBuffer.push_back({ glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 	MiniMapVBOBuffer.push_back({ glm::vec4(-1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
@@ -63,7 +66,7 @@ void C3DObject::MiniMapBuildVBO()
 
 	MiniMapVBOBufferSize = MiniMapVBOBuffer.size();
 }
-void C3DObject::MiniMapPrepareVBO()
+void old_C3DObject::MiniMapPrepareVBO()
 {
 	glGenVertexArrays(1, &MiniMapVAOName);
 	glBindVertexArray(MiniMapVAOName);
@@ -77,7 +80,7 @@ void C3DObject::MiniMapPrepareVBO()
 		std::vector<VBOData>().swap(MiniMapVBOBuffer); //free memory used by vector itself
 	}
 }
-void C3DObject::MiniMapAttribBind()
+void old_C3DObject::MiniMapAttribBind()
 {
 	GLuint vertex_attr_loc;
 	GLuint texcoor_attr_loc;
@@ -92,7 +95,7 @@ void C3DObject::MiniMapAttribBind()
 	glEnableVertexAttribArray(texcoor_attr_loc);
 }
 
-void C3DObject::MiniMapBindTextureImage()
+void old_C3DObject::MiniMapBindTextureImage()
 {
 	try {
 		MiniMapImage = FreeImage_Load(FreeImage_GetFileType(MiniMapImgFile, 0), MiniMapImgFile);
@@ -135,21 +138,21 @@ void C3DObject::MiniMapBindTextureImage()
 	delete bits;
 }
 
-void C3DObject::MiniMapUnbindAll()
+void old_C3DObject::MiniMapUnbindAll()
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
 
-void C3DObject::MiniMapCreateProgram()
+void old_C3DObject::MiniMapCreateProgram()
 {
 	if (!MiniMapProgramID) {
 		MiniMapProgramID = create_program(MiniMapVShaderFile, MiniMapFShaderFile);
 	}
 }
 
-void C3DObject::MiniMapDraw(CCamera *cam)
+void old_C3DObject::MiniMapDraw(CCamera *cam)
 {
 	glUseProgram(MiniMapProgramID);
 	glBindVertexArray(MiniMapVAOName);
@@ -160,7 +163,6 @@ void C3DObject::MiniMapDraw(CCamera *cam)
 
 	int iSamplerLoc = glGetUniformLocation(MiniMapProgramID, "tex");
 	glUniform1i(iSamplerLoc, 0);
-
 	
 	//mvp = cam->GetProjection() * mv;
 	//norm = glm::mat3(glm::transpose(glm::inverse(mv)));
@@ -168,7 +170,7 @@ void C3DObject::MiniMapDraw(CCamera *cam)
 
 	int mvpUniformLoc = glGetUniformLocation(MiniMapProgramID, "mvp");
 	//int normUniformLoc = glGetUniformLocation(MiniMapProgramID, "norm");
-	MiniMapMVP = MiniMapProj * MiniMapView * MiniMapModel;
+	MiniMapMVP = cam->GetMiniMapProjection() * cam->GetMiniMapView() * MiniMapModel;
 	glUniformMatrix4fv(mvpUniformLoc, 1, GL_FALSE, glm::value_ptr(MiniMapMVP));
 	//glUniformMatrix3fv(normUniformLoc, 1, GL_FALSE, glm::value_ptr(norm));
 	
@@ -180,43 +182,43 @@ void C3DObject::MiniMapDraw(CCamera *cam)
 	glUseProgram(0);
 }
 
-bool C3DObject::PrepareAndBuildVBO(const char* vShaderFile, const char* fShaderFile, const char* imgFile)
+bool old_C3DObject::PrepareAndBuildVBO(const char* vShaderFile, const char* fShaderFile, const char* imgFile)
 {
 	return true;
 }
 
-void C3DObject::BuildVBO()
+void old_C3DObject::BuildVBO()
 {
 }
 
-void C3DObject::PrepareVBO()
+void old_C3DObject::PrepareVBO()
 {
 }
 
-void C3DObject::AttribBind()
+void old_C3DObject::AttribBind()
 {
 }
 
-void C3DObject::BindTextureImage()
+void old_C3DObject::BindTextureImage()
 {
 }
 
-void C3DObject::UnbindAll()
+void old_C3DObject::UnbindAll()
 {
 }
 
-void C3DObject::CreateProgram()
+void old_C3DObject::CreateProgram()
 {
 }
 
-void C3DObject::Draw(CCamera* cam)
+void old_C3DObject::Draw(CCamera* cam)
 {
 }
 
-bool C3DObject::MiniMapIntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position)
+bool old_C3DObject::MiniMapIntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position)
 {
 	glm::vec3 vert0, vert1, vert2;
-	for (int i = 0; i < MiniMapVBOBuffer.size(); i += 3) {
+	for (unsigned int i = 0; i < MiniMapVBOBuffer.size(); i += 3) {
 		vert0 = glm::vec3(MiniMapModel*MiniMapVBOBuffer[i].vert);
 		vert1 = glm::vec3(MiniMapModel*MiniMapVBOBuffer[i + 1].vert);
 		vert2 = glm::vec3(MiniMapModel*MiniMapVBOBuffer[i + 2].vert);
@@ -227,10 +229,10 @@ bool C3DObject::MiniMapIntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec
 	return false;
 }
 
-bool C3DObject::IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position)
+bool old_C3DObject::IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position)
 {
 	glm::vec3 vert0, vert1, vert2;
-	for (int i = 0; i < VBOBuffer.size(); i += 3) {
+	for (unsigned int i = 0; i < VBOBuffer.size(); i += 3) {
 		vert0 = glm::vec3(Model*VBOBuffer[i].vert);
 		vert1 = glm::vec3(Model*VBOBuffer[i + 1].vert);
 		vert2 = glm::vec3(Model*VBOBuffer[i + 2].vert);
@@ -242,7 +244,221 @@ bool C3DObject::IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & pos
 	return false;
 }
 
-float C3DObject::DistanceToLine(glm::vec3 p0, glm::vec3 p1)
+float old_C3DObject::DistanceToLine(glm::vec3 p0, glm::vec3 p1)
 {
 	return MinimumDistance(p0, p1, CartesianCoords);
+}
+
+float old_C3DObject::DistanceToPoint(glm::vec3 p)
+{
+	return glm::distance(p, CartesianCoords);
+}
+
+void old_C3DObject::SetColor(glm::vec4 color)
+{
+	Color = color;
+}
+
+//void old_C3DObject::SelectObject(CUserInterface * ui)
+//{
+//}
+
+glm::mat4 old_C3DObject::GetModelMatrix(CScene* scn)
+{
+	return Scale * Rotate * Translate;
+}
+
+void C3DObjectModel::SetCartesianCoordinates(glm::vec4 c)
+{
+	cartesianCoords = glm::vec3(c);
+}
+
+void C3DObjectModel::SetCartesianCoordinates(glm::vec3 c)
+{
+	cartesianCoords = c;
+}
+
+void C3DObjectModel::SetCartesianCoordinates(float x, float y, float z)
+{
+	cartesianCoords = glm::vec3(x, y, z);
+}
+
+C3DObjectModel::C3DObjectModel(int vpId, C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObjectProgram* prog)
+{
+	this->vbo.insert_or_assign(vpId, vbo);
+	this->tex.insert_or_assign(vpId, tex);
+	this->prog.insert_or_assign(vpId, prog);
+
+	translateMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
+	scaleMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
+	rotateMatrix.insert_or_assign(vpId, glm::mat4(1.0f));	
+}
+
+C3DObjectModel::C3DObjectModel(C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObjectProgram* prog)
+{
+	this->vbo.insert_or_assign(Main, vbo);
+	this->tex.insert_or_assign(Main, tex);
+	this->prog.insert_or_assign(Main, prog);
+
+	this->vbo.insert_or_assign(MiniMap, vbo ? vbo->Clone() : NULL);
+	this->tex.insert_or_assign(MiniMap, tex ? tex->Clone() : NULL);
+	this->prog.insert_or_assign(MiniMap, prog ? prog->Clone() : NULL);
+
+	translateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
+	scaleMatrix.insert_or_assign(Main, glm::mat4(1.0f));
+	rotateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
+
+	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+}
+
+C3DObjectModel::~C3DObjectModel()
+{
+}
+
+void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)
+{
+	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
+	C3DObjectProgram *prog_ = prog.at(vpControl->Id);
+	C3DObjectTexture *tex_ = tex.at(vpControl->Id);
+
+	if(vbo_ && !vbo_->Ready())
+	{
+		if (!vbo_->HasBuffer())
+			return;
+		if (prog_) prog_->CreateProgram();
+		vbo_->LoadToGPU();
+		if (prog_) prog_->Bind();
+		if (tex_) {
+			tex_->LoadToGPU();
+			tex_->UnBind();
+		}
+		vbo_->UnBind();
+	}
+
+	if (prog_)
+		prog_->UseProgram();
+	if (vbo_) {
+		vbo_->Bind();
+		if (vbo_->NeedsReload)
+			vbo_->Reload();
+	}
+
+	if (tex_)
+		tex_->Bind(prog_->ProgramId);
+
+	BindUniforms(vpControl);
+	
+	if (vbo_)
+		vbo_->Draw(mode);
+
+	if (vbo_)
+		vbo_->UnBind();
+	
+	if (prog_)
+		prog_->DoNotUseProgram();
+}
+
+void C3DObjectModel::BindUniforms(CViewPortControl* vpControl)
+{
+	if (prog.at(vpControl->Id)) {
+		int mvpUniformLoc = prog.at(vpControl->Id)->GetUniformLocation("mvp");
+		glm::mat4 mvp = vpControl->GetProjMatrix() * vpControl->GetViewMatrix() * GetModelMatrix(vpControl);
+		glUniformMatrix4fv(mvpUniformLoc, 1, GL_FALSE, glm::value_ptr(mvp));
+	}
+}
+
+glm::mat4 C3DObjectModel::GetModelMatrix(CViewPortControl* vpControl)
+{
+	glm::mat4 mMatrix = GetTranslateMatrix(vpControl) * GetRotateMatrix(vpControl) * GetScaleMatrix(vpControl);
+	modelMatrix.insert_or_assign(vpControl->Id, mMatrix);
+	return mMatrix;
+}
+
+glm::mat4 C3DObjectModel::GetScaleMatrix(CViewPortControl* vpControl)
+{
+	return scaleMatrix.at(vpControl->Id);
+	try
+	{
+		return scaleMatrix.at(vpControl->Id);
+	}
+	catch (...)
+	{
+		return glm::mat4(1.0f);
+	}
+}
+
+glm::mat4 C3DObjectModel::GetRotateMatrix(CViewPortControl* vpControl)
+{
+	return rotateMatrix.at(vpControl->Id);
+	try 
+	{	
+		return rotateMatrix.at(vpControl->Id);
+	}
+	catch (...)
+	{
+		return glm::mat4(1.0f);
+	}
+}
+
+glm::mat4 C3DObjectModel::GetTranslateMatrix(CViewPortControl* vpControl)
+{
+	return translateMatrix.at(vpControl->Id);
+	try {
+		return translateMatrix.at(vpControl->Id);
+	}
+	catch (...)
+	{
+		return glm::mat4(1.0f);
+	}
+}
+
+bool C3DObjectModel::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, glm::vec3& position)
+{
+	try {
+		glm::vec3 vert0, vert1, vert2;
+		std::vector<VBOData> buffer = *vbo.at(vpId)->GetBuffer();
+
+		for (unsigned int i = 0; i < buffer.size(); i += 3) {
+			vert0 = glm::vec3(modelMatrix.at(vpId)*buffer[i].vert);
+			vert1 = glm::vec3(modelMatrix.at(vpId)*buffer[i + 1].vert);
+			vert2 = glm::vec3(modelMatrix.at(vpId)*buffer[i + 2].vert);
+			if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, position)) {
+				return true;
+			}
+		}
+	}
+	catch (...) {
+		return false;
+	}
+	return false;
+}
+
+float C3DObjectModel::DistanceToLine(glm::vec3 p0, glm::vec3 p1)
+{
+	return MinimumDistance(p0, p1, cartesianCoords);
+}
+
+float C3DObjectModel::DistanceToPoint(glm::vec3 p)
+{
+	return glm::distance(p, cartesianCoords);
+}
+
+void C3DObjectModel::SelectObject(CUserInterface* ui)
+{
+}
+
+void C3DObjectModel::Init(int vpId)
+{
+}
+
+glm::vec3* C3DObjectModel::GetBounds()
+{
+	return NULL;
+}
+
+void C3DObjectModel::SetColor(glm::vec4 color)
+{
+	Color = color;
 }

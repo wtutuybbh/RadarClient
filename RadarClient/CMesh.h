@@ -35,7 +35,6 @@ PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB = NULL;			// VBO Deletion Procedure
 #include "C3DObject.h"
 //#include "CScene.h"
 #include "FreeImage.h"
-#include "Util.h"
 //#include <vector>
 //#include "ShaderUtils.h"
 
@@ -57,28 +56,26 @@ typedef struct {
 	double imgLon0, imgLat0, imgLon1, imgLat1;
 } ImageMapHeader;
 
-class CVert;													// Vertex Class
+//class CVert;													// Vertex Class
 
-typedef CVert CVec;												// The Definitions Are Synonymous
+//typedef CVert CVec;												// The Definitions Are Synonymous
 
-class CTexCoord;												// Texture Coordinate Class
+//class CTexCoord;												// Texture Coordinate Class
 
 
-class CMesh : C3DObject
+class old_CMesh : old_C3DObject
 {
 public:
 	// Mesh Data
 	int				m_nVertexCount;								// Vertex Count
-	CVert*			m_pVertices;								// Vertex Data
-	CTexCoord*		m_pTexCoords;								// Texture Coordinates
+	glm::vec3*		m_pVertices;								// Vertex Data
+	glm::vec2*		m_pTexCoords;								// Texture Coordinates
 	unsigned int	m_nTextureId;								// Texture ID
 	
 
 																// Vertex Buffer Object Names
 	unsigned int	m_nVBOVertices;								// Vertex VBO Name
 	unsigned int	m_nVBOTexCoords;							// Texture Coordinate VBO Name
-
-	short mpp;
 
 	CScene *scn;
 																// Temporary Data
@@ -87,21 +84,18 @@ public:
 	ImageMapHeader* iMapH;
 
 	glm::vec3 * m_Bounds;
-	glm::vec3 * CMesh::GetBounds() override;
+	glm::vec3 * old_CMesh::GetBounds() override;
 
 	void *bitmap;
 
-	float lonStretch, latStretch;
-
-	float centerHeight;
+	float CenterHeight, AverageHeight;
 
 	int texsize;
 
 	FIBITMAP *subimage;
 	
-public:
-	CMesh(CScene *scn);													// Mesh Constructor
-	~CMesh();													// Mesh Deconstructor
+	old_CMesh(CScene *scn);													// Mesh Constructor
+	~old_CMesh();													// Mesh Deconstructor
 
 	AltitudeMap* GetAltitudeMap(const char *fileName, double lon1, double lat1, double lon2, double lat2);
 	AltitudeMapHeader* GetAltitudeMapHeader(const char *fileName, double lon1, double lat1, double lon2, double lat2);
@@ -120,8 +114,44 @@ public:
 
 	void Draw(CCamera *cam) override;
 	void MiniMapDraw(CCamera *cam) override;
+
+	bool IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position) override;
 };
 
 
 typedef int(_cdecl * GDPALTITUDEMAP)(const char *, double *, int *, short *);
 typedef int(_cdecl * GDPALTITUDEMAP_SIZES)(const char *, double *, int *);
+
+class CMesh : public C3DObjectModel
+{
+	CScene *scn;
+	
+	bool LoadHeightmap(int vpId);
+	AltitudeMap* GetAltitudeMap(const char *fileName, double lon1, double lat1, double lon2, double lat2);
+	AltitudeMapHeader* GetAltitudeMapHeader(const char *fileName, double lon1, double lat1, double lon2, double lat2);
+	ImageMapHeader* GetImageMapHeader(const char *imgFile, const char *datFile);
+	float PtHeight(int nX, int nY) const;
+	int texsize;
+	AltitudeMap* aMap;							// Heightmap Data
+	AltitudeMapHeader* aMapH;
+	ImageMapHeader* iMapH;
+	glm::vec3 * m_Bounds;
+	
+
+	void *bitmap;
+	FIBITMAP *subimage;
+
+	bool clearAfter;
+
+	float shiftX, shiftZ;
+public:
+	glm::vec3 Size;
+	static float Y0;
+	int UseTexture, UseAltitudeMap;
+	CMesh(int vpId, CScene *scn, bool clearAfter, float shiftX, float shiftZ);
+	float CenterHeight, AverageHeight;
+	bool IntersectLine(int vpId, glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position) override;
+	void BindUniforms(CViewPortControl *vpControl) override;
+	glm::vec3 * CMesh::GetBounds() override;
+	void Init(int vpId) override;
+};

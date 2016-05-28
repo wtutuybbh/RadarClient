@@ -15,6 +15,7 @@
 #define MPI2             1.57079632679489661923   /* Pi/2     */
 #define M_PI_180      0.01745329251994329      /* Pi/180   */
 #include <vector>
+#include <mutex>
 using namespace std;
 
 #define CM_POSTDATA (WM_USER + 2)
@@ -31,7 +32,9 @@ using namespace std;
 #define R2D(x) ((x)*180.0/M_PI)
 
 #define MNNAK 0.5 //коэффициент накопления от ширины ДН
-#define LENDATAOTOBR 16 //размер массива Data[LENDATAOTOBR] в структуре STROTOBR
+//#define LENDATAOTOBR 16 //размер массива Data[LENDATAOTOBR] в структуре STROTOBR
+//int LENDATAOTOBR = 1;
+//int counter = 0;
 
 
 #define MSGBASE (0x0400 + 512)
@@ -58,10 +61,13 @@ using namespace std;
 #define MSG_PTSTRK (MSGBASE + 105)  // список подтвержденных точек
 #define MSG_OBJTRK (MSGBASE + 106)    // список траекторий
 #define MSG_DELTRK (MSGBASE + 107) // список удаленных траекторий
+#define MSG_LOCATION (MSGBASE + 161)
 
 #define MSG_ECHO (MSGBASE + 158)
 
 #define MSG_INIT (MSGBASE + 159)
+#define MSG_ECHO (MSGBASE + 158)
+#define MSG_STRING (MSGBASE + 160)
 
 #define TXRXBUFSIZE 4*1024*1024
 
@@ -156,14 +162,14 @@ typedef struct
 	int time;//1==200mkC
 }STRPOINT, *PTRPOINT;
 //---------------------------------------------------------------------------
-typedef struct
+/*typedef struct
 {
 	int NumSektor;                //номер кадра
 	int Btek;                     // номер элемента разрешения от 0 по азимуту
 	unsigned int CountSamer;      //количество обработанных замеров 
 	unsigned int CountSamerFalse; //количество пропущенных замеров 
 	float Data[LENDATAOTOBR];
-}STROTOBR, *PTROTOBR;
+}STROTOBR, *PTROTOBR;*/
 //---------------------------------------------------------------------------
 typedef struct
 {
@@ -359,6 +365,10 @@ struct _client                     //Клиенты
 };
 
 
+union UTCtime {
+	WORD ta[8];
+	SYSTEMTIME st;
+};
 
 
 typedef struct tagRDR_INITCL
@@ -377,11 +387,29 @@ typedef struct tagRDR_INITCL
 	int           ViewStep;     // offs 100
 	short         Proto[2];     // offs 104
 	unsigned int  ScanMode;     // offs 108
-	char          resv2[1024 - 112]; // offs 112
+	UTCtime       srvTime;
+	int           MaxNumSectPt;
+	int           MaxNumSectImg;
+	int           blankR1;
+	int           blankR2;
+	char          resv2[1024 - 104 - 16 - 4 - 4 - 4 - 4];
 }  RDR_INITCL;
 
 
+typedef struct tagRDRCURRPOS
+{
+	double northdir;  // направление на сервер в радианах относительно устройства
+	char currstate; // 0-не получены коорд, 1-2D, 2-3D
+	char resv1[7];
+	double lon; // широта
+	double lat; // долгота
+	double elv; // высота над уровнем моря
+	double direction; // угол
+	UTCtime       srvTime;
+	double E0;
+	char resv2[128 - 7 * 8 - 16];
 
+} RDRCURRPOS;
 
 
 
@@ -390,6 +418,7 @@ class TRK
 {
 public:
 	int id; // id 
+	bool Found;
 	vector<RDRTRACK> P; // точки трека
 	TRK(int _id);
 	void InsertPoints(RDRTRACK* pt, int N);
@@ -404,9 +433,14 @@ class CRCSocket
 {
 	bool OnceClosed;
 	char *hole;
-	
+	int LENDATAOTOBR {1};
 public:
+	bool Initialized {false};
+	bool PointOK, TrackOK, ImageOK;
 	vector<TRK*> Tracks;
+	vector<TRK*> trak;
+	float MMAXP;
+	int IDX, NumViewSct;
 	//used when receiving data:
 	std::string ErrorText;
 	WSADATA WsaDat;
@@ -414,23 +448,35 @@ public:
 	struct hostent *host;
 	SOCKADDR_IN SockAddr;
 	HWND hWnd;
-	char szHistory[10000];
+	//char szHistory[10000];
 	_client *client;
 
 	//used when processing data:
-	char *tm, *ReadBuf;
-	long ReadBufLength;
+	char *tm/*, *ReadBuf*/;
+	/*long ReadBufLength;*/
 	RDR_INITCL* s_rdrinit;
+	RDR_INITCL rdrinit;
 	RPOINTS* info_p;
 	RPOINT* pts;
+	RDRCURRPOS *CurrentPosition {NULL};
 
 	RIMAGE* info_i;
 
-	void* PTR_D;
-	int b1, b2;
-	int CurrScan;
+	long Buf[TXRXBUFSIZE];
 
-	CRCSocket(HWND hWnd);
+	void* PTR_D;
+
+	int n_view_in_scan;
+	int ActiveSeans;
+	int CurrScan;
+	int scan_w;
+
+	float Max_Amp, Min_Amp;
+	int b1, b2;
+
+	std::mutex* m;
+
+	CRCSocket(HWND hWnd, std::mutex* m);
 	~CRCSocket();
 
 	bool IsConnected;
@@ -442,6 +488,12 @@ public:
 	void PostData(WPARAM wParam, LPARAM lParam);
 	void OnSrvMsg_RDRTRACK(RDRTRACK* info, int N);
 	void OnSrvMsg_DELTRACK(int* deltrackz, int N);
+	void OnSrvMsg_LOCATION(RDRCURRPOS* d);
+	void OnSrvMsg_RIMAGE(RIMAGE* info, void* pixels);
+	void OnSrvMsg_INIT(RDR_INITCL* s_rdrinit);
+	void DoInit(RDR_INITCL* init);
+	unsigned int _IMG_MapAmp2ColorRGB255(float Amp, float Min);
+	unsigned int MapAmp2ColorRGB255(float Amp, float Min);
 	int FindTrack(int id);
 	void RectToPolar2d(double x, double y, double* phi, double* ro);
 	void FreeMemory(char *ptr);

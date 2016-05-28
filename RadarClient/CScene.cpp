@@ -6,8 +6,11 @@
 #include <string>
 
 #include "CRCPoint.h"
+#include "CTrack.h"
 #include "CScene.h"
 #include "CMesh.h"
+#include "CMarkup.h"
+#include "CSector.h"
 
 #include "CMinimapPointer.h"
 
@@ -17,15 +20,20 @@
 
 #include "CCamera.h"
 #include <vector>
-
+#include "CSettings.h"
+#include "CViewPortControl.h"
 
 
 /*CScene::CScene(float lonc, float latc) {
 	geocenter.x = lonc;
 	geocenter.y = latc;
 }*/
-CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize) {
-	Sectors = NULL;
+CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize, mutex *m) {
+
+	this->m = m;
+	CRCPointModel::InitStructure();
+
+	/*old_Sectors = NULL;*/
 	SectorsCount = 0;
 
 	this->Camera = new CCamera();
@@ -42,13 +50,59 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 
 	this->texsize = texsize;
 
-	mesh = new CMesh(this);
+	old_Mesh = new old_CMesh(this);
 
-	markCount = 50*5;
+	m_Bounds = new glm::vec3[2];
+	Mesh = new CMesh(Main, this, true, 0.5, 0.5);
+	rcutils::takeminmax(Mesh->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(Mesh->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(Mesh->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+	rcutils::takeminmax(Mesh->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(Mesh->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(Mesh->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+	Mesh1 = new CMesh(Main, this, true, 0.5, -0.5);
+	rcutils::takeminmax(Mesh1->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(Mesh1->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(Mesh1->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+	rcutils::takeminmax(Mesh1->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(Mesh1->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(Mesh1->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+	Mesh2 = new CMesh(Main, this, true, -0.5, -0.5);
+	rcutils::takeminmax(Mesh2->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(Mesh2->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(Mesh2->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+	rcutils::takeminmax(Mesh2->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(Mesh2->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(Mesh2->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+	Mesh3 = new CMesh(Main, this, true, -0.5, 0.5);
+	rcutils::takeminmax(Mesh3->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(Mesh3->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(Mesh3->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+	rcutils::takeminmax(Mesh3->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(Mesh3->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(Mesh3->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
 
+	MeshSize = m_Bounds[1] - m_Bounds[0];
+
+	Camera->MeshSize = Mesh->Size = Mesh1->Size = Mesh2->Size = Mesh3->Size = MeshSize;
+
+	Mesh->Init(MiniMap);
+	Mesh1->Init(MiniMap);
+	Mesh2->Init(MiniMap);
+	Mesh3->Init(MiniMap);
+
+	mmPointer = new CMiniMapPointer(MiniMap, this);
+	y0 = (Mesh->CenterHeight + Mesh1->CenterHeight + Mesh2->CenterHeight + Mesh3->CenterHeight) / 4 / mppv;
+	Markup = new CMarkup(glm::vec4(0, y0, 0, 1));
+
+	testPoint = new CRCPointModel(Main, y0, mpph, mppv, 0, 0, 0);
+	testPoint->SetCartesianCoordinates(1000/mpph, y0, 0);
+
+	numCircles = 7;
 	marksPerCircle = 10;
 
-	numCircles = markCount / 5 / marksPerCircle;
+	markCount = marksPerCircle * numCircles * 5;
+
 	segmentsPerCircle = 1000;
 
 	rayWidth = 10;
@@ -56,17 +110,22 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	maxE = 30;
 	minDist = 100;
 	maxDist = 5000;
+	
+
 	rayDensity = 1;
-
-
 	vertexCount_Ray = (rayDensity + 1) * (rayDensity + 1) * 2;
+	
 	vertexCount_Axis = 38;
 	
 	vertexCount_Info = 4;
+	
+
+	vertexCount = vertexCount_Axis + markCount*2 + numCircles * segmentsPerCircle + vertexCount_Info;
+
+
+
 	infoWidth = 370;
 	infoHeight = 250;
-
-	vertexCount = /*vertexCount_Ray + */vertexCount_Axis + markCount*2 + numCircles * segmentsPerCircle + vertexCount_Info;
 
 	markSize = 10.0f;
 	AxisGridShift = 250;
@@ -85,11 +144,14 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 
 	RayVBOisBuilt = VBOisBuilt = MiniMapVBOisBuilt = false;
 
-	MiniMapPointer = new CMinimapPointer(this);
+	MiniMapPointer = new old_CMinimapPointer(this);
 
 	circles = NULL;
 	markup = NULL;
 	info = NULL;
+	ray = NULL;
+
+	Initialized = false;
 }
 CScene::~CScene() {
 	if (circles) {
@@ -99,6 +161,8 @@ CScene::~CScene() {
 	}
 	if(markup)
 		delete [] markup;
+	if (ray)
+		delete[] ray;
 	if (AxisGrid)
 		delete[] AxisGrid;
 	if (AxisGridColor)
@@ -109,41 +173,96 @@ CScene::~CScene() {
 		delete[] RayColor;
 	if (Camera)
 		delete Camera;
-	if (mesh)
-		delete mesh;
+	if (old_Mesh)
+		delete old_Mesh;
 	if (MiniMapPointer)
 		delete MiniMapPointer;
 	if (info)
 		delete[] info;
-	if (Sectors) {
+	/*if (old_Sectors) {
 		for (int i = 0; i < SectorsCount; i++) {
-			for (vector<CRCPoint*>::iterator it = Sectors[i].begin(); it != Sectors[i].end(); ++it) {
+			for (auto it = old_Sectors[i].begin(); it != old_Sectors[i].end(); ++it) {
 				delete *it;
 			}
-			Sectors[i].clear();
+			old_Sectors[i].clear();
 		}
 		
-		delete[] Sectors;
-	}
-
+		delete[] old_Sectors;
+	}*/
+	Sectors.clear();
+	Tracks.clear();
 }
 
-bool CScene::DrawScene()
+bool CScene::DrawScene(CViewPortControl * vpControl)
 {
+	//auto glstr = glGetString(GL_EXTENSIONS);
+
 	if (!VBOisBuilt) {
 		PrepareVBOs();
 		VBOisBuilt = BuildVBOs();
-		Camera->SetAll(0, y0+1, 0, 0, y0 + 1, 1, 0, 1, 0,
-			60.0f, 4.0f / 3.0f, 1.0f, 10000.0f,
-			0.01);
+		Camera->Move(glm::vec3(292, y0 + 235, 310), false);
 		Camera->RadarPosition = glm::vec3(0, y0, 0);
+	}
+	//Mesh->Draw(vpControl, GL_TRIANGLES);
+	//return true;
+
+	//goto shader_debug;
+	//glDisable(GL_LIGHTING);
+	//glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+
+	//Mesh->UseTexture = vpControl->DisplayMap;
+	//glDisable(GL_LINE_SMOOTH);
+
+	Mesh->UseTexture = vpControl->UI->GetCheckboxState_Map();
+	Mesh->UseAltitudeMap = vpControl->UI->GetCheckboxState_AltitudeMap();
+	Mesh->Draw(vpControl, GL_TRIANGLES);
+	Mesh1->UseTexture = vpControl->UI->GetCheckboxState_Map();
+	Mesh1->UseAltitudeMap = vpControl->UI->GetCheckboxState_AltitudeMap();
+	Mesh1->Draw(vpControl, GL_TRIANGLES);
+	Mesh2->UseTexture = vpControl->UI->GetCheckboxState_Map();
+	Mesh2->UseAltitudeMap = vpControl->UI->GetCheckboxState_AltitudeMap();
+	Mesh2->Draw(vpControl, GL_TRIANGLES);
+	Mesh3->UseTexture = vpControl->UI->GetCheckboxState_Map();
+	Mesh3->UseAltitudeMap = vpControl->UI->GetCheckboxState_AltitudeMap();
+	Mesh3->Draw(vpControl, GL_TRIANGLES);
+
+	glEnable(GL_PROGRAM_POINT_SIZE);
+	if (UI->GetCheckboxState_Points()) {
+		for (int i = 0; i < Sectors.size(); i++) {
+			if (Sectors[i] != NULL)
+				Sectors[i]->Draw(vpControl, GL_POINTS);
+		}
+	}
+	//tracks:
+	if (UI->GetCheckboxState_Tracks()) {
+		for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
+		{
+			it->second->Draw(vpControl, GL_POINTS);
+		}
+	}
+
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+	glDisable(GL_DEPTH_TEST);
+	if (UI->GetCheckboxState_MarkupLines())
+	{
+		Markup->Draw(vpControl, 0);
 	}
 
 
-	//goto shader_debug;
-	mesh->Draw(Camera);
+	//testPoint->Draw(vpControl, GL_TRIANGLES);
 
-	
+	if (UI->GetCheckboxState_MarkupLabels()) 
+	{
+		DrawBitmaps();
+	}
+
+	return false;
+	//return false;
+	//old_Mesh->Draw(Camera);
+	glEnable(GL_LINE_SMOOTH);
 	
 	glDisable(GL_DEPTH_TEST);									// Disable Depth Testing
 
@@ -159,73 +278,33 @@ bool CScene::DrawScene()
 	glColorPointer(4, GL_FLOAT, 0, 0);		
 
 
-	glDrawElements(GL_LINES, vertexCount_Axis + markCount * 2, GL_UNSIGNED_SHORT, markup);
+	/*glDrawElements(GL_LINES, vertexCount_Axis + markCount * 2, GL_UNSIGNED_SHORT, markup);
 
 	for (int c = 0; c < numCircles; c++) {
 		glDrawElements(GL_LINE_LOOP, segmentsPerCircle, GL_UNSIGNED_SHORT, circles[c]);
-	}
-
-	glDisable(GL_LIGHTING);
+	}*/
 	
-	BitmapString(0, y0, 0, "(" + cnvrt::float2str(geocenter.x) + "; " + cnvrt::float2str(geocenter.y) + ")");
-	glColor4f(1.0f, 1.0f, 0.0f, 0.7f);
-	BitmapString(-10*markDistance/mpph, y0 + 1, 0, "1km");
-	BitmapString(10 * markDistance / mpph, y0 + 1, 0, "1km");
-	BitmapString(0, y0 + 1, -10 * markDistance / mpph, "1km");
-	BitmapString(0, y0 + 1, 10 * markDistance / mpph, "1km");
-	BitmapString(0, y0 + 10 * markDistance / mppv, 0, "1km");
+	
+	
 
-	BitmapString(-20 * markDistance / mpph, y0 + 1, 0, "2km");
-	BitmapString(20 * markDistance / mpph, y0 + 1, 0, "2km");
-	BitmapString(0, y0 + 1, -20 * markDistance / mpph, "2km");
-	BitmapString(0, y0 + 1, 20 * markDistance / mpph, "2km");
-	BitmapString(0, y0 + 20 * markDistance / mppv, 0, "2km");
-
-	BitmapString(-30 * markDistance / mpph, y0 + 1, 0, "3km");
-	BitmapString(30 * markDistance / mpph, y0 + 1, 0, "3km");
-	BitmapString(0, y0 + 1, -30 * markDistance / mpph, "3km");
-	BitmapString(0, y0 + 1, 30 * markDistance / mpph, "3km");
-	BitmapString(0, y0 + 30 * markDistance / mppv, 0, "3km");
-
-	BitmapString(-40 * markDistance / mpph, y0 + 1, 0, "4km");
-	BitmapString(40 * markDistance / mpph, y0 + 1, 0, "4km");
-	BitmapString(0, y0 + 1, -40 * markDistance / mpph, "4km");
-	BitmapString(0, y0 + 1, 40 * markDistance / mpph, "4km");
-	BitmapString(0, y0 + 40 * markDistance / mppv, 0, "4km");
-
-	BitmapString(-50 * markDistance / mpph, y0 + 1, 0, "5km");
-	BitmapString(50 * markDistance / mpph, y0 + 1, 0, "5km");
-	BitmapString(0, y0 + 1, -50 * markDistance / mpph, "5km");
-	BitmapString(0, y0 + 1, 50 * markDistance / mpph, "5km");
-	BitmapString(0, y0 + 50 * markDistance / mppv, 0, "5km");
-
-	for (int a = 0; a < 360; a += 10) {
-		BitmapString(-(maxDist+50*mpph) * sin(cnvrt::dg2rad(a)) / mpph, y0, (maxDist + 50*mpph) * cos(cnvrt::dg2rad(a)) / mpph, cnvrt::float2str(a) + "°");
-	}
-
-	glColor3f(0.8f, 0.8f, 1.0f);
-	BitmapString(0, y0 + markDistance, 60 * markDistance / mpph, "N");
-	glColor3f(1.0f, 0.8f, 0.8f);
-	BitmapString(0, y0 + markDistance, -60 * markDistance / mpph, "S");
-	glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
-	BitmapString(60 * markDistance / mpph, y0 + markDistance, 0, "W");
-	BitmapString(-60 * markDistance / mpph, y0 + markDistance, 0, "E");
 
 	glEnable(GL_DEPTH_TEST);
-
-	if (UI->GetCheckboxState_Points()) {
-		CRCPoint::UseProgram_s();
-		/*for (int i = 0; i < Points.size(); i++) {
-			Points[i].Draw(Camera);
-		}*/
+	//Mesh->Draw(vpControl, GL_TRIANGLES);
+	//points:
+	/*if (UI->GetCheckboxState_Points()) {
+		old_CRCPoint::UseProgram_s();
 		for (int i = 0; i < SectorsCount; i++) {			
-			for (vector<CRCPoint*>::iterator it = Sectors[i].begin(); it != Sectors[i].end(); ++it) {
+			for (vector<old_CRCPoint*>::iterator it = old_Sectors[i].begin(); it != old_Sectors[i].end(); ++it) {
 				(*it)->Draw(Camera);
 			}
 		}
 		
 		glUseProgram(0);
-	}
+	}*/
+	//points:
+	//Mesh->Draw(vpControl, GL_TRIANGLES);
+
+	
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -233,6 +312,10 @@ bool CScene::DrawScene()
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	if (Ray_VBOName == 0 && Ray_VBOName_c == 0) {
+		PrepareRayVBO();
+		BuildRayVBO();
+	}
 	if (Ray_VBOName > 0 && Ray_VBOName_c > 0 && Socket->IsConnected) {
 		glRotatef(-viewAngle, 0.0f, 1.0f, 0.0f);
 
@@ -304,23 +387,46 @@ bool CScene::DrawScene()
 	return true;
 }
 
-bool CScene::MiniMapDraw()
+bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 {
-	mesh->MiniMapDraw(Camera);
-	MiniMapPointer->MiniMapDraw(Camera);
+	//old_Mesh->MiniMapDraw(Camera);
+
+	Mesh->Draw(vpControl, GL_TRIANGLES);
+	Mesh1->Draw(vpControl, GL_TRIANGLES);
+	Mesh2->Draw(vpControl, GL_TRIANGLES);
+	Mesh3->Draw(vpControl, GL_TRIANGLES);
+
+	//MiniMapPointer->MiniMapDraw(Camera);
+	glEnable(GL_PROGRAM_POINT_SIZE);
+	if (UI->GetCheckboxState_Points()) {
+		for (int i = 0; i < Sectors.size(); i++) {
+			if (Sectors[i] != NULL)
+				Sectors[i]->Draw(vpControl, GL_POINTS);
+		}
+	}
+	if (UI->GetCheckboxState_Tracks()) {
+		for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
+		{
+			it->second->Draw(vpControl, GL_POINTS);
+		}
+	}
+	glDisable(GL_DEPTH_BUFFER);
+	Markup->Draw(vpControl, 0);
+	//glEnable(GL_DEPTH_BUFFER);
+	mmPointer->Draw(vpControl, GL_TRIANGLES);
 	return true;
 }
 
 bool CScene::PrepareVBOs()
 {	
-	mesh->LoadHeightmap();
+	old_Mesh->LoadHeightmap();
+	
+	old_CRCPoint::PrepareVBO_s();
 
-	CRCPoint::PrepareVBO_s();
-
-	AxisGrid = new CVec[vertexCount];
+	AxisGrid = new glm::vec3[vertexCount];
 	
 
-	glm::vec3 *b = meshBounds = mesh->GetBounds();
+	glm::vec3 *b = meshBounds = old_Mesh->GetBounds();
 
 	//y0 - is a height of a radar, in OpenGl units ("pixels"), above the sea level
 	switch (zeroLevel) {
@@ -331,7 +437,7 @@ bool CScene::PrepareVBOs()
 		y0 = b[1].y;
 		break;
 	case ZEROLEVEL_ACTUALHEIGHT:
-		y0 = mesh->centerHeight;
+		y0 = old_Mesh->CenterHeight;
 		break;
 	}
 
@@ -433,15 +539,21 @@ bool CScene::PrepareVBOs()
 	AxisGrid[i0].z = -1;
 	info[3] = i0;
 
-	
+	/*std::ofstream outfile("old.txt", std::ofstream::binary);
+	for (int i = 0; i < i0; i++) {
+		outfile << AxisGrid[i].x << ";" << AxisGrid[i].y << ";" << AxisGrid[i].z << "\r\n";
+	}
+	outfile.close();*/
+
+	glm::vec4 axisColor = CSettings::GetColor(ColorAxis);
 
 	//axis and markup color array
 	AxisGridColor = new CColorRGBA[vertexCount];	
 	for (int i = 0/*vertexCount_Ray*/; i < vertexCount - vertexCount_Info; i++) {
-		AxisGridColor[i].r = 1.0f;
-		AxisGridColor[i].g = 1.0f;
-		AxisGridColor[i].b = 0.0f;
-		AxisGridColor[i].a = 0.5f;
+		AxisGridColor[i].r = axisColor.r;
+		AxisGridColor[i].g = axisColor.g;
+		AxisGridColor[i].b = axisColor.b;
+		AxisGridColor[i].a = axisColor.a;
 	}
 	//info box color array
 	for (int i = vertexCount - vertexCount_Info; i < vertexCount; i++) {
@@ -479,11 +591,12 @@ bool CScene::PrepareVBOs()
 
 }
 
-bool CScene::PrepareRayVBO(RDR_INITCL * init)
+bool CScene::PrepareRayVBO()
 {
-	rayWidth = init->dAzm * init->ViewStep;
+	if (!Initialized)
+		return false;
 
-	Ray = new CVec[vertexCount_Ray]; //ray vertex array
+	Ray = new glm::vec3[vertexCount_Ray]; //ray vertex array
 	int i0 = 0;
 
 	float d_rayW = rayWidth / rayDensity; //one arc step - 'width' dimension
@@ -495,6 +608,8 @@ bool CScene::PrepareRayVBO(RDR_INITCL * init)
 	int oneside = (rayDensity + 1) * (rayDensity + 1);
 	rayArraySize = rayDensity*rayDensity * 6 * 2 + rayDensity * 6 * 4;
 	
+
+	int ZERO_ELEVATION = glm::radians(CSettings::GetFloat(FloatZeroElevation));
 	a = -rayWidth / 2;
 	for (int i = 0; i <= rayDensity; i++) {
 		e = ZERO_ELEVATION - RAY_HEIGHT/2.0f;
@@ -570,9 +685,9 @@ bool CScene::MiniMapPrepareAndBuildVBO()
 
 bool CScene::BuildVBOs()
 {
-	mesh->BuildVBOs();
+	old_Mesh->BuildVBOs();
 
-	CRCPoint::BuildVBO_s();
+	old_CRCPoint::BuildVBO_s();
 
 	if (AxisGrid && AxisGridColor) {
 		glGenBuffers(1, &AxisGrid_VBOName);
@@ -616,21 +731,23 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 	if (init->Nazm <= 0 || info_p->N<=0) //TODO: full defence against bad data need to be there
 		return;
 
+	//Init = init;
+	if (!Initialized)
+		Init(init);	
+
 	viewAngle = glm::degrees(init->begAzm + init->dAzm * (info_p->d1 + info_p->d2) / 2);
 
-	if (Ray_VBOName == 0 && Ray_VBOName_c == 0) {
-		PrepareRayVBO(init);
-		BuildRayVBO();
-	}
+
 	
-	if(!Sectors) {
+	/*if(!old_Sectors) {
 		if (init->Nazm % init->ViewStep != 0) {
 			return;
 			//throw new std::exception("invalid data");
 		}
 		SectorsCount = init->Nazm / init->ViewStep;
-		Sectors = new std::vector<CRCPoint*>[SectorsCount];
-	}
+		old_Sectors = new std::vector<old_CRCPoint*>[SectorsCount];
+	}*/
+
 	if (info_p->d1 == info_p->d2)
 		return;
 
@@ -647,90 +764,195 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 	
 	int currentSector = SectorsCount * (min / init->Nazm);
 
-	float a_start = init->begAzm + info_p->d1 * init->dAzm;
-	float a_end = init->begAzm + info_p->d2 * init->dAzm;
-
-	//removes all points in sector and sets up new points received from serfer
-	/*for (vector<CRCPoint>::iterator it = Points.begin(); it != Points.end();)
+	if (Sectors[currentSector] == NULL)
 	{
-		if (it->SphericalCoords.y >= a_start && it->SphericalCoords.y <= a_end || it->SphericalCoords.y <= a_start && it->SphericalCoords.y >= a_end)
-		{
-			it = Points.erase(it);
-		}
-		else
-		{
-			++it;
-		}
-	}*/
-	for (vector<CRCPoint*>::iterator it = Sectors[currentSector].begin(); it != Sectors[currentSector].end(); ++it) {
-		delete *it;				
+		Sectors[currentSector] = new CSector();
 	}
-	Sectors[currentSector].clear(); //destroy all vbo buffer objects
-	//std::vector<VBOData>().swap(Sectors+currentSector);
-	//add new points
+
+	Sectors[currentSector]->Refresh(glm::vec4(0, y0, 0, 1), mpph, mppv, info_p, pts, init);
 	
-	for (int i = 0; i < info_p->N; i++) {
-		CRCPoint *p = new CRCPoint(y0, mpph, mppv, pts[i].R * init->dR, init->begAzm + pts[i].B * init->dAzm, ZERO_ELEVATION + init->begElv + pts[i].E * init->dElv);
-		float brightness = std::fmin(pts[i].Amp / 1000.0f, 1.0f);	
-		p->Color = glm::vec4(brightness, 0, 0, 1);
-		Sectors[currentSector].push_back(p);
-	}	
+	
+	UI->FillInfoGrid(this);
 }
 
 void CScene::ClearSectors()
 {
-	if (!Sectors)
+	/*if (!old_Sectors)
 		return;
 	for (int i = 0; i < SectorsCount; i++) {
-		Sectors[i].clear();
+		old_Sectors[i].clear();
 	}
-	delete[] Sectors;
-	Sectors = NULL;
+	delete[] old_Sectors;
+	old_Sectors = NULL;*/
+
+	Sectors.clear();
+
 	SectorsCount = 0;
+}
+
+void CScene::RefreshTracks(vector<TRK*>* tracks)
+{	
+	if(tracks->size() == 0)
+		return;
+
+	m->lock();
+
+	for (int i = 0; i < tracks->size(); i++)
+	{
+		bool insertNew = true;
+		for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
+		{
+			if (it->first == tracks->at(i)->id) {
+				it->second->Found = tracks->at(i)->Found = true;
+				it->second->Refresh(glm::vec4(0, y0, 0, 1), mpph, mppv, &tracks->at(i)->P);
+				insertNew = false;
+			}
+		}
+		if (insertNew)
+		{
+			CTrack *t = new CTrack(tracks->at(i)->id);
+			t->Refresh(glm::vec4(0, y0, 0, 1), mpph, mppv, &tracks->at(i)->P);
+			t->Found = true;
+			Tracks.insert_or_assign(tracks->at(i)->id, t);			
+		}
+	}
+	for (auto it = Tracks.begin(); it != Tracks.end();) {
+		if (!it->second->Found) {
+			it = Tracks.erase(it);
+		}
+		else {
+			it->second->Found = false;
+			++it;
+		}
+	}
+	UI->FillInfoGrid(this);
+
+	m->unlock();
+}
+
+void CScene::Init(RDR_INITCL* init)
+{
+	if (!init)
+		return;
+	minE = init->begElv;
+	maxE = init->begElv + init->dElv;
+	rayWidth = init->dAzm * init->ViewStep;
+	SectorsCount = init->Nazm / init->ViewStep;
+	Sectors.resize(SectorsCount);
+	Initialized = true;
+}
+
+CRCPointModel * CScene::GetCRCPointFromRDRTRACK(RDRTRACK * tp) const
+{
+	//TODO: need common formula here
+	float r = 0.75 * sqrt(tp->X * tp->X + tp->Y * tp->Y) / 1;
+	float a = glm::radians(-120 + 0.02 * 1000 * (atan(tp->X / tp->Y)) / (M_PI / 180));
+	float e = glm::radians(30.0f);
+	CRCPointModel* p = new CRCPointModel(Main, y0, mpph, mppv, r, a, e);
+	p->Color = CSettings::GetColor(ColorTrack);
+	return p;
 }
 
 void CScene::SetCameraPositionFromMiniMapXY(float x, float y, float direction) const
 /* x and y from -1 to 1 */
 {
-	glm::vec3 *b = mesh->GetBounds();
+	glm::vec3 *b = m_Bounds;
 	Camera->SetPositionXZ((b[0].x + b[1].x)/2 - x * (b[1].x - b[0].x)/2, (b[0].z + b[1].z) / 2 + y * (b[1].z - b[0].z) / 2);
 }
-C3DObject * CScene::GetObjectAtMiniMapPosition(float x, float y) const
+C3DObjectModel * CScene::GetObjectAtMiniMapPosition(int vpId, glm::vec3 p0, glm::vec3 p1) const
 {
-	glm::vec3 orig(x, y, 1);
-	glm::vec3 dir(0, 0, 1);
+	glm::vec3 orig = p0;
+	glm::vec3 dir = p1 - p0;
 	glm::vec3 pos;
-	if (MiniMapPointer->MiniMapIntersectLine(orig, dir, pos)) {
-		return MiniMapPointer;
+	if (mmPointer->IntersectLine(vpId, orig, dir, pos)) {
+		return mmPointer;
 	}
 	return NULL;
 }
-C3DObject * CScene::GetFirstObjectBetweenPoints(glm::vec3 p0, glm::vec3 p1) const
+C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 screenPoint, int& index)
 {
 	/*if (MiniMapPointer->MiniMapIntersectLine(orig, dir, pos)) {
-		return MiniMapPointer;
-	}*/
-	CRCPoint *p = NULL;
-	float dist, minDist = FLT_MAX, treshold = 10;
-	for (int i = 0; i < SectorsCount; i++) {
-		for (vector<CRCPoint*>::iterator it = Sectors[i].begin(); it != Sectors[i].end(); ++it) {
-			if ((*it)->DistanceToLine(p0, p1) < treshold) {
-				dist = glm::distance(p0, (*it)->CartesianCoords);
-				if (dist < minDist) {
-					p = *it;
-					minDist = dist;
-				}
+		return MiniMapPointer;	
+	}*/	
+	for (int i = 0; i < Sectors.size(); i++)
+	{
+		if (Sectors[i])
+		{
+			index = Sectors[i]->GetPoint(vpControl, screenPoint);
+			if (index >= 0)
+			{
+				Sectors[i]->SelectPoint(Main, index);
+				Sectors[i]->SelectPoint(MiniMap, index);
 			}
 		}
 	}
-	return p;
+	return NULL;	
 }
+
+C3DObjectModel* CScene::GetFirstTrackBetweenPoints(int vpId, glm::vec3 p0, glm::vec3 p1) const
+{
+	return NULL;
+}
+
+old_C3DObject* CScene::GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const
+{
+	glm::vec3 dir = p1 - p0, position;
+	old_Mesh->IntersectLine(p0, dir, position);
+	return NULL;
+}
+
 glm::vec2 CScene::CameraXYForMiniMap() const
 {
-	glm::vec3 *b = mesh->GetBounds();
+	glm::vec3 *b = old_Mesh->GetBounds();
 	if (b) {
 		return glm::vec2(- 2 * (Camera->GetPosition().x - b[0].x) / (b[1].x - b[0].x) + 1, -1 + 2 * (Camera->GetPosition().z - b[0].z) / (b[1].z - b[0].z));
 	}
 	return glm::vec2(0);
 }
 
+void CScene::DrawBitmaps() const
+{
+	BitmapString(0, y0, 0, "(" + cnvrt::float2str(geocenter.x) + "; " + cnvrt::float2str(geocenter.y) + ")");
+	glColor4f(1.0f, 1.0f, 0.0f, 0.7f);
+	BitmapString(-10 * markDistance / mpph, y0 + 1, 0, "1km");
+	BitmapString(10 * markDistance / mpph, y0 + 1, 0, "1km");
+	BitmapString(0, y0 + 1, -10 * markDistance / mpph, "1km");
+	BitmapString(0, y0 + 1, 10 * markDistance / mpph, "1km");
+	BitmapString(0, y0 + 10 * markDistance / mppv, 0, "1km");
+
+	BitmapString(-20 * markDistance / mpph, y0 + 1, 0, "2km");
+	BitmapString(20 * markDistance / mpph, y0 + 1, 0, "2km");
+	BitmapString(0, y0 + 1, -20 * markDistance / mpph, "2km");
+	BitmapString(0, y0 + 1, 20 * markDistance / mpph, "2km");
+	BitmapString(0, y0 + 20 * markDistance / mppv, 0, "2km");
+
+	BitmapString(-30 * markDistance / mpph, y0 + 1, 0, "3km");
+	BitmapString(30 * markDistance / mpph, y0 + 1, 0, "3km");
+	BitmapString(0, y0 + 1, -30 * markDistance / mpph, "3km");
+	BitmapString(0, y0 + 1, 30 * markDistance / mpph, "3km");
+	BitmapString(0, y0 + 30 * markDistance / mppv, 0, "3km");
+
+	BitmapString(-40 * markDistance / mpph, y0 + 1, 0, "4km");
+	BitmapString(40 * markDistance / mpph, y0 + 1, 0, "4km");
+	BitmapString(0, y0 + 1, -40 * markDistance / mpph, "4km");
+	BitmapString(0, y0 + 1, 40 * markDistance / mpph, "4km");
+	BitmapString(0, y0 + 40 * markDistance / mppv, 0, "4km");
+
+	BitmapString(-50 * markDistance / mpph, y0 + 1, 0, "5km");
+	BitmapString(50 * markDistance / mpph, y0 + 1, 0, "5km");
+	BitmapString(0, y0 + 1, -50 * markDistance / mpph, "5km");
+	BitmapString(0, y0 + 1, 50 * markDistance / mpph, "5km");
+	BitmapString(0, y0 + 50 * markDistance / mppv, 0, "5km");
+
+	for (int a = 0; a < 360; a += 10) {
+		BitmapString(-(maxDist + 50 * mpph) * sin(cnvrt::dg2rad(a)) / mpph, y0, (maxDist + 50 * mpph) * cos(cnvrt::dg2rad(a)) / mpph, cnvrt::float2str(a) + "°");
+	}
+
+	glColor3f(0.8f, 0.8f, 1.0f);
+	BitmapString(0, y0 + markDistance, 60 * markDistance / mpph, "N");
+	glColor3f(1.0f, 0.8f, 0.8f);
+	BitmapString(0, y0 + markDistance, -60 * markDistance / mpph, "S");
+	glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
+	BitmapString(60 * markDistance / mpph, y0 + markDistance, 0, "W");
+	BitmapString(-60 * markDistance / mpph, y0 + markDistance, 0, "E");
+}

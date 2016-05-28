@@ -29,13 +29,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
@@ -107,6 +107,8 @@
 xcopy /y "$(SolutionDir)freeglut\bin\*.dll" "$(OutDir)"
 xcopy /y "$(SolutionDir)glew\bin\Release\Win32\*.dll" "$(OutDir)"
 xcopy /y "$(ProjectDir)GLSL\*.glsl" "$(OutDir)"
+xcopy /y "$(ProjectDir)GLSL\*.vert" "$(OutDir)"
+xcopy /y "$(ProjectDir)GLSL\*.frag" "$(OutDir)"
 xcopy /y "$(SolutionDir)Data\*.*" "$(OutDir)"
 xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
@@ -164,6 +166,8 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
 xcopy /y "$(SolutionDir)freeglut\bin\*.dll" "$(OutDir)"
 xcopy /y "$(SolutionDir)glew\bin\Release\Win32\*.dll" "$(OutDir)"
 xcopy /y "$(ProjectDir)GLSL\*.glsl" "$(OutDir)"
+xcopy /y "$(ProjectDir)GLSL\*.vert" "$(OutDir)"
+xcopy /y "$(ProjectDir)GLSL\*.frag" "$(OutDir)"
 xcopy /y "$(SolutionDir)Data\*.*" "$(OutDir)"
 xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
@@ -189,6 +193,13 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="C3DObjectProgram.cpp" />
+    <ClCompile Include="C3DObjectTexture.cpp" />
+    <ClCompile Include="C3DObjectVBO.cpp" />
+    <ClCompile Include="CMarkup.cpp" />
+    <ClCompile Include="CRImage.cpp" />
+    <ClCompile Include="CSector.cpp" />
+    <ClCompile Include="CSettings.cpp" />
     <ClCompile Include="CMinimap.cpp" />
     <ClCompile Include="CMinimapPointer.cpp" />
     <ClCompile Include="CRCPoint.cpp" />
@@ -202,9 +213,16 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="CScene.cpp" />
     <ClCompile Include="ShaderUtils.cpp" />
     <ClCompile Include="Util.cpp" />
-    <ClCompile Include="ViewPortControl.cpp" />
+    <ClCompile Include="CViewPortControl.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="C3DObjectProgram.h" />
+    <ClInclude Include="C3DObjectTexture.h" />
+    <ClInclude Include="C3DObjectVBO.h" />
+    <ClInclude Include="CMarkup.h" />
+    <ClInclude Include="CRImage.h" />
+    <ClInclude Include="CSector.h" />
+    <ClInclude Include="CSettings.h" />
     <ClInclude Include="CMinimap.h" />
     <ClInclude Include="CMinimapPointer.h" />
     <ClInclude Include="CRCPoint.h" />
@@ -219,13 +237,19 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="resource.h" />
     <ClInclude Include="ShaderUtils.h" />
     <ClInclude Include="Util.h" />
-    <ClInclude Include="ViewPortControl.h" />
+    <ClInclude Include="CViewPortControl.h" />
     <ClInclude Include="ZeeGrid.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+    <None Include="GLSL\CMarkup.f.glsl" />
+    <None Include="GLSL\CMarkup.v.glsl" />
+    <None Include="GLSL\CMesh.frag" />
+    <None Include="GLSL\CMesh.vert" />
     <None Include="GLSL\CRCPoint.f.glsl" />
     <None Include="GLSL\CRCPoint.v.glsl" />
+    <None Include="GLSL\CSector.f.glsl" />
+    <None Include="GLSL\CSector.v.glsl" />
     <None Include="GLSL\Minimap.f.glsl" />
     <None Include="GLSL\Minimap.v.glsl" />
     <None Include="GLSL\MiniMapPointer.f.glsl" />

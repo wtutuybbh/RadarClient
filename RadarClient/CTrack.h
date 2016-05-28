@@ -1,12 +1,16 @@
 #pragma once
-#include "C3DObject.h"
 #include <vector>
-class CTrack :
-	public C3DObject
+#include "CSector.h"
+
+class CViewPortControl;
+
+class CTrack :	public CSector
 {
 public:
-	vector<C3DObject*> Points;
-	CTrack();
+	int ID;
+	bool Found;
+	CTrack(int id);
 	~CTrack();
+	void Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK>* trackPoints);
 };
 

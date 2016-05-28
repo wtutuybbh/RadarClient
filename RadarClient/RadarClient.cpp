@@ -50,14 +50,18 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/rotate_vector.hpp"
+#include "glm/gtx/intersect.hpp"
 //#include "FreeImage.h"
 
-#include "ViewPortControl.h"
+#include "CViewPortControl.h"
 #include "CMinimap.h"
 
 #include "CUserInterface.h"
 
 #include "CRCSocket.h"
+
+#include "CSettings.h"
+#include "CSector.h"
 
 #define VIEW_PORT_CONTROL_ID     100
 
@@ -70,7 +74,7 @@
 static BOOL g_isProgramLooping;											// Window Creation Loop, For FullScreen/Windowed Toggle																		// Between Fullscreen / Windowed Mode
 static BOOL g_createFullScreen;											// If TRUE, Then Create Fullscreen
 
-//CMesh*		g_pMesh = NULL;										// Mesh Data
+//old_CMesh*		g_pMesh = NULL;										// Mesh Data
 //CScene*		g_Scn = NULL;
 float		g_flYRot = 0.0f;									// Rotation
 int			g_nFPS = 0, g_nFrames = 0;							// FPS and FPS Counter
@@ -86,13 +90,17 @@ HWND g_ViewPortControl_hWnd;
 
 HANDLE g_hIcon;
 
-ViewPortControl *g_vpControl;
+CViewPortControl *g_vpControl;
 CMinimap *g_Minimap;
 CUserInterface *g_UI;
 CRCSocket *g_Socket;
 #ifdef _DEBUG
 DebugWindowInfo g_dwi;
 #endif
+
+std::mutex m;
+
+bool g_Initialized = false;
 
 void TerminateApplication(GL_Window* window)							// Terminate The Application
 {
@@ -342,7 +350,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		break;														// Exit
 	}
-	return 0;														// Return
 
 	case WM_CREATE:													// Window Creation
 	{
@@ -371,32 +378,25 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		GetClientRect(hWnd, &clientRect);
 
 		g_vpControl->Add(hWnd, PANEL_WIDTH, 0, (clientRect.right - clientRect.left) - PANEL_WIDTH, clientRect.bottom - clientRect.top - INFO_HEIGHT);
-		
+		g_vpControl->Id = Main;
 		g_vpControl->InitGL();
 		
-		g_Socket = new CRCSocket(hWnd);
+		g_Socket = new CRCSocket(hWnd, &m);
+		g_Socket->Connect();
+		
 		
 		g_UI = new CUserInterface(hWnd, g_vpControl, g_Socket, PANEL_WIDTH);
+
 		//return 0;
 		g_Minimap->Add(hWnd, 0, 0, g_UI->MinimapSize, g_UI->MinimapSize);
+		g_Minimap->Id = MiniMap;
 		g_Minimap->InitGL();
 
 #ifdef _DEBUG
 		g_Minimap->dwi = &g_dwi;
-
+		g_UI->dwi = &g_dwi;
 #endif // _DEBUG
 
-
-		//g_Socket->Connect();
-		/*g_ViewPortControl_hWnd = CreateWindowEx(
-			WS_EX_CLIENTEDGE, // give it a standard border
-			VIEW_PORT_WC,
-			_T("A viewport control"),
-			WS_VISIBLE | WS_CHILD,
-			PANEL_WIDTH, 0, (clientRect.right - clientRect.left)- PANEL_WIDTH, clientRect.bottom - clientRect.top,
-			hWnd,
-			NULL, GetModuleHandle(0), NULL
-			);*/
 	}
 	return 0;														// Return
 
@@ -471,7 +471,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		switch (WSAGETSELECTEVENT(lParam)) {
 		case FD_READ:
-			g_Socket->Read();
+			if (g_Socket)
+				g_Socket->Read();
 			/*SendMessage(hWnd,
 				WM_SETTEXT,
 				sizeof(szIncoming) - 1,
@@ -484,7 +485,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				"Server closed connection",
 				"Connection closed!",
 				MB_ICONINFORMATION | MB_OK);*/
-			g_Socket->Close();
+			if (g_Socket)
+				g_Socket->Close();
 			/*SendMessage(hWnd, WM_DESTROY, NULL, NULL);*/
 			 
 			break;
@@ -492,11 +494,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 		break;
 	case CM_POSTDATA: {
-		g_Socket->PostData(wParam, lParam);
-		g_vpControl->MakeCurrent();
-		g_vpControl->Scene->RefreshSector(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit);
-
-		g_UI->FillGrid(&g_Socket->Tracks);
+		if (g_Socket)
+			g_Socket->PostData(wParam, lParam);
+		//g_vpControl->MakeCurrent();
+		if (g_vpControl && g_vpControl->Scene) {
+			g_vpControl->Scene->RefreshSector(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit);
+			g_vpControl->Scene->RefreshTracks(&g_Socket->Tracks);
+		}
+		if (g_UI) {
+			g_UI->FillGrid(&g_Socket->Tracks);
+		}
 
 		g_Socket->FreeMemory((char *)wParam);
 	}
@@ -504,6 +511,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case CM_CONNECT: {
 		if (g_UI) {
 			g_UI->ConnectionStateChanged(wParam);
+			g_UI->FillInfoGrid(g_vpControl->Scene);
 		}
 	}
 	break;
@@ -538,6 +546,24 @@ BOOL RegisterWindowClass(Application* application)						// Register A Window Cla
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	CSettings::Init();
+	/*
+	bool glm::gtx::intersect::intersectLineTriangle	(	genType const & 	orig,
+genType const & 	dir,
+genType const & 	vert0,
+genType const & 	vert1,
+genType const & 	vert2,
+genType & 	position 
+)	
+*/
+	
+	/*glm::vec3 orig(1, 1, 20), to(2, 1, 0), vert0(0, 0, 0), vert1(0, 5, 0), vert2(5, 0, 0), position, baryPosition;
+	glm::vec3 dir = to - orig;
+	bool lineResult = glm::intersectLineTriangle(orig, dir, vert2, vert0, vert1, position);
+	bool rayResult  = glm::intersectRayTriangle(orig, dir, vert0, vert2, vert1, baryPosition);
+	glm::vec3 planeOrig(1, 0, 0), planeNormal(0, 0, 1);
+	float distance;
+	bool planeResult = glm::intersectRayPlane(orig, 0.5f*dir, planeOrig, planeNormal, distance);*/
 	//MessageBox(HWND_DESKTOP, "Attach WinDbg and press OK", MB_OK, MB_ICONINFORMATION);
 	g_hIcon = NULL;
 
@@ -548,7 +574,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	MSG					msg;											// Window Message Structure
 	DWORD				tickCount;										// Used For The Tick Counter
 #ifdef _DEBUG
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	long lBreakAlloc = 0;
 	if (lBreakAlloc > 0)
 	{
@@ -585,7 +611,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		g_texsize = std::stoi(v[4]);
 	}
 	
-	g_vpControl = new ViewPortControl("VP3D");
+	CSettings::SetFloat(FloatMPPh, g_mpph);
+	CSettings::SetFloat(FloatMPPv, g_mppv);
+
+	g_vpControl = new CViewPortControl("VP3D");
 	g_Minimap = new CMinimap("VPMiniMap");
 
 	//return Deinitialize();
@@ -652,19 +681,26 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			DebugMessage(&g_dwi, "Hello");
 #endif
 			
-			if (Initialize(&window, &keys) == FALSE)					// Call User Intialization
-			{
+			//if (0/*Initialize(&window, &keys) == FALSE*/)					// Call User Intialization
+			//{
 				// Failure
-				TerminateApplication(&window);							// Close Window, This Will Handle The Shutdown
-			}
+				//TerminateApplication(&window);							// Close Window, This Will Handle The Shutdown
+			//}
 
-			else														// Otherwise (Start The Message Pump)
-			{	// Initialize was a success
+			//else														// Otherwise (Start The Message Pump)
+			//{	// Initialize was a success
 				isMessagePumpActive = TRUE;								// Set isMessagePumpActive To TRUE
 				
 				while (isMessagePumpActive == TRUE)						// While The Message Pump Is Active
 				{
-					
+					if (!g_Initialized) {
+						if (g_Socket && g_Socket->Initialized) 
+						{
+							Initialize(&window, &keys);
+							g_Initialized = true;
+						}
+						
+					}
 					// Success Creating Window.  Check For Window Messages
 #ifdef _DEBUG
 					if (PeekMessage(&msg, g_dwi.hWnd, 0, 0, PM_REMOVE) != 0) {
@@ -713,7 +749,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						}
 					}
 				}														// Loop While isMessagePumpActive == TRUE
-			}															// If (Initialize (...
+			//}															// If (Initialize (...
 
 			DestroyWindowGL(g_vpControl->hWnd, g_vpControl->hDC, g_vpControl->hRC);															// Application Is Finished
 			DestroyWindowGL(g_Minimap->hWnd, g_Minimap->hDC, g_Minimap->hRC);
@@ -782,7 +818,7 @@ BOOL Initialize(GL_Window* window, Keys* keys)					// Any GL Init Code & User In
 
 
 
-	g_vpControl->Scene = new CScene(g_altFile, g_imgFile, g_datFile, g_lon, g_lat, g_mpph, g_mppv, g_texsize);	 
+	g_vpControl->Scene = new CScene(g_altFile, g_imgFile, g_datFile, g_lon, g_lat, g_mpph, g_mppv, g_texsize, &m);	 
 	g_vpControl->Scene->Socket = g_Socket;
 	g_vpControl->Scene->UI = g_UI;
 	g_vpControl->UI = g_UI;
@@ -802,12 +838,12 @@ BOOL Initialize(GL_Window* window, Keys* keys)					// Any GL Init Code & User In
 
 	g_vpControl->Scene->BuildVBOs();*/									// Build The VBOs
 	
-	g_vpControl->Camera->SetAll(0, 1, 0, 0, 0, 1, 0, 1, 0, 
+	g_vpControl->Camera->SetAll(0, 0, 0, 0, 0, 1, 0, 1, 0, 
 		60.0f, 4.0f/3.0f, 1.0f, 10000.0f,
 		0.01, LookAtCallback_);
 
 
-	
+	g_UI->FillInfoGrid(g_vpControl->Scene);
 
 
 	return TRUE;												// Return TRUE (Initialization Successful)
@@ -823,8 +859,8 @@ int Deinitialize(void)										// Any User DeInitialization Goes Here
 	}
 	if (g_Minimap)
 		delete g_Minimap;
-	if (g_Socket)
-		delete g_Socket;
+	/*if (g_Socket)
+		delete g_Socket;*/
 	if (g_UI)
 		delete g_UI;
 	if (g_hIcon)
@@ -836,7 +872,7 @@ void Update(DWORD milliseconds)								// Perform Motion Updates Here
 {
 	//g_flYRot += (float)(milliseconds) / 1000.0f * 25.0f;		// Consistantly Rotate The Scenery
 
-	if (g_keys->keyDown[VK_ESCAPE] == TRUE)					// Is ESC Being Pressed?
+/*	if (g_keys->keyDown[VK_ESCAPE] == TRUE)					// Is ESC Being Pressed?
 	{
 		TerminateApplication(g_window);						// Terminate The Program
 	}
@@ -844,7 +880,7 @@ void Update(DWORD milliseconds)								// Perform Motion Updates Here
 	if (g_keys->keyDown[VK_F1] == TRUE)						// Is F1 Being Pressed?
 	{
 		ToggleFullscreen(g_window);							// Toggle Fullscreen Mode
-	}
+	}*/
 }
 
 void Draw(void)
@@ -857,8 +893,8 @@ void Draw(void)
 
 		char szTitle[256] = { 0 };									// Build The Title String
 		sprintf(szTitle, "RadarClient v0.000 - %d FPS", g_nFPS);
-
-		SetWindowText(g_window->hWnd, szTitle);				// Set The Title
+		if (g_window)
+			SetWindowText(g_window->hWnd, szTitle);				// Set The Title
 	}
 	g_nFrames++;
 	// Increment Our FPS Counter

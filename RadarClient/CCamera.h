@@ -3,13 +3,14 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/rotate_vector.hpp"
+#include "glm/detail/type_mat.hpp"
 typedef void(*LookAtCallback)(double eyex, double eyey, double eyez, double centerx, double centery, double centerz, double upx, double upy, double upz);
 enum MovementType { FORWARD, BACKWARD, STRAFE_L, STRAFE_R };
 
 class CCamera {
 private:
 	glm::vec3 Position;
-	glm::vec3 Up0;
+	glm::vec3 Up0;	
 public:
 	
 	glm::vec3 Direction;
@@ -21,12 +22,14 @@ public:
 	float zFar;
 	float Speed;
 	glm::vec3 RadarPosition;
+	glm::vec3 MeshSize;
 	bool FixViewOnRadar = false;
+	
 
 	CCamera();
-	CCamera(float eyex, float eyey, float eyez, float centerx, float centery, float centerz, float upx, float upy, float upz, 
+	/*CCamera(float eyex, float eyey, float eyez, float centerx, float centery, float centerz, float upx, float upy, float upz, 
 		float fovy, float aspect, float zNear, float zFar,
-		float speed, LookAtCallback lookAt);
+		float speed, LookAtCallback lookAt);*/
 	~CCamera();
 
 	void SetAll(float eyex, float eyey, float eyez, float centerx, float centery, float centerz, float upx, float upy, float upz,
@@ -42,7 +45,7 @@ public:
 	void LookAt();
 	void MoveByView(double shift);
 	void Rotate(float amount, glm::vec3& axis);
-	void Translate(glm::vec3& direction);
+	void Move(glm::vec3 const & direction, bool preserveDirection);
 	void ApplyMovement(MovementType movement);
 
 	glm::mat4 GetView();
@@ -56,6 +59,11 @@ public:
 	float GetAzimut();
 
 	glm::vec3 GetDirection();
+
+	int flag0;
+	float left, right, top, bottom, znear, zfar;
+	glm::vec3 mmPosition, mmTo, mmUp;
+
 private:
 	LookAtCallback lookAt;
 };

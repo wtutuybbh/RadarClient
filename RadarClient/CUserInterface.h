@@ -8,21 +8,25 @@
 #include <vector>
 #include <tchar.h>
 
+#include "Util.h"
+
 #include "glm/glm.hpp"
 
 #define TEXT_LABEL_NOT_CONNECTED _T("Нет соединения")
 #define TEXT_LABEL_CONNECTED _T("Соединение установлено")
 #define TEXT_LABEL_SHOW _T("Выводить:")
 #define TEXT_LABEL_VIEW _T("Вид местности:")
+#define TEXT_LABEL_MARKUP _T("Разметка:")
 #define TEXT_LABEL_CAMERA_POSITION _T("Положение камеры:")
 #define TEXT_LABEL_CAMERA_DIRECTION _T("Направление камеры:")
 
-#define TEXT_BUTTON_CONNECT _T("Установить соединение")
-#define TEXT_BUTTON_DISCONNECT _T("Разорвать соединение")
+#define TEXT_BUTTON_CONNECT _T("Cоединить")
+#define TEXT_BUTTON_DISCONNECT _T("Разъединить")
+#define TEXT_BUTTON_TEST _T("Тест")
 
 #define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_RADAR _T("От радара")
-#define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_100M_ABOVE_RADAR _T("С высоты 100 м над радаром")
-#define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_1000M_ABOVE_RADAR _T("С высоты 1 км в над радаром")
+#define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_100M_ABOVE_RADAR _T("100м над радаром")
+#define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_1000M_ABOVE_RADAR _T("1км над радаром")
 
 #define TEXT_RADIOBUTTON_CAMERA_DIRECTION_FROM_RADAR_TO_NORTH _T("От радара на север")
 #define TEXT_RADIOBUTTON_CAMERA_DIRECTION_TO_RADAR _T("К радару")
@@ -32,14 +36,20 @@
 #define TEXT_CHECKBOX_POINTS _T("Точки")
 #define TEXT_CHECKBOX_SERIES _T("Траектории")
 #define TEXT_CHECKBOX_RLI _T("RLI-изображения")
-#define TEXT_CHECKBOX_FIXVIEWTORADAR _T("Фиксировать камеру на радар")
+#define TEXT_CHECKBOX_FIXVIEWTORADAR _T("Вид на радар")
+#define TEXT_CHECKBOX_MEASURE_DISTANCE _T("Измерения")
 
 #define TEXT_CHECKBOX_LANDSCAPE _T("Ландшафт")
 #define TEXT_CHECKBOX_MAP _T("Карта")
 
-#define TEXT_GRID_NAME _T("Список траекторий")
+#define TEXT_CHECKBOX_MARKUP_LINES _T("Линии")
+#define TEXT_CHECKBOX_MARKUP_LABELS _T("Числа")
 
-class ViewPortControl;
+#define TEXT_GRID_NAME _T("Список траекторий")
+#define TEXT_INFOGRID_NAME _T("Информация")
+
+class CScene;
+class CViewPortControl;
 class CRCSocket;
 
 class CUserInterface;
@@ -67,8 +77,8 @@ class CUserInterface
 {
 private:
 	int CurrentID;
-	int IsConnected_ID, Button_Connect_ID, Grid_ID, FixViewToRadar_ID;
-	int ObjOptions_ID[3], MapOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2];
+	int IsConnected_ID, Button_Connect_ID, Grid_ID, InfoGrid_ID, FixViewToRadar_ID, MeasureDistance_ID, Test_ID;
+	int ObjOptions_ID[3], MapOptions_ID[2], MarkupOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2];
 	//int Info_ID[]
 	void SetChecked(int id, bool checked);
 
@@ -78,62 +88,77 @@ private:
 
 	HFONT Font; // user interface font
 
-	HWND hg; //ZeeGrid's window handle
-public:
-	int Column1X, Column2X;
+	HWND GridHWND, InfoGridHWND; //ZeeGrid's window handle
+	int Column1X, Column2X, Column3X;
 	int VStep, VStepGrp;
-	int MinimapSize, PanelWidth;
+	int PanelWidth;
 	int ButtonHeight, ControlWidth, ControlWidthL, ControlWidthXL;
+	int GridX, GridY, InfoGridX, InfoGridY;
+	int GridWidth, InfoGridWidth;
+
+	virtual LRESULT Button_Connect(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_MarkupOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_FixViewToRadar(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_MeasureDistance(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Trackbar_CameraDirection_VTilt(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Trackbar_CameraDirection_Turn(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT InfoGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+public:
+	int MinimapSize;
 	HWND ParentHWND;
 	HFONT hDlgFont;
 	
 
 	ElementsMap Elements;
 
-	ViewPortControl *VPControl;
+	CViewPortControl *VPControl;
 	CRCSocket *Socket;
 
 	int InsertElement(DWORD xStyle, LPCSTR Class,LPCSTR Text, DWORD Style, int X, int Y, int Width, int Height, UIWndProc Action);
 	
-
-	virtual LRESULT Button_Connect(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-	virtual LRESULT Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT Checkbox_FixViewToRadar(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT Trackbar_CameraDirection_VTilt(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT Trackbar_CameraDirection_Turn(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
 	virtual LRESULT Wnd_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	virtual LRESULT Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	virtual LRESULT Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	CUserInterface(HWND parentHWND, CViewPortControl *vpControl,	CRCSocket *Socket, int panelWidth);
+	virtual ~CUserInterface();	
 
-	CUserInterface(HWND parentHWND, ViewPortControl *vpControl,	CRCSocket *Socket, int panelWidth);
-	~CUserInterface();	
-
-	void ConnectionStateChanged(bool IsConnected);
+	void ConnectionStateChanged(bool IsConnected) const;
 
 	bool GetCheckboxState_Points();
+	bool GetCheckboxState_Tracks();
+	bool GetCheckboxState_Map();
+	bool GetCheckboxState_AltitudeMap();
+	bool GetCheckboxState_MarkupLines();
+	bool GetCheckboxState_MarkupLabels();
 
 	int GetTrackbarValue_VTilt();
 	int GetTrackbarValue_Turn();
 	void SetTrackbarValue_VTilt(int val);
 	void SetTrackbarValue_Turn(int val);
 
-	void ControlEnable(int ID, bool enable);
+	void ControlEnable(int ID, bool enable) const;
 
-	bool IsVistaOrLater();
+	static bool IsVistaOrLater();
 
-	void Resize();
+	void Resize() const;
 
 	void InitGrid();
 
-	HFONT GetFont();
+	static HFONT GetFont();
 
 	void FillGrid(std::vector<TRK*> *tracks);
+	void FillInfoGrid(CScene *scene);
+
+	bool MeasureDistance() const;
+#ifdef _DEBUG
+	DebugWindowInfo *dwi;
+#endif
 };
 
