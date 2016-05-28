@@ -11,6 +11,10 @@
 *.userprefs
 
 # Build results
+GeoDataProvider/Debug/
+GeoDataProvider/Release/
+RadarClient/Debug/
+RadarClient/Release/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
