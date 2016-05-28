@@ -344,7 +344,7 @@ void CRCSocket::OnSrvMsg_DELTRACK(int* deltrackz, int N)
 			}
 		}
 	}
-	m->unlock();
+	m->unlock(); //against crash - but did not help
 }
 
 void CRCSocket::OnSrvMsg_LOCATION(RDRCURRPOS* d)
