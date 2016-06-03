@@ -260,7 +260,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		DrawBitmaps();
 	}
 
-	return false;
+	//return false;
 	//return false;
 	//old_Mesh->Draw(Camera);
 	glEnable(GL_LINE_SMOOTH);
