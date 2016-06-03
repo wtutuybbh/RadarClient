@@ -256,7 +256,8 @@ C3DObjectProgram* CRCPointModel::prog_s = NULL;
 void CRCPointModel::InitStructure()
 {
 	CRCPointModel::vbo_s = new C3DObjectVBO(false);
-	vbo_s->SetBuffer(CRCPointModel::CreateSphereR1(1));
+	vector<VBOData>* buffer = CRCPointModel::CreateSphereR1(1);
+	vbo_s->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 
 	CRCPointModel::prog_s = new C3DObjectProgram("CRCPoint.v.glsl", "CRCPoint.f.glsl", "vertex", NULL, "normal", NULL);
 }

@@ -708,14 +708,14 @@ bool CMesh::LoadHeightmap(int vpId)
 
 
 	vbo.insert_or_assign(vpId, new C3DObjectVBO(clearAfter));
-	vbo.at(vpId)->SetBuffer(buffer);
+	vbo.at(vpId)->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 
 	if (FreeImage_GetBPP(subimage) != 32)
 	{
 		FIBITMAP* tempImage = subimage;
 		subimage = FreeImage_ConvertTo32Bits(tempImage);
 	}
-	tex.insert_or_assign(vpId, new C3DObjectTexture(subimage, "tex", true, true));
+	tex.insert_or_assign(vpId, new C3DObjectTexture(subimage, "tex", true, false));
 
 
 	//outfile.close();
@@ -966,9 +966,11 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 	if (vpControl->Id == Main) {		
 		int useTexture_loc = prog.at(vpControl->Id)->GetUniformLocation("useTexture");
 		int y0_loc = prog.at(vpControl->Id)->GetUniformLocation("y0");
+		int usey0_loc = prog.at(vpControl->Id)->GetUniformLocation("useY0");
 
 		glUniform1i(useTexture_loc, UseTexture);
-		glUniform1i(y0_loc, UseAltitudeMap == 1 ? -1 : Y0);
+		glUniform1i(usey0_loc, UseAltitudeMap);
+		glUniform1f(y0_loc, Y0);
 		
 	}
 }
@@ -994,7 +996,7 @@ void CMesh::Init(int vpId)
 		buffer->push_back({ glm::vec4(m_Bounds[1].x, y, m_Bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 		buffer->push_back({ glm::vec4(m_Bounds[0].x, y, m_Bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
 
-		newvbo->SetBuffer(buffer);
+		newvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 
 		//newvbo->InitStructure();
 

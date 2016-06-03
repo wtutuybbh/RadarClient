@@ -205,14 +205,15 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	}
 	//Mesh->Draw(vpControl, GL_TRIANGLES);
 	//return true;
-
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//goto shader_debug;
-	//glDisable(GL_LIGHTING);
+	glDisable(GL_LIGHTING);
 	//glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 
 	//Mesh->UseTexture = vpControl->DisplayMap;
-	//glDisable(GL_LINE_SMOOTH);
+	glDisable(GL_LINE_SMOOTH);
 
 	Mesh->UseTexture = vpControl->UI->GetCheckboxState_Map();
 	Mesh->UseAltitudeMap = vpControl->UI->GetCheckboxState_AltitudeMap();
@@ -226,7 +227,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	Mesh3->UseTexture = vpControl->UI->GetCheckboxState_Map();
 	Mesh3->UseAltitudeMap = vpControl->UI->GetCheckboxState_AltitudeMap();
 	Mesh3->Draw(vpControl, GL_TRIANGLES);
-
+	//return false;
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	if (UI->GetCheckboxState_Points()) {
 		for (int i = 0; i < Sectors.size(); i++) {
@@ -390,7 +391,8 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 {
 	//old_Mesh->MiniMapDraw(Camera);
-
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	Mesh->Draw(vpControl, GL_TRIANGLES);
 	Mesh1->Draw(vpControl, GL_TRIANGLES);
 	Mesh2->Draw(vpControl, GL_TRIANGLES);
@@ -609,7 +611,7 @@ bool CScene::PrepareRayVBO()
 	rayArraySize = rayDensity*rayDensity * 6 * 2 + rayDensity * 6 * 4;
 	
 
-	int ZERO_ELEVATION = glm::radians(CSettings::GetFloat(FloatZeroElevation));
+	float ZERO_ELEVATION = glm::radians(CSettings::GetFloat(FloatZeroElevation));
 	a = -rayWidth / 2;
 	for (int i = 0; i <= rayDensity; i++) {
 		e = ZERO_ELEVATION - RAY_HEIGHT/2.0f;

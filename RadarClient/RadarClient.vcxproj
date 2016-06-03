@@ -256,9 +256,6 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <None Include="GLSL\MiniMapPointer.v.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="RadarClient.rc" />
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="..\Data\radar.png" />
   </ItemGroup>
   <ItemGroup>

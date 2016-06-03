@@ -45,7 +45,7 @@ void CSettings::Init()
 	
 	ints.insert_or_assign(IntRayDensity, 1);
 	
-	floats.insert_or_assign(FloatZeroElevation, 30);
+	floats.insert_or_assign(FloatZeroElevation, 30.0f);
 }
 
 glm::vec4 CSettings::GetColor(int key)
