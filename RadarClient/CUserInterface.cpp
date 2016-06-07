@@ -144,6 +144,10 @@ glm::vec3 CUserInterface::GetDirection()
 	return glm::vec3(-sin(e)*sin(a), cos(e), sin(e)*cos(a));
 }
 
+float CUserInterface::GetHeight()
+{
+	return GetTrackbarValue_VTilt(); //here elevation counts from top-up direction
+}
 
 int CUserInterface::InsertElement(DWORD xStyle, LPCSTR _class, LPCSTR text, DWORD style, int x, int y, int width, int height, UIWndProc action)
 {
@@ -258,9 +262,14 @@ LRESULT CUserInterface::Trackbar_CameraDirection_VTilt(HWND hwnd, UINT uMsg, WPA
 	
 	int val = SendMessage(GetDlgItem(hwnd, ID), TBM_GETPOS, 0, 0);
 
-	SetDlgItemText(ParentHWND, CameraDirectionValue_ID[0], std::to_string(val).c_str());
-	if (VPControl && VPControl->Camera)
-		VPControl->Camera->Direction = GetDirection();
+	//SetDlgItemText(ParentHWND, CameraDirectionValue_ID[0], std::to_string(val).c_str());
+	if (VPControl && VPControl->Camera && VPControl->Scene)
+		//VPControl->Camera->Direction = GetDirection();
+	{
+		glm::vec3 p = VPControl->Camera->GetPosition();
+		
+		VPControl->Camera->SetPosition(p.x, VPControl->Scene->y0 + (5000 - VPControl->Scene->y0)*(100 - val)/100/ VPControl->Scene->mppv, p.z);
+	}
 
 	return LRESULT();
 }

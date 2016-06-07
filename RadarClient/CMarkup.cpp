@@ -104,8 +104,8 @@ CMarkup::CMarkup(glm::vec4 origin) : C3DObjectModel (Main,
 
 	C3DObjectVBO *mmvbo = new C3DObjectVBO(false);
 
-	vbo.at(Main)->SetBuffer(buffer);
-	mmvbo->SetBuffer(buffer);
+	vbo.at(Main)->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+	mmvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 
 	int lineMarkupCount = vertexCount_Axis + markCount * 2;
 	unsigned short * lineMarkup = new unsigned short[lineMarkupCount];

@@ -31,10 +31,17 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 		return;
 	//mpph, mppv, pts[i].R * init->dR, init->begAzm + pts[i].B * init->dAzm, ZERO_ELEVATION + init->begElv + pts[i].E * init->dElv
 	float r, a, e;
-	vector<VBOData> *buffer = new vector<VBOData>(info_p->N);
+	vector<VBOData> *vbuffer = (vector<VBOData> *)vbo.at(Main)->GetBuffer();
+	if (vbuffer) {
+		vbuffer->clear();
+		vbuffer->resize(info_p->N);
+	}
+	else {
+		vbuffer = new vector<VBOData>(info_p->N);
+	}
 	glm::vec4 mincolor = CSettings::GetColor(ColorPointLowLevel);
 	glm::vec4 maxcolor = CSettings::GetColor(ColorPointHighLevel);
-	int zeroElevation = glm::radians(CSettings::GetFloat(FloatZeroElevation));
+	float zeroElevation = glm::radians(CSettings::GetFloat(FloatZeroElevation));
 	for (int i = 0; i < info_p->N; i++) 
 	{
 		if (pts[i].Amp > maxAmp)
@@ -42,15 +49,15 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 		r = pts[i].R * init->dR;
 		a = init->begAzm + pts[i].B * init->dAzm;
 		e = zeroElevation + init->begElv + pts[i].E * init->dElv;
-		(*buffer)[i].vert = origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0);
+		(*vbuffer)[i].vert = origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0);
 	}
 	for (int i = 0; i < info_p->N; i++)
 	{
-		(*buffer)[i].color = mincolor + pts[i].Amp / maxAmp * (maxcolor - mincolor);
+		(*vbuffer)[i].color = mincolor + pts[i].Amp / maxAmp * (maxcolor - mincolor);
 	}
-	vbo.at(Main)->SetBuffer(buffer);
+	vbo.at(Main)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
 	vbo.at(Main)->NeedsReload = true;
-	vbo.at(MiniMap)->SetBuffer(buffer);
+	vbo.at(MiniMap)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
 	vbo.at(MiniMap)->NeedsReload = true;
 }
 
@@ -71,7 +78,7 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 {
 	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
 
-	vector<VBOData> *buffer = vbo_->GetBuffer();
+	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
 
 	if (!buffer || buffer->size() == 0)
 		return -1;
@@ -99,7 +106,7 @@ void CSector::SelectPoint(int vpId, int pointIndex)
 {
 	C3DObjectVBO *vbo_ = vbo.at(vpId);
 
-	vector<VBOData> *buffer = vbo_->GetBuffer();
+	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
 
 	if (!buffer || buffer->size() == 0)
 		return;

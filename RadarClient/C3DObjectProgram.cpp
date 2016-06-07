@@ -48,22 +48,22 @@ void C3DObjectProgram::Bind()
 		//UseProgram();
 		if (vertexAttribName) {
 			GLint vertex_attr_loc = glGetAttribLocation(this->ProgramId, vertexAttribName);
-			glVertexAttribPointer(vertex_attr_loc, 4, GL_FLOAT, GL_FALSE, sizeof(VBOData), (void*)0);
+			glVertexAttribPointer(vertex_attr_loc, 4, GL_FLOAT, GL_FALSE, elementSize, (void*)(sizeof(float) * vertexPlace));
 			glEnableVertexAttribArray(vertex_attr_loc);
 		}
 		if (textureAttribName) {
 			GLint texcoor_attr_loc = glGetAttribLocation(this->ProgramId, textureAttribName);
-			glVertexAttribPointer(texcoor_attr_loc, 2, GL_FLOAT, GL_FALSE, sizeof(VBOData), (void*)(sizeof(float) * 11));
+			glVertexAttribPointer(texcoor_attr_loc, 2, GL_FLOAT, GL_FALSE, elementSize, (void*)(sizeof(float) * texcoorPlace));
 			glEnableVertexAttribArray(texcoor_attr_loc);
 		}
 		if (normalAttribName) {
 			GLint normal_attr_loc = glGetAttribLocation(this->ProgramId, normalAttribName);
-			glVertexAttribPointer(normal_attr_loc, 3, GL_FLOAT, GL_FALSE, sizeof(VBOData), (void*)(sizeof(float) * 4));
+			glVertexAttribPointer(normal_attr_loc, 3, GL_FLOAT, GL_FALSE, elementSize, (void*)(sizeof(float) * normalPlace));
 			glEnableVertexAttribArray(normal_attr_loc);
 		}
 		if (colorAttribName) {
 			GLint color_attr_loc = glGetAttribLocation(this->ProgramId, colorAttribName);
-			glVertexAttribPointer(color_attr_loc, 3, GL_FLOAT, GL_FALSE, sizeof(VBOData), (void*)(sizeof(float) * 7));
+			glVertexAttribPointer(color_attr_loc, 3, GL_FLOAT, GL_FALSE, elementSize, (void*)(sizeof(float) * colorPlace));
 			glEnableVertexAttribArray(color_attr_loc);
 		}
 	}

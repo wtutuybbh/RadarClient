@@ -418,12 +418,12 @@ bool C3DObjectModel::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, gl
 {
 	try {
 		glm::vec3 vert0, vert1, vert2;
-		std::vector<VBOData> buffer = *vbo.at(vpId)->GetBuffer();
+		std::vector<VBOData> *buffer = (std::vector<VBOData> *)vbo.at(vpId)->GetBuffer();
 
-		for (unsigned int i = 0; i < buffer.size(); i += 3) {
-			vert0 = glm::vec3(modelMatrix.at(vpId)*buffer[i].vert);
-			vert1 = glm::vec3(modelMatrix.at(vpId)*buffer[i + 1].vert);
-			vert2 = glm::vec3(modelMatrix.at(vpId)*buffer[i + 2].vert);
+		for (unsigned int i = 0; i < buffer->size(); i += 3) {
+			vert0 = glm::vec3(modelMatrix.at(vpId)*(*buffer)[i].vert);
+			vert1 = glm::vec3(modelMatrix.at(vpId)*(*buffer)[i + 1].vert);
+			vert2 = glm::vec3(modelMatrix.at(vpId)*(*buffer)[i + 2].vert);
 			if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, position)) {
 				return true;
 			}

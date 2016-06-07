@@ -2,8 +2,8 @@
 
 C3DObjectVBO::~C3DObjectVBO()
 {
-	if (buffer) {
-		buffer->clear();
+	if (buffer && clearAfter) {
+		//buffer->clear();
 		delete buffer;
 	}
 	if (idxArrays) {
@@ -34,22 +34,26 @@ C3DObjectVBO::C3DObjectVBO(bool clearAfter)
 
 C3DObjectVBO* C3DObjectVBO::InitStructure()
 {
-	buffer = new std::vector<VBOData>;
+	auto b = new std::vector<VBOData>;
 	//default structure
-	buffer->push_back({ glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(-1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
-	buffer->push_back({ glm::vec4(1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
+	b->push_back({ glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	b->push_back({ glm::vec4(-1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
+	b->push_back({ glm::vec4(1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
 
-	buffer->push_back({ glm::vec4(1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
-	buffer->push_back({ glm::vec4(1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
-	buffer->push_back({ glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+	b->push_back({ glm::vec4(1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
+	b->push_back({ glm::vec4(1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
+	b->push_back({ glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+
+	buffer = b;
 
 	return this;
 }
 
-void C3DObjectVBO::SetBuffer(std::vector<VBOData>* buffer)
+void C3DObjectVBO::SetBuffer(void *vbuffer, void* buffer, int size)
 {
+	this->vbuffer = vbuffer;
 	this->buffer = buffer;
+	this->bufferSize = size;
 }
 
 void C3DObjectVBO::Bind() const
@@ -65,14 +69,9 @@ void C3DObjectVBO::LoadToGPU()
 
 		glGenBuffers(1, &vboId);
 		glBindBuffer(GL_ARRAY_BUFFER, vboId);
-		glBufferData(GL_ARRAY_BUFFER, buffer->size() * sizeof(VBOData), &(*buffer)[0], GL_STATIC_DRAW);
-		bufferSize = buffer->size();
+		glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(VBOData), buffer, GL_STATIC_DRAW);
+		//bufferSize = buffer->size();
 
-		if (clearAfter) {
-			//glFinish();			
-			buffer->clear(); //destroy all vbo buffer objects
-			std::vector<VBOData>().swap(*buffer); //free memory used by vector itself
-		}
 
 		if (idxArrays)
 		{
@@ -91,17 +90,13 @@ void C3DObjectVBO::LoadToGPU()
 
 void C3DObjectVBO::Reload()
 {
-	if (buffer == NULL || buffer->size() == 0)
+	if (buffer == NULL || bufferSize == 0)
 	{
 		return;
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, vboId);
-	glBufferData(GL_ARRAY_BUFFER, buffer->size() * sizeof(VBOData), &(*buffer)[0], GL_STATIC_DRAW);
-	bufferSize = buffer->size();
-	if (clearAfter) {
-		buffer->clear(); //destroy all vbo buffer objects
-		std::vector<VBOData>().swap(*buffer); //free memory used by vector itself
-	}
+	glBufferData(GL_ARRAY_BUFFER, bufferSize * elementSize, buffer, GL_STATIC_DRAW);
+	
 	if (idxArrays)
 	{
 		for (int i = 0; i < idxArrays->size(); i++)
@@ -120,7 +115,7 @@ bool C3DObjectVBO::Ready() const
 
 bool C3DObjectVBO::HasBuffer() const
 {
-	return buffer != NULL && buffer->size() > 0;
+	return buffer != NULL && bufferSize > 0;
 }
 
 void C3DObjectVBO::UnBind()
@@ -131,8 +126,7 @@ void C3DObjectVBO::UnBind()
 
 void C3DObjectVBO::Draw(GLenum mode) const
 {
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	if (idxArrays)
 	{
 		GLenum mode;
@@ -158,9 +152,9 @@ void C3DObjectVBO::Draw(GLenum mode) const
 	}
 }
 
-std::vector<VBOData>* C3DObjectVBO::GetBuffer() const
+void* C3DObjectVBO::GetBuffer() const
 {
-	return buffer;
+	return vbuffer;
 }
 
 void C3DObjectVBO::AddIndexArray(unsigned short* idxArray, int length, GLenum mode)
@@ -182,7 +176,7 @@ void C3DObjectVBO::AddIndexArray(unsigned short* idxArray, int length, GLenum mo
 C3DObjectVBO* C3DObjectVBO::Clone()
 {
 	C3DObjectVBO* vbo_ = new C3DObjectVBO(clearAfter);
-	vbo_->SetBuffer(buffer);
+	vbo_->SetBuffer(vbuffer, buffer, bufferSize);
 	if (idxArrays)
 	{
 		for (int i = 0; i < idxArrays->size(); i++)

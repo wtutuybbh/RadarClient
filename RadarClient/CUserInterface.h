@@ -83,6 +83,7 @@ private:
 	void SetChecked(int id, bool checked);
 
 	glm::vec3 GetDirection();
+	float GetHeight();
 
 	HMODULE hgridmod; //ZeeGrid's dll handle
 

@@ -96,7 +96,7 @@ LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wPara
 					float a = Camera->GetAzimut();
 
 					UI->SetTrackbarValue_Turn(50 * a / M_PI + 50);
-					UI->SetTrackbarValue_VTilt(100 * e / M_PI);
+					//UI->SetTrackbarValue_VTilt(100 * e / M_PI);
 				}
 			}
 			Camera->startPosition = Camera->newPosition;

@@ -67,7 +67,7 @@ CMiniMapPointer::CMiniMapPointer(int vpId, CScene *scene) :
 	buffer->push_back({ glm::vec4(scene->MeshSize.x, y, -scene->MeshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 	buffer->push_back({ glm::vec4(-scene->MeshSize.x, y, -scene->MeshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
 
-	vbo.at(vpId)->SetBuffer(buffer);
+	vbo.at(vpId)->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 
 	scaleMatrix.insert_or_assign(vpId, glm::scale(glm::vec3(0.03, 0.015, 0.03)));
 }
