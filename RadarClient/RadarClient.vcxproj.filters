@@ -166,11 +166,6 @@
     <None Include="GLSL\CSector.v.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="RadarClient.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="..\Data\radar.png">
       <Filter>Resource Files</Filter>
     </Image>
