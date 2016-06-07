@@ -135,7 +135,7 @@ class CMesh : public C3DObjectModel
 	AltitudeMap* aMap;							// Heightmap Data
 	AltitudeMapHeader* aMapH;
 	ImageMapHeader* iMapH;
-	glm::vec3 * m_Bounds;
+	glm::vec3 * Bounds;
 	
 
 	void *bitmap;
@@ -146,10 +146,14 @@ class CMesh : public C3DObjectModel
 	float shiftX, shiftZ;
 public:
 	glm::vec3 Size;
-	static float Y0;
+	static float Y0, AverageHeight;
+	static CMesh** Meshs;
+	static int TotalMeshsCount;
+	float LocalAverageHeight;
+	static int TotalVertexCount;
 	int UseTexture, UseAltitudeMap;
 	CMesh(int vpId, CScene *scn, bool clearAfter, float shiftX, float shiftZ);
-	float CenterHeight, AverageHeight;
+	float CenterHeight;
 	bool IntersectLine(int vpId, glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position) override;
 	void BindUniforms(CViewPortControl *vpControl) override;
 	glm::vec3 * CMesh::GetBounds() override;

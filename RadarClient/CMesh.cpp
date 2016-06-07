@@ -571,6 +571,8 @@ void old_CMesh::BuildVBOs()
 }
 
 float CMesh::Y0;
+
+//int CMesh::TotalVertexCount;
 bool CMesh::LoadHeightmap(int vpId)
 {
 	iMapH = GetImageMapHeader(scn->imgFile.data(), scn->datFile.data());
@@ -623,9 +625,9 @@ bool CMesh::LoadHeightmap(int vpId)
 		if (aMap->data[i] > maxheight) maxheight = aMap->data[i];
 		if (aMap->data[i] < minheight) minheight = aMap->data[i];
 	}
-	m_Bounds = new glm::vec3[2];
-	m_Bounds[0].x = m_Bounds[0].y = m_Bounds[0].z = FLT_MAX;
-	m_Bounds[1].x = m_Bounds[1].y = m_Bounds[1].z = FLT_MIN;
+	Bounds = new glm::vec3[2];
+	Bounds[0].x = Bounds[0].y = Bounds[0].z = FLT_MAX;
+	Bounds[1].x = Bounds[1].y = Bounds[1].z = FLT_MIN;
 
 	float lonStretch = aMapH->dlon * cnvrt::londg2m(1, aMapH->latSW + aMapH->dlat * aMapH->Nlat / 2.0) / scn->mpph;
 	float latStretch = aMapH->dlat * cnvrt::latdg2m(1, aMapH->latSW + aMapH->dlat * aMapH->Nlat / 2.0) / scn->mpph;
@@ -633,7 +635,7 @@ bool CMesh::LoadHeightmap(int vpId)
 	float absoluteShiftX = shiftX * lonStretch * (aMap->sizeX - 1);
 	float absoluteShiftZ = shiftZ * latStretch * (aMap->sizeY - 1);
 
-	AverageHeight = 0;
+	LocalAverageHeight = 0;
 
 	VBOData tmp;
 	float minh = CSettings::GetFloat(FloatMinAltitude), maxh = CSettings::GetFloat(FloatMaxAltitude), h, level;
@@ -665,9 +667,9 @@ bool CMesh::LoadHeightmap(int vpId)
 				
 				buffer->push_back(tmp);
 
-				rcutils::takeminmax(tmp.vert.x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-				rcutils::takeminmax(tmp.vert.y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-				rcutils::takeminmax(tmp.vert.z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+				rcutils::takeminmax(tmp.vert.x, &(Bounds[0].x), &(Bounds[1].x));
+				rcutils::takeminmax(tmp.vert.y, &(Bounds[0].y), &(Bounds[1].y));
+				rcutils::takeminmax(tmp.vert.z, &(Bounds[0].z), &(Bounds[1].z));
 
 				/*m_pVertices[nIndex].x = lonStretch * (-flX + (aMap->sizeX / 2.0));
 				rcutils::takeminmax(m_pVertices[nIndex].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
@@ -683,7 +685,7 @@ bool CMesh::LoadHeightmap(int vpId)
 				m_pTexCoords[nIndex].y = flZ / aMap->sizeY;*/
 
 				if (nTri == 0)
-					AverageHeight += tmp.vert.y;
+					LocalAverageHeight += tmp.vert.y;
 				// Increment Our Index
 				nIndex++;
 
@@ -694,7 +696,7 @@ bool CMesh::LoadHeightmap(int vpId)
 		//outfile << std::endl;
 		//outfile.write(buff, 2);
 	}
-	AverageHeight /= aMap->sizeY * aMap->sizeX;
+	LocalAverageHeight /= aMap->sizeY * aMap->sizeX;
 
 	prog.insert_or_assign(vpId, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", NULL, "color"));
 	//prog->CreateProgram();
@@ -937,7 +939,7 @@ CMesh::CMesh(int vpId, CScene* scn, bool clearAfter, float shiftX, float shiftZ)
 {
 	this->scn = scn;
 	aMap = NULL;
-	m_Bounds = NULL;
+	Bounds = NULL;
 	iMapH = NULL;
 	aMapH = NULL;
 	this->texsize = scn->texsize;
@@ -950,6 +952,110 @@ CMesh::CMesh(int vpId, CScene* scn, bool clearAfter, float shiftX, float shiftZ)
 
 bool CMesh::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, glm::vec3& position)
 {
+	glm::vec3 planeOrig(0, AverageHeight, 0), planeNormal(0, 1, 0);
+	float distance;
+	bool planeResult = glm::intersectRayPlane(orig, dir, planeOrig, planeNormal, distance);
+	glm::vec3 approxPoint = orig + distance * dir;
+	CMesh *m;
+	glm::vec3 *b;
+	for (int i = 0; i < CMesh::TotalMeshsCount; i++) {
+		m = CMesh::Meshs[i];
+		b = m->Bounds;
+		//find appropriate part of surface by testing bounds:
+		if (approxPoint.x > b[0].x && approxPoint.z > b[0].z && approxPoint.x <= b[1].x && approxPoint.z <= b[1].z) {			
+			break;
+		}
+	}
+	//now work with pointer m:
+	//grid coordinates:
+	int ix0 = -aMap->sizeX * (approxPoint.x - b[1].x) / (b[1].x - b[0].x);
+	int iy0 = aMap->sizeY * (approxPoint.z - b[0].z) / (b[1].z - b[0].z);
+	if (ix0 < 0 || ix0 >= aMap->sizeX || iy0 < 0 || iy0 >= aMap->sizeY) {
+		ix0 = aMap->sizeX / 2;
+		iy0 = aMap->sizeY / 2;
+	}
+	// 2. test triangles around approximate intersection point
+
+	m->G
+
+	int X = aMap->sizeX - 1, Y = aMap->sizeY - 1;
+
+	if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (iy0 * X + ix0)], m_pVertices[6 * (iy0 * X + ix0) + 1], m_pVertices[6 * (iy0 * X + ix0) + 2], position))
+		return true;
+	if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (iy0 * X + ix0) + 3], m_pVertices[6 * (iy0 * X + ix0) + 4], m_pVertices[6 * (iy0 * X + ix0) + 5], position))
+		return true;
+
+	int level = 1;
+	int x, y;
+	bool found = false;
+	while (ix0 - level >= 0 || ix0 + level < X || iy0 - level >= 0 || iy0 + level < Y)
+	{
+		if (iy0 - level >= 0) {
+			y = iy0 - level;
+			for (x = max(ix0 - level, 0); x < min(ix0 + level, X); x++)
+			{
+				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x)], m_pVertices[6 * (y * X + x) + 1], m_pVertices[6 * (y * X + x) + 2], position))
+				{
+					found = true; break;
+				}
+				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x) + 3], m_pVertices[6 * (y * X + x) + 4], m_pVertices[6 * (y * X + x) + 5], position))
+				{
+					found = true; break;
+				}
+			}
+			if (found) break;
+		}
+		if (ix0 + level < X) {
+			x = ix0 + level;
+			for (y = max(iy0 - level, 0); y < min(iy0 + level, Y); y++)
+			{
+				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x)], m_pVertices[6 * (y * X + x) + 1], m_pVertices[6 * (y * X + x) + 2], position))
+				{
+					found = true; break;
+				}
+				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x) + 3], m_pVertices[6 * (y * X + x) + 4], m_pVertices[6 * (y * X + x) + 5], position))
+				{
+					found = true; break;
+				}
+			}
+			if (found) break;
+		}
+		if (iy0 + level < Y)
+		{
+			y = iy0 + level;
+			for (x = min(ix0 + level, X - 1); x > max(ix0 - level, 0); x--)
+			{
+				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x)], m_pVertices[6 * (y * X + x) + 1], m_pVertices[6 * (y * X + x) + 2], position))
+				{
+					found = true; break;
+				}
+				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x) + 3], m_pVertices[6 * (y * X + x) + 4], m_pVertices[6 * (y * X + x) + 5], position))
+				{
+					found = true; break;
+				}
+			}
+			if (found) break;
+		}
+		if (ix0 - level >= 0)
+		{
+			x = ix0 - level;
+			for (y = min(iy0 + level, Y - 1); y > max(iy0 - level, 0); y--)
+			{
+				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x)], m_pVertices[6 * (y * X + x) + 1], m_pVertices[6 * (y * X + x) + 2], position))
+				{
+					found = true; break;
+				}
+				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x) + 3], m_pVertices[6 * (y * X + x) + 4], m_pVertices[6 * (y * X + x) + 5], position))
+				{
+					found = true; break;
+				}
+			}
+			if (found) break;
+		}
+		level++;
+	}
+	level++;
+	return found;
 	return false;
 }
 
@@ -977,7 +1083,7 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 
 glm::vec3 * CMesh::GetBounds()
 {
-	return m_Bounds;
+	return Bounds;
 }
 
 void CMesh::Init(int vpId)
@@ -988,13 +1094,13 @@ void CMesh::Init(int vpId)
 		
 		std::vector<VBOData> *buffer = new std::vector<VBOData>;
 		float y = 0;// (m_Bounds[0].y + m_Bounds[1].y) / 2;
-		buffer->push_back({ glm::vec4(m_Bounds[0].x, y, m_Bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
-		buffer->push_back({ glm::vec4(m_Bounds[0].x, y, m_Bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
-		buffer->push_back({ glm::vec4(m_Bounds[1].x, y, m_Bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
+		buffer->push_back({ glm::vec4(Bounds[0].x, y, Bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
+		buffer->push_back({ glm::vec4(Bounds[0].x, y, Bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
+		buffer->push_back({ glm::vec4(Bounds[1].x, y, Bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
 
-		buffer->push_back({ glm::vec4(m_Bounds[1].x, y, m_Bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
-		buffer->push_back({ glm::vec4(m_Bounds[1].x, y, m_Bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-		buffer->push_back({ glm::vec4(m_Bounds[0].x, y, m_Bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
+		buffer->push_back({ glm::vec4(Bounds[1].x, y, Bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
+		buffer->push_back({ glm::vec4(Bounds[1].x, y, Bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+		buffer->push_back({ glm::vec4(Bounds[0].x, y, Bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
 
 		newvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 
