@@ -28,6 +28,9 @@
 	geocenter.x = lonc;
 	geocenter.y = latc;
 }*/
+float CMesh::AverageHeight;
+CMesh **CMesh::Meshs;
+int CMesh::TotalMeshsCount;
 CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize, mutex *m) {
 
 	this->m = m;
@@ -82,6 +85,10 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	rcutils::takeminmax(Mesh3->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
 	rcutils::takeminmax(Mesh3->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
 
+	CMesh::AverageHeight = (Mesh->AverageHeight + Mesh1->AverageHeight + Mesh2->AverageHeight + Mesh3->AverageHeight)/4;
+
+
+
 	MeshSize = m_Bounds[1] - m_Bounds[0];
 
 	Camera->MeshSize = Mesh->Size = Mesh1->Size = Mesh2->Size = Mesh3->Size = MeshSize;
@@ -90,6 +97,13 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	Mesh1->Init(MiniMap);
 	Mesh2->Init(MiniMap);
 	Mesh3->Init(MiniMap);
+
+	CMesh::Meshs = new CMesh*[4];
+	CMesh::Meshs[0] = Mesh;
+	CMesh::Meshs[1] = Mesh1;
+	CMesh::Meshs[2] = Mesh2;
+	CMesh::Meshs[3] = Mesh3;
+	CMesh::TotalMeshsCount = 4;
 
 	mmPointer = new CMiniMapPointer(MiniMap, this);
 	y0 = (Mesh->CenterHeight + Mesh1->CenterHeight + Mesh2->CenterHeight + Mesh3->CenterHeight) / 4 / mppv;
@@ -896,10 +910,13 @@ C3DObjectModel* CScene::GetFirstTrackBetweenPoints(int vpId, glm::vec3 p0, glm::
 	return NULL;
 }
 
-old_C3DObject* CScene::GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const
+C3DObjectModel* CScene::GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const
 {
 	glm::vec3 dir = p1 - p0, position;
-	old_Mesh->IntersectLine(p0, dir, position);
+	//old_Mesh->IntersectLine(p0, dir, position);
+	if (CMesh::Meshs && CMesh::Meshs[0]) {
+		CMesh::Meshs[0]->IntersectLine(Main, p0, dir, position);
+	}
 	return NULL;
 }
 

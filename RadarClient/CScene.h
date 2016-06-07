@@ -161,7 +161,7 @@ public:
 	C3DObjectModel *GetObjectAtMiniMapPosition(int vpId, glm::vec3 p0, glm::vec3 p1) const;
 	C3DObjectModel *GetSectorPoint(CViewPortControl *vpControl, glm::vec2 screenPoint, int& index);
 	C3DObjectModel *GetFirstTrackBetweenPoints(int vpId, glm::vec3 p0, glm::vec3 p1) const; //returns point from track under cursor
-	old_C3DObject *GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const;
+	C3DObjectModel *GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const;
 
 	glm::vec2 CameraXYForMiniMap() const;
 

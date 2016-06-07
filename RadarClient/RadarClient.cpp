@@ -546,6 +546,8 @@ BOOL RegisterWindowClass(Application* application)						// Register A Window Cla
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	//CMesh::AverageHeight = 0;
+	//CMesh::TotalVertexCount = 0;
 	CSettings::Init();
 	/*
 	bool glm::gtx::intersect::intersectLineTriangle	(	genType const & 	orig,
