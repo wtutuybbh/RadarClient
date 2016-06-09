@@ -453,6 +453,11 @@ void C3DObjectModel::Init(int vpId)
 {
 }
 
+C3DObjectVBO* C3DObjectModel::GetC3DObjectVBO(int vpId)
+{
+	return vbo.at(vpId);
+}
+
 glm::vec3* C3DObjectModel::GetBounds()
 {
 	return NULL;

@@ -950,12 +950,17 @@ CMesh::CMesh(int vpId, CScene* scn, bool clearAfter, float shiftX, float shiftZ)
 	UseTexture = 1;
 }
 
-bool CMesh::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, glm::vec3& position)
+bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)
 {
-	glm::vec3 planeOrig(0, AverageHeight, 0), planeNormal(0, 1, 0);
+	/*
+	glm::vec4 planeOrig(0, AverageHeight, 0, 1), planeNormal(0, 1, 0, 0);
 	float distance;
+	glm::vec4 orig(orig_, 1);
+	glm::vec4 dir(dir_, 0);
+	glm::vec4 position;
+
 	bool planeResult = glm::intersectRayPlane(orig, dir, planeOrig, planeNormal, distance);
-	glm::vec3 approxPoint = orig + distance * dir;
+	glm::vec4 approxPoint = orig + distance * dir;
 	CMesh *m;
 	glm::vec3 *b;
 	for (int i = 0; i < CMesh::TotalMeshsCount; i++) {
@@ -976,13 +981,13 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, glm::vec3& 
 	}
 	// 2. test triangles around approximate intersection point
 
-	m->G
+	vector<VBOData> *buffer = (vector<VBOData> *)m->GetC3DObjectVBO(Main)->GetBuffer();
 
 	int X = aMap->sizeX - 1, Y = aMap->sizeY - 1;
 
-	if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (iy0 * X + ix0)], m_pVertices[6 * (iy0 * X + ix0) + 1], m_pVertices[6 * (iy0 * X + ix0) + 2], position))
+	if (glm::intersectLineTriangle(orig, dir, buffer->at(6 * (iy0 * X + ix0)).vert, buffer->at(6 * (iy0 * X + ix0) + 1).vert, buffer->at(6 * (iy0 * X + ix0) + 2).vert, position))
 		return true;
-	if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (iy0 * X + ix0) + 3], m_pVertices[6 * (iy0 * X + ix0) + 4], m_pVertices[6 * (iy0 * X + ix0) + 5], position))
+	if (glm::intersectLineTriangle(orig, dir, buffer->at(6 * (iy0 * X + ix0) + 3).vert, buffer->at(6 * (iy0 * X + ix0) + 4).vert, buffer->at(6 * (iy0 * X + ix0) + 5).vert, position))
 		return true;
 
 	int level = 1;
@@ -994,11 +999,11 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, glm::vec3& 
 			y = iy0 - level;
 			for (x = max(ix0 - level, 0); x < min(ix0 + level, X); x++)
 			{
-				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x)], m_pVertices[6 * (y * X + x) + 1], m_pVertices[6 * (y * X + x) + 2], position))
+				if (glm::intersectLineTriangle(orig, dir, buffer->at(6 * (y * X + x)).vert, buffer->at(6 * (y * X + x) + 1).vert, buffer->at(6 * (y * X + x) + 2).vert, position))
 				{
 					found = true; break;
 				}
-				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x) + 3], m_pVertices[6 * (y * X + x) + 4], m_pVertices[6 * (y * X + x) + 5], position))
+				if (glm::intersectLineTriangle(orig, dir, buffer->at(6 * (y * X + x) + 3).vert, buffer->at(6 * (y * X + x) + 4).vert, buffer->at(6 * (y * X + x) + 5).vert, position))
 				{
 					found = true; break;
 				}
@@ -1009,11 +1014,11 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, glm::vec3& 
 			x = ix0 + level;
 			for (y = max(iy0 - level, 0); y < min(iy0 + level, Y); y++)
 			{
-				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x)], m_pVertices[6 * (y * X + x) + 1], m_pVertices[6 * (y * X + x) + 2], position))
+				if (glm::intersectLineTriangle(orig, dir, buffer->at(6 * (y * X + x)).vert, buffer->at(6 * (y * X + x) + 1).vert, buffer->at(6 * (y * X + x) + 2).vert, position))
 				{
 					found = true; break;
 				}
-				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x) + 3], m_pVertices[6 * (y * X + x) + 4], m_pVertices[6 * (y * X + x) + 5], position))
+				if (glm::intersectLineTriangle(orig, dir, buffer->at(6 * (y * X + x) + 3).vert, buffer->at(6 * (y * X + x) + 4).vert, buffer->at(6 * (y * X + x) + 5).vert, position))
 				{
 					found = true; break;
 				}
@@ -1025,11 +1030,11 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, glm::vec3& 
 			y = iy0 + level;
 			for (x = min(ix0 + level, X - 1); x > max(ix0 - level, 0); x--)
 			{
-				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x)], m_pVertices[6 * (y * X + x) + 1], m_pVertices[6 * (y * X + x) + 2], position))
+				if (glm::intersectLineTriangle(orig, dir, buffer->at(6 * (y * X + x)).vert, buffer->at(6 * (y * X + x) + 1).vert, buffer->at(6 * (y * X + x) + 2).vert, position))
 				{
 					found = true; break;
 				}
-				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x) + 3], m_pVertices[6 * (y * X + x) + 4], m_pVertices[6 * (y * X + x) + 5], position))
+				if (glm::intersectLineTriangle(orig, dir, buffer->at(6 * (y * X + x) + 3).vert, buffer->at(6 * (y * X + x) + 4).vert, buffer->at(6 * (y * X + x) + 5).vert, position))
 				{
 					found = true; break;
 				}
@@ -1041,11 +1046,11 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, glm::vec3& 
 			x = ix0 - level;
 			for (y = min(iy0 + level, Y - 1); y > max(iy0 - level, 0); y--)
 			{
-				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x)], m_pVertices[6 * (y * X + x) + 1], m_pVertices[6 * (y * X + x) + 2], position))
+				if (glm::intersectLineTriangle(orig, dir, buffer->at(6 * (y * X + x)).vert, buffer->at(6 * (y * X + x) + 1).vert, buffer->at(6 * (y * X + x) + 2).vert, position))
 				{
 					found = true; break;
 				}
-				if (glm::intersectLineTriangle(orig, dir, m_pVertices[6 * (y * X + x) + 3], m_pVertices[6 * (y * X + x) + 4], m_pVertices[6 * (y * X + x) + 5], position))
+				if (glm::intersectLineTriangle(orig, dir, buffer->at(6 * (y * X + x) + 3).vert, buffer->at(6 * (y * X + x) + 4).vert, buffer->at(6 * (y * X + x) + 5).vert, position))
 				{
 					found = true; break;
 				}
@@ -1055,7 +1060,11 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, glm::vec3& 
 		level++;
 	}
 	level++;
-	return found;
+	position = position / position.w;
+	position_.x = position.x;
+	position_.y = position.y;
+	position_.z = position.z;
+	return found;*/
 	return false;
 }
 

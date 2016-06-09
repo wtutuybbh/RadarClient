@@ -138,6 +138,7 @@ public:
 	virtual void SelectObject(CUserInterface * ui);
 
 	virtual void Init(int vpId);
+	C3DObjectVBO * GetC3DObjectVBO(int vpId);
 
 	virtual glm::vec3 * GetBounds();
 };
