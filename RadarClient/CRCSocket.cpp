@@ -334,7 +334,7 @@ void CRCSocket::OnSrvMsg_DELTRACK(int* deltrackz, int N)
 	m->lock();
 	for (int i = 0; i < N; i++)
 	{
-		for (int j = 0; j<Tracks.size(); j++)
+		/*for (int j = 0; j<Tracks.size(); j++)
 		{
 			if (Tracks[j]->id == deltrackz[i])
 			{
@@ -342,6 +342,18 @@ void CRCSocket::OnSrvMsg_DELTRACK(int* deltrackz, int N)
 				Tracks.erase(Tracks.begin() + j);//TODO: crashes here!!!
 				//break;
 			}
+		}*/
+		for (auto it = Tracks.begin();
+		it != Tracks.end();
+			/*it++*/) 
+		{
+
+			if ((*it)->id == deltrackz[i]) {
+				delete *it;
+				it = Tracks.erase(it);
+			}
+			else
+				++it;
 		}
 	}
 	m->unlock(); //against crash - but did not help
@@ -374,11 +386,13 @@ void CRCSocket::OnSrvMsg_LOCATION(RDRCURRPOS* d)
 
 void CRCSocket::OnSrvMsg_RIMAGE(RIMAGE* info, void* pixels)
 {
+	if (rdrinit.ViewStep == 0) return;
 
 	int offset_B_pixels;
 
 
 	if (info->resv1[0] != 0) return; // если тип данных не флоат то хз
+
 	{
 		// новый битмап под кусок нового РЛИ
 		char flip;

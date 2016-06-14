@@ -905,8 +905,20 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 	return NULL;	
 }
 
-C3DObjectModel* CScene::GetFirstTrackBetweenPoints(int vpId, glm::vec3 p0, glm::vec3 p1) const
+C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, glm::vec2 screenPoint, int& index)
 {
+	for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
+	{
+		if (it->second)
+		{
+			index = it->second->GetPoint(vpControl, screenPoint);
+			if (index >= 0)
+			{
+				it->second->SelectPoint(Main, index);
+				it->second->SelectPoint(MiniMap, index);
+			}
+		}
+	}
 	return NULL;
 }
 
