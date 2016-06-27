@@ -1,9 +1,12 @@
 #pragma once
 #include <FreeImage.h>
+#include <string>
+
+using namespace std;
 
 class C3DObjectTexture
 {
-	const char* imgFile{ NULL };
+	string imgFile;
 	unsigned int textureId;
 	char *textureUniformName;
 	FIBITMAP *image {NULL};

@@ -47,8 +47,8 @@ void C3DObjectTexture::UnBind()
 
 C3DObjectTexture* C3DObjectTexture::Clone()
 {
-	if (imgFile)
-		return new C3DObjectTexture(imgFile, textureUniformName);
+	if (imgFile.length()>0)
+		return new C3DObjectTexture(imgFile.c_str(), textureUniformName);
 
 	return new C3DObjectTexture(image, textureUniformName, clearAfter, useBits);
 }
@@ -63,7 +63,7 @@ C3DObjectTexture::~C3DObjectTexture()
 
 C3DObjectTexture::C3DObjectTexture(const char* imgFile, const char *textureUniformName)
 {	
-	this->imgFile = imgFile;
+	this->imgFile = imgFile?string(imgFile):string();
 	try {
 		image = FreeImage_Load(FreeImage_GetFileType(imgFile, 0), imgFile);
 	}

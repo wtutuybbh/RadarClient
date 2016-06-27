@@ -46,10 +46,13 @@ CRCSocket::~CRCSocket()
 	}
 	if (s_rdrinit)
 		delete s_rdrinit;
-	for (vector<TRK*>::iterator it = Tracks.begin(); it != Tracks.end(); ++it) {
-		delete *it;
-	}
+	for (auto it = begin(Tracks); it != end(Tracks); ++it)
+		delete (*it);
 	Tracks.clear();
+
+	for (auto it = begin(trak); it != end(trak); ++it)
+		delete (*it);
+	trak.clear();
 }
 
 void CRCSocket::Init()

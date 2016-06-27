@@ -303,10 +303,10 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	PanelWidth = panelWidth;
 	Column2X = panelWidth / 3;
 	Column3X = Column2X * 2;
-	VStep = 22;
+	VStep = 21;
 	VStepGrp = 30;
 	MinimapSize = PanelWidth - VStepGrp;
-	ButtonHeight = 20, ControlWidth = Column2X - VStepGrp - VStep, ControlWidthL = Column2X - VStep, ControlWidthXL = Column3X;
+	ButtonHeight = 19, ControlWidth = Column2X - VStepGrp - VStep, ControlWidthL = Column2X - VStep, ControlWidthXL = Column3X;
 
 	int CurrentY = 0;
 
@@ -391,6 +391,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 
 	SetChecked(ObjOptions_ID[0], 0);
 	SetChecked(ObjOptions_ID[1], 1);
+	SetChecked(ObjOptions_ID[2], 1);
 	SetChecked(MapOptions_ID[0], 1);
 	SetChecked(MapOptions_ID[1], 1);
 	SetChecked(MarkupOptions_ID[0], 1);

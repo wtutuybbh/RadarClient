@@ -44,6 +44,7 @@ class CMiniMapPointer;
 class CMesh;
 
 class CScene {
+	unsigned long mainDrawCount{ 0 };
 public:
 	float maxAmp = 0;
 

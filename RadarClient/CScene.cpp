@@ -405,7 +405,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	//glEnable(GL_DEPTH_TEST);
 
 	
-
+	mainDrawCount++;
 	return true;
 }
 
@@ -836,8 +836,8 @@ void CScene::RefreshTracks(vector<TRK*>* tracks)
 
 void CScene::RefreshImages(RIMAGE* info, void* pixels)
 {
-	if (ImageSet)
-		ImageSet->Refresh(glm::vec4(0, y0, 0, 1), mpph, mppv, rdrinit, info, pixels);
+	//if (ImageSet)
+	//	ImageSet->Refresh(glm::vec4(0, y0, 0, 1), mpph, mppv, rdrinit, info, pixels);
 }
 
 void CScene::Init(RDR_INITCL* init)
