@@ -2,18 +2,19 @@
 #include "ShaderUtils.h"
 #include "Util.h"
 
+
 C3DObjectProgram::~C3DObjectProgram()
 {
 }
 
 C3DObjectProgram::C3DObjectProgram(const char* vShaderFile, const char* fShaderFile, const char* vertexAttribName, const char * textureAttribName, const char * normalAttribName, const char * colorAttribName)
 {
-	this->vShaderFile = vShaderFile;
-	this->fShaderFile = fShaderFile;
-	this->vertexAttribName = vertexAttribName;
-	this->textureAttribName = textureAttribName;
-	this->normalAttribName = normalAttribName;
-	this->colorAttribName = colorAttribName;
+	this->vShaderFile = vShaderFile?string(vShaderFile):string();
+	this->fShaderFile = fShaderFile?string(fShaderFile):string();
+	this->vertexAttribName = vertexAttribName?string(vertexAttribName):string();
+	this->textureAttribName = textureAttribName?string(textureAttribName):string();
+	this->normalAttribName = normalAttribName?string(normalAttribName):string();
+	this->colorAttribName = colorAttribName?string(colorAttribName):string();
 	this->ready = false;
 }
 
@@ -31,7 +32,7 @@ void C3DObjectProgram::CreateProgram()
 {
 	if (!ready)
 	{
-		ProgramId = create_program(vShaderFile, fShaderFile);
+		ProgramId = create_program(vShaderFile.c_str(), fShaderFile.c_str());
 		ready = true;
 	}
 }
@@ -46,23 +47,23 @@ void C3DObjectProgram::Bind()
 	if (this->ProgramId)
 	{
 		//UseProgram();
-		if (vertexAttribName) {
-			GLint vertex_attr_loc = glGetAttribLocation(this->ProgramId, vertexAttribName);
+		if (vertexAttribName.length()>0) {
+			GLint vertex_attr_loc = glGetAttribLocation(this->ProgramId, vertexAttribName.c_str());
 			glVertexAttribPointer(vertex_attr_loc, 4, GL_FLOAT, GL_FALSE, elementSize, (void*)(sizeof(float) * vertexPlace));
 			glEnableVertexAttribArray(vertex_attr_loc);
 		}
-		if (textureAttribName) {
-			GLint texcoor_attr_loc = glGetAttribLocation(this->ProgramId, textureAttribName);
+		if (textureAttribName.length()>0) {
+			GLint texcoor_attr_loc = glGetAttribLocation(this->ProgramId, textureAttribName.c_str());
 			glVertexAttribPointer(texcoor_attr_loc, 2, GL_FLOAT, GL_FALSE, elementSize, (void*)(sizeof(float) * texcoorPlace));
 			glEnableVertexAttribArray(texcoor_attr_loc);
 		}
-		if (normalAttribName) {
-			GLint normal_attr_loc = glGetAttribLocation(this->ProgramId, normalAttribName);
+		if (normalAttribName.length()>0) {
+			GLint normal_attr_loc = glGetAttribLocation(this->ProgramId, normalAttribName.c_str());
 			glVertexAttribPointer(normal_attr_loc, 3, GL_FLOAT, GL_FALSE, elementSize, (void*)(sizeof(float) * normalPlace));
 			glEnableVertexAttribArray(normal_attr_loc);
 		}
-		if (colorAttribName) {
-			GLint color_attr_loc = glGetAttribLocation(this->ProgramId, colorAttribName);
+		if (colorAttribName.length()>0) {
+			GLint color_attr_loc = glGetAttribLocation(this->ProgramId, colorAttribName.c_str());
 			glVertexAttribPointer(color_attr_loc, 3, GL_FLOAT, GL_FALSE, elementSize, (void*)(sizeof(float) * colorPlace));
 			glEnableVertexAttribArray(color_attr_loc);
 		}
@@ -71,5 +72,5 @@ void C3DObjectProgram::Bind()
 
 C3DObjectProgram* C3DObjectProgram::Clone() const
 {
-	return new C3DObjectProgram(vShaderFile, fShaderFile, vertexAttribName, textureAttribName, normalAttribName, colorAttribName);
+	return new C3DObjectProgram(vShaderFile.c_str(), fShaderFile.c_str(), vertexAttribName.c_str(), textureAttribName.c_str(), normalAttribName.c_str(), colorAttribName.c_str());
 }

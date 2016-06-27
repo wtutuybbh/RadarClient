@@ -1,10 +1,13 @@
 #pragma once
 #include "Util.h"
+#include <string>
+
+using namespace std;
 
 class C3DObjectProgram
 {
 	bool ready;
-	const char *vShaderFile, *fShaderFile, *vertexAttribName, *textureAttribName, *normalAttribName, *colorAttribName;
+	string vShaderFile, fShaderFile, vertexAttribName, textureAttribName, normalAttribName, colorAttribName;
 	int vertexPlace{ 0 }, texcoorPlace{ 11 }, normalPlace{ 4 }, colorPlace{ 7 };
 	int elementSize{ sizeof(VBOData) };
 public:	
