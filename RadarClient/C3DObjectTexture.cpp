@@ -4,8 +4,6 @@
 
 void C3DObjectTexture::InitBits()
 {
-
-
 	bits = new BYTE[sizeX * sizeY * 4];
 
 	BYTE *pixels = (BYTE*)FreeImage_GetBits(image);
@@ -21,7 +19,7 @@ void C3DObjectTexture::InitBits()
 
 void C3DObjectTexture::LoadToGPU()
 {
-	if (!ready && bits) {
+	if (!ready && (useBits && bits || !useBits && image)) {
 		glGenTextures(1, &textureId);
 		glBindTexture(GL_TEXTURE_2D, textureId);
 		
@@ -32,10 +30,12 @@ void C3DObjectTexture::LoadToGPU()
 		ready = true;
 		if (useBits && bits)
 		{
-			delete bits;
+			delete[] bits;
+			bits = NULL;
 		}
 		if (clearAfter) {
 			FreeImage_Unload(image);
+			image = NULL;
 		}
 	}
 }
@@ -51,6 +51,14 @@ C3DObjectTexture* C3DObjectTexture::Clone()
 		return new C3DObjectTexture(imgFile, textureUniformName);
 
 	return new C3DObjectTexture(image, textureUniformName, clearAfter, useBits);
+}
+
+C3DObjectTexture::~C3DObjectTexture()
+{
+	if (bits)
+		delete[] bits;
+	if (image)
+		FreeImage_Unload(image);
 }
 
 C3DObjectTexture::C3DObjectTexture(const char* imgFile, const char *textureUniformName)
@@ -74,6 +82,7 @@ C3DObjectTexture::C3DObjectTexture(const char* imgFile, const char *textureUnifo
 	InitBits();
 
 	FreeImage_Unload(image);
+	image = NULL;
 
 	this->textureUniformName = (char *)textureUniformName;
 
@@ -104,7 +113,8 @@ void C3DObjectTexture::Bind(unsigned int programId) const
 	glUniform1i(iSamplerLoc, 0);
 }
 
-void C3DObjectTexture::UnloadImage() const
+void C3DObjectTexture::UnloadImage()
 {
 	FreeImage_Unload(image);
+	image = NULL;
 }

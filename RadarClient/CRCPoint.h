@@ -9,13 +9,13 @@
 
 #define _USE_MATH_DEFINES 
 
-#define CRCPOINT_CONSTRUCTOR_USES_RADIANS
+
 
 #define POINT_SIZE 5.0f
 
 class CScene;
 
-class old_CRCPoint : public old_C3DObject
+/*class old_CRCPoint : public old_C3DObject
 {
 private:
 	static void CreateSphereR1(int level);
@@ -48,7 +48,7 @@ public:
 	bool IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position) override;
 	void SelectObject(CUserInterface* ui);
 	glm::mat4 GetModelMatrix(CScene* scn) override;
-};
+};*/
 
 
 
@@ -62,6 +62,7 @@ public:
 
 	static void InitStructure();
 	CRCPointModel(int vpId, float y0, float mpph, float mppv, float r, float a, float e);
+	~CRCPointModel() override;
 	static std::vector<VBOData>* CreateSphereR1(int level);
 	glm::mat4 GetScaleMatrix(CViewPortControl *vpControl) override;
 	glm::mat4 GetTranslateMatrix(CViewPortControl *vpControl) override;

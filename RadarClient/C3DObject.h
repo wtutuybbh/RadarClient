@@ -24,7 +24,7 @@ typedef std::unordered_map<int, PtrToMethod> PtrToMethodMap;
 */
 class CUserInterface;
 
-class old_C3DObject
+/*class old_C3DObject
 {
 protected:
 	std::vector<VBOData> VBOBuffer;
@@ -99,7 +99,7 @@ public:
 	//virtual void SelectObject(CUserInterface * ui);
 
 	virtual glm::mat4 GetModelMatrix(CScene *scn);
-};
+};*/
 
 class CViewPortControl;
 

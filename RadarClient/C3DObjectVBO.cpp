@@ -2,10 +2,10 @@
 
 C3DObjectVBO::~C3DObjectVBO()
 {
-	if (buffer && clearAfter) {
+	/*if (buffer && clearAfter) {
 		//buffer->clear();
 		delete buffer;
-	}
+	}*/
 	if (idxArrays) {
 		idxArrays->clear();
 		delete idxArrays;

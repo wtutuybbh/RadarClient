@@ -13,15 +13,15 @@
 #include <unordered_map>
 #include "CSettings.h"
 
-GLuint old_CRCPoint::ProgramID_s;
-std::vector<VBOData> old_CRCPoint::VBOBuffer_s;
-unsigned int old_CRCPoint::VBOName_s, old_CRCPoint::VAOName_s;
-GLuint old_CRCPoint::MVPUniformLoc_s;
-GLuint old_CRCPoint::NormUniformLoc_s;
-int old_CRCPoint::VBOBufferSize_s;
+//GLuint old_CRCPoint::ProgramID_s;
+//std::vector<VBOData> old_CRCPoint::VBOBuffer_s;
+//unsigned int old_CRCPoint::VBOName_s, old_CRCPoint::VAOName_s;
+//GLuint old_CRCPoint::MVPUniformLoc_s;
+//GLuint old_CRCPoint::NormUniformLoc_s;
+//int old_CRCPoint::VBOBufferSize_s;
 
 
-void old_CRCPoint::CreateSphereR1(int level)
+/*void old_CRCPoint::CreateSphereR1(int level)
 {
 	if (level < 0)
 		level = 0;
@@ -249,7 +249,7 @@ glm::mat4 old_CRCPoint::GetModelMatrix(CScene* scn)
 
 	return old_C3DObject::GetModelMatrix(scn);
 }
-
+*/
 C3DObjectVBO* CRCPointModel::vbo_s = NULL;
 C3DObjectProgram* CRCPointModel::prog_s = NULL;
 
@@ -280,6 +280,15 @@ CRCPointModel::CRCPointModel(int vpId, float y0, float mpph, float mppv, float r
 	pixelSize = 2;
 
 	Color = CSettings::GetColor(ColorPointHighLevel);
+}
+
+CRCPointModel::~CRCPointModel()
+{
+	for (auto it = begin(vbo); it != end(vbo); ++it)
+	{
+		vector<VBOData> *buffer = (vector<VBOData>*)it->second->GetBuffer();
+		delete buffer;
+	}
 }
 
 std::vector<VBOData>* CRCPointModel::CreateSphereR1(int level)

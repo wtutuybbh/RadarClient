@@ -148,6 +148,7 @@ CMarkup::CMarkup(glm::vec4 origin) : C3DObjectModel (Main,
 
 CMarkup::~CMarkup()
 {
+	delete (vector<VBOData>*)vbo.at(Main)->GetBuffer();
 }
 
 void CMarkup::BindUniforms(CViewPortControl* vpControl)

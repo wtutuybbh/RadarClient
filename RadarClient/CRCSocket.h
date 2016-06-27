@@ -461,6 +461,7 @@ public:
 	RDRCURRPOS *CurrentPosition {NULL};
 
 	RIMAGE* info_i;
+	void * pixels;
 
 	long Buf[TXRXBUFSIZE];
 
@@ -485,7 +486,7 @@ public:
 	int Connect();
 	int Read();
 	int Close();
-	void PostData(WPARAM wParam, LPARAM lParam);
+	unsigned int PostData(WPARAM wParam, LPARAM lParam);
 	void OnSrvMsg_RDRTRACK(RDRTRACK* info, int N);
 	void OnSrvMsg_DELTRACK(int* deltrackz, int N);
 	void OnSrvMsg_LOCATION(RDRCURRPOS* d);

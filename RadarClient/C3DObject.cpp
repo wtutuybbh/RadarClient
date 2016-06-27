@@ -5,20 +5,19 @@
 #include "CUserInterface.h"
 #include "CViewPortControl.h"
 #include "C3DObjectProgram.h"
-#include "ShaderUtils.h"
-
+/*
 old_C3DObject::old_C3DObject()
 {
 }
 
 old_C3DObject::old_C3DObject(bool initMap)
 {
-	/*MiniMapDrawMethodsSequence.insert({ 0, PtrToMethod(&old_C3DObject::MiniMapCreateProgram) });
-	MiniMapDrawMethodsSequence.insert({ 1, (PtrToMethod)(&old_C3DObject::MiniMapBuildVBO) });
-	MiniMapDrawMethodsSequence.insert({ 2, (PtrToMethod)(&old_C3DObject::MiniMapPrepareVBO) });
-	MiniMapDrawMethodsSequence.insert({ 3, (PtrToMethod)(&old_C3DObject::MiniMapAttribBind) });
-	MiniMapDrawMethodsSequence.insert({ 4, (PtrToMethod)(&old_C3DObject::MiniMapBindTextureImage) });
-	MiniMapDrawMethodsSequence.insert({ 5, (PtrToMethod)(&old_C3DObject::MiniMapUnbindAll) });*/
+	//MiniMapDrawMethodsSequence.insert({ 0, PtrToMethod(&old_C3DObject::MiniMapCreateProgram) });
+	//MiniMapDrawMethodsSequence.insert({ 1, (PtrToMethod)(&old_C3DObject::MiniMapBuildVBO) });
+	//MiniMapDrawMethodsSequence.insert({ 2, (PtrToMethod)(&old_C3DObject::MiniMapPrepareVBO) });
+	//MiniMapDrawMethodsSequence.insert({ 3, (PtrToMethod)(&old_C3DObject::MiniMapAttribBind) });
+	//MiniMapDrawMethodsSequence.insert({ 4, (PtrToMethod)(&old_C3DObject::MiniMapBindTextureImage) });
+	//MiniMapDrawMethodsSequence.insert({ 5, (PtrToMethod)(&old_C3DObject::MiniMapUnbindAll) });
 	MiniMapVBOReady = false;
 	MiniMapProgramID = 0;
 	MiniMapVBOBuffer.clear(); //destroy all vbo buffer objects
@@ -28,7 +27,7 @@ old_C3DObject::old_C3DObject(bool initMap)
 }
 old_C3DObject::~old_C3DObject()
 {
-	/*MiniMapDrawMethodsSequence.clear();*/
+	//MiniMapDrawMethodsSequence.clear();
 }
 
 glm::vec3 * old_C3DObject::GetBounds()
@@ -47,10 +46,10 @@ bool old_C3DObject::MiniMapPrepareAndBuildVBO(const char * vShaderFile, const ch
 	MiniMapBindTextureImage();
 	MiniMapUnbindAll();
 
-	/*old_C3DObject *obj = this;
-	for (PtrToMethodMap::iterator it = MiniMapDrawMethodsSequence.begin(); it != MiniMapDrawMethodsSequence.end(); ++it) {
-		CALL_MEMBER_FN(*obj, it->second)();
-	}*/
+	//old_C3DObject *obj = this;
+	//for (PtrToMethodMap::iterator it = MiniMapDrawMethodsSequence.begin(); it != MiniMapDrawMethodsSequence.end(); ++it) {
+	//	CALL_MEMBER_FN(*obj, it->second)();
+	//}
 	return true;
 }
 
@@ -93,9 +92,9 @@ void old_C3DObject::MiniMapAttribBind()
 
 	glEnableVertexAttribArray(vertex_attr_loc);
 	glEnableVertexAttribArray(texcoor_attr_loc);
-}
+}*/
 
-void old_C3DObject::MiniMapBindTextureImage()
+/*void old_C3DObject::MiniMapBindTextureImage()
 {
 	try {
 		MiniMapImage = FreeImage_Load(FreeImage_GetFileType(MiniMapImgFile, 0), MiniMapImgFile);
@@ -136,23 +135,23 @@ void old_C3DObject::MiniMapBindTextureImage()
 
 	FreeImage_Unload(MiniMapImage);
 	delete bits;
-}
+}*/
 
-void old_C3DObject::MiniMapUnbindAll()
+/*void old_C3DObject::MiniMapUnbindAll()
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-}
+}*/
 
-void old_C3DObject::MiniMapCreateProgram()
+/*void old_C3DObject::MiniMapCreateProgram()
 {
 	if (!MiniMapProgramID) {
 		MiniMapProgramID = create_program(MiniMapVShaderFile, MiniMapFShaderFile);
 	}
-}
+}*/
 
-void old_C3DObject::MiniMapDraw(CCamera *cam)
+/*void old_C3DObject::MiniMapDraw(CCamera *cam)
 {
 	glUseProgram(MiniMapProgramID);
 	glBindVertexArray(MiniMapVAOName);
@@ -180,9 +179,9 @@ void old_C3DObject::MiniMapDraw(CCamera *cam)
 	glDrawArrays(GL_TRIANGLES, 0, MiniMapVBOBufferSize);
 	glBindVertexArray(0);
 	glUseProgram(0);
-}
+}*/
 
-bool old_C3DObject::PrepareAndBuildVBO(const char* vShaderFile, const char* fShaderFile, const char* imgFile)
+/*bool old_C3DObject::PrepareAndBuildVBO(const char* vShaderFile, const char* fShaderFile, const char* imgFile)
 {
 	return true;
 }
@@ -266,7 +265,7 @@ void old_C3DObject::SetColor(glm::vec4 color)
 glm::mat4 old_C3DObject::GetModelMatrix(CScene* scn)
 {
 	return Scale * Rotate * Translate;
-}
+}*/
 
 void C3DObjectModel::SetCartesianCoordinates(glm::vec4 c)
 {
@@ -315,6 +314,21 @@ C3DObjectModel::C3DObjectModel(C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObje
 
 C3DObjectModel::~C3DObjectModel()
 {
+	for (auto it = begin(vbo); it != end(vbo); ++it)
+		delete it->second;
+	vbo.clear();
+	
+	for (auto it = begin(tex); it != end(tex); ++it)
+		delete it->second;
+	tex.clear();
+
+	for (auto it = begin(tex); it != end(tex); ++it)
+		delete it->second;
+	prog.clear();
+
+	translateMatrix.clear();
+	scaleMatrix.clear();
+	rotateMatrix.clear();
 }
 
 void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)

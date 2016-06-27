@@ -3,9 +3,11 @@
 class CRImage :
 	public C3DObjectModel
 {
+	static float maxAmp;
 public:
-	CRImage();
-	virtual ~CRImage();
-	void Refresh(RIMAGE* info, void* pixels);
+	float Azemuth;
+	CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels);
+	~CRImage() override;
+
 };
 

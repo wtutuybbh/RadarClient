@@ -27,7 +27,7 @@
 #include "CViewPortControl.h"
 #include "CSettings.h"
 
-old_CMesh::old_CMesh(CScene *scn) : old_C3DObject(true)
+/*old_CMesh::old_CMesh(CScene *scn) : old_C3DObject(true)
 {
 	// Set Pointers To NULL
 	aMap = NULL;
@@ -489,7 +489,7 @@ bool old_CMesh::LoadHeightmap()
 				m_pVertices[nIndex].x = lonStretch * ( -flX + (aMap->sizeX / 2.0));
 				rcutils::takeminmax(m_pVertices[nIndex].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
 				
-				m_pVertices[nIndex].y = (PtHeight((int)flX, (int)flZ) /*- (maxheight+minheight)/2*/) / scn->mppv;
+				m_pVertices[nIndex].y = (PtHeight((int)flX, (int)flZ) ) / scn->mppv;
 				rcutils::takeminmax(m_pVertices[nIndex].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
 
 				m_pVertices[nIndex].z = latStretch * (flZ - (aMap->sizeY / 2.0));
@@ -521,11 +521,7 @@ bool old_CMesh::LoadHeightmap()
 	//ofstream outfile 
 	//unsigned char * tmpdata = new unsigned char[aMap->sizeX * aMap->sizeY * 3];
 
-	/*for (int i = 0; i < aMap->sizeX * aMap->sizeY; i++) {
-		tmpdata[i * 3] = aMap->data[i]*255.0 / maxheight;
-		tmpdata[i * 3 + 1] = tmpdata[i * 3];
-		tmpdata[i * 3 + 2] = tmpdata[i * 3];
-	}*/
+	
 
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, texsize, texsize, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(subimage));
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -569,6 +565,7 @@ void old_CMesh::BuildVBOs()
 	//delete[] m_pVertices; m_pVertices = NULL;
 	delete[] m_pTexCoords; m_pTexCoords = NULL;
 }
+*/
 
 float CMesh::Y0;
 
@@ -948,6 +945,15 @@ CMesh::CMesh(int vpId, CScene* scn, bool clearAfter, float shiftX, float shiftZ)
 	this->shiftZ = shiftZ;
 	LoadHeightmap(vpId);
 	UseTexture = 1;
+}
+
+CMesh::~CMesh()
+{
+	for (auto it = begin(vbo); it != end(vbo); ++it)
+	{
+		vector<VBOData> *buffer = (vector<VBOData>*)it->second->GetBuffer();
+		delete buffer;
+	}
 }
 
 bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)

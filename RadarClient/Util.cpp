@@ -151,7 +151,38 @@ namespace rcutils {
 		split(s, delim, elems);
 		return elems;
 	}
-	
+
+	//
+	bool between_on_circle(float x, float x1, float x2, short direction, bool take1, bool take2)
+	{
+		if (x>=M_PIx2)		
+			x = x - round(x / M_PIx2)*M_PIx2;		
+
+		if (x1 == x2)
+		{
+			if (x == x1)
+				return true;
+			return false;
+		}
+		if (take1 && x == x1 || take2 && x == x2)
+			return true;
+			
+		if (direction>0)
+		{
+			if (x2 > x1 && x > x1 && x < x2)
+				return true;
+			if (x2 < x1 && (x < x2 || x > x1))
+				return true;			
+		}
+		if (direction<0)
+		{
+			if (x1 > x2 && x > x2 && x < x1)
+				return true;
+			if (x1 < x2 && (x < x1 || x > x2))
+				return true;
+		}
+		return false;
+	}
 }
 void BitmapString(float x, float y, float z, std::string s)
 {

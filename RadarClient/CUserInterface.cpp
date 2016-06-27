@@ -400,7 +400,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	SendMessage(GetDlgItem(parentHWND, CameraDirection_ID[1]), TBM_SETPOS, 1, 50);
 
 	//ControlEnable(ObjOptions_ID[1], false);
-	ControlEnable(ObjOptions_ID[2], false);
+	//ControlEnable(ObjOptions_ID[2], false);
 
 
 	//////////font setting:
@@ -485,6 +485,11 @@ bool CUserInterface::GetCheckboxState_Points()
 bool CUserInterface::GetCheckboxState_Tracks()
 {
 	return Button_GetCheck(GetDlgItem(ParentHWND, ObjOptions_ID[1]));
+}
+
+bool CUserInterface::GetCheckboxState_Images()
+{
+	return Button_GetCheck(GetDlgItem(ParentHWND, ObjOptions_ID[2]));
 }
 
 int CUserInterface::GetTrackbarValue_VTilt()

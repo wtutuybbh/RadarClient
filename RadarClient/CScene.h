@@ -33,6 +33,7 @@ class CRCPointModel;
 class CRCTrackModel;
 class CCamera;
 class old_CTrack;
+class CRImageSet;
 
 #include "CRCSocket.h"
 #include "CUserInterface.h"
@@ -41,6 +42,7 @@ class old_C3DObject;
 class old_CMinimapPointer;
 class CMiniMapPointer;
 class CMesh;
+
 class CScene {
 public:
 	float maxAmp = 0;
@@ -49,7 +51,6 @@ public:
 	float mppv; // meters per pixel horizontal
 	glm::vec2 geocenter; //geographic coordinates of center point (place of the radar)
 	int msize; // area square's side length in meters
-	old_CMesh *old_Mesh;
 	glm::vec3 *meshBounds;
 
 	std::string altFile, imgFile, datFile;
@@ -102,6 +103,7 @@ public:
 
 
 	std::unordered_map<int, CTrack*> Tracks;
+	vector<int> SelectedTracksIds;
 
 	int SectorsCount;
 
@@ -112,9 +114,8 @@ public:
 
 	bool VBOisBuilt, RayVBOisBuilt, MiniMapVBOisBuilt;
 
-	old_CMinimapPointer *MiniMapPointer;
 
-	//RDR_INITCL * Init;
+	RDR_INITCL * rdrinit;
 	bool Initialized;
 
 	std::vector<old_C3DObject*> Selection;
@@ -123,11 +124,11 @@ public:
 	CMesh* Mesh2;
 	CMesh* Mesh3;
 
-	CMiniMapPointer *mmPointer;
+	CMiniMapPointer *mmPointer {NULL};
 
-	CMarkup *Markup;
+	CRImageSet *ImageSet {NULL};
 
-	CRCPointModel *testPoint;
+	CMarkup *Markup {NULL};
 
 	glm::vec3 MeshSize;
 	glm::vec3 * m_Bounds;
@@ -151,6 +152,8 @@ public:
 	void ClearSectors();
 
 	void RefreshTracks(vector<TRK*> *tracks);
+
+	void RefreshImages(RIMAGE* info, void* pixels);
 
 	void Init(RDR_INITCL* init);
 

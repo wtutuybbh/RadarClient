@@ -63,6 +63,8 @@
 #include "CSettings.h"
 #include "CSector.h"
 
+#include <vld.h>
+
 #define VIEW_PORT_CONTROL_ID     100
 
 #define PANEL_WIDTH 500
@@ -494,12 +496,36 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 		break;
 	case CM_POSTDATA: {
+		unsigned int msg=-1;
 		if (g_Socket)
-			g_Socket->PostData(wParam, lParam);
+			msg = g_Socket->PostData(wParam, lParam);
 		//g_vpControl->MakeCurrent();
 		if (g_vpControl && g_vpControl->Scene) {
-			g_vpControl->Scene->RefreshSector(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit);
-			g_vpControl->Scene->RefreshTracks(&g_Socket->Tracks);
+			switch (msg) 
+			{
+				case MSG_RPOINTS: 
+				{
+					g_vpControl->Scene->RefreshSector(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit);
+				}
+				break;
+				case MSG_OBJTRK:
+				{
+					g_vpControl->Scene->RefreshTracks(&g_Socket->Tracks);
+				}
+				break;
+				case MSG_RIMAGE:
+				{
+					g_vpControl->Scene->RefreshImages(g_Socket->info_i, g_Socket->pixels);
+				}
+				break;
+				case MSG_INIT:
+				{
+					g_vpControl->Scene->Init(g_Socket->s_rdrinit);
+				}
+				break;
+				default:
+					break;
+			}
 		}
 		if (g_UI) {
 			g_UI->FillGrid(&g_Socket->Tracks);
@@ -576,7 +602,7 @@ genType & 	position
 	MSG					msg;											// Window Message Structure
 	DWORD				tickCount;										// Used For The Tick Counter
 #ifdef _DEBUG
-	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	long lBreakAlloc = 0;
 	if (lBreakAlloc > 0)
 	{

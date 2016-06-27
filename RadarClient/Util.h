@@ -19,6 +19,9 @@
 
 #include <tchar.h>
 
+#define M_PIx2 6.28318530717959
+
+
 namespace cnvrt {
 	inline double dg2rad(double dg) {
 		return dg*M_PI / 180.0;
@@ -39,7 +42,7 @@ namespace rcutils {
 	std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
 	std::vector<std::string> split(const std::string &s, char delim);
 
-	
+	bool between_on_circle(float x, float x1, float x2, short direction, bool take1, bool take2);
 }
 
 void BitmapString(float x, float y, float z, std::string s);
@@ -116,3 +119,5 @@ float MinimumDistance(glm::vec3 v, glm::vec3 w, glm::vec3 p);
 #ifndef max
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
 #endif
+
+#define CRCPOINT_CONSTRUCTOR_USES_RADIANS

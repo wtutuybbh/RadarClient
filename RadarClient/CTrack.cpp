@@ -3,11 +3,12 @@
 #include "CSettings.h"
 
 
-CTrack::CTrack(int id)
+CTrack::CTrack(int id, bool selected)
 {
+	Selected = selected;
 	ID = id;
 	Found = false;
-	Color = CSettings::GetColor(ColorTrack);
+	Color = Selected ? CSettings::GetColor(ColorTrackSelected) : CSettings::GetColor(ColorTrack);
 }
 
 
@@ -41,4 +42,22 @@ void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK>*
 	vbo.at(Main)->NeedsReload = true;
 	vbo.at(MiniMap)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
 	vbo.at(MiniMap)->NeedsReload = true;
+}
+
+void CTrack::SelectTrack(int vpId, bool selectState)
+{
+	Selected = selectState;
+
+	C3DObjectVBO *vbo_ = vbo.at(vpId);
+
+	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
+
+	if (!buffer || buffer->size() == 0)
+		return;
+
+	for (auto it = buffer->begin(); it != buffer->end(); ++it)
+	{
+		(*it).color = Selected ? CSettings::GetColor(ColorTrackSelected) : CSettings::GetColor(ColorTrack);
+	}
+	vbo_->NeedsReload = true;
 }

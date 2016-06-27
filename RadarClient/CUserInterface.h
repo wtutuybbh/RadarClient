@@ -134,6 +134,7 @@ public:
 
 	bool GetCheckboxState_Points();
 	bool GetCheckboxState_Tracks();
+	bool GetCheckboxState_Images();
 	bool GetCheckboxState_Map();
 	bool GetCheckboxState_AltitudeMap();
 	bool GetCheckboxState_MarkupLines();

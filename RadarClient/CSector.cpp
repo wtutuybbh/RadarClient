@@ -17,6 +17,8 @@ CSector::CSector() : C3DObjectModel(Main, new C3DObjectVBO(false), nullptr, new 
 
 CSector::~CSector()
 {
+	delete (vector<VBOData>*)vbo.at(Main)->GetBuffer();
+
 	vbo.clear();
 	tex.clear();
 	prog.clear();
@@ -46,6 +48,7 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 	{
 		if (pts[i].Amp > maxAmp)
 			maxAmp = pts[i].Amp;
+		//here we calculate point spherical coordinates
 		r = pts[i].R * init->dR;
 		a = init->begAzm + pts[i].B * init->dAzm;
 		e = zeroElevation + init->begElv + pts[i].E * init->dElv;

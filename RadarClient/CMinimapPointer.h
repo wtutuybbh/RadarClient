@@ -2,10 +2,8 @@
 #include "C3DObject.h"
 #include <vector>
 
-class old_CMinimapPointer : public old_C3DObject
-{/*
-private:
-	VBOBuffer*/
+/*class old_CMinimapPointer : public old_C3DObject
+{
 private:
 	//bool MiniMapVBOReady;
 
@@ -17,7 +15,7 @@ public:
 	explicit old_CMinimapPointer(CScene *scene);
 	~old_CMinimapPointer();
 
-};
+};*/
 
 class CMiniMapPointer : public C3DObjectModel
 {

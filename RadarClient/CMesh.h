@@ -63,7 +63,7 @@ typedef struct {
 //class CTexCoord;												// Texture Coordinate Class
 
 
-class old_CMesh : old_C3DObject
+/*class old_CMesh : old_C3DObject
 {
 public:
 	// Mesh Data
@@ -116,7 +116,7 @@ public:
 	void MiniMapDraw(CCamera *cam) override;
 
 	bool IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position) override;
-};
+};*/
 
 
 typedef int(_cdecl * GDPALTITUDEMAP)(const char *, double *, int *, short *);
@@ -153,6 +153,7 @@ public:
 	static int TotalVertexCount;
 	int UseTexture, UseAltitudeMap;
 	CMesh(int vpId, CScene *scn, bool clearAfter, float shiftX, float shiftZ);
+	~CMesh() override;
 	float CenterHeight;
 	bool IntersectLine(int vpId, glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position) override;
 	void BindUniforms(CViewPortControl *vpControl) override;

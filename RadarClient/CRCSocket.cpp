@@ -208,7 +208,7 @@ int CRCSocket::Close()
 	return 0;
 }
 
-void CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
+unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 {
 	try
 	{
@@ -236,7 +236,7 @@ void CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			if (controlSum == 0)			
 				PointOK = true;			
 			else
-				return;			
+				return -1;			
 
 			pts = (RPOINT*)(void*)(info_p + 1);
 			b1 = info_p->d1;
@@ -250,8 +250,10 @@ void CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			if (controlSum == 0)
 				ImageOK = true;
 			else
-				return;
-			OnSrvMsg_RIMAGE((RIMAGE*)PTR_D, (void*)&((RIMAGE*)PTR_D)[1]);
+				return -1;
+			//OnSrvMsg_RIMAGE((RIMAGE*)PTR_D, (void*)&((RIMAGE*)PTR_D)[1]);
+			info_i = (RIMAGE*)PTR_D;
+			pixels = (void*)&((RIMAGE*)PTR_D)[1];
 			break;
 		}
 			break;
@@ -281,7 +283,7 @@ void CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				s_rdrinit = new RDR_INITCL;
 
 			memcpy(s_rdrinit, (RDR_INITCL*)(void*)&sh[1], sizeof(RDR_INITCL));
-			OnSrvMsg_INIT((RDR_INITCL*)(void*)&sh[1]);
+			//OnSrvMsg_INIT((RDR_INITCL*)(void*)&sh[1]);
 			//DoInit(s_rdrinit);			
 		}
 		case MSG_LOCATION:
@@ -291,14 +293,18 @@ void CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		break;
-		default:
-			break;
+		default: 
+		{
+			return 0;;
 		}
+		}
+		return sh->type;
 
 	}
 	catch (...) {
-
+		return -1;
 	}
+	return 0;
 	//delete[](char*)wParam;
 }
 
@@ -332,7 +338,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 void CRCSocket::OnSrvMsg_DELTRACK(int* deltrackz, int N)
 {
 	m->lock();
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < min(N, Tracks.size()); i++)
 	{
 		/*for (int j = 0; j<Tracks.size(); j++)
 		{
@@ -386,29 +392,29 @@ void CRCSocket::OnSrvMsg_LOCATION(RDRCURRPOS* d)
 
 void CRCSocket::OnSrvMsg_RIMAGE(RIMAGE* info, void* pixels)
 {
-	if (rdrinit.ViewStep == 0) return;
+	//if (rdrinit.ViewStep == 0) return;
 
-	int offset_B_pixels;
+	//int offset_B_pixels;
 
 
-	if (info->resv1[0] != 0) return; // если тип данных не флоат то хз
+	//if (info->resv1[0] != 0) return; // если тип данных не флоат то хз
 
-	{
-		// новый битмап под кусок нового РЛИ
-		char flip;
-		int B1 = info->d1, B2 = info->d2;
-		if (B2 < B1)
-		{
-			offset_B_pixels = B2;
-			flip = 1;
+	//{
+	//	// новый битмап под кусок нового РЛИ
+	//	char flip;
+	//	int B1 = info->d1, B2 = info->d2;
+	//	if (B2 < B1)
+	//	{
+	//		offset_B_pixels = B2;
+	//		flip = 1;
 
-		}
-		else
-		{
-			flip = 0;
-			offset_B_pixels = B1;
-		}
-		IDX = offset_B_pixels / rdrinit.ViewStep;
+	//	}
+	//	else
+	//	{
+	//		flip = 0;
+	//		offset_B_pixels = B1;
+	//	}
+	//	IDX = offset_B_pixels / rdrinit.ViewStep;
 		//AnsiString s;
 		//s.sprintf("IDX %d, offsB %d", IDX, offset_B_pixels);
 		//lblB->Caption = s;
@@ -467,12 +473,13 @@ void CRCSocket::OnSrvMsg_RIMAGE(RIMAGE* info, void* pixels)
 
 		}*/
 
-	}
+	//}
 }
 
 void CRCSocket::OnSrvMsg_INIT(RDR_INITCL* s_rdrinit)
 {
-	DoInit(s_rdrinit);
+	this->s_rdrinit = s_rdrinit;
+	//DoInit(s_rdrinit);
 }
 
 unsigned CRCSocket::_IMG_MapAmp2ColorRGB255(float Amp, float Min)
@@ -603,6 +610,11 @@ void CRCSocket::FreeMemory(char *readBuf)
 
 TRK::TRK(int _id)
 {
+	int stop = 0;
+	if (_id<0 || _id>10000)
+	{
+		stop = 1;
+	}
 	id = _id;
 	Found = false;
 }

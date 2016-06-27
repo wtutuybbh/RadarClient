@@ -1,7 +1,7 @@
 #include "CMinimapPointer.h"
 #include "glm/gtx/vector_angle.hpp"
 
-old_CMinimapPointer::old_CMinimapPointer(CScene *scene) : old_C3DObject::old_C3DObject(true)
+/*old_CMinimapPointer::old_CMinimapPointer(CScene *scene) : old_C3DObject::old_C3DObject(true)
 {	
 	//MiniMapVBOReady = false;
 	Scene = scene;
@@ -48,7 +48,7 @@ void old_CMinimapPointer::MiniMapBuildVBO()
 
 	MiniMapVBOBufferSize = MiniMapVBOBuffer.size();
 }
-
+*/
 
 CMiniMapPointer::CMiniMapPointer(int vpId, CScene *scene) :
 	C3DObjectModel(vpId, 

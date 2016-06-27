@@ -72,12 +72,16 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSdk_71A_IncludePath);c:\Program Files (x86)\Visual Leak Detector\include\</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSdk_71A_LibraryPath_x86);c:\Program Files (x86)\Visual Leak Detector\lib\Win32\</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSdk_71A_IncludePath);c:\Program Files (x86)\Visual Leak Detector\include\</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSdk_71A_LibraryPath_x86);c:\Program Files (x86)\Visual Leak Detector\lib\Win32\</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -88,7 +92,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=2;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)FreeImage;$(SolutionDir)glew\include;$(SolutionDir)freeglut\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)FreeImage;$(SolutionDir)glew\include;$(SolutionDir)freeglut\include;C:\Program Files %28x86%29\Visual Leak Detector\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
       <CompileAs>CompileAsCpp</CompileAs>
@@ -146,7 +150,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)FreeImage;$(SolutionDir)glew\include;$(SolutionDir)freeglut\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)FreeImage;$(SolutionDir)glew\include;$(SolutionDir)freeglut\include;C:\Program Files %28x86%29\Visual Leak Detector\include</AdditionalIncludeDirectories>
       <TreatWarningAsError>false</TreatWarningAsError>
       <CompileAs>CompileAsCpp</CompileAs>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -198,6 +202,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="C3DObjectVBO.cpp" />
     <ClCompile Include="CMarkup.cpp" />
     <ClCompile Include="CRImage.cpp" />
+    <ClCompile Include="CRImageSet.cpp" />
     <ClCompile Include="CSector.cpp" />
     <ClCompile Include="CSettings.cpp" />
     <ClCompile Include="CMinimap.cpp" />
@@ -221,6 +226,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="C3DObjectVBO.h" />
     <ClInclude Include="CMarkup.h" />
     <ClInclude Include="CRImage.h" />
+    <ClInclude Include="CRImageSet.h" />
     <ClInclude Include="CSector.h" />
     <ClInclude Include="CSettings.h" />
     <ClInclude Include="CMinimap.h" />
