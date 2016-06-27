@@ -268,13 +268,13 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			//Memo1->Lines->Add("OBJTRK");
 			break;
 		}
-		case MSG_DELTRK: {
+		/*case MSG_DELTRK: {
 			//Memo1->Lines->Add("DELTRK");
 			int N = *((int*)((void*)PTR_D));
 			int* DTK = (int*)(void*)((char*)PTR_D + 4);
 			OnSrvMsg_DELTRACK(DTK, N);
 		}
-			break;
+			break;*/
 		
 			// 
 		case MSG_INIT: {
