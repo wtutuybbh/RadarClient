@@ -314,21 +314,7 @@ C3DObjectModel::C3DObjectModel(C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObje
 
 C3DObjectModel::~C3DObjectModel()
 {
-	for (auto it = begin(vbo); it != end(vbo); ++it)
-		delete it->second;
-	vbo.clear();
 	
-	for (auto it = begin(tex); it != end(tex); ++it)
-		delete it->second;
-	tex.clear();
-
-	for (auto it = begin(tex); it != end(tex); ++it)
-		delete it->second;
-	prog.clear();
-
-	translateMatrix.clear();
-	scaleMatrix.clear();
-	rotateMatrix.clear();
 }
 
 void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)

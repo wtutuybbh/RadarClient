@@ -63,7 +63,7 @@
 #include "CSettings.h"
 #include "CSector.h"
 
-#include <vld.h>
+//#include <vld.h>
 
 #define VIEW_PORT_CONTROL_ID     100
 
@@ -488,7 +488,7 @@ genType & 	position
 		_CrtSetBreakAlloc(lBreakAlloc);
 	}
 #endif
-	std::ifstream files_txt("files.txt");
+	std::ifstream files_txt("settings.txt");
 	
 	if (!files_txt) {
 		MessageBox(HWND_DESKTOP, "files.txt not found.", MB_OK, MB_ICONERROR);
