@@ -902,7 +902,11 @@ void CScene::Init(RDR_INITCL* init)
 	}
 
 	minE = init->begElv;
-	maxE = init->begElv + init->dElv;
+	maxE = init->begElv + init->dElv * init->Nelv;
+	if (minE==0 && maxE==0)
+	{
+		minE = maxE = CSettings::GetFloat(FloatZeroElevation);
+	}
 	rayWidth = init->dAzm * init->ViewStep;
 	SectorsCount = init->Nazm / init->ViewStep;
 	Sectors.resize(SectorsCount);
