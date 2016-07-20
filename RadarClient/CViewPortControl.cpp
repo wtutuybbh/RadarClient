@@ -110,12 +110,20 @@ LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wPara
 			Camera->startPosition.x = GET_X_LPARAM(lParam);
 			Camera->startPosition.y = GET_Y_LPARAM(lParam);
 			C3DObjectModel* o = Get3DObject(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-			if (o)
-			{
-				int i;
-				i = 1;
-
-			}			
+			
+				if (Scene && UI)
+				{
+					if (o)
+					{
+						o->SetGeoCoords(Scene->GetGeographicCoordinates(o->GetCartesianCoords()));
+						Scene->PushSelection(o);
+					}
+					else
+					{
+						Scene->ClearSelection();
+					}
+					UI->FillInfoGrid(Scene);
+				}									
 		}
 		break;
 	}
@@ -192,9 +200,11 @@ C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 	C3DObjectModel *t = Scene->GetFirstTrackBetweenPoints(this, glm::vec2(x, y), index);
 	if (o && !t) {
 		o->SetColor(glm::vec4(0, 1, 0, 1));
+		return o;
 	}
 	if (!o && t) {
 		t->SetColor(glm::vec4(0, 1, 0, 1));
+		return t;
 	}
 	if(o && t)
 	{

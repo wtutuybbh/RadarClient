@@ -15,9 +15,11 @@ CRImageSet::CRImageSet()
 
 void CRImageSet::Draw(CViewPortControl* vpControl, GLenum mode)
 {
-	for (auto it = Images->begin(); it != Images->end(); ++it)
-	{
-		(*it)->Draw(vpControl, mode);
+	if (Images) {
+		for (auto it = Images->begin(); it != Images->end(); ++it)
+		{
+			(*it)->Draw(vpControl, mode);
+		}
 	}
 }
 void CRImageSet::Refresh(glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels)

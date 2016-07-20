@@ -41,27 +41,33 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 	else {
 		vbuffer = new vector<VBOData>(info_p->N);
 	}
-	glm::vec4 mincolor = CSettings::GetColor(ColorPointLowLevel);
-	glm::vec4 maxcolor = CSettings::GetColor(ColorPointHighLevel);
 	float zeroElevation = glm::radians(CSettings::GetFloat(FloatZeroElevation));
 	for (int i = 0; i < info_p->N; i++) 
 	{
-		if (pts[i].Amp > maxAmp)
-			maxAmp = pts[i].Amp;
 		//here we calculate point spherical coordinates
 		r = pts[i].R * init->dR;
 		a = init->begAzm + pts[i].B * init->dAzm;
 		e = zeroElevation + init->begElv + pts[i].E * init->dElv;
 		(*vbuffer)[i].vert = origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0);
-	}
-	for (int i = 0; i < info_p->N; i++)
-	{
-		(*vbuffer)[i].color = mincolor + pts[i].Amp / maxAmp * (maxcolor - mincolor);
+		(*vbuffer)[i].norm.x = pts[i].Amp;
+		
+		(*vbuffer)[i].color = GetColor(pts[i].Amp);
+		
 	}
 	vbo.at(Main)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
 	vbo.at(Main)->NeedsReload = true;
 	vbo.at(MiniMap)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
 	vbo.at(MiniMap)->NeedsReload = true;
+}
+
+void CSector::Dump(CViewPortControl* vpControl, std::ofstream *outfile)
+{
+	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
+	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
+	for (auto it = buffer->begin(); it != buffer->end(); ++it)
+	{
+		*outfile << (*it).norm.x << char(13) << std::endl;
+	}
 }
 
 void CSector::BindUniforms(CViewPortControl* vpControl)
@@ -105,6 +111,15 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 	return -1;
 }
 
+glm::vec3 CSector::GetPointCoords(CViewPortControl* vpControl, int index)
+{
+	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
+
+	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
+
+	return glm::vec3(buffer->at(index).vert);
+}
+
 void CSector::SelectPoint(int vpId, int pointIndex)
 {
 	C3DObjectVBO *vbo_ = vbo.at(vpId);
@@ -116,4 +131,40 @@ void CSector::SelectPoint(int vpId, int pointIndex)
 	
 	(*buffer)[pointIndex].color = CSettings::GetColor(ColorPointSelected);
 	vbo_->NeedsReload = true;
+}
+
+void CSector::UnselectAll(int vpId)
+{
+	C3DObjectVBO *vbo_ = vbo.at(vpId);
+
+	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
+
+	if (!buffer || buffer->size() == 0)
+		return;
+
+	for (int i = 0; i < buffer->size(); i++)
+	{
+		buffer->at(i).color = GetColor(buffer->at(i).norm.x);
+	}
+	vbo_->NeedsReload = true;
+}
+
+glm::vec4 CSector::GetColor(float level)
+{
+	if (level < CSettings::GetInt(IntPointColorThreshold_00))
+	{
+		return CSettings::GetColor(ColorPointColor_00);
+	}
+	else if (level < CSettings::GetInt(IntPointColorThreshold_01))
+	{
+		return CSettings::GetColor(ColorPointColor_01);
+	}
+	else if (level < CSettings::GetInt(IntPointColorThreshold_02))
+	{
+		return CSettings::GetColor(ColorPointColor_02);
+	}
+	else
+	{
+		return CSettings::GetColor(ColorPointColor_03);
+	}
 }

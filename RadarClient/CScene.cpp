@@ -23,6 +23,8 @@
 #include "CSettings.h"
 #include "CViewPortControl.h"
 #include "CRImageSet.h"
+#include <iostream>
+#include <fstream>
 
 
 /*CScene::CScene(float lonc, float latc) {
@@ -32,6 +34,22 @@
 float CMesh::AverageHeight;
 CMesh **CMesh::Meshs;
 int CMesh::TotalMeshsCount;
+
+void CScene::PushSelection(C3DObjectModel* o)
+{
+	Selection.push_back(o);
+}
+
+void CScene::ClearSelection()
+{
+	Selection.clear();
+	for (int i = 0; i < Sectors.size(); i++)
+	{
+		Sectors.at(i)->UnselectAll(Main);
+		Sectors.at(i)->UnselectAll(MiniMap);
+	}
+}
+
 CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize, mutex *m) {
 
 	this->m = m;
@@ -261,7 +279,8 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	}
 	if (UI->GetCheckboxState_Images())
 	{
-		ImageSet->Draw(vpControl, GL_POINTS);
+		if (ImageSet)
+			ImageSet->Draw(vpControl, GL_POINTS);
 	}
 
 	glEnable(GL_LINE_SMOOTH);
@@ -435,7 +454,8 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	}
 	if (UI->GetCheckboxState_Images())
 	{
-		ImageSet->Draw(vpControl, GL_POINTS);
+		if (ImageSet)
+			ImageSet->Draw(vpControl, GL_POINTS);
 	}
 	glDisable(GL_DEPTH_BUFFER);
 	Markup->Draw(vpControl, 0);
@@ -791,6 +811,33 @@ void CScene::ClearSectors()
 	SectorsCount = 0;
 }
 
+void CScene::Dump(CViewPortControl *vpControl)
+{
+	time_t rawtime;
+	struct tm * timeinfo;
+	char buffer[80];
+
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	strftime(buffer, 80, "%d-%m-%Y %I:%M:%S", timeinfo);
+	std::string str(buffer);
+	string dump("dump");
+	string txt(".txt");
+	std::ofstream outfile;
+	string fname = dump + str + txt;
+	outfile.open("dump.txt");
+	if (outfile.is_open()) {
+		for (int i = 0; i < Sectors.size(); i++)
+		{
+			if (Sectors.at(i))
+				Sectors.at(i)->Dump(vpControl, &outfile);
+		}
+		outfile.flush();
+		outfile.close();
+	}
+}
+
 void CScene::RefreshTracks(vector<TRK*>* tracks)
 {	
 	if(tracks->size() == 0)
@@ -847,6 +894,13 @@ void CScene::Init(RDR_INITCL* init)
 
 	rdrinit = init;
 
+	if (UI)
+	{
+		float ba_deg = glm::degrees(init->begAzm);
+		UI->SetTrackbarValue_BegAzm(100.0 * (ba_deg-CSettings::GetFloat(FloatMinBegAzm)) / (CSettings::GetFloat(FloatMaxBegAzm) - CSettings::GetFloat(FloatMinBegAzm)));
+		UI->SetTrackbarValue_ZeroElevation(100.0 * CSettings::GetFloat(FloatZeroElevation) / 90.0);
+	}
+
 	minE = init->begElv;
 	maxE = init->begElv + init->dElv;
 	rayWidth = init->dAzm * init->ViewStep;
@@ -900,6 +954,9 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 			{
 				Sectors[i]->SelectPoint(Main, index);
 				Sectors[i]->SelectPoint(MiniMap, index);
+				CRCPointModel *point = new CRCPointModel(vpControl->Id, this->y0, this->mpph, this->mppv, 0, 0, 0);
+				point->SetCartesianCoordinates(Sectors[i]->GetPointCoords(vpControl, index));
+				return point;
 			}
 		}
 	}
@@ -989,4 +1046,17 @@ void CScene::DrawBitmaps() const
 	glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
 	BitmapString(60 * markDistance / mpph, y0 + markDistance, 0, "W");
 	BitmapString(-60 * markDistance / mpph, y0 + markDistance, 0, "E");
+}
+
+void CScene::SetBegAzm(double begAzm)
+{
+	if (rdrinit)
+	{
+		rdrinit->begAzm = begAzm;
+	}
+}
+
+glm::vec3 CScene::GetGeographicCoordinates(glm::vec3 glCoords)
+{
+	return glm::vec3(geocenter.x + glCoords.x * mpph / cnvrt::londg2m(1, geocenter.y), geocenter.y + glCoords.z * mpph / cnvrt::londg2m(1, geocenter.y), glCoords.y);
 }

@@ -119,7 +119,10 @@ public:
 	RDR_INITCL * rdrinit;
 	bool Initialized;
 
-	std::vector<old_C3DObject*> Selection;
+	std::vector<C3DObjectModel*> Selection;
+	void PushSelection(C3DObjectModel *o);
+	void ClearSelection();
+
 	CMesh* Mesh;
 	CMesh* Mesh1;
 	CMesh* Mesh2;
@@ -151,6 +154,7 @@ public:
 
 	void RefreshSector(RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init);
 	void ClearSectors();
+	void Dump(CViewPortControl *vpControl);
 
 	void RefreshTracks(vector<TRK*> *tracks);
 
@@ -170,4 +174,8 @@ public:
 	glm::vec2 CameraXYForMiniMap() const;
 
 	void DrawBitmaps() const;
+
+	void SetBegAzm(double begAzm);
+
+	glm::vec3 GetGeographicCoordinates(glm::vec3 glCoords);
 };

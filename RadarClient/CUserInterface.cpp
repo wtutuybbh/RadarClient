@@ -13,6 +13,7 @@
 
 #include "Util.h"
 #include "CMesh.h"
+#include "CSettings.h"
 
 /*CUserInterface::CUserInterface()
 {
@@ -121,6 +122,16 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	return LRESULT();
 }
 
+LRESULT CUserInterface::Button_Dump(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if (VPControl && VPControl->Scene)
+	{
+		VPControl->Scene->Dump(VPControl);
+	}
+
+	return LRESULT();
+}
+
 LRESULT CUserInterface::Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	return LRESULT();
@@ -142,6 +153,16 @@ glm::vec3 CUserInterface::GetDirection()
 	float a = glm::radians((GetTrackbarValue_Turn() - 50) * 3.6f);
 	float e = glm::radians(1.8 * GetTrackbarValue_VTilt()); //here elevation counts from top-up direction
 	return glm::vec3(-sin(e)*sin(a), cos(e), sin(e)*cos(a));
+}
+
+float CUserInterface::GetBegAzm()
+{
+	return CSettings::GetFloat(FloatMinBegAzm) + (CSettings::GetFloat(FloatMaxBegAzm) - CSettings::GetFloat(FloatMinBegAzm)) * GetTrackbarValue(BegAzm_ID)/100.0;
+}
+
+float CUserInterface::GetZeroElevation()
+{
+	return CSettings::GetFloat(FloatMinZeroElevation) + (CSettings::GetFloat(FloatMaxZeroElevation) - CSettings::GetFloat(FloatMinZeroElevation)) * GetTrackbarValue(ZeroElevation_ID) / 100.0;
 }
 
 float CUserInterface::GetHeight()
@@ -286,6 +307,47 @@ LRESULT CUserInterface::Trackbar_CameraDirection_Turn(HWND hwnd, UINT uMsg, WPAR
 
 	return LRESULT();
 }
+
+LRESULT CUserInterface::Trackbar_BegAzm(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	/*int ID = GetDlgCtrlID((HWND)lParam);
+
+	int val = SendMessage(GetDlgItem(hwnd, ID), TBM_GETPOS, 0, 0);*/
+
+	if (VPControl && VPControl->Scene)
+	{
+		VPControl->Scene->SetBegAzm(glm::radians(GetBegAzm()));
+	}
+	Trackbar_BegAzm_SetText(BegAzmValue_ID);	
+	return LRESULT();
+}
+
+void CUserInterface::Trackbar_BegAzm_SetText(int labelID)
+{
+	float val = GetBegAzm();
+	stringstream stream;
+	stream << fixed << setprecision(2) << val;
+	string s = stream.str();
+	SetDlgItemText(ParentHWND, BegAzmValue_ID, s.c_str());
+}
+
+LRESULT CUserInterface::Trackbar_ZeroElevation(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	CSettings::SetFloat(FloatZeroElevation, GetZeroElevation());
+	CSettings::SetFloat(FloatCTrackRefresh_e0, GetZeroElevation());
+	Trackbar_ZeroElevation_SetText(ZeroElevationValue_ID);
+	return LRESULT();
+}
+
+void CUserInterface::Trackbar_ZeroElevation_SetText(int labelID)
+{
+	float val = GetZeroElevation();
+	stringstream stream;
+	stream << fixed << setprecision(2) << val;
+	string s = stream.str();
+	SetDlgItemText(ParentHWND, ZeroElevationValue_ID, s.c_str());
+}
+
 //TRACKBAR_CLASS
 CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
 {
@@ -329,7 +391,8 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 
 	MeasureDistance_ID = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_MEASURE_DISTANCE, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MeasureDistance);
 	
-	Test_ID = InsertElement(NULL, _T("BUTTON"), TEXT_BUTTON_TEST, WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Button_Test);
+	Test_ID = InsertElement(NULL, _T("BUTTON"), TEXT_BUTTON_TEST, WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth/2, ButtonHeight, &CUserInterface::Button_Test);
+	Dump_ID = InsertElement(NULL, _T("BUTTON"), TEXT_BUTTON_DUMP, WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X + ControlWidth / 2 + Column1X / 2, CurrentY, ControlWidth/2, ButtonHeight, &CUserInterface::Button_Dump);
 
 	CurrentY += VStepGrp;
 
@@ -356,9 +419,20 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 
 	InsertElement(NULL, _T("STATIC"), TEXT_LABEL_CAMERA_POSITION, WS_VISIBLE | WS_CHILD, Column1X, CurrentY, ControlWidth, ButtonHeight, NULL);
 	CameraPosition_ID[0] = InsertElement(NULL, _T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_RADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_GROUP, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
+
+	InsertElement(NULL, _T("STATIC"), _T("Начальный азимут"), WS_VISIBLE | WS_CHILD, Column2X, CurrentY, ControlWidth, ButtonHeight, NULL);
+	BegAzm_ID = InsertElement(NULL, TRACKBAR_CLASS, TEXT_LABEL_CAMERA_POSITION, WS_VISIBLE | WS_CHILD | TBS_HORZ | TBS_BOTTOM, Column2X + ControlWidth + VStep / 2, CurrentY, ControlWidth, VStepGrp, &CUserInterface::Trackbar_BegAzm);
+	BegAzmValue_ID = InsertElement(NULL, _T("STATIC"), _T("BegAzmValue_ID"), WS_VISIBLE | WS_CHILD, Column2X + 2* ControlWidth + VStep, CurrentY, ControlWidth/2, ButtonHeight, NULL);
+
 	CurrentY += VStep;
 	CameraPosition_ID[1] = InsertElement(NULL, _T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_100M_ABOVE_RADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
+	
+
 	CurrentY += VStep;
+	InsertElement(NULL, _T("STATIC"), _T("Начальный угол места"), WS_VISIBLE | WS_CHILD, Column2X, CurrentY, ControlWidth, ButtonHeight, NULL);
+	ZeroElevation_ID = InsertElement(NULL, TRACKBAR_CLASS, TEXT_LABEL_CAMERA_POSITION, WS_VISIBLE | WS_CHILD | TBS_HORZ | TBS_BOTTOM, Column2X + ControlWidth + VStep / 2, CurrentY, ControlWidth, VStepGrp, &CUserInterface::Trackbar_ZeroElevation);
+	ZeroElevationValue_ID = InsertElement(NULL, _T("STATIC"), _T("ZeroElevationValue_ID"), WS_VISIBLE | WS_CHILD, Column2X + 2 * ControlWidth + VStep, CurrentY, ControlWidth/2, ButtonHeight, NULL);
+
 	CameraPosition_ID[2] = InsertElement(NULL, _T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_1000M_ABOVE_RADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
 	CurrentY += VStep;
 	//CameraDirectionValue_ID[0] = InsertElement(_T("STATIC"), _T(""), WS_VISIBLE | WS_CHILD, 10, 530, 100, 30, NULL);
@@ -432,6 +506,9 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 
 	GridHWND = InfoGridHWND = NULL;
 	InitGrid();
+
+	Trackbar_BegAzm_SetText(BegAzmValue_ID);
+	Trackbar_ZeroElevation_SetText(ZeroElevationValue_ID);
 }
 
 CUserInterface::~CUserInterface()
@@ -507,6 +584,13 @@ int CUserInterface::GetTrackbarValue_Turn()
 	return val;
 }
 
+int CUserInterface::GetTrackbarValue(int id) const
+{
+	HWND hwnd = GetDlgItem(ParentHWND, id);
+	int val = SendMessage(hwnd, TBM_GETPOS, 0, 0);
+	return val;
+}
+
 void CUserInterface::SetTrackbarValue_VTilt(int val)
 {
 	SendMessage(GetDlgItem(ParentHWND, CameraDirection_ID[0]), TBM_SETPOS, 1, val);
@@ -515,6 +599,23 @@ void CUserInterface::SetTrackbarValue_VTilt(int val)
 void CUserInterface::SetTrackbarValue_Turn(int val)
 {
 	SendMessage(GetDlgItem(ParentHWND, CameraDirection_ID[1]), TBM_SETPOS, 1, val);
+}
+
+void CUserInterface::SetTrackbarValue(int id, int val) const
+{
+	SendMessage(GetDlgItem(ParentHWND, id), TBM_SETPOS, 1, val);
+}
+
+void CUserInterface::SetTrackbarValue_BegAzm(int val)
+{
+	SetTrackbarValue(BegAzm_ID, val);
+	Trackbar_BegAzm_SetText(BegAzmValue_ID);
+}
+
+void CUserInterface::SetTrackbarValue_ZeroElevation(int val)
+{
+	SetTrackbarValue(ZeroElevation_ID, val);
+	Trackbar_ZeroElevation_SetText(ZeroElevationValue_ID);
 }
 
 void CUserInterface::ControlEnable(int ID, bool enable) const
@@ -695,6 +796,19 @@ void CUserInterface::FillInfoGrid(CScene* scene)
 		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, (LPARAM)ss.str().c_str());
 
 		
+	}
+
+	if (scene->Selection.size()>0)
+	{
+		C3DObjectModel *last = scene->Selection.at(scene->Selection.size() - 1);
+
+		glm::vec3 geoCoords = last->GetGeoCoords();
+
+		r++;
+		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 1, (LPARAM)"Точка ");
+		ss.str(std::string());
+		ss << std::fixed << std::setprecision(4) << geoCoords.x << ", " << geoCoords.y;
+		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, (LPARAM)ss.str().c_str());
 	}
 
 	SendMessage(InfoGridHWND, ZGM_AUTOSIZE_ALL_COLUMNS, 0, 0);

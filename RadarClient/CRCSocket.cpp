@@ -1,7 +1,10 @@
 ﻿//#include "stdafx.h"
 #include "CRCSocket.h"
-#include <mutex>
+#include "CSettings.h"
 
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
 
 CRCSocket::CRCSocket(HWND hWnd, std::mutex* m)
 {
@@ -78,7 +81,7 @@ void CRCSocket::Init()
 		SendMessage(hWnd, WM_DESTROY, NULL, NULL);
 	}
 	// Resolve IP address for hostname	
-	if ((host = gethostbyname("localhost")) == NULL)
+	if ((host = gethostbyname(CSettings::GetString(StringHostName).c_str())) == NULL)
 	{
 		ErrorText = "Failed to resolve hostname!";
 		WSACleanup();
@@ -86,7 +89,7 @@ void CRCSocket::Init()
 
 	// Setup our socket address structure
 
-	SockAddr.sin_port = htons(10001);
+	SockAddr.sin_port = htons(CSettings::GetInt(IntPort));
 	SockAddr.sin_family = AF_INET;
 	SockAddr.sin_addr.s_addr = *((unsigned long*)host->h_addr);
 
@@ -338,6 +341,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		}
 	}
 }
+
 void CRCSocket::OnSrvMsg_DELTRACK(int* deltrackz, int N)
 {
 	m->lock();

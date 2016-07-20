@@ -488,17 +488,66 @@ genType & 	position
 		_CrtSetBreakAlloc(lBreakAlloc);
 	}
 #endif
-	std::ifstream files_txt("settings.txt");
+	std::ifstream settings_txt("settings.txt");
 	
-	if (!files_txt) {
+	if (!settings_txt) {
 		MessageBox(HWND_DESKTOP, "files.txt not found.", MB_OK, MB_ICONERROR);
 		return 0;
 	}
-	std::getline(files_txt, g_altFile);
-	std::getline(files_txt, g_imgFile);
-	std::getline(files_txt, g_datFile);
+	std::getline(settings_txt, g_altFile);
+	std::getline(settings_txt, g_imgFile);
+	std::getline(settings_txt, g_datFile);
+	string s;
+	while (settings_txt.good()) {
+		std::getline(settings_txt, s);
+		std::vector<std::string> strparts = rcutils::split(s, '=');
+		string settingName = strparts.at(0);
+		if(settingName.substr(0, 5) == "Float")
+		{
+			float settingValue = ::atof(strparts.at(1).c_str());
+			CSettings::SetFloat(CSettings::GetIndex(settingName), settingValue);
+		}
+		if (settingName.substr(0, 3) == "Int")
+		{
+			int settingValue = ::_atoi64(strparts.at(1).c_str());
+			CSettings::SetInt(CSettings::GetIndex(settingName), settingValue);
+		}
+		if (settingName.substr(0, 5) == "Color")
+		{
+			unsigned short shift=0;
+			if (strparts.at(1).substr(0, 1) == "#")
+			{
+				shift = 1;
+			}
+			glm::vec4 settingValue;
+			unsigned short v;
+			std::stringstream ss, ss1, ss2, ss3;
 
-	files_txt.close();
+			string str_r = strparts.at(1).substr(shift, 2);						
+			ss << std::hex << str_r;
+			ss >> v;
+			settingValue.r = (float)v / 255.0;
+
+			str_r = strparts.at(1).substr(shift+2, 2);
+			ss1 << std::hex << str_r;
+			ss1 >> v;
+			settingValue.g = (float)v / 255.0;
+
+			str_r = strparts.at(1).substr(shift + 4, 2);
+			ss2 << std::hex << str_r;
+			ss2 >> v;
+			settingValue.b = (float)v / 255.0;
+
+			str_r = strparts.at(1).substr(shift + 6, 2);
+			ss3 << std::hex << str_r;
+			ss3 >> v;
+			settingValue.a = (float)v / 255.0;
+
+			CSettings::SetColor(CSettings::GetIndex(settingName), settingValue);
+		}
+	}
+
+	settings_txt.close();
 
 	if (strcmp(lpCmdLine, "") == 0) {
 		g_lon = 37.631424;

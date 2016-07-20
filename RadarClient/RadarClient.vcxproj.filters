@@ -180,4 +180,9 @@
     <Library Include="..\glew\lib\Release\Win32\glew32.lib" />
     <Library Include="..\glew\lib\Release\Win32\glew32s.lib" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\Data\settings.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

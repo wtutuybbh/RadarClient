@@ -110,10 +110,13 @@ protected:
 	std::unordered_map<int, C3DObjectTexture*> tex;
 	std::unordered_map<int, C3DObjectProgram*> prog;
 	std::unordered_map<int, glm::mat4> scaleMatrix, rotateMatrix, translateMatrix, modelMatrix;
-	glm::vec3 cartesianCoords, sphericalCoords;
+	glm::vec3 cartesianCoords, sphericalCoords, geoCoords;
 public:
 	void SetCartesianCoordinates(glm::vec4 c);
 	void SetCartesianCoordinates(glm::vec3 c);
+	glm::vec3 GetCartesianCoords();
+	void SetGeoCoords(glm::vec3 c);
+	glm::vec3 GetGeoCoords();
 	void SetCartesianCoordinates(float x, float y, float z);
 
 

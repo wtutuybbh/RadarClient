@@ -23,6 +23,7 @@
 #define TEXT_BUTTON_CONNECT _T("Cоединить")
 #define TEXT_BUTTON_DISCONNECT _T("Разъединить")
 #define TEXT_BUTTON_TEST _T("Тест")
+#define TEXT_BUTTON_DUMP _T("Дамп")
 
 #define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_RADAR _T("От радара")
 #define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_100M_ABOVE_RADAR _T("100м над радаром")
@@ -77,12 +78,15 @@ class CUserInterface
 {
 private:
 	int CurrentID;
-	int IsConnected_ID, Button_Connect_ID, Grid_ID, InfoGrid_ID, FixViewToRadar_ID, MeasureDistance_ID, Test_ID;
+	int IsConnected_ID, Button_Connect_ID, Grid_ID, InfoGrid_ID, FixViewToRadar_ID, MeasureDistance_ID, Test_ID, Dump_ID, BegAzm_ID, ZeroElevation_ID, BegAzmValue_ID, ZeroElevationValue_ID;
 	int ObjOptions_ID[3], MapOptions_ID[2], MarkupOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2];
 	//int Info_ID[]
 	void SetChecked(int id, bool checked);
 
 	glm::vec3 GetDirection();
+	float GetBegAzm();
+	float GetZeroElevation();
+
 	float GetHeight();
 
 	HMODULE hgridmod; //ZeeGrid's dll handle
@@ -99,6 +103,7 @@ private:
 
 	virtual LRESULT Button_Connect(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Button_Dump(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MarkupOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -107,6 +112,10 @@ private:
 	virtual LRESULT RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Trackbar_CameraDirection_VTilt(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Trackbar_CameraDirection_Turn(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Trackbar_BegAzm(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	void Trackbar_BegAzm_SetText(int labelID);
+	virtual LRESULT Trackbar_ZeroElevation(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	void Trackbar_ZeroElevation_SetText(int labelID);
 	virtual LRESULT Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT InfoGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -142,8 +151,12 @@ public:
 
 	int GetTrackbarValue_VTilt();
 	int GetTrackbarValue_Turn();
+	int GetTrackbarValue(int id) const;
 	void SetTrackbarValue_VTilt(int val);
 	void SetTrackbarValue_Turn(int val);
+	void SetTrackbarValue(int id, int val) const;
+	void SetTrackbarValue_BegAzm(int val);
+	void SetTrackbarValue_ZeroElevation(int val);
 
 	void ControlEnable(int ID, bool enable) const;
 

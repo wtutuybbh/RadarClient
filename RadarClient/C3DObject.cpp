@@ -277,6 +277,21 @@ void C3DObjectModel::SetCartesianCoordinates(glm::vec3 c)
 	cartesianCoords = c;
 }
 
+glm::vec3 C3DObjectModel::GetCartesianCoords()
+{
+	return cartesianCoords;
+}
+
+void C3DObjectModel::SetGeoCoords(glm::vec3 c)
+{
+	geoCoords = c;
+}
+
+glm::vec3 C3DObjectModel::GetGeoCoords()
+{
+	return geoCoords;
+}
+
 void C3DObjectModel::SetCartesianCoordinates(float x, float y, float z)
 {
 	cartesianCoords = glm::vec3(x, y, z);
