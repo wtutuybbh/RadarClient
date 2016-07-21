@@ -52,6 +52,8 @@ void CScene::ClearSelection()
 
 CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize, mutex *m) {
 
+	rdrinit = NULL;
+
 	this->m = m;
 	//CRCPointModel::InitStructure();
 

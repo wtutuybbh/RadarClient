@@ -116,7 +116,7 @@ public:
 	bool VBOisBuilt, RayVBOisBuilt, MiniMapVBOisBuilt;
 
 
-	RDR_INITCL * rdrinit;
+	RDR_INITCL * rdrinit{NULL};
 	bool Initialized;
 
 	std::vector<C3DObjectModel*> Selection;
