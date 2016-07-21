@@ -303,8 +303,8 @@ typedef struct
 	int SampleCount; // количество отсчетов в канале
 	int SampleSize;  // в байтах на 1 канал
 	int AZMT;       // 8200 едениц = 360 градусов
-	float* ch1offs; // резерв
-	float* ch2offs; // резерв
+	float* ch1offs{ NULL }; // резерв
+	float* ch2offs{ NULL }; // резерв
 
 	unsigned int type; //= 0 - олдскул записи. поля ниже не существуют.
 					   //  1 - имитатор. версия 1.1 / 4байта float, 2 канала, ch1=ch2, после модуля опт фильтр /
@@ -352,14 +352,14 @@ typedef struct
 
 typedef struct _send_queue_element
 {
-	char* data; // массив + заголовок точнее то что от них осталось отправить
+	char* data{ NULL }; // массив + заголовок точнее то что от них осталось отправить
 	int length; // размер
 } send_queue_element;
 
 struct _client                     //Клиенты
 {
-	char *buff;
-	SOCKET *Socket;
+	char *buff{ NULL };
+	SOCKET *Socket{ NULL };
 	unsigned int offset;
 	vector<send_queue_element> send_queue;  // очередь отправляемых данных
 };
@@ -432,7 +432,7 @@ public:
 class CRCSocket
 {
 	bool OnceClosed;
-	char *hole;
+	char *hole{ NULL };
 	int LENDATAOTOBR {1};
 public:
 	bool Initialized {false};
@@ -449,23 +449,23 @@ public:
 	SOCKADDR_IN SockAddr;
 	HWND hWnd;
 	//char szHistory[10000];
-	_client *client;
+	_client *client{ NULL };
 
 	//used when processing data:
 	char *tm/*, *ReadBuf*/;
 	/*long ReadBufLength;*/
-	RDR_INITCL* s_rdrinit;
+	RDR_INITCL* s_rdrinit{ NULL };
 	RDR_INITCL rdrinit;
-	RPOINTS* info_p;
-	RPOINT* pts;
+	RPOINTS* info_p{ NULL };
+	RPOINT* pts{ NULL };
 	RDRCURRPOS *CurrentPosition {NULL};
 
-	RIMAGE* info_i;
-	void * pixels;
+	RIMAGE* info_i{ NULL };
+	void * pixels{ NULL };
 
 	long Buf[TXRXBUFSIZE];
 
-	void* PTR_D;
+	void* PTR_D{ NULL };
 
 	int n_view_in_scan;
 	int ActiveSeans;
@@ -475,7 +475,7 @@ public:
 	float Max_Amp, Min_Amp;
 	int b1, b2;
 
-	std::mutex* m;
+	std::mutex* m{ NULL };
 
 	CRCSocket(HWND hWnd, std::mutex* m);
 	~CRCSocket();

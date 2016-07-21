@@ -7,7 +7,7 @@ class CRImage;
 class CRImageSet
 {
 public:
-	std::vector<CRImage*> *Images;
+	std::vector<CRImage*> *Images{ NULL };
 	float prevAzimuth {0.0f}; //azimuth from previous scan
 	CRImageSet();
 	~CRImageSet();

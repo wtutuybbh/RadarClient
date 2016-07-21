@@ -23,6 +23,7 @@
 #include "CSettings.h"
 #include "CViewPortControl.h"
 #include "CRImageSet.h"
+#include "CLine.h"
 #include <iostream>
 #include <fstream>
 
@@ -228,6 +229,9 @@ CScene::~CScene() {
 	}*/
 	Sectors.clear();
 	Tracks.clear();
+
+	if (begAzmLine)
+		delete begAzmLine;
 }
 
 bool CScene::DrawScene(CViewPortControl * vpControl)
@@ -294,6 +298,9 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		Markup->Draw(vpControl, 0);
 	}
 
+	if (begAzmLine) {
+		begAzmLine->Draw(vpControl, GL_LINES);
+	}
 
 	//testPoint->Draw(vpControl, GL_TRIANGLES);
 
@@ -461,6 +468,9 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	}
 	glDisable(GL_DEPTH_BUFFER);
 	Markup->Draw(vpControl, 0);
+	if (begAzmLine) {
+		begAzmLine->Draw(vpControl, GL_LINES);
+	}
 	//glEnable(GL_DEPTH_BUFFER);
 	mmPointer->Draw(vpControl, GL_TRIANGLES);
 	return true;
@@ -898,9 +908,18 @@ void CScene::Init(RDR_INITCL* init)
 
 	if (UI)
 	{
-		float ba_deg = glm::degrees(init->begAzm);
+			float ba_deg = glm::degrees(init->begAzm);
+		while (ba_deg < 0)
+			ba_deg = 360 + ba_deg; //circle magic
 		UI->SetTrackbarValue_BegAzm(100.0 * (ba_deg-CSettings::GetFloat(FloatMinBegAzm)) / (CSettings::GetFloat(FloatMaxBegAzm) - CSettings::GetFloat(FloatMinBegAzm)));
 		UI->SetTrackbarValue_ZeroElevation(100.0 * CSettings::GetFloat(FloatZeroElevation) / 90.0);
+
+		int markDistance = CSettings::GetInt(IntMarkupMarkDistance);
+		int numCircles = CSettings::GetInt(IntMarkupNumCircles);
+		int marksPerCircle = CSettings::GetInt(IntMarkupMarksPerCircle);
+		int r = markDistance * numCircles * marksPerCircle;
+
+		begAzmLine = new CLine(Main, glm::vec4(0, y0, 0, 1), glm::vec4(- r * sin(init->begAzm), y0, r * cos(init->begAzm), 1));
 	}
 
 	minE = init->begElv;
@@ -1059,6 +1078,16 @@ void CScene::SetBegAzm(double begAzm)
 	if (rdrinit)
 	{
 		rdrinit->begAzm = begAzm;
+		
+		int markDistance = CSettings::GetInt(IntMarkupMarkDistance);
+		int numCircles = CSettings::GetInt(IntMarkupNumCircles);
+		int marksPerCircle = CSettings::GetInt(IntMarkupMarksPerCircle);
+		int r = markDistance * numCircles * marksPerCircle;
+
+		if (begAzmLine)
+			begAzmLine->SetPoints(glm::vec4(0, y0, 0, 1), glm::vec4(- r * sin(rdrinit->begAzm), y0, r * cos(rdrinit->begAzm), 1));
+		else 
+			begAzmLine = new CLine(Main, glm::vec4(0, y0, 0, 1), glm::vec4(- r * sin(rdrinit->begAzm), y0, r * cos(rdrinit->begAzm), 1));
 	}
 }
 

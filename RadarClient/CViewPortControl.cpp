@@ -250,15 +250,21 @@ LRESULT CALLBACK CViewPortControl::stWinMsgHandler(HWND hwnd, UINT uMsg, WPARAM 
 		SetWindowLong(hwnd, GWL_USERDATA, (long)((LPCREATESTRUCT(lParam))->lpCreateParams));
 	}
 
-	// get the pointer to the window
-	vpc = (CViewPortControl*)GetWindowLong(hwnd, GWL_USERDATA);
+	
+	try {
+		// get the pointer to the window
+		vpc = (CViewPortControl*)GetWindowLong(hwnd, GWL_USERDATA);
 
-	// if we have the pointer, go to the message handler of the window
-	// else, use DefWindowProc
-	if (vpc)
-		return vpc->ViewPortControlProc(hwnd, uMsg, wParam, lParam);
-	else
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+		// if we have the pointer, go to the message handler of the window
+		// else, use DefWindowProc
+		if (vpc)
+			return vpc->ViewPortControlProc(hwnd, uMsg, wParam, lParam);
+		else
+			return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	}
+	catch (...) {
+		MessageBox(HWND_DESKTOP, "Exception in CViewPortControl::stWinMsgHandler", "Error", MB_OK | MB_ICONEXCLAMATION);
+	}
 }
 
 bool CViewPortControl::Register(void)

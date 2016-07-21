@@ -43,9 +43,9 @@ class CViewPortControl {
 	bool Register(void);
 	void Init();
 public:
-	CScene *Scene;
-	CCamera *Camera;
-	CUserInterface *UI;
+	CScene *Scene{ NULL };
+	CCamera *Camera{ NULL };
+	CUserInterface *UI{ NULL };
 	HWND hWnd;
 	HDC hDC;
 	HGLRC hRC;

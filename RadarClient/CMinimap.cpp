@@ -4,7 +4,7 @@
 
 bool CMinimap::IsCameraHere(int x, int y) const
 {
-	if (!Camera)
+	if (!Camera || !Scene)
 		return false;
 	glm::vec4 viewport = glm::vec4(0, 0, Width, Height);
 	glm::vec3 wincoord0 = glm::vec3(x, Height - y - 1, 0.0f);

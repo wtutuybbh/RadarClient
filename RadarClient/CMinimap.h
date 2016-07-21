@@ -20,7 +20,7 @@ public:
 	glm::mat4 GetProjMatrix() const override;
 	glm::mat4 GetViewMatrix() const override;
 #ifdef _DEBUG
-	DebugWindowInfo *dwi;
+	DebugWindowInfo *dwi{ NULL };
 #endif
 };
 

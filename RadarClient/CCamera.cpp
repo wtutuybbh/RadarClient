@@ -162,7 +162,7 @@ glm::mat4 CCamera::GetMiniMapView()
 {	
 	return glm::lookAt(mmPosition, mmTo, mmUp);
 
-	return glm::lookAt(glm::vec3(0.0f, 1000.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	//return glm::lookAt(glm::vec3(0.0f, 1000.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 glm::mat4 CCamera::GetMiniMapProjection()

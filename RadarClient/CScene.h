@@ -10,6 +10,7 @@
 //#include "CMesh.h"
 //#include "CTrack.h"
 class CTrack;
+class CLine;
 
 #define ZEROLEVEL_ZERO 0
 #define ZEROLEVEL_MAXHEIGHT 1
@@ -46,13 +47,15 @@ class CMesh;
 class CScene {
 	unsigned long mainDrawCount{ 0 };
 public:
+	CLine *begAzmLine{ NULL };
+
 	float maxAmp = 0;
 
 	float mpph; // meters per pixel vertical
 	float mppv; // meters per pixel horizontal
 	glm::vec2 geocenter; //geographic coordinates of center point (place of the radar)
 	int msize; // area square's side length in meters
-	glm::vec3 *meshBounds;
+	glm::vec3 *meshBounds{ NULL };
 
 	std::string altFile, imgFile, datFile;
 	
@@ -78,8 +81,8 @@ public:
 
 	int numCircles, marksPerCircle, segmentsPerCircle;
 
-	glm::vec3 *AxisGrid, *Ray;
-	CColorRGBA *AxisGridColor, *RayColor;
+	glm::vec3 *AxisGrid{ NULL }, *Ray{ NULL };
+	CColorRGBA *AxisGridColor{ NULL }, *RayColor{ NULL };
 
 
 
@@ -91,10 +94,10 @@ public:
 	float viewAngle;
 
 	///arrays for different VBO objects:
-	unsigned short *markup;
-	unsigned short **circles;
-	unsigned short *ray;
-	unsigned short *info;
+	unsigned short *markup{ NULL };
+	unsigned short **circles{ NULL };
+	unsigned short *ray{ NULL };
+	unsigned short *info{ NULL };
 
 	int zeroLevel = ZEROLEVEL_ACTUALHEIGHT;
 	float y0;
@@ -108,10 +111,10 @@ public:
 
 	int SectorsCount;
 
-	CCamera *Camera;
+	CCamera *Camera{ NULL };
 
-	CRCSocket *Socket;
-	CUserInterface *UI;
+	CRCSocket *Socket{ NULL };
+	CUserInterface *UI{ NULL };
 
 	bool VBOisBuilt, RayVBOisBuilt, MiniMapVBOisBuilt;
 
@@ -123,10 +126,10 @@ public:
 	void PushSelection(C3DObjectModel *o);
 	void ClearSelection();
 
-	CMesh* Mesh;
-	CMesh* Mesh1;
-	CMesh* Mesh2;
-	CMesh* Mesh3;
+	CMesh* Mesh{ NULL };
+	CMesh* Mesh1{ NULL };
+	CMesh* Mesh2{ NULL };
+	CMesh* Mesh3{ NULL };
 
 	CMiniMapPointer *mmPointer {NULL};
 
@@ -135,8 +138,8 @@ public:
 	CMarkup *Markup {NULL};
 
 	glm::vec3 MeshSize;
-	glm::vec3 * m_Bounds;
-	mutex *m;
+	glm::vec3 * m_Bounds{ NULL };
+	mutex *m{ NULL };
 	/*CScene(float lonc, float latc);*/
 	CScene(std::string alfFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize, mutex *m);
 	~CScene();
