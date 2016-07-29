@@ -3,13 +3,19 @@
 ///#pragma once
 
 ///git add -u .
+
 #ifdef _DEBUG
-#define CRTDBG_MAP_ALLOC
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
 #include <crtdbg.h>
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#define new DEBUG_NEW
+#else
+#include <stdlib.h>
 #endif
 
 #include <stdio.h>
-#include <stdlib.h>
+
 #include <math.h>
 #include <string>
 #include <sstream>
@@ -108,6 +114,12 @@ void TerminateApplication(GL_Window* window)							// Terminate The Application
 {
 	PostMessage(window->hWnd, WM_QUIT, 0, 0);							// Send A WM_QUIT Message
 	g_isProgramLooping = FALSE;											// Stop Looping Of The Program
+
+	if (g_Socket)
+	{
+		delete g_Socket;
+		g_Socket = NULL;
+	}
 }
 
 void ToggleFullscreen(GL_Window* window)								// Toggle Fullscreen/Windowed
@@ -454,6 +466,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//CMesh::AverageHeight = 0;
 	//CMesh::TotalVertexCount = 0;
 	CSettings::Init();
+	C3DObjectModel::_id = 0;
+	C3DObjectModel::_testid = 0;
 	/*
 	bool glm::gtx::intersect::intersectLineTriangle	(	genType const & 	orig,
 genType const & 	dir,

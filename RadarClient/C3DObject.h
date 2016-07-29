@@ -105,6 +105,7 @@ class CViewPortControl;
 
 class C3DObjectModel
 {
+	
 protected:
 	std::unordered_map<int, C3DObjectVBO*> vbo;
 	std::unordered_map<int, C3DObjectTexture*> tex;
@@ -112,6 +113,8 @@ protected:
 	std::unordered_map<int, glm::mat4> scaleMatrix, rotateMatrix, translateMatrix, modelMatrix;
 	glm::vec3 cartesianCoords, sphericalCoords, geoCoords;
 public:
+	static int _id, _testid;
+	int id;
 	void SetCartesianCoordinates(glm::vec4 c);
 	void SetCartesianCoordinates(glm::vec3 c);
 	glm::vec3 GetCartesianCoords();

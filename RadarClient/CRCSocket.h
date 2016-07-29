@@ -1,4 +1,15 @@
 ﻿#pragma once
+
+#ifdef _DEBUG
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#define new DEBUG_NEW
+#else
+#include <stdlib.h>
+#endif
+
 #ifndef global1h
 #define global1h
 
@@ -445,14 +456,14 @@ public:
 	std::string ErrorText;
 	WSADATA WsaDat;
 	SOCKET Socket;
-	struct hostent *host;
+	struct hostent *host{ NULL };
 	SOCKADDR_IN SockAddr;
 	HWND hWnd;
 	//char szHistory[10000];
 	_client *client{ NULL };
 
 	//used when processing data:
-	char *tm/*, *ReadBuf*/;
+	//char *tm/*, *ReadBuf*/;
 	/*long ReadBufLength;*/
 	RDR_INITCL* s_rdrinit{ NULL };
 	RDR_INITCL rdrinit;

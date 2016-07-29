@@ -284,11 +284,9 @@ CRCPointModel::CRCPointModel(int vpId, float y0, float mpph, float mppv, float r
 
 CRCPointModel::~CRCPointModel()
 {
-	for (auto it = begin(vbo); it != end(vbo); ++it)
-	{
-		vector<VBOData> *buffer = (vector<VBOData>*)it->second->GetBuffer();
+	auto buffer = (vector<VBOData>*)vbo.at(Main)->GetBuffer();
+	if (buffer)
 		delete buffer;
-	}
 }
 
 std::vector<VBOData>* CRCPointModel::CreateSphereR1(int level)

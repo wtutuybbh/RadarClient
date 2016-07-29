@@ -102,9 +102,7 @@ public:
 	int zeroLevel = ZEROLEVEL_ACTUALHEIGHT;
 	float y0;
 
-	//std::vector<old_CRCPoint*> *old_Sectors;
-	std::vector<CSector*> Sectors;
-
+	std::vector<CSector*> Sectors; //points
 
 	std::unordered_map<int, CTrack*> Tracks;
 	vector<int> SelectedTracksIds;

@@ -72,6 +72,13 @@ CMiniMapPointer::CMiniMapPointer(int vpId, CScene *scene) :
 	scaleMatrix.insert_or_assign(vpId, glm::scale(glm::vec3(0.03, 0.015, 0.03)));
 }
 
+CMiniMapPointer::~CMiniMapPointer()
+{
+	auto buffer = (vector<VBOData>*)vbo.at(MiniMap)->GetBuffer();
+	if (buffer)
+		delete buffer;
+}
+
 glm::mat4 CMiniMapPointer::GetRotateMatrix(CViewPortControl* vpControl)
 {
 	return glm::rotate(Scene->Camera->GetAzimut() + (float)M_PI / 2, glm::vec3(0, 1, 0));

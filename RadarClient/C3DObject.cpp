@@ -296,9 +296,13 @@ void C3DObjectModel::SetCartesianCoordinates(float x, float y, float z)
 {
 	cartesianCoords = glm::vec3(x, y, z);
 }
-
+int C3DObjectModel::_id;
+int C3DObjectModel::_testid;
 C3DObjectModel::C3DObjectModel(int vpId, C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObjectProgram* prog)
 {
+	this->id = _id;
+	_id++;
+
 	this->vbo.insert_or_assign(vpId, vbo);
 	this->tex.insert_or_assign(vpId, tex);
 	this->prog.insert_or_assign(vpId, prog);
@@ -310,6 +314,9 @@ C3DObjectModel::C3DObjectModel(int vpId, C3DObjectVBO* vbo, C3DObjectTexture* te
 
 C3DObjectModel::C3DObjectModel(C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObjectProgram* prog)
 {
+	this->id = _id;
+	_id++;
+
 	this->vbo.insert_or_assign(Main, vbo);
 	this->tex.insert_or_assign(Main, tex);
 	this->prog.insert_or_assign(Main, prog);
@@ -329,7 +336,29 @@ C3DObjectModel::C3DObjectModel(C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObje
 
 C3DObjectModel::~C3DObjectModel()
 {
-	
+	if (id == _testid)
+	{
+		int dummy;
+		dummy = 1 + 1;
+	}
+	if (vbo.size()>0)
+	{
+		for (auto it = begin(vbo); it != end(vbo); ++it)
+			if (it->second)
+				delete it->second;
+	}
+	if (prog.size()>0)
+	{
+		for (auto it = begin(prog); it != end(prog); ++it)
+			if (it->second)
+				delete it->second;
+	}
+	if (tex.size()>0)
+	{
+		for (auto it = begin(tex); it != end(tex); ++it)
+			if (it->second)
+				delete it->second;
+	}
 }
 
 void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)

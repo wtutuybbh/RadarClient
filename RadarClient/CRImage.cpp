@@ -3,7 +3,11 @@
 #include "CSettings.h"
 
 float CRImage::maxAmp = 1000;
-CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels) : C3DObjectModel(new C3DObjectVBO(true), NULL, new C3DObjectProgram("CRImage.v.glsl", "CRImage.f.glsl", "vertex", NULL, NULL, "color"))
+CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels) : 
+	C3DObjectModel(
+		new C3DObjectVBO(true), 
+		NULL, 
+		new C3DObjectProgram("CRImage.v.glsl", "CRImage.f.glsl", "vertex", NULL, NULL, "color"))
 {
 	Azemuth = azemuth;
 	float *px = (float *)pixels;
@@ -50,7 +54,9 @@ CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_IN
 
 CRImage::~CRImage()
 {
-	delete (vector<VBOData>*)vbo.at(Main)->GetBuffer();
+	auto buffer = (vector<VBOData>*)vbo.at(Main)->GetBuffer();
+	if (buffer)
+		delete buffer;
 }
 
 

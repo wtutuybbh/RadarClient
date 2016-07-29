@@ -18,10 +18,6 @@ CSector::CSector() : C3DObjectModel(Main, new C3DObjectVBO(false), nullptr, new 
 CSector::~CSector()
 {
 	delete (vector<VBOData>*)vbo.at(Main)->GetBuffer();
-
-	vbo.clear();
-	tex.clear();
-	prog.clear();
 }
 
 float CSector::maxAmp = 0;

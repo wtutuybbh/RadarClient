@@ -115,15 +115,16 @@ CMarkup::CMarkup(glm::vec4 origin) : C3DObjectModel (Main,
 	vbo.at(Main)->AddIndexArray(lineMarkup, lineMarkupCount, GL_LINES);
 	mmvbo->AddIndexArray(lineMarkup, lineMarkupCount, GL_LINES);
 
-	unsigned short **circles = new unsigned short*[numCircles];
+	unsigned short *circle;
 	for (int c = 0; c < numCircles+2; c++) {
-		circles[c] = new unsigned short[segmentsPerCircle];
+		circle = new unsigned short[segmentsPerCircle];
 		for (int i = 0; i < segmentsPerCircle; i++) {
-			circles[c][i] = lineMarkupCount + segmentsPerCircle*c + i;
+			circle[i] = lineMarkupCount + segmentsPerCircle*c + i;
 		}
-		vbo.at(Main)->AddIndexArray(circles[c], segmentsPerCircle, GL_LINE_LOOP);
-		mmvbo->AddIndexArray(circles[c], segmentsPerCircle, GL_LINE_LOOP);
+		vbo.at(Main)->AddIndexArray(circle, segmentsPerCircle, GL_LINE_LOOP);
+		mmvbo->AddIndexArray(circle, segmentsPerCircle, GL_LINE_LOOP);
 	}
+
 	vbo.insert_or_assign(MiniMap, mmvbo);
 
 	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", NULL, NULL, "color"));
@@ -148,7 +149,15 @@ CMarkup::CMarkup(glm::vec4 origin) : C3DObjectModel (Main,
 
 CMarkup::~CMarkup()
 {
-	delete (vector<VBOData>*)vbo.at(Main)->GetBuffer();
+	if (id == _testid)
+	{
+		int dummy;
+		dummy = 1 + 1;
+	}
+	auto buffer = (vector<VBOData>*)vbo.at(Main)->GetBuffer();
+	if (buffer)
+		delete buffer;
+	vbo.at(Main)->ClearIndexArray();
 }
 
 void CMarkup::BindUniforms(CViewPortControl* vpControl)

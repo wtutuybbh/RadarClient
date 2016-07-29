@@ -31,6 +31,9 @@ CLine::CLine(int vpId, glm::vec4 a, glm::vec4 b) : C3DObjectModel(Main,
 
 CLine::~CLine()
 {
+	auto buffer = (vector<VBOData>*)vbo.at(Main)->GetBuffer();
+	if (buffer)
+		delete buffer;
 }
 
 void CLine::SetPoints(glm::vec4 a, glm::vec4 b)

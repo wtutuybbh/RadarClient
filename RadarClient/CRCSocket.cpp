@@ -49,6 +49,10 @@ CRCSocket::~CRCSocket()
 	}
 	if (s_rdrinit)
 		delete s_rdrinit;
+
+	/*if (info_p)
+		delete info_p;*/
+
 	for (auto it = begin(Tracks); it != end(Tracks); ++it)
 		delete (*it);
 	Tracks.clear();
@@ -56,6 +60,9 @@ CRCSocket::~CRCSocket()
 	for (auto it = begin(trak); it != end(trak); ++it)
 		delete (*it);
 	trak.clear();
+
+	if (CurrentPosition)
+		delete CurrentPosition;
 }
 
 void CRCSocket::Init()
@@ -146,7 +153,6 @@ int CRCSocket::Read()
 		0);*/
 
 	try {
-		szIncoming = NULL;
 		szIncoming = new char[TXRXBUFSIZE];
 		ZeroMemory(szIncoming, sizeof(szIncoming));
 		recev = recv(Socket, client->buff + client->offset, TXRXBUFSIZE, 0);
@@ -177,6 +183,8 @@ int CRCSocket::Read()
 				if (sh->word1 != 0xAAAAAAAA || sh->word2 != 0x55555555)   // проверим шапку
 				{
 					client->offset = 0;
+					if (szIncoming)
+						delete[] szIncoming;
 					return recev;
 				}
 
@@ -184,6 +192,8 @@ int CRCSocket::Read()
 			catch (std::bad_alloc)
 			{  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
 			   // YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
+				if (szIncoming)
+					delete[] szIncoming;
 				return recev;
 			}
 		}

@@ -194,6 +194,12 @@ CScene::~CScene() {
 	}
 	if(markup)
 		delete [] markup;
+	if (Markup)
+		delete Markup;
+
+	if (mmPointer)
+		delete mmPointer;
+
 	if (ray)
 		delete[] ray;
 	if (AxisGrid)
@@ -206,14 +212,25 @@ CScene::~CScene() {
 		delete[] RayColor;
 	if (Camera)
 		delete Camera;
-	if (Mesh)
+
+	if(CMesh::Meshs)
+	{
+		for (int i = 0; i < CMesh::TotalMeshsCount; i++)
+		{
+			delete CMesh::Meshs[i];
+		}
+		delete[] CMesh::Meshs;
+		CMesh::Meshs = NULL;
+	}
+
+	/*if (Mesh)
 		delete Mesh;
 	if (Mesh1)
 		delete Mesh1;
 	if (Mesh2)
 		delete Mesh2;
 	if (Mesh3)
-		delete Mesh3;
+		delete Mesh3;*/
 
 	if (info)
 		delete[] info;
@@ -227,11 +244,22 @@ CScene::~CScene() {
 		
 		delete[] old_Sectors;
 	}*/
+	for (auto it = begin(Sectors); it != end(Sectors); ++it)
+		delete *it;	
 	Sectors.clear();
+
+	for (auto it = begin(Tracks); it != end(Tracks); ++it)
+		delete it->second;
 	Tracks.clear();
 
 	if (begAzmLine)
 		delete begAzmLine;
+
+	if (ImageSet)
+		delete ImageSet;
+
+	if (m_Bounds)
+		delete[] m_Bounds;
 }
 
 bool CScene::DrawScene(CViewPortControl * vpControl)
@@ -895,8 +923,8 @@ void CScene::RefreshTracks(vector<TRK*>* tracks)
 
 void CScene::RefreshImages(RIMAGE* info, void* pixels)
 {
-	//if (ImageSet)
-	//	ImageSet->Refresh(glm::vec4(0, y0, 0, 1), mpph, mppv, rdrinit, info, pixels);
+	if (ImageSet)
+		ImageSet->Refresh(glm::vec4(0, y0, 0, 1), mpph, mppv, rdrinit, info, pixels);
 }
 
 void CScene::Init(RDR_INITCL* init)
@@ -932,10 +960,10 @@ void CScene::Init(RDR_INITCL* init)
 	SectorsCount = init->Nazm / init->ViewStep;
 	Sectors.resize(SectorsCount);
 
-	Initialized = true;
-
 	if (!ImageSet)
 		ImageSet = new CRImageSet();
+
+	Initialized = true;	
 }
 
 CRCPointModel * CScene::GetCRCPointFromRDRTRACK(RDRTRACK * tp) const

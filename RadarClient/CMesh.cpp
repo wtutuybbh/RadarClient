@@ -954,6 +954,21 @@ CMesh::~CMesh()
 		vector<VBOData> *buffer = (vector<VBOData>*)it->second->GetBuffer();
 		delete buffer;
 	}
+	if (Bounds)
+		delete[] Bounds;
+	if (aMap) {
+		if (aMap->data)
+			delete[] aMap->data;		
+		delete aMap;
+	}
+	if (aMapH)
+	{
+		if (aMapH->fileName)
+			delete[] aMapH->fileName;
+		delete aMapH;
+	}
+	if (iMapH)
+		delete iMapH;
 }
 
 bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)

@@ -34,6 +34,7 @@ public:
 	void* GetBuffer() const;
 
 	virtual void AddIndexArray(unsigned short *idxArray, int length, GLenum mode);
+	virtual void ClearIndexArray();
 
 	virtual C3DObjectVBO* Clone();
 };

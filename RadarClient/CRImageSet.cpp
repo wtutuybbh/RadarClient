@@ -5,6 +5,13 @@
 
 CRImageSet::~CRImageSet()
 {
+	if (Images)
+	{
+		for (auto it = begin(*Images); it != end(*Images); ++it)
+			delete (*it);
+		Images->clear();
+		delete Images;
+	}
 }
 
 

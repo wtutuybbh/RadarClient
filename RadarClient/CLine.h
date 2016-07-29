@@ -5,7 +5,7 @@ class CLine :
 {
 public:
 	CLine(int vpId, glm::vec4 a, glm::vec4 b);
-	~CLine();
+	~CLine() override;
 	void SetPoints(glm::vec4 a, glm::vec4 b);
 };
 

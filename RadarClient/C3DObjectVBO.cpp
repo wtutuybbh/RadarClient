@@ -2,13 +2,9 @@
 
 C3DObjectVBO::~C3DObjectVBO()
 {
-	/*if (buffer && clearAfter) {
-		//buffer->clear();
-		delete buffer;
-	}*/
-	if (idxArrays) {
+	if (idxArrays) {		
 		idxArrays->clear();
-		delete idxArrays;
+		delete idxArrays;	
 	}
 	if (idxIds) {
 		idxIds->clear();
@@ -171,6 +167,14 @@ void C3DObjectVBO::AddIndexArray(unsigned short* idxArray, int length, GLenum mo
 	idxLengths->push_back(length);
 	idxModes->push_back(mode);
 	idxIds->push_back(0);
+}
+
+void C3DObjectVBO::ClearIndexArray()
+{
+	if (idxArrays) {
+		for (auto it = begin(*idxArrays); it != end(*idxArrays); ++it)
+			delete *it;
+	}
 }
 
 C3DObjectVBO* C3DObjectVBO::Clone()
