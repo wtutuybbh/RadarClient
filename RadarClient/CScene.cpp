@@ -43,6 +43,8 @@ void CScene::PushSelection(C3DObjectModel* o)
 
 void CScene::ClearSelection()
 {
+	for (auto it = begin(Selection); it != end(Selection); ++it)
+		delete *it;
 	Selection.clear();
 	for (int i = 0; i < Sectors.size(); i++)
 	{
@@ -187,6 +189,7 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	Initialized = false;
 }
 CScene::~CScene() {
+	ClearSelection();
 	if (circles) {
 		for (int c = 0; c < numCircles; c++)
 			delete [] circles[c];
@@ -947,7 +950,7 @@ void CScene::Init(RDR_INITCL* init)
 		int marksPerCircle = CSettings::GetInt(IntMarkupMarksPerCircle);
 		int r = markDistance * numCircles * marksPerCircle;
 
-		begAzmLine = new CLine(Main, glm::vec4(0, y0, 0, 1), glm::vec4(- r * sin(init->begAzm), y0, r * cos(init->begAzm), 1));
+		begAzmLine = new CLine(Main, glm::vec4(0, y0, 0, 1), glm::vec4(- r * sin(init->begAzm), y0, r * cos(init->begAzm), 1), Simple);
 	}
 
 	minE = init->begElv;
@@ -1113,9 +1116,9 @@ void CScene::SetBegAzm(double begAzm)
 		int r = markDistance * numCircles * marksPerCircle;
 
 		if (begAzmLine)
-			begAzmLine->SetPoints(glm::vec4(0, y0, 0, 1), glm::vec4(- r * sin(rdrinit->begAzm), y0, r * cos(rdrinit->begAzm), 1));
+			begAzmLine->SetPoints(glm::vec4(0, y0, 0, 1), glm::vec4(- r * sin(rdrinit->begAzm), y0, r * cos(rdrinit->begAzm), 1), Simple);
 		else 
-			begAzmLine = new CLine(Main, glm::vec4(0, y0, 0, 1), glm::vec4(- r * sin(rdrinit->begAzm), y0, r * cos(rdrinit->begAzm), 1));
+			begAzmLine = new CLine(Main, glm::vec4(0, y0, 0, 1), glm::vec4(- r * sin(rdrinit->begAzm), y0, r * cos(rdrinit->begAzm), 1), Simple);
 	}
 }
 

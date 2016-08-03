@@ -54,68 +54,7 @@ LRESULT CUserInterface::Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 #ifdef _DEBUG
-	std::stringstream s;
-	glm::vec4 radarPoint = glm::vec4(100, 200, 300, 1);
-	glm::vec4 radarPoint1 = radarPoint + glm::vec4(1, 0, 0, 0);
-	glm::vec4 radarPoint2 = radarPoint + glm::vec4(0, 1, 0, 0);
-	glm::vec4 radarPoint3 = radarPoint + glm::vec4(0, 0, 1, 0);
-	glm::mat4 mvp = VPControl->Camera->GetProjection() * VPControl->Camera->GetView();
-	glm::vec4 screenPoint = mvp * radarPoint;
-	glm::vec4 screenPoint1 = mvp * radarPoint1;
-	glm::vec4 screenPoint2 = mvp * radarPoint2;
-	glm::vec4 screenPoint3 = mvp * radarPoint3;
-	screenPoint = screenPoint / screenPoint.w;
-	screenPoint1 = screenPoint1 / screenPoint1.w;
-	screenPoint2 = screenPoint2 / screenPoint2.w;
-	screenPoint3 = screenPoint3 / screenPoint3.w;
-
-	glm::mat4 model1 = glm::scale(glm::vec3(1 / glm::distance(screenPoint, screenPoint1) / VPControl->Scene->height));
-	glm::mat4 model2 = glm::scale(glm::vec3(1 / glm::distance(screenPoint, screenPoint2) / VPControl->Scene->height));
-	glm::mat4 model3 = glm::scale(glm::vec3(1 / glm::distance(screenPoint, screenPoint3) / VPControl->Scene->height));
-
-	glm::mat4 model = glm::scale(glm::vec3(
-		1 / glm::distance(screenPoint, screenPoint1) / VPControl->Scene->height, 
-		1 / glm::distance(screenPoint, screenPoint2) / VPControl->Scene->height, 
-		1 / glm::distance(screenPoint, screenPoint3) / VPControl->Scene->height));
-
-	glm::vec4 screenPoint1_1 = VPControl->Camera->GetProjection() * VPControl->Camera->GetView() * model1 * radarPoint1;
-	screenPoint1_1 = screenPoint1_1 / screenPoint1_1.w;
-
-	glm::vec4 screenPoint2_1 = VPControl->Camera->GetProjection() * VPControl->Camera->GetView() * model2 * radarPoint2;
-	screenPoint2_1 = screenPoint2_1 / screenPoint2_1.w;
-
-	glm::vec4 screenPoint3_1 = VPControl->Camera->GetProjection() * VPControl->Camera->GetView() * model3 * radarPoint3;
-	screenPoint3_1 = screenPoint3_1 / screenPoint3_1.w;
-
-	glm::vec4 screenPoint1_2 = VPControl->Camera->GetProjection() * VPControl->Camera->GetView() * model * radarPoint1;
-	screenPoint1_2 = screenPoint1_2 / screenPoint1_2.w;
-
-	glm::vec4 screenPoint2_2 = VPControl->Camera->GetProjection() * VPControl->Camera->GetView() * model * radarPoint2;
-	screenPoint2_2 = screenPoint2_2 / screenPoint2_2.w;
-
-	glm::vec4 screenPoint3_2 = VPControl->Camera->GetProjection() * VPControl->Camera->GetView() * model * radarPoint3;
-	screenPoint3_2 = screenPoint3_2 / screenPoint3_2.w;
-
-	/*s << "(0, " << radarPoint.y << ", 0, 1) ->(" << screenPoint.x << ", " << screenPoint.y << ", " << screenPoint.z << ", " << screenPoint.w << ")";
-	DebugMessage(dwi, s.str());
-	s.str(std::string());*/
-	s << glm::distance(screenPoint, screenPoint1)*VPControl->Scene->height << " vs " << glm::distance(screenPoint, screenPoint1_1) * VPControl->Scene->height << " dist " << 1 / glm::length(VPControl->Camera->GetPosition()) << " test " << (1 / glm::distance(screenPoint, screenPoint1) / (glm::length(VPControl->Camera->GetPosition())));
-	DebugMessage(dwi, s.str());
-	s.str(std::string());
-	s << glm::distance(screenPoint, screenPoint2)*VPControl->Scene->height << " vs " << glm::distance(screenPoint, screenPoint2_1) * VPControl->Scene->height << " dist " << 1 / glm::length(VPControl->Camera->GetPosition()) << " test " << (1 / glm::distance(screenPoint, screenPoint2) / (glm::length(VPControl->Camera->GetPosition())));
-	DebugMessage(dwi, s.str());
-	s.str(std::string());
-	s << glm::distance(screenPoint, screenPoint3)*VPControl->Scene->height << " vs " << glm::distance(screenPoint, screenPoint3_1) * VPControl->Scene->height << " dist " << 1 / glm::length(VPControl->Camera->GetPosition()) << " test " << (1 / glm::distance(screenPoint, screenPoint3) / (glm::length(VPControl->Camera->GetPosition())));
-	DebugMessage(dwi, s.str());
-	s.str(std::string());
-	s << glm::distance(screenPoint, screenPoint1)*VPControl->Scene->height << " vs " << glm::distance(screenPoint, screenPoint1_2) * VPControl->Scene->height << " dist " << 1 / glm::length(VPControl->Camera->GetPosition()) << " test " << (1 / glm::distance(screenPoint, screenPoint1) / (glm::length(VPControl->Camera->GetPosition())));
-	DebugMessage(dwi, s.str());
-	s.str(std::string());
-	s << glm::distance(screenPoint, screenPoint2)*VPControl->Scene->height << " vs " << glm::distance(screenPoint, screenPoint2_2) * VPControl->Scene->height << " dist " << 1 / glm::length(VPControl->Camera->GetPosition()) << " test " << (1 / glm::distance(screenPoint, screenPoint2) / (glm::length(VPControl->Camera->GetPosition())));
-	DebugMessage(dwi, s.str());
-	s.str(std::string());
-	s << glm::distance(screenPoint, screenPoint3)*VPControl->Scene->height << " vs " << glm::distance(screenPoint, screenPoint3_2) * VPControl->Scene->height << " dist " << 1 / glm::length(VPControl->Camera->GetPosition()) << " test " << (1 / glm::distance(screenPoint, screenPoint3) / (glm::length(VPControl->Camera->GetPosition())));
-	DebugMessage(dwi, s.str());
+	
 
 	
 #endif // _DEBUG

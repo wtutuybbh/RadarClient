@@ -1,7 +1,7 @@
 //#include "stdafx.h"
 #include "CLine.h"
 
-CLine::CLine(int vpId, glm::vec4 a, glm::vec4 b) : C3DObjectModel(Main,
+CLine::CLine(int vpId, glm::vec4 a, glm::vec4 b, LineStyle style) : C3DObjectModel(Main,
 	new C3DObjectVBO(false),
 	NULL,
 	new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", NULL, NULL, "color"))
@@ -36,7 +36,7 @@ CLine::~CLine()
 		delete buffer;
 }
 
-void CLine::SetPoints(glm::vec4 a, glm::vec4 b)
+void CLine::SetPoints(glm::vec4 a, glm::vec4 b, LineStyle style)
 {
 	C3DObjectVBO *vbo_ = vbo.at(Main);
 

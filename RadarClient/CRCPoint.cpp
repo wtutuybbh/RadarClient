@@ -284,7 +284,12 @@ CRCPointModel::CRCPointModel(int vpId, float y0, float mpph, float mppv, float r
 
 CRCPointModel::~CRCPointModel()
 {
-	auto buffer = (vector<VBOData>*)vbo.at(Main)->GetBuffer();
+	auto obj = vbo.at(Main);
+
+	vector<VBOData>* buffer = NULL;
+	if (obj) 
+		buffer = (vector<VBOData>*)obj->GetBuffer();
+
 	if (buffer)
 		delete buffer;
 }

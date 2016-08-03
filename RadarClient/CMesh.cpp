@@ -611,7 +611,7 @@ bool CMesh::LoadHeightmap(int vpId)
 																		//m_pTexCoords = new CTexCoord[m_nVertexCount];				// Allocate Tex Coord Data
 	//m_pTexCoords = new glm::vec2[m_nVertexCount];				// Allocate Tex Coord Data
 
-	std::vector<VBOData> * buffer = new std::vector<VBOData>;
+	std::vector<VBOData> * buffer = new std::vector<VBOData> ((aMap->sizeX - 1) * (aMap->sizeY - 1) * 6);
 
 
 	int nX, nZ, nTri, nIndex = 0;									// Create Variables
@@ -973,7 +973,7 @@ CMesh::~CMesh()
 
 bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)
 {
-	/*
+	
 	glm::vec4 planeOrig(0, AverageHeight, 0, 1), planeNormal(0, 1, 0, 0);
 	float distance;
 	glm::vec4 orig(orig_, 1);
@@ -992,6 +992,7 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 			break;
 		}
 	}
+	
 	//now work with pointer m:
 	//grid coordinates:
 	int ix0 = -aMap->sizeX * (approxPoint.x - b[1].x) / (b[1].x - b[0].x);
@@ -1005,7 +1006,7 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 	vector<VBOData> *buffer = (vector<VBOData> *)m->GetC3DObjectVBO(Main)->GetBuffer();
 
 	int X = aMap->sizeX - 1, Y = aMap->sizeY - 1;
-
+	/*
 	if (glm::intersectLineTriangle(orig, dir, buffer->at(6 * (iy0 * X + ix0)).vert, buffer->at(6 * (iy0 * X + ix0) + 1).vert, buffer->at(6 * (iy0 * X + ix0) + 2).vert, position))
 		return true;
 	if (glm::intersectLineTriangle(orig, dir, buffer->at(6 * (iy0 * X + ix0) + 3).vert, buffer->at(6 * (iy0 * X + ix0) + 4).vert, buffer->at(6 * (iy0 * X + ix0) + 5).vert, position))
@@ -1014,6 +1015,8 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 	int level = 1;
 	int x, y;
 	bool found = false;
+	
+
 	while (ix0 - level >= 0 || ix0 + level < X || iy0 - level >= 0 || iy0 + level < Y)
 	{
 		if (iy0 - level >= 0) {
