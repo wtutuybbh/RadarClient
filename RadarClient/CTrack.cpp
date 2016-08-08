@@ -1,6 +1,10 @@
+#define WIN32_LEAN_AND_MEAN
+
+#include "CRCSocket.h"
 #include "CTrack.h"
-#include "CRCPoint.h"
 #include "CSettings.h"
+#include "CViewPortControl.h"
+#include "C3DObjectVBO.h"
 
 
 CTrack::CTrack(int id, bool selected)
@@ -17,7 +21,7 @@ CTrack::~CTrack()
 }
 
 
-void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK>* trackPoints)
+void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK*>* trackPoints)
 {
 	vector<VBOData> *vbuffer = (vector<VBOData> *)vbo.at(Main)->GetBuffer();
 	if (vbuffer) {
@@ -30,9 +34,9 @@ void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK>*
 	float r, a, e;
 	for (int i = 0; i < trackPoints->size(); i++)
 	{
-		r = CSettings::GetFloat(FloatCTrackRefresh_Kr) * sqrt((*trackPoints)[i].X * (*trackPoints)[i].X + (*trackPoints)[i].Y * (*trackPoints)[i].Y + (*trackPoints)[i].Z * (*trackPoints)[i].Z);
-		a = glm::radians(CSettings::GetFloat(FloatCTrackRefresh_a0) + CSettings::GetFloat(FloatCTrackRefresh_scale1) * CSettings::GetFloat(FloatCTrackRefresh_scale2) * (atan((*trackPoints)[i].X / (*trackPoints)[i].Y)) / (M_PI / 180));
-		e = glm::radians(CSettings::GetFloat(FloatCTrackRefresh_e0) + CSettings::GetFloat(FloatCTrackRefresh_scale3) * atan((*trackPoints)[i].Z / sqrt((*trackPoints)[i].X * (*trackPoints)[i].X + (*trackPoints)[i].Y * (*trackPoints)[i].Y)) / (M_PI / 180));
+		r = CSettings::GetFloat(FloatCTrackRefresh_Kr) * sqrt((*trackPoints)[i]->X * (*trackPoints)[i]->X + (*trackPoints)[i]->Y * (*trackPoints)[i]->Y + (*trackPoints)[i]->Z * (*trackPoints)[i]->Z);
+		a = glm::radians(CSettings::GetFloat(FloatCTrackRefresh_a0) + CSettings::GetFloat(FloatCTrackRefresh_scale1) * CSettings::GetFloat(FloatCTrackRefresh_scale2) * (atan((*trackPoints)[i]->X / (*trackPoints)[i]->Y)) / (M_PI / 180));
+		e = glm::radians(CSettings::GetFloat(FloatCTrackRefresh_e0) + CSettings::GetFloat(FloatCTrackRefresh_scale3) * atan((*trackPoints)[i]->Z / sqrt((*trackPoints)[i]->X * (*trackPoints)[i]->X + (*trackPoints)[i]->Y * (*trackPoints)[i]->Y)) / (M_PI / 180));
 
 		(*vbuffer)[i].vert = origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0);
 		(*vbuffer)[i].color = Color;

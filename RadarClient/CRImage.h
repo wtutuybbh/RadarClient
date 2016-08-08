@@ -1,5 +1,7 @@
 #pragma once
 #include "C3DObject.h"
+struct RDR_INITCL;
+struct RIMAGE;
 class CRImage :
 	public C3DObjectModel
 {

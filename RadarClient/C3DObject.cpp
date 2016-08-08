@@ -1,10 +1,14 @@
 //#include "stdafx.h"
+#define WIN32_LEAN_AND_MEAN
 #include "C3DObject.h"
 #include "glm/glm.hpp"
 #include "glm/gtx/intersect.hpp"
 #include "CUserInterface.h"
 #include "CViewPortControl.h"
 #include "C3DObjectProgram.h"
+#include "C3DObjectVBO.h"
+#include "C3DObjectTexture.h"
+
 /*
 old_C3DObject::old_C3DObject()
 {

@@ -1,5 +1,9 @@
 #pragma once
 #include "C3DObject.h"
+struct RPOINTS;
+struct RPOINT;
+struct RDR_INITCL;
+
 class CViewPortControl;
 class CSector :
 	public C3DObjectModel

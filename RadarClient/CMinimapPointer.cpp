@@ -1,5 +1,12 @@
+#define WIN32_LEAN_AND_MEAN
+
 #include "CMinimapPointer.h"
 #include "glm/gtx/vector_angle.hpp"
+#include "C3DObjectVBO.h"
+#include "C3DObjectTexture.h"
+#include "C3DObjectProgram.h"
+#include "CScene.h"
+#include "CMinimap.h"
 
 /*old_CMinimapPointer::old_CMinimapPointer(CScene *scene) : old_C3DObject::old_C3DObject(true)
 {	

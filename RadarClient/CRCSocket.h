@@ -1,4 +1,8 @@
 ﻿#pragma once
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <winsock2.h>
 
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
@@ -13,9 +17,8 @@
 #ifndef global1h
 #define global1h
 
-#include <WinSock2.h>
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+//#define WIN32_LEAN_AND_MEAN 1
+
 #include <iostream>
 #include <string>
 #include <ctime>
@@ -27,6 +30,11 @@
 #define M_PI_180      0.01745329251994329      /* Pi/180   */
 #include <vector>
 #include <mutex>
+
+
+#include <windows.h>
+//#pragma comment(lib,"ws2_32")
+
 using namespace std;
 
 #define CM_POSTDATA (WM_USER + 2)
@@ -84,12 +92,12 @@ using namespace std;
 
 // точки траектории
 
-typedef struct
+struct RDRTRACKS
 {
 	int N;
-} RDRTRACKS;
+};
 
-typedef struct
+struct RDRTRACK
 {
 	int numTrack;// номер траектории
 	float Amp;   // амплитуда последнего измерения
@@ -104,10 +112,10 @@ typedef struct
 	int countFalse;      // счётчик отсутствия подтверждений
 	char resv1[8];
 
-} RDRTRACK;
+};
 
 //---------------------------------------------------------------------------
-typedef struct
+struct STRCONSTANT
 {
 	float HeightDN;  //ширина ДН град
 	float DeltaB;    //единица кода УСУК по В град 
@@ -116,10 +124,10 @@ typedef struct
 	float SpeedObj;  //макcимальная скорость объекта(м/с)
 	float TimeCode;  //единица кода времени от ПЛИС(мкС)
 
-}STRCONSTANT, *PTRCONSTANT;
+};
 
 //---------------------------------------------------------------------------
-typedef struct
+struct STRRAB
 {
 	int vidRab;  //0-работа 1-кимс на доске вн.прерывания и данные АЦП как шум
 				 //2-кимс на доске без вн.прерываний и данных АЦП 3-кимс на хосте
@@ -132,9 +140,9 @@ typedef struct
 	int delBN;   // дискрета отображения (накопления) (код УСУК)
 
 	STRCONSTANT constProg;
-}STRRAB, *PTRRAB;
+};
 //---------------------------------------------------------------------------
-typedef union
+union USOST
 {
 	unsigned int iSost;
 	struct srtuctSost
@@ -144,9 +152,9 @@ typedef union
 		int Sinch : 8;
 		int Afu : 8;
 	}Device;
-}USOST, *PTRuSOST;
+};
 //---------------------------------------------------------------------------
-typedef struct
+struct STRCAPTION
 {
 	unsigned int regim;     // режим работы, код аварийного завершения(>100) 
 							// 101-ошибка чтения из ХОСТ исходных данных
@@ -160,18 +168,18 @@ typedef struct
 	unsigned int sizeOtobr; // размер массива с данными (STROTOBR)
 	int reserv1;
 	int reserv2;
-}STRCAPTION, *PTRCAPTION;
+};
 
 
 
 //---------------------------------------------------------------------------
-typedef struct
+struct STRPOINT
 {
 	float Amp;
 	int R;  //код АЦП
 	int B;  //код УСУК
 	int time;//1==200mkC
-}STRPOINT, *PTRPOINT;
+};
 //---------------------------------------------------------------------------
 /*typedef struct
 {
@@ -182,7 +190,7 @@ typedef struct
 	float Data[LENDATAOTOBR];
 }STROTOBR, *PTROTOBR;*/
 //---------------------------------------------------------------------------
-typedef struct
+struct STRTRACK
 {
 	int numTrack;// номер траектории
 	float Amp;   // амплитуда последнего измерения
@@ -194,9 +202,9 @@ typedef struct
 	int countTrue;      // счетчик подтверждений
 	int countFalse;      // счетчик отсутствия подтверждений
 
-}STRTRACK, *PTRTRACK;
+};
 //---------------------------------------------------------------------------
-typedef struct
+struct STRONSINCH
 {
 	unsigned kIsl : 1;    //команда на формирование имп излучения
 	unsigned kStart : 1;  //команда на формирование имп старта АЦП 
@@ -221,10 +229,10 @@ typedef struct
 
 	unsigned reserv2 : 32;    //
 
-}STRONSINCH, *PTRONSINCH; //на синхронизатор
+};
 						  //---------------------------------------------------------------------------
 
-typedef struct
+struct STRWITHSINCH
 {
 	unsigned kB : 32;     //код положения антенны по азимуту
 	unsigned kTime : 32;  //код времени
@@ -238,17 +246,17 @@ typedef struct
 
 	unsigned Va : 32;      //скорость движения по азимуту
 
-}STRWITHSINCH, *PTRWITHSINCH;//от синхронизатора
+};//от синхронизатора
 
 							 //---------------------------------------------------------------------------
-typedef struct
+struct STRNACHVEKT
 {
 	double r0;   //дальность
 	double b0;   //азимут
 	double v0;   //скорость продольная
 	double psi;  //угол между проекцией л.в. на сферу и вектором скорости
 	double sc;   //ЭПР
-}STRNACHVEKT;///начальный вектор цели
+};///начальный вектор цели
 
 			 //---------------------------------------------------------------------------
 
@@ -266,7 +274,7 @@ struct _sh                         //Шапка массивов
 };
 
 
-typedef struct tagRPOINT
+struct RPOINT
 {
 
 	float Amp;
@@ -274,18 +282,18 @@ typedef struct tagRPOINT
 	short B;
 	short E;
 	unsigned int T;   //1==200mkC
-}  RPOINT;
+};
 
-typedef struct tagRPOINTS
+struct RPOINTS
 {
 	int N;
 	short d1;
 	short d2;
 	short D;
 	short resv1[3];
-} RPOINTS;
+};
 
-typedef struct tagRIMAGE
+struct RIMAGE
 {
 	int N;
 	short d1;
@@ -293,12 +301,12 @@ typedef struct tagRIMAGE
 	short D;
 	int NR;
 	short resv1[1];
-} RIMAGE;
+};
 
 
 
 
-typedef struct tagSTRPOINTS
+struct STRPOINTS
 {
 
 	float Amp;
@@ -306,10 +314,10 @@ typedef struct tagSTRPOINTS
 	int B;        //код УСУК
 	int time;   //1==200mkC
 
-}  STRPOINTS, *PTRPOINTS;
+};
 
 
-typedef struct
+struct Nchannel_Data
 {
 	int SampleCount; // количество отсчетов в канале
 	int SampleSize;  // в байтах на 1 канал
@@ -347,7 +355,7 @@ typedef struct
 	char reserv[128 - 20 * 4];
 
 
-} Nchannel_Data;
+};
 
 
 
@@ -361,11 +369,11 @@ typedef struct
 подразумевается 1 вызов SendArray => отправка 1 порции данных => 1 элемент очереди
 */
 
-typedef struct _send_queue_element
+struct send_queue_element
 {
 	char* data{ NULL }; // массив + заголовок точнее то что от них осталось отправить
 	int length; // размер
-} send_queue_element;
+};
 
 struct _client                     //Клиенты
 {
@@ -382,7 +390,7 @@ union UTCtime {
 };
 
 
-typedef struct tagRDR_INITCL
+struct RDR_INITCL
 {
 	int           Nazm;         // offs 0    число дискретов по азимуту
 	int           Nelv;         // offs 4
@@ -404,10 +412,10 @@ typedef struct tagRDR_INITCL
 	int           blankR1;
 	int           blankR2;
 	char          resv2[1024 - 104 - 16 - 4 - 4 - 4 - 4];
-}  RDR_INITCL;
+};
 
 
-typedef struct tagRDRCURRPOS
+struct RDRCURRPOS
 {
 	double northdir;  // направление на сервер в радианах относительно устройства
 	char currstate; // 0-не получены коорд, 1-2D, 2-3D
@@ -420,7 +428,7 @@ typedef struct tagRDRCURRPOS
 	double E0;
 	char resv2[128 - 7 * 8 - 16];
 
-} RDRCURRPOS;
+};
 
 
 
@@ -430,7 +438,7 @@ class TRK
 public:
 	int id; // id 
 	bool Found;
-	vector<RDRTRACK> P; // точки трека
+	vector<RDRTRACK *> P; // точки трека
 	TRK(int _id);
 	void InsertPoints(RDRTRACK* pt, int N);
 	~TRK();

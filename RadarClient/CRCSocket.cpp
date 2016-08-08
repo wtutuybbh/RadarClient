@@ -1,4 +1,6 @@
-﻿//#include "stdafx.h"
+﻿#define WIN32_LEAN_AND_MEAN
+
+//#include "stdafx.h"
 #include "CRCSocket.h"
 #include "CSettings.h"
 
@@ -644,6 +646,6 @@ void TRK::InsertPoints(RDRTRACK* pt, int N)
 	for (int i = 0; i < N; i++)
 	{
 		if (pt->numTrack != this->id) continue;
-		P.push_back(pt[i]);
+		P.push_back(&pt[i]);
 	}
 }

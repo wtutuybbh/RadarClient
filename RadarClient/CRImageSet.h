@@ -4,6 +4,8 @@
 #include "C3DObject.h"
 class CViewPortControl;
 class CRImage;
+struct RDR_INITCL;
+struct RIMAGE;
 class CRImageSet
 {
 public:

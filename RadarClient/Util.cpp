@@ -1,3 +1,5 @@
+#define WIN32_LEAN_AND_MEAN
+
 #include "Util.h"
 #include "glm/glm.hpp"
 #include "glm/gtx/norm.hpp"

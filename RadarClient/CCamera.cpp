@@ -1,3 +1,4 @@
+#define WIN32_LEAN_AND_MEAN
 #include "CCamera.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"

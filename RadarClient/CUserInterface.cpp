@@ -1,6 +1,8 @@
 #pragma once
-#include "CUserInterface.h"
+#define WIN32_LEAN_AND_MEAN
+
 #include "CRCSocket.h"
+#include "CUserInterface.h"
 #include "CViewPortControl.h"
 #include "CCamera.h"
 #include "CScene.h"
@@ -667,15 +669,15 @@ void CUserInterface::FillGrid(vector<TRK*> *tracks)
 		SendMessage(GridHWND, ZGM_SETCELLINT, offset + 2, (LPARAM)&npoints);
 
 		ss.str(std::string());
-		ss << std::fixed << std::setprecision(4) << tracks->at(i)->P.at(0).X << "," << tracks->at(i)->P.at(0).Y;
+		ss << std::fixed << std::setprecision(4) << tracks->at(i)->P.at(0)->X << "," << tracks->at(i)->P.at(0)->Y;
 		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 3, (LPARAM)ss.str().c_str());
 		
 		ss.str(std::string());
-		ss << std::fixed << std::setprecision(4) << tracks->at(i)->P.at(npoints-1).X << "," << tracks->at(i)->P.at(npoints - 1).Y;
+		ss << std::fixed << std::setprecision(4) << tracks->at(i)->P.at(npoints-1)->X << "," << tracks->at(i)->P.at(npoints - 1)->Y;
 		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 4, (LPARAM)ss.str().c_str());
 
 		ss.str(std::string());
-		glm::vec3 speed(tracks->at(i)->P.at(npoints - 1).vX, tracks->at(i)->P.at(npoints - 1).vY, tracks->at(i)->P.at(npoints - 1).vZ);
+		glm::vec3 speed(tracks->at(i)->P.at(npoints - 1)->vX, tracks->at(i)->P.at(npoints - 1)->vY, tracks->at(i)->P.at(npoints - 1)->vZ);
 		ss << std::fixed << std::setprecision(4) <<  glm::length(speed);
 		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 5, (LPARAM)ss.str().c_str());
 

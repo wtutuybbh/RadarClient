@@ -1,6 +1,12 @@
 //#include "stdafx.h"
+#define WIN32_LEAN_AND_MEAN
+
+#include "CRCSocket.h"
 #include "CSector.h"
 #include "CSettings.h"
+#include "CViewPortControl.h"
+#include "C3DObjectVBO.h"
+#include "C3DObjectProgram.h"
 
 
 CSector::CSector() : C3DObjectModel(Main, new C3DObjectVBO(false), nullptr, new C3DObjectProgram("CSector.v.glsl", "CSector.f.glsl", "vertex", nullptr, nullptr, "color"))

@@ -1,5 +1,9 @@
+#define WIN32_LEAN_AND_MEAN
 //#include "stdafx.h"
 #include "CLine.h"
+#include "CViewPortControl.h"
+#include "C3DObjectVBO.h"
+#include "C3DObjectProgram.h"
 
 CLine::CLine(int vpId, glm::vec4 a, glm::vec4 b, LineStyle style) : C3DObjectModel(Main,
 	new C3DObjectVBO(false),

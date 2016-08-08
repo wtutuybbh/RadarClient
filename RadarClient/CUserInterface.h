@@ -1,12 +1,10 @@
 #pragma once
 
 #define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <windowsx.h>
+#include <windows.h>
 //#include <CommCtrl.h>
 #include <unordered_map>
 #include <vector>
-#include <tchar.h>
 
 #include "Util.h"
 

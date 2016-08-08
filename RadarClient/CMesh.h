@@ -1,5 +1,4 @@
 #pragma once
-#include <windows.h>
 #include <GL/GL.h>
 
 #pragma comment( lib, "opengl32.lib" )							// Search For OpenGL32.lib While Linking

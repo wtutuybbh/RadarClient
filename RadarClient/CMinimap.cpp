@@ -1,3 +1,5 @@
+#define WIN32_LEAN_AND_MEAN
+
 #include "CMinimap.h"
 #include "CScene.h"
 #include "CCamera.h"

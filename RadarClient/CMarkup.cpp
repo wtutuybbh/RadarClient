@@ -1,5 +1,9 @@
+#define WIN32_LEAN_AND_MEAN
 #include "CMarkup.h"
 #include "CSettings.h"
+#include "CViewPortControl.h"
+#include "C3DObjectVBO.h"
+#include "C3DObjectProgram.h"
 
 
 CMarkup::CMarkup(glm::vec4 origin) : C3DObjectModel (Main,

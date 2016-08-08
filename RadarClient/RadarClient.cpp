@@ -1,8 +1,9 @@
 ﻿// Altitude.cpp : Defines the entry point for the console application.
 //
-///#pragma once
-
+#pragma once
+//#define WIN32_LEAN_AND_MEAN
 ///git add -u .
+#include "CRCSocket.h"
 
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
@@ -40,8 +41,8 @@
 *                                              *
 ***********************************************/
 
-#include <windows.h>													// Header File For The Windows Library
-#include <windowsx.h>
+//#include <windows.h>													// Header File For The Windows Library
+//#include <windowsx.h>
 #include <gl/gl.h>														// Header File For The OpenGL32 Library
 #include <gl/glu.h>														// Header File For The GLu32 Library
 
@@ -51,6 +52,7 @@
 #include "Util.h"
 
 #include "CCamera.h"
+#define WIN32_LEAN_AND_MEAN
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -64,10 +66,9 @@
 
 #include "CUserInterface.h"
 
-#include "CRCSocket.h"
+
 
 #include "CSettings.h"
-#include "CSector.h"
 
 //#include <vld.h>
 

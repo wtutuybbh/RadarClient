@@ -1,6 +1,12 @@
+#define WIN32_LEAN_AND_MEAN
+
 //#include "stdafx.h"
+#include "CRCSocket.h"
 #include "CRImage.h"
 #include "CSettings.h"
+#include "C3DObjectVBO.h"
+#include "C3DObjectProgram.h"
+#include "CViewPortControl.h"
 
 float CRImage::maxAmp = 1000;
 CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels) : 

@@ -1,3 +1,5 @@
+#define WIN32_LEAN_AND_MEAN
+
 //#include "stdafx.h"
 #include <GL/glew.h>
 #include <GL/glut.h>
@@ -12,6 +14,8 @@
 #include "CViewPortControl.h"
 #include <unordered_map>
 #include "CSettings.h"
+#include "C3DObjectVBO.h"
+#include "C3DObjectProgram.h"
 
 //GLuint old_CRCPoint::ProgramID_s;
 //std::vector<VBOData> old_CRCPoint::VBOBuffer_s;
@@ -256,7 +260,7 @@ C3DObjectProgram* CRCPointModel::prog_s = NULL;
 void CRCPointModel::InitStructure()
 {
 	CRCPointModel::vbo_s = new C3DObjectVBO(false);
-	vector<VBOData>* buffer = CRCPointModel::CreateSphereR1(1);
+	std::vector<VBOData>* buffer = CRCPointModel::CreateSphereR1(1);
 	vbo_s->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 
 	CRCPointModel::prog_s = new C3DObjectProgram("CRCPoint.v.glsl", "CRCPoint.f.glsl", "vertex", NULL, "normal", NULL);

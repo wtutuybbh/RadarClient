@@ -1,4 +1,5 @@
 #pragma once
+#include "CRCSocket.h"
 #include "glm/glm.hpp"
 //#include "CMesh.h"
 #include <string>
@@ -36,7 +37,7 @@ class CCamera;
 class old_CTrack;
 class CRImageSet;
 
-#include "CRCSocket.h"
+
 #include "CUserInterface.h"
 
 class old_C3DObject;

@@ -22,7 +22,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/rotate_vector.hpp"
-#include "C3DObject.h"
+//#include "C3DObject.h"
+class C3DObjectModel;
 
 /* Window class */
 #define VIEW_PORT_WC   _T("CViewPortControl")
