@@ -4,6 +4,8 @@
 //
 
 #pragma once
+#include <windows.h>
+
 #define _CRT_SECURE_NO_WARNINGS
 #include "targetver.h"
 

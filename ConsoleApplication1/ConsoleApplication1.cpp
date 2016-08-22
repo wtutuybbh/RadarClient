@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 
-#include <windows.h>
+//
 
 using namespace boost::filesystem;
 using namespace std;
@@ -111,12 +111,12 @@ void RCDataFileSet::AddTextureFile(std::string imgFile, std::string datFile)
 
 void RCDataFileSet::AddAltitudeFile(std::string altFile)
 {
-	/*HINSTANCE hDLL;               // Handle to DLL
+	HINSTANCE hDLL;               // Handle to DLL
 	GDPALTITUDEMAP_SIZES gdpAltitudeMap_Sizes;    // Function pointer
 	double LL[10];
 	int size[8], result;
 
-	hDLL = LoadLibrary("GeoDataProvider.dll");*/
+	hDLL = LoadLibrary(_T("GeoDataProvider.dll"));
 }
 
 void RCDataFileSet::AddFile(RCDataFile* file)
@@ -187,10 +187,10 @@ int main(int argc, char *argv[]) {
 			if (filename.substr(filename.length() - 4) == ".dt2")
 			{
 				string altFile = entry.path().generic_string();
-				DataFileSet.AddFile(Altitude, altFile, string(NULL));
+				DataFileSet.AddFile(Altitude, altFile, "");
 			}
 			//entry.replace_filename()
 		}
 	}
-	cout << DataFileSet.CountFilesOfGivenType(Texture);
+	cout << DataFileSet.CountFilesOfGivenType(Altitude);
 }
