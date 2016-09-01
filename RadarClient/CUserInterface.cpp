@@ -16,6 +16,11 @@
 #include "Util.h"
 #include "CMesh.h"
 #include "CSettings.h"
+#include "CRCDataFileSet.h"
+#include <boost/filesystem/path.hpp>
+#include <boost/range/iterator_range_core.hpp>
+#include <boost/filesystem/operations.hpp>
+#include "CRCDataFile.h"
 
 /*CUserInterface::CUserInterface()
 {
@@ -56,9 +61,60 @@ LRESULT CUserInterface::Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 #ifdef _DEBUG
+	std::stringstream s;
 	
 
-	
+	CRCDataFileSet DataFileSet;
+
+	boost::filesystem::path p(".");
+
+	if (is_directory(p)) {
+		std::cout << p << " is a directory containing:\n";
+
+		for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {})) {
+			std::string filename = entry.path().filename().generic_string();
+			if (filename.substr(filename.length() - 4) == ".jpg")
+			{
+				string imgFile = entry.path().generic_string();
+				string datFile = imgFile.substr(0, imgFile.length() - 3) + "dat";
+				DataFileSet.AddFile(Texture, imgFile, datFile);
+			}
+			if (filename.substr(filename.length() - 4) == ".dt2")
+			{
+				string altFile = entry.path().generic_string();
+				DataFileSet.AddFile(Altitude, altFile, "");
+			}
+			//entry.replace_filename()
+		}
+	}
+	s << DataFileSet.CountFilesOfGivenType(Texture);
+	DebugMessage(dwi, s.str());
+
+	try {
+		string img_64x64("c:\\Users\\RazumovSa\\Documents\\Visual Studio 2015\\Projects\\RadarClient\\ConsoleApplication1\\Debug\\img_64x64.jpg");
+		string img_new("c:\\Users\\RazumovSa\\Documents\\Visual Studio 2015\\Projects\\RadarClient\\ConsoleApplication1\\Debug\\img_new.jpg");
+
+		FIBITMAP *bitmap_64x64 = FreeImage_Load(FreeImage_GetFileType(img_64x64.c_str(), 0), img_64x64.c_str());
+
+		FIBITMAP *bitmap_new = FreeImage_Allocate(128, 128, 24);
+
+		FIBITMAP *copied = FreeImage_Copy(bitmap_64x64, 0, 0, 63, 63);
+
+		FIBITMAP *resized = FreeImage_Rescale(copied, 128, 128);
+
+		FreeImage_Paste(bitmap_new, resized, 0, 0, 256);
+
+		FreeImage_Save(FIF_JPEG, bitmap_new, img_new.c_str());
+
+		FreeImage_Unload(bitmap_64x64);
+		FreeImage_Unload(copied);
+		FreeImage_Unload(resized);
+		FreeImage_Unload(bitmap_new);
+
+	}
+	catch (...) {
+		return 0;
+	}
 #endif // _DEBUG
 	return LRESULT();
 }

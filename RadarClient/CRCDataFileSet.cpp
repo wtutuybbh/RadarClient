@@ -10,15 +10,6 @@ using namespace std;
 
 typedef int(_cdecl * GDPALTITUDEMAP_SIZES)(const char *, double *, int *);
 
-CRCDataFileSet::CRCDataFileSet()
-{
-}
-
-
-CRCDataFileSet::~CRCDataFileSet()
-{
-}
-
 void CRCDataFileSet::AddTextureFile(std::string imgFile, std::string datFile)
 {
 	void *bitmap;

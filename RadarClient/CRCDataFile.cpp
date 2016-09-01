@@ -2,10 +2,6 @@
 #include "CRCDataFile.h"
 
 
-CRCDataFile::~CRCDataFile()
-{
-}
-
 DataFileType CRCDataFile::Type()
 {
 	return type;
@@ -37,6 +33,7 @@ glm::vec4 CRCDataFile::ColorAt(int x, int y)
 
 void CRCDataFile::FitSize(float resX, float resY) {
 	//TODO:
+
 }
 
 void CRCDataFile::SetValue(int x, int y, float val, float resX, float resY)
