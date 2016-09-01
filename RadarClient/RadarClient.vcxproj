@@ -202,6 +202,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="CLine.cpp" />
     <ClCompile Include="CMarkup.cpp" />
     <ClCompile Include="CRCDataFile.cpp" />
+    <ClCompile Include="CRCDataFileSet.cpp" />
     <ClCompile Include="CRImage.cpp" />
     <ClCompile Include="CRImageSet.cpp" />
     <ClCompile Include="CSector.cpp" />
@@ -228,6 +229,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CLine.h" />
     <ClInclude Include="CMarkup.h" />
     <ClInclude Include="CRCDataFile.h" />
+    <ClInclude Include="CRCDataFileSet.h" />
     <ClInclude Include="CRImage.h" />
     <ClInclude Include="CRImageSet.h" />
     <ClInclude Include="CSector.h" />
@@ -245,6 +247,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CScene.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ShaderUtils.h" />
+    <ClInclude Include="stdafx.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="CViewPortControl.h" />
     <ClInclude Include="ZeeGrid.h" />
