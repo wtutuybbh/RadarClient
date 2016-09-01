@@ -55,11 +55,11 @@ void CScene::ClearSelection()
 	}
 }
 
-CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize, mutex *m) {
+CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize) {
 
 	rdrinit = NULL;
 
-	this->m = m;
+	//this->m = m;
 	//CRCPointModel::InitStructure();
 
 	/*old_Sectors = NULL;*/
@@ -888,7 +888,7 @@ void CScene::RefreshTracks(vector<TRK*>* tracks)
 	if(tracks->size() == 0)
 		return;
 
-	m->lock();
+	//m->lock();
 
 	for (int i = 0; i < tracks->size(); i++)
 	{
@@ -923,7 +923,7 @@ void CScene::RefreshTracks(vector<TRK*>* tracks)
 	}
 	UI->FillInfoGrid(this);
 
-	m->unlock();
+	//m->unlock();
 }
 
 void CScene::RefreshImages(RIMAGE* info, void* pixels)

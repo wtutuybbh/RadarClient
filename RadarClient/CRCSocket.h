@@ -494,9 +494,9 @@ public:
 	float Max_Amp, Min_Amp;
 	int b1, b2;
 
-	std::mutex* m{ NULL };
+	//std::mutex* m{ NULL };
 
-	CRCSocket(HWND hWnd, std::mutex* m);
+	CRCSocket(HWND hWnd/*, std::mutex* m*/);
 	~CRCSocket();
 
 	bool IsConnected;
@@ -507,7 +507,7 @@ public:
 	int Close();
 	unsigned int PostData(WPARAM wParam, LPARAM lParam);
 	void OnSrvMsg_RDRTRACK(RDRTRACK* info, int N);
-	void OnSrvMsg_DELTRACK(int* deltrackz, int N);
+	//void OnSrvMsg_DELTRACK(int* deltrackz, int N);
 	void OnSrvMsg_LOCATION(RDRCURRPOS* d);
 	void OnSrvMsg_RIMAGE(RIMAGE* info, void* pixels);
 	void OnSrvMsg_INIT(RDR_INITCL* s_rdrinit);
@@ -515,7 +515,7 @@ public:
 	unsigned int _IMG_MapAmp2ColorRGB255(float Amp, float Min);
 	unsigned int MapAmp2ColorRGB255(float Amp, float Min);
 	int FindTrack(int id);
-	void RectToPolar2d(double x, double y, double* phi, double* ro);
+	//void RectToPolar2d(double x, double y, double* phi, double* ro);
 	void FreeMemory(char *ptr);
 	//__event void ConnectionStateChange(bool isConnected);
 };

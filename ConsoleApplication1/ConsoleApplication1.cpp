@@ -17,46 +17,75 @@ enum DataFileType
 	Texture,
 	Altitude
 };
-class RCDataFile
+class CRCDataFile
 {	
 	std::string _imgFileName, _datFileName;
 	double lon0, lat0, lon1, lat1;
 	int width, height;
 	DataFileType type;
+	float *data{ NULL };
+	float *resolution{ NULL };
 public:
-	RCDataFile(DataFileType type, const std::string& imgFileName, const std::string& datFileName, double lon0, double lat0, double lon1, double lat1, int width, int height)
-		: type(type),
-		_imgFileName(imgFileName),
+	CRCDataFile(DataFileType type, const std::string& imgFileName, const std::string& datFileName, double lon0, double lat0, double lon1, double lat1, int width, int height)
+		: _imgFileName(imgFileName),
 		_datFileName(datFileName),
 		lon0(lon0),
 		lat0(lat0),
 		lon1(lon1),
 		lat1(lat1),
 		width(width),
-		height(height)
+		height(height),
+		type(type)
 	{
 	}
 	DataFileType Type();
+	void ApplyIntersection(CRCDataFile &src);
+	float ValueAt(int x, int y);
+	void SetValue(int x, int y, float val, float res);
 };
-class RCDataFileSet
+class CRCDataFileSet
 {
-	std::vector<RCDataFile *> _files;
+	std::vector<CRCDataFile *> _files;
 	void AddTextureFile(std::string imgFile, std::string datFile);
 	void AddAltitudeFile(std::string altFile);
 public:
-	void AddFile(RCDataFile *file);
+	void AddFile(CRCDataFile *file);
 	void AddFile(DataFileType type, std::string imgFile, std::string datFile);
 	int CountFilesOfGivenType(DataFileType type);
-	RCDataFile *GetFile(int index);
-	~RCDataFileSet();
+	CRCDataFile *GetFile(int index);
+	~CRCDataFileSet();
 };
 
-DataFileType RCDataFile::Type()
+DataFileType CRCDataFile::Type()
 {
 	return type;
 }
 
-void RCDataFileSet::AddTextureFile(std::string imgFile, std::string datFile)
+void CRCDataFile::ApplyIntersection(CRCDataFile& src)
+{
+
+}
+
+float CRCDataFile::ValueAt(int x, int y)
+{
+	if (data)
+		return data[y*width + x];
+	return 0;
+}
+
+void CRCDataFile::SetValue(int x, int y, float val, float res)
+{
+	if (data && resolution)
+	{
+		if (res < resolution[y*width + x])
+		{
+			resolution[y*width + x] = res;
+			data[y*width + x] = val;
+		}
+	}
+}
+
+void CRCDataFileSet::AddTextureFile(std::string imgFile, std::string datFile)
 {
 	void *bitmap;
 	try {
@@ -105,11 +134,11 @@ void RCDataFileSet::AddTextureFile(std::string imgFile, std::string datFile)
 	infile.close();
 	int width = FreeImage_GetWidth((FIBITMAP*)bitmap), height = FreeImage_GetHeight((FIBITMAP*)bitmap);
 	FreeImage_Unload((FIBITMAP*)bitmap);
-	auto file = new RCDataFile(Texture, imgFile, datFile, imgLon0, imgLat0, imgLon1, imgLat1, width, height);
+	auto file = new CRCDataFile(Texture, imgFile, datFile, imgLon0, imgLat0, imgLon1, imgLat1, width, height);
 	_files.push_back(file);
 }
 
-void RCDataFileSet::AddAltitudeFile(std::string altFile)
+void CRCDataFileSet::AddAltitudeFile(std::string altFile)
 {
 	HINSTANCE hDLL;               // Handle to DLL
 	GDPALTITUDEMAP_SIZES gdpAltitudeMap_Sizes;    // Function pointer
@@ -117,14 +146,35 @@ void RCDataFileSet::AddAltitudeFile(std::string altFile)
 	int size[8], result;
 
 	hDLL = LoadLibrary(_T("GeoDataProvider.dll"));
+
+	if (hDLL != NULL)
+	{
+		gdpAltitudeMap_Sizes = (GDPALTITUDEMAP_SIZES)GetProcAddress(hDLL, "gdpAltitudeMap_Sizes");
+		if (!gdpAltitudeMap_Sizes)
+		{
+			FreeLibrary(hDLL);
+			return;
+		}
+		LL[0] = 0;
+		LL[1] = 0;
+		LL[2] = 180;
+		LL[3] = 180;
+		result = gdpAltitudeMap_Sizes(altFile.c_str(), LL, size);
+		if (result == 0) {
+			auto file = new CRCDataFile(Altitude, altFile, altFile, LL[8], LL[9], LL[8] + LL[6] * (size[6]-1), LL[9] + LL[7] * (size[7] - 1), size[6], size[7]);
+			_files.push_back(file);
+		}
+		FreeLibrary(hDLL);
+	}
+	return;
 }
 
-void RCDataFileSet::AddFile(RCDataFile* file)
+void CRCDataFileSet::AddFile(CRCDataFile* file)
 {
 	_files.push_back(file);
 }
 
-void RCDataFileSet::AddFile(DataFileType type, std::string imgFile, std::string datFile)
+void CRCDataFileSet::AddFile(DataFileType type, std::string imgFile, std::string datFile)
 {
 	switch(type)
 	{
@@ -141,7 +191,7 @@ void RCDataFileSet::AddFile(DataFileType type, std::string imgFile, std::string 
 	}
 }
 
-int RCDataFileSet::CountFilesOfGivenType(DataFileType type)
+int CRCDataFileSet::CountFilesOfGivenType(DataFileType type)
 {
 	int size = 0;
 	for (auto it = begin(_files); it != end(_files); ++it)
@@ -152,12 +202,12 @@ int RCDataFileSet::CountFilesOfGivenType(DataFileType type)
 	return size;
 }
 
-RCDataFile* RCDataFileSet::GetFile(int index)
+CRCDataFile* CRCDataFileSet::GetFile(int index)
 {
 	return _files.at(index);
 }
 
-RCDataFileSet::~RCDataFileSet()
+CRCDataFileSet::~CRCDataFileSet()
 {
 	for (auto it = begin(_files); it != end(_files); ++it)
 	{
@@ -169,7 +219,7 @@ RCDataFileSet::~RCDataFileSet()
 
 int main(int argc, char *argv[]) {
 
-	RCDataFileSet DataFileSet;
+	CRCDataFileSet DataFileSet;
 
 	path p(argc>1 ? argv[1] : ".");
 
@@ -192,5 +242,31 @@ int main(int argc, char *argv[]) {
 			//entry.replace_filename()
 		}
 	}
-	cout << DataFileSet.CountFilesOfGivenType(Altitude);
+	cout << DataFileSet.CountFilesOfGivenType(Texture);
+
+	try {
+		string img_64x64("c:\\Users\\RazumovSa\\Documents\\Visual Studio 2015\\Projects\\RadarClient\\ConsoleApplication1\\Debug\\img_64x64.jpg");
+		string img_new("c:\\Users\\RazumovSa\\Documents\\Visual Studio 2015\\Projects\\RadarClient\\ConsoleApplication1\\Debug\\img_new.jpg");
+
+		FIBITMAP *bitmap_64x64 = FreeImage_Load(FreeImage_GetFileType(img_64x64.c_str(), 0), img_64x64.c_str());
+
+		FIBITMAP *bitmap_new = FreeImage_Allocate(128, 128, 24);
+
+		FIBITMAP *copied = FreeImage_Copy(bitmap_64x64, 0, 0, 63, 63);
+
+		FIBITMAP *resized = FreeImage_Rescale(copied, 128, 128);
+
+		FreeImage_Paste(bitmap_new, resized, 0, 0, 256);
+
+		FreeImage_Save(FIF_JPEG, bitmap_new, img_new.c_str());
+
+		FreeImage_Unload(bitmap_64x64);
+		FreeImage_Unload(copied);
+		FreeImage_Unload(resized);
+		FreeImage_Unload(bitmap_new);
+
+	}
+	catch (...) {
+		return 0;
+	}
 }

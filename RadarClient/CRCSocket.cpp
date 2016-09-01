@@ -8,9 +8,9 @@
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 #endif
 
-CRCSocket::CRCSocket(HWND hWnd, std::mutex* m)
+CRCSocket::CRCSocket(HWND hWnd/*, std::mutex* m*/)
 {
-	this->m = m;
+	//this->m = m;
 
 	this->hWnd = hWnd;
 	OnceClosed = false;
@@ -143,7 +143,6 @@ int CRCSocket::Read()
 
 	char *szIncoming = NULL;
 	
-
 	_sh *sh;
 	int recev;
 	unsigned int offset, length;
@@ -167,7 +166,7 @@ int CRCSocket::Read()
 			return recev;
 		}
 		sh = (struct _sh*)client->buff;
-		if (sh->word1 != 0xAAAAAAAA || sh->word2 != 0x55555555)   // проверим шапку
+		if (sh->word1 != 2863311530/* 0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку
 			return recev;
 		length = sh->dlina;
 		while (length <= offset)  // приняли больше или ровно 1 порцию
@@ -182,7 +181,7 @@ int CRCSocket::Read()
 
 				offset -= length;
 				length = sh->dlina;
-				if (sh->word1 != 0xAAAAAAAA || sh->word2 != 0x55555555)   // проверим шапку
+				if (sh->word1 != 2863311530 /*0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку 
 				{
 					client->offset = 0;
 					if (szIncoming)
@@ -332,7 +331,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 	{
 		// ищем трек
 		int Idx = FindTrack(info[i].numTrack);
-		RectToPolar2d(info[i].X, info[i].Y, &info[i].X, &info[i].Y);
+		//RectToPolar2d(info[i].X, info[i].Y, &info[i].X, &info[i].Y);
 		if (-1 == Idx)
 		{
 			//создаём трек
@@ -353,24 +352,14 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		}
 	}
 }
-
+/*
 void CRCSocket::OnSrvMsg_DELTRACK(int* deltrackz, int N)
 {
 	m->lock();
 	for (int i = 0; i < min(N, Tracks.size()); i++)
 	{
-		/*for (int j = 0; j<Tracks.size(); j++)
-		{
-			if (Tracks[j]->id == deltrackz[i])
-			{
-				delete Tracks[j];
-				Tracks.erase(Tracks.begin() + j);//TODO: crashes here!!!
-				//break;
-			}
-		}*/
 		for (auto it = Tracks.begin();
-		it != Tracks.end();
-			/*it++*/) 
+		it != Tracks.end();) 
 		{
 
 			if ((*it)->id == deltrackz[i]) {
@@ -382,7 +371,7 @@ void CRCSocket::OnSrvMsg_DELTRACK(int* deltrackz, int N)
 		}
 	}
 	m->unlock(); //against crash - but did not help
-}
+}*/
 
 void CRCSocket::OnSrvMsg_LOCATION(RDRCURRPOS* d)
 {
@@ -609,13 +598,13 @@ int CRCSocket::FindTrack(int id) // если в массиве trak нашли �
 	}
 	return -1;
 }
-void CRCSocket::RectToPolar2d(double x, double y, double* phi, double* ro)
+/*void CRCSocket::RectToPolar2d(double x, double y, double* phi, double* ro)
 {
 	double x1 = x, y1 = y;
 
 	*phi = -120 + 0.02 * 1000 * (atan(x1 / y1)) / M_PI_180;
 	*ro = 0.75 * sqrt(x1*x1 + y1*y1) / 1;
-}
+}*/
 
 void CRCSocket::FreeMemory(char *readBuf)
 {
@@ -639,6 +628,13 @@ TRK::TRK(int _id)
 }
 TRK::~TRK()
 {
+	for (int i = 0; i < P.size(); i++)
+	{
+		if (P.at(i))
+		{
+			delete P.at(i);
+		}
+	}
 	P.clear();
 }
 void TRK::InsertPoints(RDRTRACK* pt, int N)
@@ -646,6 +642,8 @@ void TRK::InsertPoints(RDRTRACK* pt, int N)
 	for (int i = 0; i < N; i++)
 	{
 		if (pt->numTrack != this->id) continue;
-		P.push_back(&pt[i]);
+		RDRTRACK *t = new RDRTRACK();
+		memcpy(t, &pt[i], sizeof(RDRTRACK));
+		P.push_back(t);
 	}
 }

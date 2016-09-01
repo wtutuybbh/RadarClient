@@ -107,7 +107,7 @@ CRCSocket *g_Socket;
 DebugWindowInfo g_dwi;
 #endif
 
-std::mutex m;
+//std::mutex m;
 
 bool g_Initialized = false;
 
@@ -285,7 +285,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		g_vpControl->Id = Main;
 		g_vpControl->InitGL();
 		
-		g_Socket = new CRCSocket(hWnd, &m);
+		g_Socket = new CRCSocket(hWnd);
 		g_Socket->Connect();
 		
 		
@@ -789,7 +789,7 @@ BOOL Initialize(GL_Window* window, Keys* keys)					// Any GL Init Code & User In
 
 
 
-	g_vpControl->Scene = new CScene(g_altFile, g_imgFile, g_datFile, g_lon, g_lat, g_mpph, g_mppv, g_texsize, &m);	 
+	g_vpControl->Scene = new CScene(g_altFile, g_imgFile, g_datFile, g_lon, g_lat, g_mpph, g_mppv, g_texsize);	 
 	g_vpControl->Scene->Socket = g_Socket;
 	g_vpControl->Scene->UI = g_UI;
 	g_vpControl->UI = g_UI;

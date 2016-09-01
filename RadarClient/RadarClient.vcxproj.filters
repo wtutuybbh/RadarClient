@@ -84,6 +84,9 @@
     <ClCompile Include="CLine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CRCDataFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CMesh.h">
@@ -159,6 +162,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CLine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CRCDataFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

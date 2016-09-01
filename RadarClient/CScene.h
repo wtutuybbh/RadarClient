@@ -138,9 +138,9 @@ public:
 
 	glm::vec3 MeshSize;
 	glm::vec3 * m_Bounds{ NULL };
-	mutex *m{ NULL };
+	//mutex *m{ NULL };
 	/*CScene(float lonc, float latc);*/
-	CScene(std::string alfFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize, mutex *m);
+	CScene(std::string alfFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize);
 	~CScene();
 
 	bool DrawScene(CViewPortControl * vpControl);

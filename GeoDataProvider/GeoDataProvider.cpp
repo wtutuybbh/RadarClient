@@ -10,7 +10,6 @@
 
 extern "C"
 {
-
 	__declspec(dllexport) int gdpAltitudeMap_Sizes(const char *fileName, double *LL, int *size) {
 		char chr1[1], chr2[2], chr3[3], chr4[5];
 
@@ -75,73 +74,12 @@ extern "C"
 		lonSW += std::stoi(s.substr(197, 2));
 		lonSW += std::stof(s.substr(199, 4));
 		if (s.at(203) == 'W') lonSW *= -1;
-		/*
-		for (q = 0; q < 4; q++) chr4[q] = DSI[281 + q];
-		Nlat = std::stoi(s.substr(281, 4));
-		for (q = 0; q < 4; q++) chr4[q] = DSI[285 + q];
-		Nlon = atoi((const char *)chr4);
-
-
-		for (q = 0; q < 2; q++) chr2[q] = DSI[185 + q];
-		latSW = atoi((const char *)chr2);
-		for (q = 0; q < 2; q++) chr2[q] = DSI[187 + q];
-		latSW += atoi((const char *)chr2) / 60;
-		for (q = 0; q < 4; q++) chr4[q] = DSI[189 + q];
-		latSW += atof((const char *)chr4) / 3600;
-		chr1[0] = DSI[193];
-		if (chr1[0] == 'S')	latSW *= -1;
-
-		for (q = 0; q < 3; q++) chr3[q] = DSI[194 + q];
-		lonSW = atoi((const char *)chr3);
-		for (q = 0; q < 2; q++) chr2[q] = DSI[197 + q];
-		lonSW += atoi((const char *)chr2) / 60;
-		for (q = 0; q < 4; q++) chr4[q] = DSI[199 + q];
-		lonSW += atof((const char *)chr4) / 3600;
-		chr1[0] = DSI[203];
-		if (chr1[0] == 'S')	lonSW *= -1;
-		*/
-
-		//check fragment bounds:
-		//TODO: in future versions fragment should be combined from the set of files (instead of one file in this version).
-		// lat check:
-		/*if (LL[1] < latSW) {
-			infile.close(); return -7;
-		}
-		if (LL[3] < latSW) {
-			infile.close(); return -8;
-		}
-		if (LL[1] > latSW + Nlat * dlat) {
-			infile.close(); return -9;
-		}
-		if (LL[3] > latSW + Nlat * dlat) {
-			infile.close(); return -10;
-		}
-		//lon check:
-		if (LL[0] < lonSW) {
-			infile.close(); return -11;
-		}
-		if (LL[2] < lonSW) {
-			infile.close(); return -12;
-		}
-		if (LL[0] > lonSW + Nlon * dlon) {
-			infile.close(); return -13;
-		}
-		if (LL[2] > lonSW + Nlon * dlon) {
-			infile.close(); return -14;
-		}*/
-		// end of check fragment bounds
 
 		char ACC[ACC_SIZE];
 		infile.read(ACC, ACC_SIZE);
 		if (!infile.good()) {
 			infile.close(); return -15;
 		}
-
-
-		/*int dataBlockCount = 0, latCount = 0, lonCount = 0;
-		int checksum = 0;*/
-
-
 
 		int iLonStart, iLatStart, iLonEnd, iLatEnd;
 
@@ -150,18 +88,8 @@ extern "C"
 		iLonEnd = floor((LL[2] - lonSW) / dlon);
 		iLatEnd = floor((LL[3] - latSW) / dlat);
 
-		//checking lon indices:
-		/*if (iLonStart >= iLonEnd) {
-			infile.close(); return -16;
-		}*/
-
 		if (iLonStart < 0) iLonStart = 0;
 		if (iLonEnd >= Nlon) iLonEnd = Nlon - 1;
-
-		//checking lat indices:
-		/*if (iLatStart >= iLatEnd) {
-			infile.close(); return -17;
-		}*/
 
 		if (iLatStart < 0) iLatStart = 0;
 		if (iLatEnd >= Nlat) iLatEnd = Nlat - 1;
