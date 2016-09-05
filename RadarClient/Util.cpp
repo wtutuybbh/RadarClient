@@ -349,3 +349,4 @@ float MinimumDistance(glm::vec3 v, glm::vec3 w, glm::vec3 p)
 	const glm::vec3 projection = v + t * (w - v);  // Projection falls on the segment
 	return glm::distance(p, projection);
 }
+

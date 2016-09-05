@@ -17,6 +17,8 @@
 #include "CMesh.h"
 #include "CSettings.h"
 #include "CRCDataFileSet.h"
+#include "CRCAltitudeDataFile.h"
+#include "CRCTextureDataFile.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -77,22 +79,29 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 			{
 				string imgFile = entry.path().generic_string();
 				string datFile = imgFile.substr(0, imgFile.length() - 3) + "dat";
-				DataFileSet.AddFile(Texture, imgFile, datFile);
-			}
+				DataFileSet.AddFile(Texture, imgFile);
+			}/*
 			if (filename.substr(filename.length() - 4) == ".dt2")
 			{
 				string altFile = entry.path().generic_string();
-				DataFileSet.AddFile(Altitude, altFile, "");
-			}
+				DataFileSet.AddFile(Altitude, altFile);
+			}*/
 			//entry.replace_filename()
 		}
 	}
 	s << DataFileSet.CountFilesOfGivenType(Texture);
 	DebugMessage(dwi, s.str());
+	s.str(std::string());
+	s << DataFileSet.CountFilesOfGivenType(Altitude);
+	DebugMessage(dwi, s.str());
+
+	CRCTextureDataFile *file = new CRCTextureDataFile(37.5, 54.7, 37.6, 54.8, 100, 100);
+
+	file->ApplyIntersection(*DataFileSet.GetFile(0));
 
 	try {
-		string img_64x64("c:\\Users\\RazumovSa\\Documents\\Visual Studio 2015\\Projects\\RadarClient\\ConsoleApplication1\\Debug\\img_64x64.jpg");
-		string img_new("c:\\Users\\RazumovSa\\Documents\\Visual Studio 2015\\Projects\\RadarClient\\ConsoleApplication1\\Debug\\img_new.jpg");
+		string img_64x64("c:\\Users\\RazumovSa\\Documents\\Visual Studio 2015\\Projects\\RadarClient\\Debug\\img_64x64.jpg");
+		string img_new("c:\\Users\\RazumovSa\\Documents\\Visual Studio 2015\\Projects\\RadarClient\\Debug\\img_new.jpg");
 
 		FIBITMAP *bitmap_64x64 = FreeImage_Load(FreeImage_GetFileType(img_64x64.c_str(), 0), img_64x64.c_str());
 
@@ -100,7 +109,7 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 		FIBITMAP *copied = FreeImage_Copy(bitmap_64x64, 0, 0, 63, 63);
 
-		FIBITMAP *resized = FreeImage_Rescale(copied, 128, 128);
+		FIBITMAP *resized = FreeImage_Rescale(copied, 96, 96);
 
 		FreeImage_Paste(bitmap_new, resized, 0, 0, 256);
 

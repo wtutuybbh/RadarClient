@@ -1,6 +1,12 @@
 //#include "stdafx.h"
 #include "CRCDataFile.h"
+#include "Util.h"
+#include <math.h>
 
+
+CRCDataFile::~CRCDataFile()
+{
+}
 
 DataFileType CRCDataFile::Type()
 {
@@ -12,39 +18,52 @@ void CRCDataFile::ApplyIntersection(CRCDataFile& src)
 	//TODO:
 }
 
-float CRCDataFile::ValueAt(int x, int y)
+bool CRCDataFile::GetIntersection(CRCDataFile& src, int& x0, int& y0, int& x1, int& y1) const
 {
-	if (type==Altitude && data)
-		return ((float *)data)[y*width + x];
-	if (type == Texture && data) {
-		// TODO:
-	}
-	return 0;
-}
+	//x0, y0, x1, y1 - coordinates of *this.
+	//if you need coordinates of src, just revert the call
 
-glm::vec4 CRCDataFile::ColorAt(int x, int y)
-{
-	if (type == Texture && data) {
-		// TODO:
+	if (this->lon1 < src.lon0 || this->lon0 > src.lon1 || this->lat1 < src.lat0 || this->lat0 > src.lat1)
+		return false;
+
+	double lon_res = (this->lon1 - this->lon0) / (width - 1), lat_res = (this->lat1 - this->lat0) / (height - 1);
+
+	x0 = ceil(zero_if_negative(src.lon0 - this->lon0) / lon_res);	
+	x1 = floor((this->lon1 - this->lon0 - zero_if_negative(this->lon1 - src.lon1)) / lon_res);
+
+	if (xdir == -1) {
+		x0 = width - x0 - 1;
+		x1 = width - x1 - 1;
 	}
-	//TODO:
-	return glm::vec4(0);
+	y0 = ceil(zero_if_negative(src.lat0 - this->lat0) / lat_res);
+	y1 = floor((this->lat1 - this->lat0 - zero_if_negative(this->lat1 - src.lat1)) / lat_res);
+	if (ydir == -1)
+	{
+		y0 = height - y0 - 1;
+		y1 = height - y1 - 1;
+	}
+
+	return true;
 }
 
 void CRCDataFile::FitSize(float resX, float resY) {
 	//TODO:
-
+	if (lon0 != lon1) {
+		width = floor((lon1 - lon0) / resX);
+		lon1 = lon0 + resX * width;
+	}
+	if (lat0 != lat1) {
+		height = floor((lat1 - lat0) / resY);
+		lat1 = lat0 + resY * height;
+	}
 }
 
-void CRCDataFile::SetValue(int x, int y, float val, float resX, float resY)
+bool CRCDataFile::Open()
 {
-	if (type == Altitude && data && resolutionX && resolutionY)
-	{
-		if (resX < resolutionX[y*width + x] && resY < resolutionY[y*width + x])
-		{
-			resolutionX[y*width + x] = resX;
-			resolutionY[y*width + x] = resY;
-			((float *)data)[y*width + x] = val;
-		}
-	}
+	return false;
+}
+
+void* CRCDataFile::GetData() const
+{
+	return data;
 }

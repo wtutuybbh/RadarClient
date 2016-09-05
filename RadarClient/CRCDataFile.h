@@ -9,16 +9,28 @@ enum DataFileType
 };
 class CRCDataFile
 {
-	std::string _imgFileName, _datFileName;
-	double lon0, lat0, lon1, lat1;
-	int width, height;
+protected:
+	std::string fileName{ "" };
+	double lon0{ 0 }, lat0{ 0 }, lon1{ 180 }, lat1{90};
+	int width{ 0 }, height{ 0 };
+	unsigned short xdir{ 1 }, ydir{ 1 };
 	DataFileType type;
 	void *data{ NULL };
 	float *resolutionX{ NULL }, *resolutionY{ NULL };
 public:
-	CRCDataFile(DataFileType type, const std::string& imgFileName, const std::string& datFileName, double lon0, double lat0, double lon1, double lat1, int width, int height)
-		: _imgFileName(imgFileName),
-		_datFileName(datFileName),
+	CRCDataFile(DataFileType type) : type(type)
+	{		
+	}
+	CRCDataFile(DataFileType type, double lon0, double lat0, double lon1, double lat1, int width, int height) : type(type), lon0(lon0),
+		lat0(lat0),
+		lon1(lon1),
+		lat1(lat1),
+		width(width),
+		height(height)
+	{
+	}
+	CRCDataFile(DataFileType type, const std::string& fileName, double lon0, double lat0, double lon1, double lat1, int width, int height)
+		: fileName(fileName),
 		lon0(lon0),
 		lat0(lat0),
 		lon1(lon1),
@@ -28,11 +40,12 @@ public:
 		type(type)
 	{
 	}
+	virtual ~CRCDataFile();
 	DataFileType Type();
-	void ApplyIntersection(CRCDataFile &src);
-	float ValueAt(int x, int y);
-	glm::vec4 ColorAt(int x, int y);
-	void SetValue(int x, int y, float val, float resX, float resY);
-	void FitSize(float resX, float resY); // set height, width and new 
+	virtual void ApplyIntersection(CRCDataFile &src);
+	bool GetIntersection(CRCDataFile &src, int &x0, int &y0, int &x1, int &y1) const;
+	void FitSize(float resX, float resY); // set height, width and new boundaries
+	virtual bool Open();
+	void *GetData() const;
 };
 

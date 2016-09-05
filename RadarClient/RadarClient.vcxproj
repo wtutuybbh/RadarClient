@@ -149,7 +149,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(BOOST_DIR);$(SolutionDir)FreeImage;$(SolutionDir)glew\include;$(SolutionDir)freeglut\include;C:\Program Files %28x86%29\Visual Leak Detector\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(BOOST_DIR);$(SolutionDir)lpng1624;$(SolutionDir)FreeImage;$(SolutionDir)glew\include;$(SolutionDir)freeglut\include;C:\Program Files %28x86%29\Visual Leak Detector\include</AdditionalIncludeDirectories>
       <TreatWarningAsError>false</TreatWarningAsError>
       <CompileAs>CompileAsCpp</CompileAs>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -202,7 +202,9 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="CLine.cpp" />
     <ClCompile Include="CMarkup.cpp" />
     <ClCompile Include="CRCDataFile.cpp" />
+    <ClCompile Include="CRCAltitudeDataFile.cpp" />
     <ClCompile Include="CRCDataFileSet.cpp" />
+    <ClCompile Include="CRCTextureDataFile.cpp" />
     <ClCompile Include="CRImage.cpp" />
     <ClCompile Include="CRImageSet.cpp" />
     <ClCompile Include="CSector.cpp" />
@@ -229,7 +231,9 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CLine.h" />
     <ClInclude Include="CMarkup.h" />
     <ClInclude Include="CRCDataFile.h" />
+    <ClInclude Include="CRCAltitudeDataFile.h" />
     <ClInclude Include="CRCDataFileSet.h" />
+    <ClInclude Include="CRCTextureDataFile.h" />
     <ClInclude Include="CRImage.h" />
     <ClInclude Include="CRImageSet.h" />
     <ClInclude Include="CSector.h" />
