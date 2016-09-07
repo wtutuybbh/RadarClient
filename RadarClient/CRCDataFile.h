@@ -4,6 +4,7 @@
 
 enum DataFileType
 {
+	Undefined,
 	Texture,
 	Altitude
 };
@@ -16,7 +17,7 @@ protected:
 	unsigned short xdir{ 1 }, ydir{ 1 };
 	DataFileType type;
 	void *data{ NULL };
-	float *resolutionX{ NULL }, *resolutionY{ NULL };
+	//float *resolutionX{ NULL }, *resolutionY{ NULL };
 public:
 	CRCDataFile(DataFileType type) : type(type)
 	{		
@@ -40,12 +41,15 @@ public:
 		type(type)
 	{
 	}
+	static DataFileType GetTypeByExt(std::string ext);
 	virtual ~CRCDataFile();
 	DataFileType Type();
 	virtual void ApplyIntersection(CRCDataFile &src);
 	bool GetIntersection(CRCDataFile &src, int &x0, int &y0, int &x1, int &y1) const;
 	void FitSize(float resX, float resY); // set height, width and new boundaries
-	virtual bool Open();
+	virtual bool Open() = 0;
 	void *GetData() const;
+	void SetName(std::string fileName);
+	std::string GetName() const;
 };
 

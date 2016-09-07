@@ -66,6 +66,8 @@ bool CMesh::LoadHeightmap(int vpId)
 		scn->geocenter.x + px * texsize / 2 - px * texsize * shiftX, 
 		scn->geocenter.y + py * texsize / 2 + py * texsize * shiftZ);
 
+	if (!aMap)
+		return false;
 	//std::ofstream outfile("new.txt", std::ofstream::binary);
 
 

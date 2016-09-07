@@ -59,7 +59,7 @@ short CRCAltitudeDataFile::ValueAt(int x, int y)
 	return 0;
 }
 
-short CRCAltitudeDataFile::ValueAt(float lon, float lat)
+short CRCAltitudeDataFile::ValueAt(double lon, double lat)
 {	
 	if (data && lon >= lon0 && lon <= lon1 && lat >= lat0 && lat <= lat1)
 	{
@@ -77,25 +77,44 @@ short CRCAltitudeDataFile::ValueAt(float lon, float lat)
 
 void CRCAltitudeDataFile::SetValue(int x, int y, short val, float resX, float resY)
 {
-	if (type == Altitude && data && resolutionX && resolutionY)
+	if (type == Altitude && data /*&& resolutionX && resolutionY*/)
 	{
-		if (resX < resolutionX[y*width + x] && resY < resolutionY[y*width + x])
-		{
-			resolutionX[y*width + x] = resX;
-			resolutionY[y*width + x] = resY;
+		//if (resX < resolutionX[y*width + x] && resY < resolutionY[y*width + x])
+		//{
+			//resolutionX[y*width + x] = resX;
+			//resolutionY[y*width + x] = resY;
 			((short *)data)[y*width + x] = val;
-		}
+		//}
 	}
 }
 
 void CRCAltitudeDataFile::ApplyIntersection(CRCDataFile& src)
 {
+	int this_x0, this_x1, this_y0, this_y1, src_x0, src_x1, src_y0, src_y1;
 
+	Open();
+	src.Open();
+
+	GetIntersection(src, this_x0, this_y0, this_x1, this_y1);
+	src.GetIntersection(*this, src_x0, src_y0, src_x1, src_y1);
+
+	CRCAltitudeDataFile *asrc = reinterpret_cast <CRCAltitudeDataFile *> (&src);
+
+	float dlon = (lon1 - lon0) / width;
+	float dlat = (lat1 - lat0) / height;
+
+	for (int x = this_x0; x <= this_x1; x++)
+	{
+		for (int y = this_y0; y < this_y1; y++)
+		{
+			SetValue(x, y, asrc->ValueAt(lon0 + x * dlon, lat0 + y * dlat), dlon, dlat);
+		}
+	}
 }
 
 bool CRCAltitudeDataFile::Open()
 {
-	if (fileName != "")
+	if (fileName != "" && !data)
 	{
 		HINSTANCE hDLL;               // Handle to DLL
 		GDPALTITUDEMAP gdpAltitudeMap;    // Function pointer

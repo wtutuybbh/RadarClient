@@ -4,6 +4,15 @@
 #include <math.h>
 
 
+DataFileType CRCDataFile::GetTypeByExt(std::string ext)
+{
+	if (ext == "dt2" || ext == "bil")
+		return Altitude;
+	if (ext == "jpg" || ext == "png" || ext == "gif" || ext == "bmp")
+		return Texture;
+	return Undefined;
+}
+
 CRCDataFile::~CRCDataFile()
 {
 }
@@ -58,12 +67,17 @@ void CRCDataFile::FitSize(float resX, float resY) {
 	}
 }
 
-bool CRCDataFile::Open()
-{
-	return false;
-}
-
 void* CRCDataFile::GetData() const
 {
 	return data;
+}
+
+void CRCDataFile::SetName(std::string fileName)
+{
+	this->fileName = fileName;
+}
+
+std::string CRCDataFile::GetName() const
+{
+	return fileName;
 }

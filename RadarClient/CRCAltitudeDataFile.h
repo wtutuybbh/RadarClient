@@ -9,7 +9,7 @@ public:
 	~CRCAltitudeDataFile();
 
 	short ValueAt(int x, int y);
-	short ValueAt(float lon, float lat);
+	short ValueAt(double lon, double lat);
 	void SetValue(int x, int y, short val, float resX, float resY);
 
 	void ApplyIntersection(CRCDataFile &src) override;

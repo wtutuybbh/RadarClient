@@ -40,7 +40,8 @@ int CMesh::TotalMeshsCount;
 
 void CScene::PushSelection(C3DObjectModel* o)
 {
-	Selection.push_back(o);
+	if (o)
+		Selection.push_back(o);
 }
 
 void CScene::ClearSelection()
@@ -50,8 +51,10 @@ void CScene::ClearSelection()
 	Selection.clear();
 	for (int i = 0; i < Sectors.size(); i++)
 	{
-		Sectors.at(i)->UnselectAll(Main);
-		Sectors.at(i)->UnselectAll(MiniMap);
+		if (Sectors.at(i)) {
+			Sectors.at(i)->UnselectAll(Main);
+			Sectors.at(i)->UnselectAll(MiniMap);
+		}
 	}
 }
 
@@ -964,6 +967,10 @@ void CScene::Init(RDR_INITCL* init)
 	rayWidth = init->dAzm * init->ViewStep;
 	SectorsCount = init->Nazm / init->ViewStep;
 	Sectors.resize(SectorsCount);
+	for (int i = 0; i < Sectors.size(); i++)
+	{
+		Sectors[i] = NULL;
+	}
 
 	if (!ImageSet)
 		ImageSet = new CRImageSet();

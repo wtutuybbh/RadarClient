@@ -49,6 +49,26 @@ void CRCDataFileSet::AddFile(DataFileType type, std::string file)
 	}
 }
 
+void CRCDataFileSet::AddFiles(std::string dir, DataFileType typeFilter, std::string extFilter)
+{
+	boost::filesystem::path p(dir);
+
+	if (is_directory(p)) {
+		//std::cout << p << " is a directory containing:\n";
+
+		for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {})) {
+			std::string filename = entry.path().filename().generic_string();
+			std::string ext = filename.substr(filename.length() - 3, 3);
+			DataFileType type = CRCDataFile::GetTypeByExt(ext);
+			if ((extFilter == "" || ext == extFilter) && (type!=Undefined && typeFilter == type))
+			{
+				string file = entry.path().generic_string();
+				AddFile(type, file);
+			}
+		}
+	}
+}
+
 int CRCDataFileSet::CountFilesOfGivenType(DataFileType type)
 {
 	int size = 0;

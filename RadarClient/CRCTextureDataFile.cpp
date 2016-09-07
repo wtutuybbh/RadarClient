@@ -150,16 +150,19 @@ void CRCTextureDataFile::ApplyIntersection(CRCDataFile& src)
 	GetIntersection(src, this_x0, this_y0, this_x1, this_y1);
 	src.GetIntersection(*this, src_x0, src_y0, src_x1, src_y1);
 
-	FIBITMAP *dib = (FIBITMAP *)data, *src_dib = (FIBITMAP *)src.GetData();;
-	FIBITMAP *copied = FreeImage_Copy(src_dib, src_x0, src_y0, src_x1, src_y1);
-	FIBITMAP *resized = FreeImage_Rescale(copied, this_x1 - this_x0 + 1, this_y1 - this_y0 + 1);
+	FIBITMAP *dib = (FIBITMAP *)data, *src_dib = (FIBITMAP *)src.GetData();
 
-	FreeImage_Paste(dib, resized, this_x0, this_y0, 255);
+	if (dib && src_dib) {
+		FIBITMAP *copied = FreeImage_Copy(src_dib, src_x0, src_y0, src_x1, src_y1);
+		FIBITMAP *resized = FreeImage_Rescale(copied, this_x1 - this_x0 + 1, this_y1 - this_y0 + 1);
 
-	FreeImage_Save(FIF_JPEG, dib, "newmap.jpg");
-	
-	FreeImage_Unload(copied);
-	FreeImage_Unload(resized);
+		FreeImage_Paste(dib, resized, this_x0, this_y0, 255);
+
+		//FreeImage_Save(FIF_JPEG, dib, "newmap.jpg");
+
+		FreeImage_Unload(copied);
+		FreeImage_Unload(resized);
+	}
 }
 
 bool CRCTextureDataFile::Open()
@@ -173,6 +176,20 @@ bool CRCTextureDataFile::Open()
 			height = FreeImage_GetHeight((FIBITMAP*)data);
 			bytespp = FreeImage_GetLine((FIBITMAP*)data) / FreeImage_GetWidth((FIBITMAP*)data);
 			return true;
+		}
+	}
+	return false;
+}
+
+bool CRCTextureDataFile::Save()
+{
+	if (data) {
+		try {
+			FreeImage_Save(FIF_JPEG, (FIBITMAP *)data, fileName.c_str());
+			return true;
+		}
+		catch (...) {
+			return false;
 		}
 	}
 	return false;
