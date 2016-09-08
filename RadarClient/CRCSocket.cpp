@@ -285,14 +285,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			//Memo1->Lines->Add("OBJTRK");
 			break;
 		}
-		/*case MSG_DELTRK: {
-			//Memo1->Lines->Add("DELTRK");
-			int N = *((int*)((void*)PTR_D));
-			int* DTK = (int*)(void*)((char*)PTR_D + 4);
-			OnSrvMsg_DELTRACK(DTK, N);
-		}
-			break;*/
-		
+	
 			// 
 		case MSG_INIT: {
 			//Memo1->Lines->Add("MSGINIT");
@@ -379,109 +372,10 @@ void CRCSocket::OnSrvMsg_LOCATION(RDRCURRPOS* d)
 		CurrentPosition = new RDRCURRPOS;
 	memcpy(CurrentPosition, d, sizeof(RDRCURRPOS));
 	Initialized = true;
-	/*AnsiString s;
-	s.sprintf("%lf", R2D(d->northdir));
-	Edit1->Text = s;
-	s.sprintf("%d", int(d->currstate));
-	Edit2->Text = s;
-	s.sprintf("%lf", (d->lon));
-	Edit3->Text = s;
-	s.sprintf("%lf", (d->lat));
-	Edit4->Text = s;
-	s.sprintf("%lf", (d->elv));
-	Edit5->Text = s;
-	s.sprintf("%lf", (d->direction));
-	Edit6->Text = s;
-	s.sprintf("%hd.%hd.%hd   %hd:%hd:%hd.%3hd",
-		d->srvTime.st.wDay, d->srvTime.st.wMonth, d->srvTime.st.wYear,
-		d->srvTime.st.wHour, d->srvTime.st.wMinute, d->srvTime.st.wSecond,
-		d->srvTime.st.wMilliseconds);*/
 }
 
 void CRCSocket::OnSrvMsg_RIMAGE(RIMAGE* info, void* pixels)
-{
-	//if (rdrinit.ViewStep == 0) return;
-
-	//int offset_B_pixels;
-
-
-	//if (info->resv1[0] != 0) return; // если тип данных не флоат то хз
-
-	//{
-	//	// новый битмап под кусок нового РЛИ
-	//	char flip;
-	//	int B1 = info->d1, B2 = info->d2;
-	//	if (B2 < B1)
-	//	{
-	//		offset_B_pixels = B2;
-	//		flip = 1;
-
-	//	}
-	//	else
-	//	{
-	//		flip = 0;
-	//		offset_B_pixels = B1;
-	//	}
-	//	IDX = offset_B_pixels / rdrinit.ViewStep;
-		//AnsiString s;
-		//s.sprintf("IDX %d, offsB %d", IDX, offset_B_pixels);
-		//lblB->Caption = s;
-		//if(IDX < 0) IDX=0;
-		//if(IDX >= NumViewSct) IDX = NumViewSct-1;
-
-		//Series4->Clear();
-		//float iX = R2D(rdrinit.begAzm+rdrinit.dAzm*offset_B_pixels);
-		//float iY = rdrinit.maxR;
-		//Series4->
-		//Series4->AddXY(iX,iY,"",clTeeColor);
-
-
-		// ищем макс. значение пикселя, затем нормируем и приводим к [0-255]
-		//float* px = (float*)pixels;
-		//float maxP = 0, x;
-
-		// формируем пиксели из данных
-		/*for (int i = 0; i < SCTB->Height; i++)
-		{
-			DWORD* P = (DWORD*)SCTB->ScanLine[i];
-			for (int j = 0; j < SCTB->Width; j++)
-			{
-				int B = px[j*info->NR + 0];
-				DWORD* P = (DWORD*)SCTB->ScanLine[SCTB->Height - 1 - i];
-				DWORD L = _IMG_MapAmp2ColorRGB255(px[j*info->NR + i + 1], 0);
-
-				if (flip) P[SCTB->Width - 1 - j] = L;
-				else P[j] = L;
-
-				//P[j] = RGB(rand()%255,rand()%255,rand()%255);
-			}
-		}*/
-
-		//vsimg[IDX]->Assign(SCTB);
-
-		/*
-		//DBG
-		for(int i = 0; i < SCTB->Height; i++)
-		{
-		DWORD* P = (DWORD*)SCTB->ScanLine[i];
-		for(int j = 0; j < SCTB->Width; j++)
-		{
-		P[j] = RGB(rand()%255,rand()%255,rand()%255);
-		}
-		}
-		Memo1->Lines->Add("OnSrvMsg_RIMAGE dbg шум");
-		//
-		*/
-		//RLI_BTM->Canvas->CopyMode = cmSrcCopy;
-		// теперь в общем битмапе заменим кусок
-		/*for (int i = 0; i < NumViewSct; i++)
-		{
-			//if(i!=IDX)
-			//RLI_BTM->Canvas->Draw(i*rdrinit.ViewStep,0, vsimg[i]);
-
-		}*/
-
-	//}
+{	
 }
 
 void CRCSocket::OnSrvMsg_INIT(RDR_INITCL* s_rdrinit)
