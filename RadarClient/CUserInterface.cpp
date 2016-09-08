@@ -69,22 +69,27 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	CRCDataFileSet DataFileSet;
 
 	//DataFileSet.AddFiles(".", Texture, "jpg");
-	DataFileSet.AddTextureFile("testmap0.jpg");
-	DataFileSet.AddTextureFile("testmap1.jpg");
-	DataFileSet.AddAltitudeFile("n55_e041_1arc_v3.bil");
+	
 
-	s << DataFileSet.CountFilesOfGivenType(Texture);
-	DebugMessage(dwi, s.str());
-	s.str(std::string());
-	s << DataFileSet.CountFilesOfGivenType(Altitude);
-	DebugMessage(dwi, s.str());
+	//CRCAltitudeDataFile *afile = new CRCAltitudeDataFile("n55_e041_1arc_v3.bil");
+	//afile->Open();
 
-	CRCTextureDataFile *file = new CRCTextureDataFile(37.601910, 54.782276, 37.663708, 54.801378, 200, 200);
+	DataFileSet.AddTextureFile("./TextureData/testsample_ne.jpg");
+	DataFileSet.AddTextureFile("./TextureData/testsample_nw.jpg");
+	DataFileSet.AddTextureFile("./TextureData/testsample_se.jpg");
+	DataFileSet.AddTextureFile("./TextureData/testsample_sw.jpg");
+	CRCTextureDataFile file(36.9724273681641, 54.9852236897972, 37.0343971252441, 55.0110295187506, 200, 200);
+	file.ApplyIntersection(*DataFileSet.GetFile(0));
+	file.ApplyIntersection(*DataFileSet.GetFile(1));
+	file.ApplyIntersection(*DataFileSet.GetFile(2));
+	file.ApplyIntersection(*DataFileSet.GetFile(3));
+	file.SetName("newmap.jpg");
+	file.Save();
 
-	file->ApplyIntersection(*DataFileSet.GetFile(0));
-	file->ApplyIntersection(*DataFileSet.GetFile(1));
-	file->SetName("newmap.jpg");
-	file->Save();
+	
+
+	
+
 
 	try {
 		string img_64x64("c:\\Users\\RazumovSa\\Documents\\Visual Studio 2015\\Projects\\RadarClient\\Debug\\img_64x64.jpg");

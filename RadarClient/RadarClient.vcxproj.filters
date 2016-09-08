@@ -93,6 +93,9 @@
     <ClCompile Include="CRCAltitudeDataFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CRCTextureDataFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CMesh.h">
@@ -180,6 +183,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CRCAltitudeDataFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CRCTextureDataFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

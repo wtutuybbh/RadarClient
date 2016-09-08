@@ -18,6 +18,7 @@ public:
 	void ApplyIntersection(CRCDataFile &src) override;
 
 	bool Open() override;
+	bool Close() override;
 
 	bool Save();
 };

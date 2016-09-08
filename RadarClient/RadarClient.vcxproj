@@ -114,6 +114,8 @@ xcopy /y "$(ProjectDir)GLSL\*.glsl" "$(OutDir)"
 xcopy /y "$(ProjectDir)GLSL\*.vert" "$(OutDir)"
 xcopy /y "$(ProjectDir)GLSL\*.frag" "$(OutDir)"
 xcopy /y "$(SolutionDir)Data\*.*" "$(OutDir)"
+xcopy /y "$(SolutionDir)Data\AltitudeData\*.*" "$(OutDir)AltitudeData\"
+xcopy /y "$(SolutionDir)Data\TextureData\*.*" "$(OutDir)TextureData\"
 xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <Bscmake>
@@ -172,6 +174,8 @@ xcopy /y "$(ProjectDir)GLSL\*.glsl" "$(OutDir)"
 xcopy /y "$(ProjectDir)GLSL\*.vert" "$(OutDir)"
 xcopy /y "$(ProjectDir)GLSL\*.frag" "$(OutDir)"
 xcopy /y "$(SolutionDir)Data\*.*" "$(OutDir)"
+xcopy /y "$(SolutionDir)Data\AltitudeData\*.*" "$(OutDir)AltitudeData\"
+xcopy /y "$(SolutionDir)Data\TextureData\*.*" "$(OutDir)TextureData\"
 xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <Bscmake>

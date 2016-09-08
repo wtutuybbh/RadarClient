@@ -141,14 +141,18 @@ glm::vec4 CRCTextureDataFile::ColorAt(float lon, float lat)
 
 void CRCTextureDataFile::ApplyIntersection(CRCDataFile& src)
 {
+	
+	if (!src.Open())
+		return;
+
 	//assume *this as a target
 	int this_x0, this_x1, this_y0, this_y1, src_x0, src_x1, src_y0, src_y1;
 
-	Open();
-	src.Open();
+	//Open();
+	
 
-	GetIntersection(src, this_x0, this_y0, this_x1, this_y1);
-	src.GetIntersection(*this, src_x0, src_y0, src_x1, src_y1);
+	if (!GetIntersection(src, this_x0, this_y0, this_x1, this_y1) || !src.GetIntersection(*this, src_x0, src_y0, src_x1, src_y1))
+		return;
 
 	FIBITMAP *dib = (FIBITMAP *)data, *src_dib = (FIBITMAP *)src.GetData();
 
@@ -179,6 +183,14 @@ bool CRCTextureDataFile::Open()
 		}
 	}
 	return false;
+}
+
+bool CRCTextureDataFile::Close()
+{
+	if (data) {
+		FreeImage_Unload((FIBITMAP *)data);
+		return true;
+	}
 }
 
 bool CRCTextureDataFile::Save()
