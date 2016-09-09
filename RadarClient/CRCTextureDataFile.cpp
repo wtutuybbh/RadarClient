@@ -154,10 +154,13 @@ void CRCTextureDataFile::ApplyIntersection(CRCDataFile& src)
 	if (!GetIntersection(src, this_x0, this_y0, this_x1, this_y1) || !src.GetIntersection(*this, src_x0, src_y0, src_x1, src_y1))
 		return;
 
-	this_y0 = height - this_y1;
-	this_y1 = height - this_y0;
-	src_y0 = src.Height() - src_y1;
-	src_y1 = src.Height() - src_y0;
+	//magic swap (because image origin is top-left):
+	int tmp = this_y0;
+	this_y0 = height - this_y1 - 1;
+	this_y1 = height - tmp - 1;
+	tmp = src_y0;
+	src_y0 = src.Height() - src_y1 - 1;
+	src_y1 = src.Height() - tmp - 1;
 
 	FIBITMAP *dib = (FIBITMAP *)data, *src_dib = (FIBITMAP *)src.Data();
 

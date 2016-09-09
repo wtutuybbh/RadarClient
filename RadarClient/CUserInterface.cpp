@@ -75,15 +75,15 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	DataFileSet.AddTextureFile("./TextureData/testsample_nw.jpg");
 	DataFileSet.AddTextureFile("./TextureData/testsample_se.jpg");
 	DataFileSet.AddTextureFile("./TextureData/testsample_sw.jpg");
-	CRCTextureDataFile file(36.96641922
-		, 54.98038633
-		, 37.03637123
-		, 55.01936474
-		, 200, 200);
+	CRCTextureDataFile file(36.9724273681641
+		, 54.9852236897972
+		, 37.0343971252441
+		, 55.0110295187506
+		, 800, 400);
 	file.ApplyIntersection(*DataFileSet.GetFile(0));
-/*	file.ApplyIntersection(*DataFileSet.GetFile(1));
+	file.ApplyIntersection(*DataFileSet.GetFile(1));
 	file.ApplyIntersection(*DataFileSet.GetFile(2));
-	file.ApplyIntersection(*DataFileSet.GetFile(3));*/
+	file.ApplyIntersection(*DataFileSet.GetFile(3));
 	file.SetName("newmap.jpg");
 	file.Save();
 

@@ -35,22 +35,25 @@ bool CRCDataFile::GetIntersection(CRCDataFile& src, int& x0, int& y0, int& x1, i
 	if (this->lon1 < src.lon0 || this->lon0 > src.lon1 || this->lat1 < src.lat0 || this->lat0 > src.lat1)
 		return false;
 
-	double lon_res = (this->lon1 - this->lon0) / (width - 1), lat_res = (this->lat1 - this->lat0) / (height - 1);
+	double lon_res = (this->lon1 - this->lon0) / width, lat_res = (this->lat1 - this->lat0) / height;
 
-	x0 = zero_if_negative(src.lon0 - this->lon0) / lon_res;	
-	x1 = (min(this->lon1, src.lon1)) / lon_res;
-
-	if (xdir == -1) {
+	x0 = floor(zero_if_negative(src.lon0 - this->lon0) / lon_res);	
+	x1 = floor((min(this->lon1, src.lon1) - this->lon0) / lon_res);
+	if (x1 == width)
+		x1--;
+	/*if (xdir == -1) {
 		x0 = width - x0 - 1;
 		x1 = width - x1 - 1;
-	}
-	y0 = ceil(zero_if_negative(src.lat0 - this->lat0) / lat_res);
-	y1 = floor((this->lat1 - this->lat0 - zero_if_negative(this->lat1 - src.lat1)) / lat_res);
-	if (ydir == -1)
+	}*/
+	y0 = zero_if_negative(src.lat0 - this->lat0) / lat_res;
+	y1 = floor((min(this->lat1, src.lat1) - this->lat0) / lat_res);
+	if (y1 == height)
+		y1--;
+	/*if (ydir == -1)
 	{
 		y0 = height - y0 - 1;
 		y1 = height - y1 - 1;
-	}
+	}*/
 
 	return true;
 }
