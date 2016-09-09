@@ -24,9 +24,6 @@
 #include <boost/filesystem/operations.hpp>
 #include "CRCDataFile.h"
 
-/*CUserInterface::CUserInterface()
-{
-}*/
 LRESULT Button1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	return 0;
 }
@@ -439,9 +436,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	
 	CameraPosition_ID[2] = InsertElement(NULL, _T("BUTTON"), TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_1000M_ABOVE_RADAR, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
 	CurrentY += VStep;
-	//CameraDirectionValue_ID[0] = InsertElement(_T("STATIC"), _T(""), WS_VISIBLE | WS_CHILD, 10, 530, 100, 30, NULL);
-	//CameraDirectionValue_ID[1] = InsertElement(_T("STATIC"), _T(""), WS_VISIBLE | WS_CHILD, 110, 530, 100, 30, NULL);
-
+	
 	int gridX = panelWidth;
 	int gridY = vpControl->Height;
 	RECT clientRect;
@@ -478,30 +473,6 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	SendMessage(GetDlgItem(parentHWND, CameraDirection_ID[0]), TBM_SETPOS, 1, 50);
 	SendMessage(GetDlgItem(parentHWND, CameraDirection_ID[1]), TBM_SETPOS, 1, 50);
 
-	//ControlEnable(ObjOptions_ID[1], false);
-	//ControlEnable(ObjOptions_ID[2], false);
-
-
-	//////////font setting:
-	/*NONCLIENTMETRICS ncm;
-	ncm.cbSize = sizeof(ncm);
-
-	// If we're compiling with the Vista SDK or later, the NONCLIENTMETRICS struct
-	// will be the wrong size for previous versions, so we need to adjust it.
-#if(_MSC_VER >= 1500 && WINVER >= 0x0600)
-	if (!IsVistaOrLater())
-	{
-		// In versions of Windows prior to Vista, the iPaddedBorderWidth member
-		// is not present, so we need to subtract its size from cbSize.
-		ncm.cbSize -= sizeof(ncm.iPaddedBorderWidth);
-	}
-#endif
-
-	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
-	hDlgFont = CreateFontIndirect(&(ncm.lfMessageFont));*/
-
-	// Set the dialog to use the system message box font
-	//SetFont(m_DlgFont, TRUE);
 	Font = GetFont();
 
 	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
@@ -741,10 +712,6 @@ void CUserInterface::FillGrid(vector<TRK*> *tracks)
 		glm::vec3 speed(tracks->at(i)->P.at(npoints - 1)->vX, tracks->at(i)->P.at(npoints - 1)->vY, tracks->at(i)->P.at(npoints - 1)->vZ);
 		ss << std::fixed << std::setprecision(4) <<  glm::length(speed);
 		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 5, (LPARAM)ss.str().c_str());
-
-		/*
-		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 6, (LPARAM)"Азимут");
-		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 7, (LPARAM)"Время");*/
 	}
 	for (; i < nrows; i++) {
 		SendMessage(GridHWND, ZGM_DELETEROW, i, 0);
@@ -765,19 +732,6 @@ void CUserInterface::FillInfoGrid(CScene* scene)
 
 	SendMessage(InfoGridHWND, ZGM_EMPTYGRID, 1, 0);
 
-	/*int N = 2;
-
-	if (scene->Socket->IsConnected)
-	{
-		N += 7;
-	}
-
-	N += scene->Selection.size();*/
-	
-	/*for (int i = nrows; i < N; i++)
-	{
-		SendMessage(InfoGridHWND, ZGM_APPENDROW, 0, 0);
-	}*/
 	
 	std::stringstream ss;
 	int r = 1;

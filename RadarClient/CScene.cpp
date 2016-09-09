@@ -30,10 +30,6 @@
 #include <fstream>
 
 
-/*CScene::CScene(float lonc, float latc) {
-	geocenter.x = lonc;
-	geocenter.y = latc;
-}*/
 float CMesh::AverageHeight;
 CMesh **CMesh::Meshs;
 int CMesh::TotalMeshsCount;
@@ -62,10 +58,6 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 
 	rdrinit = NULL;
 
-	//this->m = m;
-	//CRCPointModel::InitStructure();
-
-	/*old_Sectors = NULL;*/
 	SectorsCount = 0;
 
 	this->Camera = new CCamera();
@@ -184,8 +176,6 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 
 	RayVBOisBuilt = VBOisBuilt = MiniMapVBOisBuilt = false;
 
-//	MiniMapPointer = new old_CMinimapPointer(this);
-
 	circles = NULL;
 	markup = NULL;
 	info = NULL;
@@ -231,27 +221,9 @@ CScene::~CScene() {
 		CMesh::Meshs = NULL;
 	}
 
-	/*if (Mesh)
-		delete Mesh;
-	if (Mesh1)
-		delete Mesh1;
-	if (Mesh2)
-		delete Mesh2;
-	if (Mesh3)
-		delete Mesh3;*/
-
 	if (info)
 		delete[] info;
-	/*if (old_Sectors) {
-		for (int i = 0; i < SectorsCount; i++) {
-			for (auto it = old_Sectors[i].begin(); it != old_Sectors[i].end(); ++it) {
-				delete *it;
-			}
-			old_Sectors[i].clear();
-		}
-		
-		delete[] old_Sectors;
-	}*/
+
 	for (auto it = begin(Sectors); it != end(Sectors); ++it)
 		delete *it;	
 	Sectors.clear();
@@ -338,16 +310,12 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		begAzmLine->Draw(vpControl, GL_LINES);
 	}
 
-	//testPoint->Draw(vpControl, GL_TRIANGLES);
 
 	if (UI->GetCheckboxState_MarkupLabels()) 
 	{
 		DrawBitmaps();
 	}
 
-	//return false;
-	//return false;
-	//old_Mesh->Draw(Camera);
 	glEnable(GL_LINE_SMOOTH);
 	
 	glDisable(GL_DEPTH_TEST);									// Disable Depth Testing
@@ -364,31 +332,8 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	glColorPointer(4, GL_FLOAT, 0, 0);		
 
 
-	/*glDrawElements(GL_LINES, vertexCount_Axis + markCount * 2, GL_UNSIGNED_SHORT, markup);
-
-	for (int c = 0; c < numCircles; c++) {
-		glDrawElements(GL_LINE_LOOP, segmentsPerCircle, GL_UNSIGNED_SHORT, circles[c]);
-	}*/
-	
-	
-	
-
 
 	glEnable(GL_DEPTH_TEST);
-	//Mesh->Draw(vpControl, GL_TRIANGLES);
-	//points:
-	/*if (UI->GetCheckboxState_Points()) {
-		old_CRCPoint::UseProgram_s();
-		for (int i = 0; i < SectorsCount; i++) {			
-			for (vector<old_CRCPoint*>::iterator it = old_Sectors[i].begin(); it != old_Sectors[i].end(); ++it) {
-				(*it)->Draw(Camera);
-			}
-		}
-		
-		glUseProgram(0);
-	}*/
-	//points:
-	//Mesh->Draw(vpControl, GL_TRIANGLES);
 
 	
 
@@ -415,59 +360,13 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		glBindBuffer(GL_ARRAY_BUFFER, Ray_VBOName_c);
 		glColorPointer(4, GL_FLOAT, 0, 0);
 
-		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		glDrawElements(GL_LINE_LOOP, rayArraySize, GL_UNSIGNED_SHORT, ray);
 	}
-	//glRasterPos3f
-
 	
 	glLoadIdentity();
 	
-
-	//glMatrixMode(GL_PROJECTION);
-	//glLoadIdentity();
-	//glOrtho(0, width, height, 0, -1, 1);
-
-	//glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glMatrixMode(GL_MODELVIEW);
-	//glDrawElements(GL_POLYGON, vertexCount_Info, GL_UNSIGNED_SHORT, info);
-
 	glDisableClientState(GL_VERTEX_ARRAY);						// Enable Vertex Arrays
 	glDisableClientState(GL_COLOR_ARRAY);
-
-
-	/*glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	BitmapString2D(10, 20, "RadarClient DEMO version 0.001");
-
-	BitmapString2D(10, 60, "RadarPosition (lon, lat):"); 
-	BitmapString2D(200, 60, "(" + cnvrt::float2str(geocenter.x) + "; " + cnvrt::float2str(geocenter.y) + ")");
-
-	BitmapString2D(10, 80, "Min. elevation:"); 
-	BitmapString2D(200, 80, cnvrt::float2str(minE) + " DEG");
-						  
-	BitmapString2D(10, 100, "Max. elevation:"); 
-	BitmapString2D(200, 100, cnvrt::float2str(maxE) + " DEG");
-
-	BitmapString2D(10, 120, "Ray width:"); 
-	BitmapString2D(200, 120, cnvrt::float2str(rayWidth) + " DEG");
-
-	BitmapString2D(10, 150, "Min. distance:");
-	BitmapString2D(200, 150, cnvrt::float2str(minDist) + " m");
-
-	BitmapString2D(10, 170, "Max. distance:");
-	BitmapString2D(200, 170, cnvrt::float2str(maxDist) + " m");
-
-	BitmapString2D(10, 200, "Azimuth:");
-	BitmapString2D(200, 200, cnvrt::float2str(viewAngle) + " DEG");
-
-	BitmapString2D(10, 220, "Angular velocity:");
-	BitmapString2D(200, 220, cnvrt::float2str(RotatingSpeed/360.0f) + " RPS");*/
-
-//shader_debug:
-	//glEnable(GL_DEPTH_TEST);
-
 	
 	mainDrawCount++;
 	return true;
@@ -756,8 +655,6 @@ bool CScene::MiniMapPrepareAndBuildVBO()
 
 bool CScene::BuildVBOs()
 {
-//	old_CRCPoint::BuildVBO_s();
-
 	if (AxisGrid && AxisGridColor) {
 		glGenBuffers(1, &AxisGrid_VBOName);
 		glBindBuffer(GL_ARRAY_BUFFER, AxisGrid_VBOName);
@@ -805,18 +702,7 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 		Init(init);	
 
 	viewAngle = glm::degrees(init->begAzm + init->dAzm * (info_p->d1 + info_p->d2) / 2);
-
-
 	
-	/*if(!old_Sectors) {
-		if (init->Nazm % init->ViewStep != 0) {
-			return;
-			//throw new std::exception("invalid data");
-		}
-		SectorsCount = init->Nazm / init->ViewStep;
-		old_Sectors = new std::vector<old_CRCPoint*>[SectorsCount];
-	}*/
-
 	if (info_p->d1 == info_p->d2)
 		return;
 
@@ -846,14 +732,6 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 
 void CScene::ClearSectors()
 {
-	/*if (!old_Sectors)
-		return;
-	for (int i = 0; i < SectorsCount; i++) {
-		old_Sectors[i].clear();
-	}
-	delete[] old_Sectors;
-	old_Sectors = NULL;*/
-
 	Sectors.clear();
 
 	SectorsCount = 0;
@@ -1007,9 +885,7 @@ C3DObjectModel * CScene::GetObjectAtMiniMapPosition(int vpId, glm::vec3 p0, glm:
 }
 C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 screenPoint, int& index)
 {
-	/*if (MiniMapPointer->MiniMapIntersectLine(orig, dir, pos)) {
-		return MiniMapPointer;	
-	}*/	
+
 	for (int i = 0; i < Sectors.size(); i++)
 	{
 		if (Sectors[i])
@@ -1051,7 +927,6 @@ C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, 
 C3DObjectModel* CScene::GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const
 {
 	glm::vec3 dir = p1 - p0, position;
-	//old_Mesh->IntersectLine(p0, dir, position);
 	if (CMesh::Meshs && CMesh::Meshs[0]) {
 		CMesh::Meshs[0]->IntersectLine(Main, p0, dir, position);
 	}

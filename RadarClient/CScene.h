@@ -1,26 +1,18 @@
 #pragma once
 #include "CRCSocket.h"
 #include "glm/glm.hpp"
-//#include "CMesh.h"
 #include <string>
 #include <vector>
-//#include "C3DObject.h"
 #include "glm/detail/type_mat.hpp"
-//#include "CTrack.h"
 
-//#include "CMesh.h"
-//#include "CTrack.h"
 class CTrack;
 class CLine;
 
 #define ZEROLEVEL_ZERO 0
 #define ZEROLEVEL_MAXHEIGHT 1
 #define ZEROLEVEL_ACTUALHEIGHT 2
-
-//#define ZERO_ELEVATION 0.523599f //30 degrees
 #define RAY_HEIGHT 0.174533f //10 degrees
 
-//using namespace std;
 
 class CSector;
 class CMarkup;
@@ -138,8 +130,6 @@ public:
 
 	glm::vec3 MeshSize;
 	glm::vec3 * m_Bounds{ NULL };
-	//mutex *m{ NULL };
-	/*CScene(float lonc, float latc);*/
 	CScene(std::string alfFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize);
 	~CScene();
 

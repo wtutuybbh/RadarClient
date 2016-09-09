@@ -2,7 +2,6 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-//#include <CommCtrl.h>
 #include <unordered_map>
 #include <vector>
 

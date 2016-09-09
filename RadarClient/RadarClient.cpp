@@ -1,8 +1,4 @@
-﻿// Altitude.cpp : Defines the entry point for the console application.
-//
-#pragma once
-//#define WIN32_LEAN_AND_MEAN
-///git add -u .
+﻿#pragma once
 #include "CRCSocket.h"
 
 #ifdef _DEBUG
@@ -469,24 +465,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	CSettings::Init();
 	C3DObjectModel::_id = 0;
 	C3DObjectModel::_testid = 0;
-	/*
-	bool glm::gtx::intersect::intersectLineTriangle	(	genType const & 	orig,
-genType const & 	dir,
-genType const & 	vert0,
-genType const & 	vert1,
-genType const & 	vert2,
-genType & 	position 
-)	
-*/
-	
-	/*glm::vec3 orig(1, 1, 20), to(2, 1, 0), vert0(0, 0, 0), vert1(0, 5, 0), vert2(5, 0, 0), position, baryPosition;
-	glm::vec3 dir = to - orig;
-	bool lineResult = glm::intersectLineTriangle(orig, dir, vert2, vert0, vert1, position);
-	bool rayResult  = glm::intersectRayTriangle(orig, dir, vert0, vert2, vert1, baryPosition);
-	glm::vec3 planeOrig(1, 0, 0), planeNormal(0, 0, 1);
-	float distance;
-	bool planeResult = glm::intersectRayPlane(orig, 0.5f*dir, planeOrig, planeNormal, distance);*/
-	//MessageBox(HWND_DESKTOP, "Attach WinDbg and press OK", MB_OK, MB_ICONINFORMATION);
+
 	g_hIcon = NULL;
 
 	Application			application;									// Application Structure
@@ -799,15 +778,7 @@ BOOL Initialize(GL_Window* window, Keys* keys)					// Any GL Init Code & User In
 	g_Minimap->UI = g_UI;
 	g_Minimap->Camera = g_vpControl->Scene->Camera;
 
-/*	if (!g_vpControl->Scene->PrepareVBOs())
-	{
-		MessageBox(NULL, "Error Loading Scene", "Error", MB_OK);
-		return false;
-	}
-
-	
-
-	g_vpControl->Scene->BuildVBOs();*/									// Build The VBOs
+	// Build The VBOs
 	
 	g_vpControl->Camera->SetAll(0, 0, 0, 0, 0, 1, 0, 1, 0, 
 		60.0f, 4.0f/3.0f, 1.0f, 10000.0f,
@@ -830,8 +801,7 @@ int Deinitialize(void)										// Any User DeInitialization Goes Here
 	}
 	if (g_Minimap)
 		delete g_Minimap;
-	/*if (g_Socket)
-		delete g_Socket;*/
+
 	if (g_UI)
 		delete g_UI;
 	if (g_hIcon)
@@ -839,19 +809,9 @@ int Deinitialize(void)										// Any User DeInitialization Goes Here
 	return 0;
 }
 
-void Update(DWORD milliseconds)								// Perform Motion Updates Here
+void Update(DWORD milliseconds)								
 {
-	//g_flYRot += (float)(milliseconds) / 1000.0f * 25.0f;		// Consistantly Rotate The Scenery
 
-/*	if (g_keys->keyDown[VK_ESCAPE] == TRUE)					// Is ESC Being Pressed?
-	{
-		TerminateApplication(g_window);						// Terminate The Program
-	}
-
-	if (g_keys->keyDown[VK_F1] == TRUE)						// Is F1 Being Pressed?
-	{
-		ToggleFullscreen(g_window);							// Toggle Fullscreen Mode
-	}*/
 }
 
 void Draw(void)
@@ -868,10 +828,6 @@ void Draw(void)
 			SetWindowText(g_window->hWnd, szTitle);				// Set The Title
 	}
 	g_nFrames++;
-	// Increment Our FPS Counter
-
-//drawscene_debug:
-	//g_vpControl->Scene->DrawScene();
 
 }
 

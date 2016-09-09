@@ -1,30 +1,4 @@
 #pragma once
-/********************
-*                   *
-*   NeHeGL Header   *
-*                   *
-**********************************************************************************
-*                                                                                *
-*	You Need To Provide The Following Functions:                                 *
-*                                                                                *
-*	BOOL Initialize (GL_Window* window, Keys* keys);                             *
-*		Performs All Your Initialization                                         *
-*		Returns TRUE If Initialization Was Successful, FALSE If Not              *
-*		'window' Is A Parameter Used In Calls To NeHeGL                          *
-*		'keys' Is A Structure Containing The Up/Down Status Of keys              *
-*                                                                                *
-*	void Deinitialize (void);                                                    *
-*		Performs All Your DeInitialization                                       *
-*                                                                                *
-*	void Update (DWORD milliseconds);                                            *
-*		Perform Motion Updates                                                   *
-*		'milliseconds' Is The Number Of Milliseconds Passed Since The Last Call  *
-*		With Whatever Accuracy GetTickCount() Provides                           *
-*                                                                                *
-*	void Draw (void);                                                            *
-*		Perform All Your Scene Drawing                                           *
-*                                                                                *
-*********************************************************************************/
 
 #ifndef GL_FRAMEWORK__INCLUDED
 #define GL_FRAMEWORK__INCLUDED
