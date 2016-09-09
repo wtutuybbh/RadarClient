@@ -49,7 +49,9 @@ public:
 	void FitSize(float resX, float resY); // set height, width and new boundaries
 	virtual bool Open() = 0;
 	virtual bool Close() = 0;
-	void *GetData() const;
+	void *Data() const;
+	int Width() const;
+	int Height() const;
 	void SetName(std::string fileName);
 	std::string GetName() const;
 };
