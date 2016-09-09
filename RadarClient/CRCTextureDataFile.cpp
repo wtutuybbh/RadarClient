@@ -154,7 +154,12 @@ void CRCTextureDataFile::ApplyIntersection(CRCDataFile& src)
 	if (!GetIntersection(src, this_x0, this_y0, this_x1, this_y1) || !src.GetIntersection(*this, src_x0, src_y0, src_x1, src_y1))
 		return;
 
-	FIBITMAP *dib = (FIBITMAP *)data, *src_dib = (FIBITMAP *)src.GetData();
+	this_y0 = height - this_y1;
+	this_y1 = height - this_y0;
+	src_y0 = src.Height() - src_y1;
+	src_y1 = src.Height() - src_y0;
+
+	FIBITMAP *dib = (FIBITMAP *)data, *src_dib = (FIBITMAP *)src.Data();
 
 	if (dib && src_dib) {
 		FIBITMAP *copied = FreeImage_Copy(src_dib, src_x0, src_y0, src_x1, src_y1);

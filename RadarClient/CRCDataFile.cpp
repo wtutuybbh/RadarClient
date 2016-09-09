@@ -37,8 +37,8 @@ bool CRCDataFile::GetIntersection(CRCDataFile& src, int& x0, int& y0, int& x1, i
 
 	double lon_res = (this->lon1 - this->lon0) / (width - 1), lat_res = (this->lat1 - this->lat0) / (height - 1);
 
-	x0 = ceil(zero_if_negative(src.lon0 - this->lon0) / lon_res);	
-	x1 = floor((this->lon1 - this->lon0 - zero_if_negative(this->lon1 - src.lon1)) / lon_res);
+	x0 = zero_if_negative(src.lon0 - this->lon0) / lon_res;	
+	x1 = (min(this->lon1, src.lon1)) / lon_res;
 
 	if (xdir == -1) {
 		x0 = width - x0 - 1;
@@ -67,9 +67,19 @@ void CRCDataFile::FitSize(float resX, float resY) {
 	}
 }
 
-void* CRCDataFile::GetData() const
+void* CRCDataFile::Data() const
 {
 	return data;
+}
+
+int CRCDataFile::Width() const
+{
+	return width;
+}
+
+int CRCDataFile::Height() const
+{
+	return height;
 }
 
 void CRCDataFile::SetName(std::string fileName)
