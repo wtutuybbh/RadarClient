@@ -71,7 +71,7 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	//CRCAltitudeDataFile *afile = new CRCAltitudeDataFile("n55_e041_1arc_v3.bil");
 	//afile->Open();
 
-	DataFileSet.AddTextureFile("./TextureData/testsample_ne.jpg");
+	/*DataFileSet.AddTextureFile("./TextureData/testsample_ne.jpg");
 	DataFileSet.AddTextureFile("./TextureData/testsample_nw.jpg");
 	DataFileSet.AddTextureFile("./TextureData/testsample_se.jpg");
 	DataFileSet.AddTextureFile("./TextureData/testsample_sw.jpg");
@@ -85,11 +85,19 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	file.ApplyIntersection(*DataFileSet.GetFile(2));
 	file.ApplyIntersection(*DataFileSet.GetFile(3));
 	file.SetName("newmap.jpg");
-	file.Save();
+	file.Save();*/
 
-	
+	DataFileSet.AddAltitudeFile("./AltitudeData/n54_e036_1arc_v3.bil");
+	DataFileSet.AddAltitudeFile("./AltitudeData/n54_e037_1arc_v3.bil");
+	DataFileSet.AddAltitudeFile("./AltitudeData/n55_e036_1arc_v3.bil");
+	DataFileSet.AddAltitudeFile("./AltitudeData/n55_e037_1arc_v3.bil");
 
-	
+	CRCAltitudeDataFile file(36.5, 54.5, 37.5, 55.5, 1800, 3600);
+
+	file.ApplyIntersection(*DataFileSet.GetFile(0));
+	file.ApplyIntersection(*DataFileSet.GetFile(1));
+	file.ApplyIntersection(*DataFileSet.GetFile(2));
+	file.ApplyIntersection(*DataFileSet.GetFile(3));
 
 
 	try {

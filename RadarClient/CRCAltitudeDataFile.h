@@ -12,8 +12,8 @@ class CRCAltitudeDataFile :
 	//size[5] - y1 (lat component) of block
 	//size[6] - width (lon component) of whole file
 	//size[7] - height (lat component) of whole file
-	void SetSize();
-	void SetSize(int x0, int y0, int x1, int y1);
+	void size_set_max();
+	void size_set(int x0, int y0, int x1, int y1);
 public:
 	CRCAltitudeDataFile(const std::string& dt2FileName);
 	CRCAltitudeDataFile(double lon0, double lat0, double lon1, double lat1, int width, int height);
@@ -23,7 +23,7 @@ public:
 
 	short ValueAt(int x, int y);
 	short ValueAt(double lon, double lat);
-	void SetValue(int x, int y, short val, float resX, float resY);
+	void SetValue(int x, int y, short val/*, float resX, float resY*/);
 
 	void ApplyIntersection(CRCDataFile &src) override;
 

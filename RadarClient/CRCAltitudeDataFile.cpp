@@ -3,7 +3,7 @@
 #include "Util.h"
 
 
-void CRCAltitudeDataFile::SetSize()
+void CRCAltitudeDataFile::size_set_max()
 {
 	size[0] = size[6] = width;
 	size[1] = size[7] = height;
@@ -12,7 +12,7 @@ void CRCAltitudeDataFile::SetSize()
 	size[5] = height - 1;
 }
 
-void CRCAltitudeDataFile::SetSize(int x0, int y0, int x1, int y1)
+void CRCAltitudeDataFile::size_set(int x0, int y0, int x1, int y1)
 {
 	size[0] = x1 - x0 + 1; //width (lon component) of block
 	size[1] = y1 - y0 + 1; //height (lat component) of block
@@ -54,7 +54,7 @@ CRCAltitudeDataFile::CRCAltitudeDataFile(const std::string& dt2FileName):
 			lat1 = LL[9] + LL[7] * (size[7] - 1);
 			width = size[6];
 			height = size[7];
-			SetSize();
+			size_set_max();
 		}
 		FreeLibrary(hDLL);
 	}
@@ -63,7 +63,8 @@ CRCAltitudeDataFile::CRCAltitudeDataFile(const std::string& dt2FileName):
 CRCAltitudeDataFile::CRCAltitudeDataFile(double lon0, double lat0, double lon1, double lat1, int width, int height) :
 	CRCDataFile(Altitude, lon0, lat0, lon1, lat1, width, height)
 {
-	SetSize();
+	size_set_max();
+	data = new short[width * height];
 }
 
 CRCAltitudeDataFile::~CRCAltitudeDataFile()
@@ -100,7 +101,7 @@ short CRCAltitudeDataFile::ValueAt(double lon, double lat)
 	return 0;
 }
 
-void CRCAltitudeDataFile::SetValue(int x, int y, short val, float resX, float resY)
+void CRCAltitudeDataFile::SetValue(int x, int y, short val/*, float resX, float resY*/)
 {
 	if (type == Altitude && data /*&& resolutionX && resolutionY*/)
 	{
@@ -121,16 +122,10 @@ void CRCAltitudeDataFile::ApplyIntersection(CRCDataFile& src)
 	int this_x0, this_x1, this_y0, this_y1, src_x0, src_x1, src_y0, src_y1;
 	CRCAltitudeDataFile *asrc = reinterpret_cast <CRCAltitudeDataFile *> (&src);
 	
-
 	if (!GetIntersection(src, this_x0, this_y0, this_x1, this_y1) || !src.GetIntersection(*this, src_x0, src_y0, src_x1, src_y1))
 		return;
 
-	asrc->SetSize(src_x0, src_y0, src_x1, src_y1);
-
-	//Open();
-	
-
-	
+	asrc->size_set(src_x0, src_y0, src_x1, src_y1);
 
 	float dlon = (lon1 - lon0) / width;
 	float dlat = (lat1 - lat0) / height;
@@ -139,7 +134,7 @@ void CRCAltitudeDataFile::ApplyIntersection(CRCDataFile& src)
 	{
 		for (int y = this_y0; y < this_y1; y++)
 		{
-			SetValue(x, y, asrc->ValueAt(lon0 + x * dlon, lat0 + y * dlat), dlon, dlat);
+			SetValue(x, y, asrc->ValueAt(lon0 + x * dlon, lat0 + y * dlat)/*, dlon, dlat*/);
 		}
 	}
 }
