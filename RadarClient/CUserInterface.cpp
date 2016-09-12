@@ -88,6 +88,7 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	file.Save();*/
 
 	DataFileSet.AddAltitudeFile("./AltitudeData/n54_e036_1arc_v3.bil");
+	DataFileSet.GetFile(0)->Open();
 	DataFileSet.AddAltitudeFile("./AltitudeData/n54_e037_1arc_v3.bil");
 	DataFileSet.AddAltitudeFile("./AltitudeData/n55_e036_1arc_v3.bil");
 	DataFileSet.AddAltitudeFile("./AltitudeData/n55_e037_1arc_v3.bil");
