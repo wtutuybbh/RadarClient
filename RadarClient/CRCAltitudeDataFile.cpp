@@ -95,9 +95,10 @@ short CRCAltitudeDataFile::ValueAt(double lon, double lat)
 		if (x1 >= width) x1 = width - 1;
 		if (y1 >= height) y1 = height - 1;
 
-		if(x0==x1)
+		//if(x0==x1)
 
 		short *adata = (short *)data;
+
 		float ret = BilinearInterpolation(adata[y0*width + x0], adata[y1*width + x0], adata[y0*width + x1], adata[y1*width + x1], (lon1 - lon0) * x0 / width, (lon1 - lon0) * x1 / width, (lat1 - lat0) * y0 / height, (lat1 - lat0) * y1 / height, lon, lat);
 		return ret;
 	}
