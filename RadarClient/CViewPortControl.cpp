@@ -309,7 +309,7 @@ bool CViewPortControl::InitGL()
 {
 	DWORD windowStyle = WS_OVERLAPPEDWINDOW;							// Define Our Window Style
 	DWORD windowExtendedStyle = WS_EX_APPWINDOW;						// Define The Window's Extended Style
-
+	/*
 	PIXELFORMATDESCRIPTOR pfd =											// pfd Tells Windows How We Want Things To Be
 	{
 		sizeof(PIXELFORMATDESCRIPTOR),									// Size Of This Pixel Format Descriptor
@@ -318,20 +318,52 @@ bool CViewPortControl::InitGL()
 		PFD_SUPPORT_OPENGL |											// Format Must Support OpenGL
 		PFD_DOUBLEBUFFER,												// Must Support Double Buffering
 		PFD_TYPE_RGBA,													// Request An RGBA Format
-		16,										// Select Our Color Depth
+		32,										// Select Our Color Depth
 		0, 0, 0, 0, 0, 0,												// Color Bits Ignored
-		0,																// No Alpha Buffer
+		8,																// No Alpha Buffer
 		0,																// Shift Bit Ignored
 		0,																// No Accumulation Buffer
 		0, 0, 0, 0,														// Accumulation Bits Ignored
-		16,																// 16Bit Z-Buffer (Depth Buffer)  
-		0,																// No Stencil Buffer
+		24,																// 16Bit Z-Buffer (Depth Buffer)  
+		8,																// No Stencil Buffer
 		0,																// No Auxiliary Buffer
 		PFD_MAIN_PLANE,													// Main Drawing Layer
 		0,																// Reserved
-		0, 0, 0															// Layer Masks Ignored
+		PFD_TYPE_RGBA, 0, 0															// Layer Masks Ignored
 	};
 
+	ZeroMemory(&pfd, sizeof(pfd));
+
+	pfd.nSize = sizeof(pfd);
+	pfd.cColorBits = 24;
+	pfd.cAlphaBits = 8;
+	pfd.nVersion = 1;
+	pfd.cDepthBits = 32;
+	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.iLayerType = PFD_MAIN_PLANE;*/
+
+	PIXELFORMATDESCRIPTOR pfd =             // pfd tells windows how we want things to be
+	{
+		sizeof(PIXELFORMATDESCRIPTOR),          // Size of this pixel format descriptor
+		1,					// Version number
+		PFD_DRAW_TO_WINDOW |			// Format must support window
+		PFD_SUPPORT_OPENGL |			// Format must support OpenGL
+		PFD_DOUBLEBUFFER,			// Must support double buffering
+		PFD_TYPE_RGBA,				// Request an RGBA format
+		32,					// Select our color depth
+		0, 0, 0, 0, 0, 0,			// Color bits ignored
+		0,					// No alpha buffer
+		0,					// Shift bit ignored
+		0,					// No accumulation buffer
+		0, 0, 0, 0,				// Accumulation bits ignored
+		16,					// 16Bit Z-Buffer (Depth buffer)
+		0,					// No stencil buffer
+		0,					// No auxiliary buffer
+		PFD_MAIN_PLANE,				// Main drawing layer
+		0,					// Reserved
+		0, 0, 0					// Layer masks ignored
+	};
 	RECT clientRect;
 	
 	GetClientRect(hWnd, &clientRect);

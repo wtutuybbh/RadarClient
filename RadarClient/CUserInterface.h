@@ -76,7 +76,7 @@ class CUserInterface
 private:
 	int CurrentID;
 	int IsConnected_ID, Button_Connect_ID, Grid_ID, InfoGrid_ID, FixViewToRadar_ID, MeasureDistance_ID, Test_ID, Dump_ID, BegAzm_ID, ZeroElevation_ID, BegAzmValue_ID, ZeroElevationValue_ID;
-	int ObjOptions_ID[3], MapOptions_ID[2], MarkupOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2];
+	int ObjOptions_ID[3], MapOptions_ID[2], MarkupOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2], MapType_ID[2];
 	//int Info_ID[]
 	void SetChecked(int id, bool checked);
 
@@ -107,6 +107,7 @@ private:
 	virtual LRESULT Checkbox_FixViewToRadar(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MeasureDistance(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT RadioGroup_MapType(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Trackbar_CameraDirection_VTilt(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Trackbar_CameraDirection_Turn(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Trackbar_BegAzm(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -142,6 +143,7 @@ public:
 	bool GetCheckboxState_Tracks();
 	bool GetCheckboxState_Images();
 	bool GetCheckboxState_Map();
+	bool GetCheckboxState_BlindZones();
 	bool GetCheckboxState_AltitudeMap();
 	bool GetCheckboxState_MarkupLines();
 	bool GetCheckboxState_MarkupLabels();

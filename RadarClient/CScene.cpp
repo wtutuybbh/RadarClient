@@ -264,18 +264,14 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	//Mesh->UseTexture = vpControl->DisplayMap;
 	glDisable(GL_LINE_SMOOTH);
 
-	Mesh->UseTexture = vpControl->UI->GetCheckboxState_Map();
-	Mesh->UseAltitudeMap = vpControl->UI->GetCheckboxState_AltitudeMap();
+	Mesh->UseTexture = Mesh1->UseTexture = Mesh2->UseTexture = Mesh3->UseTexture = vpControl->DisplayMap;
+	Mesh->UseAltitudeMap = Mesh1->UseAltitudeMap = Mesh2->UseAltitudeMap = Mesh3->UseAltitudeMap = vpControl->DisplayLandscape;
+
 	Mesh->Draw(vpControl, GL_TRIANGLES);
-	Mesh1->UseTexture = vpControl->UI->GetCheckboxState_Map();
-	Mesh1->UseAltitudeMap = vpControl->UI->GetCheckboxState_AltitudeMap();
 	Mesh1->Draw(vpControl, GL_TRIANGLES);
-	Mesh2->UseTexture = vpControl->UI->GetCheckboxState_Map();
-	Mesh2->UseAltitudeMap = vpControl->UI->GetCheckboxState_AltitudeMap();
 	Mesh2->Draw(vpControl, GL_TRIANGLES);
-	Mesh3->UseTexture = vpControl->UI->GetCheckboxState_Map();
-	Mesh3->UseAltitudeMap = vpControl->UI->GetCheckboxState_AltitudeMap();
 	Mesh3->Draw(vpControl, GL_TRIANGLES);
+
 	//return false;
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	if (UI->GetCheckboxState_Points()) {
@@ -349,8 +345,6 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	}
 	if (Ray_VBOName > 0 && Ray_VBOName_c > 0 && Socket->IsConnected) {
 		glRotatef(-viewAngle, 0.0f, 1.0f, 0.0f);
-
-
 
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glBindBuffer(GL_ARRAY_BUFFER, Ray_VBOName);

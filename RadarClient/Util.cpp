@@ -134,10 +134,12 @@ namespace cnvrt {
 	}
 }
 namespace rcutils {
+	// checks the value and sets new min or max if value is out of the (min, max) range
 	void takeminmax(float value, float *min, float *max) {
 		if (*max < value) *max = value;
 		if (*min > value) *min = value;
 	}
+	// splits string using delimiter (v1)
 	std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
 		std::stringstream ss(s);
 		std::string item;
@@ -147,14 +149,14 @@ namespace rcutils {
 		return elems;
 	}
 
-
+	// splits string using delimiter (v2)
 	std::vector<std::string> split(const std::string &s, char delim) {
 		std::vector<std::string> elems;
 		split(s, delim, elems);
 		return elems;
 	}
 
-	//
+	// checks if x is between x1 and x2, assuming that they are points on circle (with period M_PIx2), taking direction into account
 	bool between_on_circle(float x, float x1, float x2, short direction, bool take1, bool take2)
 	{
 		if (x>=M_PIx2)		
@@ -186,15 +188,17 @@ namespace rcutils {
 		return false;
 	}
 }
+
+//helper function to draw bitmap string (3d version)
 void BitmapString(float x, float y, float z, std::string s)
 {
 	glRasterPos3f(x, y, z);
 	for (int n = 0; n<s.size(); ++n) {
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, s[n]);
 	}
-	//glutBitmapString(GLUT_BITMAP_HELVETICA_18, (unsigned char *)s);
 }
 
+//helper function to draw bitmap string (3d version)
 void BitmapString2D(float x, float y, std::string s)
 {
 	glRasterPos2f(x, y);
@@ -203,6 +207,7 @@ void BitmapString2D(float x, float y, std::string s)
 	}
 }
 
+// helper function to get file length in bytes
 unsigned long getFileLength(std::ifstream& file)
 {
 	if (!file.good()) return 0;

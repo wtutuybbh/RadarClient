@@ -72,7 +72,7 @@ public:
 	void SetPosition(int x, int y, int w, int h);
 	virtual glm::mat4 GetProjMatrix() const;
 	virtual glm::mat4 GetViewMatrix() const;
-	int DisplayPoints, DisplaySeries, DisplayRLIs, DisplayMap, DisplayLandscape;
+	int DisplayPoints, DisplaySeries, DisplayRLIs, DisplayMap, DisplayLandscape, DisplayBlindZones;
 
 	C3DObjectModel* Get3DObject(int x, int y);
 

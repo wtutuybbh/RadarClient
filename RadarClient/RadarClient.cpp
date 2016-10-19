@@ -70,7 +70,7 @@
 
 #define VIEW_PORT_CONTROL_ID     100
 
-#define PANEL_WIDTH 500
+#define PANEL_WIDTH 450
 #define INFO_HEIGHT 250
 
 
@@ -496,6 +496,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		std::getline(settings_txt, s);
 		std::vector<std::string> strparts = rcutils::split(s, '=');
 		string settingName = strparts.at(0);
+		if (settingName.substr(0, 6) == "String")
+		{
+			std::string settingValue(strparts.at(1).c_str());
+			CSettings::SetString(CSettings::GetIndex(settingName), settingValue);
+		}
 		if(settingName.substr(0, 5) == "Float")
 		{
 			float settingValue = ::atof(strparts.at(1).c_str());
