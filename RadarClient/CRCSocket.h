@@ -35,6 +35,8 @@
 #include <windows.h>
 //#pragma comment(lib,"ws2_32")
 
+#include "Util.h"
+
 using namespace std;
 
 #define CM_POSTDATA (WM_USER + 2)
@@ -454,6 +456,7 @@ class CRCSocket
 	char *hole{ NULL };
 	int LENDATAOTOBR {1};
 public:
+
 	bool Initialized {false};
 	bool PointOK, TrackOK, ImageOK;
 	vector<TRK*> Tracks;
@@ -517,6 +520,10 @@ public:
 	int FindTrack(int id);
 	//void RectToPolar2d(double x, double y, double* phi, double* ro);
 	void FreeMemory(char *ptr);
+
+#ifdef _DEBUG
+	DebugWindowInfo *dwi{ NULL };
+#endif
 	//__event void ConnectionStateChange(bool isConnected);
 };
 

@@ -295,8 +295,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 #ifdef _DEBUG
 		g_Minimap->dwi = &g_dwi;
 		g_UI->dwi = &g_dwi;
+		g_Socket->dwi = &g_dwi;
 #endif // _DEBUG
-
 	}
 	return 0;														// Return
 

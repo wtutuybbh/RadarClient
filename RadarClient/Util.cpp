@@ -335,10 +335,12 @@ LRESULT CALLBACK DebugWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 void DebugMessage(DebugWindowInfo *dwi, std::string Text)
 {
-	Text = Text + "\r\n";
-	int idx = GetWindowTextLength(dwi->Edit_hWnd);
-	SendMessage(dwi->Edit_hWnd, EM_SETSEL, (WPARAM)idx, (LPARAM)idx);
-	SendMessage(dwi->Edit_hWnd, EM_REPLACESEL, 0, (LPARAM)Text.c_str());
+	if (dwi) {
+		Text = Text + "\r\n";
+		int idx = GetWindowTextLength(dwi->Edit_hWnd);
+		SendMessage(dwi->Edit_hWnd, EM_SETSEL, (WPARAM)idx, (LPARAM)idx);
+		SendMessage(dwi->Edit_hWnd, EM_REPLACESEL, 0, (LPARAM)Text.c_str());
+	}
 }
 #endif
 float MinimumDistance(glm::vec3 v, glm::vec3 w, glm::vec3 p)

@@ -1,6 +1,7 @@
 ﻿#define WIN32_LEAN_AND_MEAN
 
 //#include "stdafx.h"
+#include "Util.h"
 #include "CRCSocket.h"
 #include "CSettings.h"
 
@@ -244,7 +245,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 		{
 		case MSG_RPOINTS:
 		{
-			
+
 
 			info_p = (RPOINTS*)(void*)PTR_D;
 
@@ -258,6 +259,13 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			pts = (RPOINT*)(void*)(info_p + 1);
 			b1 = info_p->d1;
 			b2 = info_p->d2;
+#ifdef _DEBUG
+			if (info_p) {
+				std::stringstream s;
+				s << "MSG_RPOINTS. D=" << info_p->D << ", N=" << info_p->N << " d1=" << info_p->d1 << ", d2=" << info_p->d2 << " pts[0].B=" << pts[0].B;
+				DebugMessage(dwi, s.str());
+			}
+#endif
 		}
 		break;
 		case MSG_RIMAGE: {
@@ -294,7 +302,14 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 
 			memcpy(s_rdrinit, (RDR_INITCL*)(void*)&sh[1], sizeof(RDR_INITCL));
 			//OnSrvMsg_INIT((RDR_INITCL*)(void*)&sh[1]);
-			//DoInit(s_rdrinit);			
+			//DoInit(s_rdrinit);	
+#ifdef _DEBUG
+			if (s_rdrinit) {
+				std::stringstream s;
+				s << "MSG_INIT. ViewStep=" << s_rdrinit->ViewStep << ", MaxNumSectPt=" << s_rdrinit->MaxNumSectPt << " Nazm=" << s_rdrinit->Nazm;
+				DebugMessage(dwi, s.str());
+			}
+#endif
 		}
 		case MSG_LOCATION:
 		{
