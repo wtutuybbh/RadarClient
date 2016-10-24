@@ -103,6 +103,8 @@ CRCSocket *g_Socket;
 DebugWindowInfo g_dwi;
 #endif
 
+std::thread *g_LoggerThread = NULL;
+
 //std::mutex m;
 
 bool g_Initialized = false;
@@ -116,6 +118,11 @@ void TerminateApplication(GL_Window* window)							// Terminate The Application
 	{
 		delete g_Socket;
 		g_Socket = NULL;
+	}
+	if (g_LoggerThread)
+	{
+		g_LoggerThread->detach();
+		delete g_LoggerThread;
 	}
 }
 
@@ -456,10 +463,11 @@ BOOL RegisterWindowClass(Application* application)						// Register A Window Cla
 	}
 	return TRUE;														// Return True (Success)
 }
-
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	RedirectIOToConsole();
+	std::cout << "test" << endl;
 	//CMesh::AverageHeight = 0;
 	//CMesh::TotalVertexCount = 0;
 	CSettings::Init();
@@ -734,7 +742,7 @@ Keys*		g_keys;
 
 // TUTORIAL
 // Based Off Of Code Supplied At OpenGL.org
-bool IsExtensionSupported(char* szTargetExtension)
+/*bool IsExtensionSupported(char* szTargetExtension)
 {
 	const unsigned char *pszExtensions = NULL;
 	const unsigned char *pszStart;
@@ -746,7 +754,7 @@ bool IsExtensionSupported(char* szTargetExtension)
 		return false;
 
 	// Get Extensions String
-	pszExtensions = glGetString(GL_EXTENSIONS);
+	pszExtensions =		
 
 	// Search The Extensions String For An Exact Copy
 	pszStart = pszExtensions;
@@ -762,7 +770,7 @@ bool IsExtensionSupported(char* szTargetExtension)
 		pszStart = pszTerminator;
 	}
 	return false;
-}
+}*/
 //~TUTORIAL
 
 BOOL Initialize(GL_Window* window, Keys* keys)					// Any GL Init Code & User Initialiazation Goes Here

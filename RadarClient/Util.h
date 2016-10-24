@@ -23,6 +23,9 @@
 #include <cctype>
 #include <locale>
 
+#include <io.h>
+#include <fcntl.h>
+
 #define M_PIx2 6.28318530717959
 
 
@@ -185,3 +188,20 @@ static inline std::string trimmed(std::string s) {
 	trim(s);
 	return s;
 }
+
+//separate thread console logging:
+BOOL CreateConsole(void);
+int	printf_mt(const char *s, ...);
+void ConsoleMessage(std::string msg);
+
+#ifndef __GUICON_H__
+
+#define __GUICON_H__
+
+#ifdef _DEBUG
+
+void RedirectIOToConsole();
+
+#endif
+
+#endif	

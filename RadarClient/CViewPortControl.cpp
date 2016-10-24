@@ -429,6 +429,10 @@ bool CViewPortControl::InitGL()
 		/* Problem: glewInit failed, something is seriously wrong. */
 		fprintf(stderr, "Error: %s\n", s);
 	}
+
+	const GLubyte* version = glGetString(GL_VERSION);
+
+
 	glm::vec4 bgColor = CSettings::GetColor(ColorBackgroud);
 	glClearColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a);
 																//glClearDepth(1.0f);										// Depth Buffer Setup

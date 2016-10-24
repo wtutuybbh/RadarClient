@@ -357,3 +357,141 @@ float MinimumDistance(glm::vec3 v, glm::vec3 w, glm::vec3 p)
 	return glm::distance(p, projection);
 }
 
+BOOL CreateConsole(void)
+{
+	FreeConsole();        //на всякий случай
+	if (AllocConsole())
+	{
+		HANDLE handle_out = GetStdHandle(STD_OUTPUT_HANDLE);
+		int hCrt = _open_osfhandle((long)handle_out, _O_TEXT);
+		FILE* hf_out = _fdopen(hCrt, "w");
+		setvbuf(hf_out, NULL, _IONBF, 1);
+		*stdout = *hf_out;
+
+		HANDLE handle_in = GetStdHandle(STD_INPUT_HANDLE);
+		hCrt = _open_osfhandle((long)handle_in, _O_TEXT);
+		FILE* hf_in = _fdopen(hCrt, "r");
+		setvbuf(hf_in, NULL, _IONBF, 128);
+		*stdin = *hf_in;
+		
+		return TRUE;
+	}
+	return FALSE;
+}
+
+int	printf_mt(const char *s, ...)   // В OEM кодировку чтобы руск буквы в консоли норм отображались
+{
+	va_list ap;
+	va_start(ap, s);
+
+	char	src[256];
+	vsprintf(src, s, ap);
+
+	va_end(ap);
+
+	char	oems[256];
+	CharToOemA(src, oems);
+
+	return printf(oems);
+
+}
+
+void ConsoleMessage(std::string msg)
+{
+}
+ 
+//void THREAD::run()   // некий поток выводит инфу независимо от других в свою консоль
+//{
+//
+//	CreateConsole();
+//	printf_mt("QThreadAdp::run и Console test\n");
+//	// другие действия
+//}
+
+#ifndef _USE_OLD_IOSTREAMS
+
+using namespace std;
+
+#endif
+
+// maximum mumber of lines the output console should have
+
+static const WORD MAX_CONSOLE_LINES = 500;
+
+#ifdef _DEBUG
+
+void RedirectIOToConsole()
+
+{
+
+	int hConHandle;
+
+	long lStdHandle;
+
+	CONSOLE_SCREEN_BUFFER_INFO coninfo;
+
+	FILE *fp;
+
+	// allocate a console for this app
+
+	AllocConsole();
+
+	// set the screen buffer to be big enough to let us scroll text
+
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE),
+
+		&coninfo);
+
+	coninfo.dwSize.Y = MAX_CONSOLE_LINES;
+
+	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE),
+
+		coninfo.dwSize);
+
+	// redirect unbuffered STDOUT to the console
+
+	lStdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
+
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+
+	fp = _fdopen(hConHandle, "w");
+
+	*stdout = *fp;
+
+	setvbuf(stdout, NULL, _IONBF, 0);
+
+	// redirect unbuffered STDIN to the console
+
+	lStdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
+
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+
+	fp = _fdopen(hConHandle, "r");
+
+	*stdin = *fp;
+
+	setvbuf(stdin, NULL, _IONBF, 0);
+
+	// redirect unbuffered STDERR to the console
+
+	lStdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
+
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+
+	fp = _fdopen(hConHandle, "w");
+
+	*stderr = *fp;
+
+	setvbuf(stderr, NULL, _IONBF, 0);
+
+	// make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog
+
+	// point to console as well
+
+	ios::sync_with_stdio();
+
+}
+
+#endif
+
+//End of File

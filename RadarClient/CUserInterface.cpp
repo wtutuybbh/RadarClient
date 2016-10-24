@@ -59,74 +59,7 @@ LRESULT CUserInterface::Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
 LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-#ifdef _DEBUG
-	std::stringstream s;
-	
-
-	CRCDataFileSet DataFileSet;
-
-	//DataFileSet.AddFiles(".", Texture, "jpg");
-	
-
-	//CRCAltitudeDataFile *afile = new CRCAltitudeDataFile("n55_e041_1arc_v3.bil");
-	//afile->Open();
-
-	/*DataFileSet.AddTextureFile("./TextureData/testsample_ne.jpg");
-	DataFileSet.AddTextureFile("./TextureData/testsample_nw.jpg");
-	DataFileSet.AddTextureFile("./TextureData/testsample_se.jpg");
-	DataFileSet.AddTextureFile("./TextureData/testsample_sw.jpg");
-	CRCTextureDataFile file(36.9724273681641
-		, 54.9852236897972
-		, 37.0343971252441
-		, 55.0110295187506
-		, 800, 400);
-	file.ApplyIntersection(*DataFileSet.GetFile(0));
-	file.ApplyIntersection(*DataFileSet.GetFile(1));
-	file.ApplyIntersection(*DataFileSet.GetFile(2));
-	file.ApplyIntersection(*DataFileSet.GetFile(3));
-	file.SetName("newmap.jpg");
-	file.Save();*/
-
-	DataFileSet.AddAltitudeFile("./AltitudeData/n54_e036_1arc_v3.bil");
-	DataFileSet.GetFile(0)->Open();
-	DataFileSet.AddAltitudeFile("./AltitudeData/n54_e037_1arc_v3.bil");
-	DataFileSet.AddAltitudeFile("./AltitudeData/n55_e036_1arc_v3.bil");
-	DataFileSet.AddAltitudeFile("./AltitudeData/n55_e037_1arc_v3.bil");
-
-	CRCAltitudeDataFile file(36.5, 54.5, 37.5, 55.5, 1800, 3600);
-
-	file.ApplyIntersection(*DataFileSet.GetFile(0));
-	file.ApplyIntersection(*DataFileSet.GetFile(1));
-	file.ApplyIntersection(*DataFileSet.GetFile(2));
-	file.ApplyIntersection(*DataFileSet.GetFile(3));
-
-
-	try {
-		string img_64x64("c:\\Users\\RazumovSa\\Documents\\Visual Studio 2015\\Projects\\RadarClient\\Debug\\img_64x64.jpg");
-		string img_new("c:\\Users\\RazumovSa\\Documents\\Visual Studio 2015\\Projects\\RadarClient\\Debug\\img_new.jpg");
-
-		FIBITMAP *bitmap_64x64 = FreeImage_Load(FreeImage_GetFileType(img_64x64.c_str(), 0), img_64x64.c_str());
-
-		FIBITMAP *bitmap_new = FreeImage_Allocate(128, 128, 24);
-
-		FIBITMAP *copied = FreeImage_Copy(bitmap_64x64, 0, 0, 63, 63);
-
-		FIBITMAP *resized = FreeImage_Rescale(copied, 96, 96);
-
-		FreeImage_Paste(bitmap_new, resized, 0, 0, 256);
-
-		FreeImage_Save(FIF_JPEG, bitmap_new, img_new.c_str());
-
-		FreeImage_Unload(bitmap_64x64);
-		FreeImage_Unload(copied);
-		FreeImage_Unload(resized);
-		FreeImage_Unload(bitmap_new);
-
-	}
-	catch (...) {
-		return 0;
-	}
-#endif // _DEBUG
+	std::cout << "test" << endl;
 	return LRESULT();
 }
 
