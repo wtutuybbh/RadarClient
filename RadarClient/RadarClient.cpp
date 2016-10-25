@@ -466,6 +466,7 @@ BOOL RegisterWindowClass(Application* application)						// Register A Window Cla
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	AllocConsole();
 	/*AllocConsole();
 	HANDLE myConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 	DWORD cCharsWritten;
