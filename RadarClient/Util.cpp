@@ -357,28 +357,6 @@ float MinimumDistance(glm::vec3 v, glm::vec3 w, glm::vec3 p)
 	return glm::distance(p, projection);
 }
 
-BOOL CreateConsole(void)
-{
-	FreeConsole();        //на вс€кий случай
-	if (AllocConsole())
-	{
-		HANDLE handle_out = GetStdHandle(STD_OUTPUT_HANDLE);
-		int hCrt = _open_osfhandle((long)handle_out, _O_TEXT);
-		FILE* hf_out = _fdopen(hCrt, "w");
-		setvbuf(hf_out, NULL, _IONBF, 1);
-		*stdout = *hf_out;
-
-		HANDLE handle_in = GetStdHandle(STD_INPUT_HANDLE);
-		hCrt = _open_osfhandle((long)handle_in, _O_TEXT);
-		FILE* hf_in = _fdopen(hCrt, "r");
-		setvbuf(hf_in, NULL, _IONBF, 128);
-		*stdin = *hf_in;
-		
-		return TRUE;
-	}
-	return FALSE;
-}
-
 int	printf_mt(const char *s, ...)   // ¬ OEM кодировку чтобы руск буквы в консоли норм отображались
 {
 	va_list ap;
@@ -396,102 +374,103 @@ int	printf_mt(const char *s, ...)   // ¬ OEM кодировку чтобы руск буквы в консол
 
 }
 
-void ConsoleMessage(std::string msg)
-{
-}
- 
-//void THREAD::run()   // некий поток выводит инфу независимо от других в свою консоль
-//{
-//
-//	CreateConsole();
-//	printf_mt("QThreadAdp::run и Console test\n");
-//	// другие действи€
-//}
-
-#ifndef _USE_OLD_IOSTREAMS
-
-using namespace std;
-
-#endif
-
-// maximum mumber of lines the output console should have
-
-static const WORD MAX_CONSOLE_LINES = 500;
-
-#ifdef _DEBUG
-
 void RedirectIOToConsole()
-
 {
+	if (AllocConsole()) {
+		FILE* pCout;
+		freopen_s(&pCout, "CONOUT$", "w", stdout);
+		SetConsoleTitle(_T("Debug Console"));
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED);
+	}
 
-	int hConHandle;
+	// set std::cout to use my custom streambuf
+	outbuf ob;
+	std::streambuf *sb = std::cout.rdbuf(&ob);
 
-	long lStdHandle;
+	std::ios::sync_with_stdio();
 
-	CONSOLE_SCREEN_BUFFER_INFO coninfo;
-
-	FILE *fp;
-
-	// allocate a console for this app
-
-	AllocConsole();
-
-	// set the screen buffer to be big enough to let us scroll text
-
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE),
-
-		&coninfo);
-
-	coninfo.dwSize.Y = MAX_CONSOLE_LINES;
-
-	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE),
-
-		coninfo.dwSize);
-
-	// redirect unbuffered STDOUT to the console
-
-	lStdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
-
-	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-
-	fp = _fdopen(hConHandle, "w");
-
-	*stdout = *fp;
-
-	setvbuf(stdout, NULL, _IONBF, 0);
-
-	// redirect unbuffered STDIN to the console
-
-	lStdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
-
-	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-
-	fp = _fdopen(hConHandle, "r");
-
-	*stdin = *fp;
-
-	setvbuf(stdin, NULL, _IONBF, 0);
-
-	// redirect unbuffered STDERR to the console
-
-	lStdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
-
-	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-
-	fp = _fdopen(hConHandle, "w");
-
-	*stderr = *fp;
-
-	setvbuf(stderr, NULL, _IONBF, 0);
-
-	// make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog
-
-	// point to console as well
-
-	ios::sync_with_stdio();
-
+	std::wcout.clear();
+	std::cout.clear();
+	std::wcerr.clear();
+	std::cerr.clear();
+	std::wcin.clear();
+	std::cin.clear();
 }
 
-#endif
+void BindStdHandlesToConsole()
+{
+	if (AllocConsole()) {
+		//Redirect unbuffered STDIN to the console
+		HANDLE stdInHandle = GetStdHandle(STD_INPUT_HANDLE);
+		if (stdInHandle != INVALID_HANDLE_VALUE)
+		{
+			int fileDescriptor = _open_osfhandle((intptr_t)stdInHandle, _O_TEXT);
+			if (fileDescriptor != -1)
+			{
+				FILE* file = _fdopen(fileDescriptor, "r");
+				if (file != NULL)
+				{
+					*stdin = *file;
+					setvbuf(stdin, NULL, _IONBF, 0);
+				}
+			}
+		}
+
+		//Redirect unbuffered STDOUT to the console
+		HANDLE stdOutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+		if (stdOutHandle != INVALID_HANDLE_VALUE)
+		{
+			int fileDescriptor = _open_osfhandle((intptr_t)stdOutHandle, _O_TEXT);
+			if (fileDescriptor != -1)
+			{
+				FILE* file = _fdopen(fileDescriptor, "w");
+				if (file != NULL)
+				{
+					*stdout = *file;
+					setvbuf(stdout, NULL, _IONBF, 0);
+				}
+			}
+		}
+
+		//Redirect unbuffered STDERR to the console
+		HANDLE stdErrHandle = GetStdHandle(STD_ERROR_HANDLE);
+		if (stdErrHandle != INVALID_HANDLE_VALUE)
+		{
+			int fileDescriptor = _open_osfhandle((intptr_t)stdErrHandle, _O_TEXT);
+			if (fileDescriptor != -1)
+			{
+				FILE* file = _fdopen(fileDescriptor, "w");
+				if (file != NULL)
+				{
+					*stderr = *file;
+					setvbuf(stderr, NULL, _IONBF, 0);
+				}
+			}
+		}
+
+		//Clear the error state for each of the C++ standard stream objects. We need to do this, as
+		//attempts to access the standard streams before they refer to a valid target will cause the
+		//iostream objects to enter an error state. In versions of Visual Studio after 2005, this seems
+		//to always occur during startup regardless of whether anything has been read from or written to
+		//the console or not.
+		std::wcout.clear();
+		std::cout.clear();
+		std::wcerr.clear();
+		std::cerr.clear();
+		std::wcin.clear();
+		std::cin.clear();
+
+		std::ios::sync_with_stdio(true);
+	}
+}
+
+int Log(std::string msg)
+{
+	HANDLE myConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	static DWORD cCharsWritten;
+	WriteConsole(myConsoleHandle, msg.c_str(), msg.length(), &cCharsWritten, NULL);
+	return (int)cCharsWritten;
+}
 
 //End of File
+

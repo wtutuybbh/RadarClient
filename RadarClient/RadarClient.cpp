@@ -466,17 +466,21 @@ BOOL RegisterWindowClass(Application* application)						// Register A Window Cla
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	AllocConsole();
+	/*AllocConsole();
 	HANDLE myConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 	DWORD cCharsWritten;
 	std::string str("enter game command\n");
 	WriteConsole(myConsoleHandle, str.c_str(), str.length(), &cCharsWritten, NULL);
 	char* command = (char*)malloc(100);
 	unsigned long charsRead = 0;
-	ReadConsole(myConsoleHandle, command, 100, &charsRead, NULL);
+	ReadConsole(myConsoleHandle, command, 100, &charsRead, NULL);*/
 
 	//RedirectIOToConsole();
-	std::cout << "test" << endl;
+	/*BindStdHandlesToConsole();
+	printf("printf test");
+	std::cout << "std::cout test" << endl;
+	fflush(stdout);*/
+	Log("Hello, world!");
 	//CMesh::AverageHeight = 0;
 	//CMesh::TotalVertexCount = 0;
 	CSettings::Init();

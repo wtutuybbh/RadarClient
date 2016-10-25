@@ -28,6 +28,7 @@
 
 #define M_PIx2 6.28318530717959
 
+#include <boost/preprocessor/repetition/enum_params.hpp>
 
 namespace cnvrt {
 	inline double dg2rad(double dg) {
@@ -189,19 +190,18 @@ static inline std::string trimmed(std::string s) {
 	return s;
 }
 
-//separate thread console logging:
-BOOL CreateConsole(void);
+class outbuf : public std::streambuf {
+public:
+	outbuf() {
+		setp(0, 0);
+	}
+
+	virtual int_type overflow(int_type c = traits_type::eof()) {
+		return fputc(c, stdout) == EOF ? traits_type::eof() : c;
+	}
+};
 int	printf_mt(const char *s, ...);
-void ConsoleMessage(std::string msg);
-
-#ifndef __GUICON_H__
-
-#define __GUICON_H__
-
-#ifdef _DEBUG
-
 void RedirectIOToConsole();
+void BindStdHandlesToConsole();
+int Log(std::string msg);
 
-#endif
-
-#endif	
