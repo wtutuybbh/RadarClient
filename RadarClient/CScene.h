@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "glm/detail/type_mat.hpp"
+#include <unordered_map>
 
 class CTrack;
 class CLine;
@@ -30,7 +31,7 @@ class old_CTrack;
 class CRImageSet;
 
 
-#include "CUserInterface.h"
+//#include "CUserInterface.h"
 
 class old_C3DObject;
 class old_CMinimapPointer;

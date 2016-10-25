@@ -26,6 +26,7 @@
 #include "CViewPortControl.h"
 #include "CRImageSet.h"
 #include "CLine.h"
+#include "CUserInterface.h"
 #include <iostream>
 #include <fstream>
 
@@ -145,7 +146,7 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	
 
 	rayDensity = 1;
-	vertexCount_Ray = (rayDensity + 1) * (rayDensity + 1) * 2;
+	vertexCount_Ray = 3;// (rayDensity + 1) * (rayDensity + 1) * 2;
 	
 	vertexCount_Axis = 38;
 	
@@ -329,7 +330,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 
 
 
-	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_DEPTH_TEST);
 
 	
 
@@ -338,6 +339,8 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	glMatrixMode(GL_MODELVIEW);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glLineWidth(3.0);
 
 	if (Ray_VBOName == 0 && Ray_VBOName_c == 0) {
 		PrepareRayVBO();
@@ -356,7 +359,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 
 		glDrawElements(GL_LINE_LOOP, rayArraySize, GL_UNSIGNED_SHORT, ray);
 	}
-	
+	glLineWidth(1.0);
 	glLoadIdentity();
 	
 	glDisableClientState(GL_VERTEX_ARRAY);						// Enable Vertex Arrays
@@ -531,9 +534,9 @@ bool CScene::PrepareVBOs()
 	RayColor = new CColorRGBA[vertexCount_Ray];
 	for (int i = 0; i < vertexCount_Ray; i++) {
 		RayColor[i].r = 1.0f;
-		RayColor[i].g = 1.0f;
-		RayColor[i].b = 1.0f;
-		RayColor[i].a = 0.2f;
+		RayColor[i].g = 0.0f;
+		RayColor[i].b = 0.0f;
+		RayColor[i].a = 1.0f;
 	}
 	
 	//index array for axis markup
@@ -561,7 +564,18 @@ bool CScene::PrepareRayVBO()
 		return false;
 
 	Ray = new glm::vec3[vertexCount_Ray]; //ray vertex array
-	int i0 = 0;
+	Ray[0].x = 0;
+	Ray[0].y = y0;
+	Ray[0].z = 0;
+
+	Ray[1].x = maxDist * sin(-rayWidth / 2) / mpph;
+	Ray[1].y = y0;
+	Ray[1].z = maxDist * cos(-rayWidth / 2) / mpph;
+
+	Ray[2].x = maxDist * sin(rayWidth / 2) / mpph;
+	Ray[2].y = y0;
+	Ray[2].z = maxDist * cos(rayWidth / 2) / mpph;
+	/*int i0 = 0;
 
 	float d_rayW = rayWidth / rayDensity; //one arc step - 'width' dimension
 	float d_rayH = RAY_HEIGHT / rayDensity; // one arc step - 'height' dimension
@@ -570,7 +584,7 @@ bool CScene::PrepareRayVBO()
 
 	float a, e;
 	int oneside = (rayDensity + 1) * (rayDensity + 1);
-	rayArraySize = rayDensity*rayDensity * 6 * 2 + rayDensity * 6 * 4;
+	rayArraySize = 3;// rayDensity*rayDensity * 6 * 2 + rayDensity * 6 * 4;
 	
 
 	float ZERO_ELEVATION = glm::radians(CSettings::GetFloat(FloatZeroElevation));
@@ -580,19 +594,22 @@ bool CScene::PrepareRayVBO()
 		for (int j = 0; j <= rayDensity; j++) {
 
 			Ray[i0].x = minDist * cos(e) * sin(a) / mpph;
-			Ray[i0].y = y0 + minDist * sin(e) / mppv;
+			Ray[i0].y = y0;// +minDist * sin(e) / mppv;
 			Ray[i0].z = minDist * cos(e) * cos(a) / mpph;
 			Ray[oneside + i0].x = maxDist * cos(e) * sin(a) / mpph;
-			Ray[oneside + i0].y = y0 + maxDist * sin(e) / mppv;
+			Ray[oneside + i0].y = y0;// +maxDist * sin(e) / mppv;
 			Ray[oneside + i0].z = maxDist * cos(e) * cos(a) / mpph;
 			i0++;
 			e += d_rayH;
 		}
 		a += d_rayW;
-	}
-
+	}*/
+	rayArraySize = 3;
 	ray = new unsigned short[rayArraySize]; //ray index array
-	int k1 = 0, k2 = 6 * rayDensity * rayDensity, k3 = 6 * rayDensity * rayDensity * 2;
+	ray[0] = 0;
+	ray[1] = 1;
+	ray[2] = 2;
+	/*int k1 = 0, k2 = 6 * rayDensity * rayDensity, k3 = 6 * rayDensity * rayDensity * 2;
 	for (int i = 0; i < rayDensity; i++) {
 		for (int j = 0; j < rayDensity; j++) {
 			ray[k1++] = i * (rayDensity + 1) + j;
@@ -637,7 +654,7 @@ bool CScene::PrepareRayVBO()
 		ray[k3++] = i;
 		ray[k3++] = oneside + i + 1;
 		ray[k3++] = i + 1;
-	}
+	}*/
 	return true;
 }
 

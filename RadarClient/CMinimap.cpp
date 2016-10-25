@@ -3,6 +3,7 @@
 #include "CMinimap.h"
 #include "CScene.h"
 #include "CCamera.h"
+#include "CUserInterface.h"
 
 bool CMinimap::IsCameraHere(int x, int y) const
 {

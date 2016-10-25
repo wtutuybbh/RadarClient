@@ -43,7 +43,6 @@
 #define TEXT_CHECKBOX_MARKUP_LINES _T("Линии")
 #define TEXT_CHECKBOX_MARKUP_LABELS _T("Числа")
 
-#define TEXT_GRID_NAME _T("Список траекторий")
 #define TEXT_INFOGRID_NAME _T("Информация")
 
 class CScene;
@@ -74,8 +73,9 @@ typedef std::unordered_map<int, InterfaceElement *> ElementsMap;
 class CUserInterface
 {
 private:
+	int mainTableMode {0};
 	int CurrentID;
-	int IsConnected_ID, Button_Connect_ID, Grid_ID, InfoGrid_ID, FixViewToRadar_ID, MeasureDistance_ID, Test_ID, Dump_ID, BegAzm_ID, ZeroElevation_ID, BegAzmValue_ID, ZeroElevationValue_ID;
+	int IsConnected_ID, Button_Connect_ID, Grid_ID, InfoGrid_ID, ColorGrid_ID, FixViewToRadar_ID, MeasureDistance_ID, Test_ID, Dump_ID, BegAzm_ID, ZeroElevation_ID, BegAzmValue_ID, ZeroElevationValue_ID;
 	int ObjOptions_ID[3], MapOptions_ID[2], MarkupOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2], MapType_ID[2];
 	//int Info_ID[]
 	void SetChecked(int id, bool checked);
@@ -115,6 +115,7 @@ private:
 	virtual LRESULT Trackbar_ZeroElevation(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void Trackbar_ZeroElevation_SetText(int labelID);
 	virtual LRESULT Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT ColorGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT InfoGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 public:
@@ -171,6 +172,9 @@ public:
 	void FillInfoGrid(CScene *scene);
 
 	bool MeasureDistance() const;
+
+	int GetMainTableMode() const;
+	void SetMainTableMode(int value);
 #ifdef _DEBUG
 	DebugWindowInfo *dwi;
 #endif

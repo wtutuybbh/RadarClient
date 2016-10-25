@@ -140,7 +140,7 @@ inline float BilinearInterpolation(float q11, float q12, float q21, float q22, f
 	y2y = y2 - y;
 	yy1 = y - y1;
 	xx1 = x - x1;
-	return 1.0 / (x2x1 * y2y1) * (
+	return 1.0f / (x2x1 * y2y1) * (
 		q11 * x2x * y2y +
 		q21 * xx1 * y2y +
 		q12 * x2x * yy1 +

@@ -59,7 +59,21 @@ LRESULT CUserInterface::Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
 LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	std::cout << "test" << endl;
+	Log("Entered color setup.");
+	if (GetMainTableMode()==0)
+	{
+		ShowWindow(Elements[Grid_ID]->hWnd, SW_HIDE);
+		ShowWindow(Elements[ColorGrid_ID]->hWnd, SW_SHOWNOACTIVATE);
+		SetMainTableMode(1);
+		return LRESULT();
+	}
+	if (GetMainTableMode() == 1)
+	{
+		ShowWindow(Elements[Grid_ID]->hWnd, SW_SHOWNOACTIVATE);
+		ShowWindow(Elements[ColorGrid_ID]->hWnd, SW_HIDE);
+		SetMainTableMode(0);
+		return LRESULT();
+	}
 	return LRESULT();
 }
 
@@ -74,6 +88,11 @@ LRESULT CUserInterface::Button_Dump(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 }
 
 LRESULT CUserInterface::Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	return LRESULT();
+}
+
+LRESULT CUserInterface::ColorGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	return LRESULT();
 }
@@ -350,7 +369,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 
 	MeasureDistance_ID = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_MEASURE_DISTANCE, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MeasureDistance);
 	
-	Test_ID = InsertElement(NULL, _T("BUTTON"), TEXT_BUTTON_TEST, WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth/2, ButtonHeight, &CUserInterface::Button_Test);
+	Test_ID = InsertElement(NULL, _T("BUTTON"), _T("Цвета"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth/2, ButtonHeight, &CUserInterface::Button_Test);
 	Dump_ID = InsertElement(NULL, _T("BUTTON"), TEXT_BUTTON_DUMP, WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X + ControlWidth / 2 + Column1X / 2, CurrentY, ControlWidth/2, ButtonHeight, &CUserInterface::Button_Dump);
 
 	CurrentY += VStepGrp;
@@ -415,7 +434,8 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	GetClientRect(parentHWND, &clientRect);
 
 
-	Grid_ID = InsertElement(NULL, _T("ZeeGrid"), TEXT_GRID_NAME, WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX, gridY, 2 * vpControl->Width / 3, clientRect.right - panelWidth, &CUserInterface::Grid);
+	Grid_ID = InsertElement(NULL, _T("ZeeGrid"), _T("Список траекторий"), WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX, gridY, 2 * vpControl->Width / 3, clientRect.right - panelWidth, &CUserInterface::Grid);
+	ColorGrid_ID = InsertElement(NULL, _T("ZeeGrid"), _T("Цвета"), WS_BORDER | WS_TABSTOP | WS_CHILD, gridX, gridY, 2 * vpControl->Width / 3, clientRect.right - panelWidth, &CUserInterface::ColorGrid);
 	InfoGrid_ID = InsertElement(NULL, _T("ZeeGrid"), TEXT_INFOGRID_NAME, WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX + 2 * vpControl->Width / 3 + 2, gridY, vpControl->Width / 3 - 2, clientRect.right - panelWidth, &CUserInterface::InfoGrid);
 
 	
@@ -755,4 +775,14 @@ bool CUserInterface::MeasureDistance() const
 {
 	HWND hWnd = GetDlgItem(ParentHWND, MeasureDistance_ID);
 	return Button_GetCheck(hWnd);
+}
+
+int CUserInterface::GetMainTableMode() const
+{
+	return mainTableMode;
+}
+
+void CUserInterface::SetMainTableMode(int value)
+{
+	mainTableMode = value;
 }
