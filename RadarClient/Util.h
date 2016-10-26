@@ -14,8 +14,8 @@
 #include <iostream>
 
 #include <Windows.h>
-#include <windowsx.h>
-#include <WinBase.h>
+//#include <windowsx.h>
+//#include <WinBase.h>
 
 #include <tchar.h>
 #include <algorithm> 
@@ -203,5 +203,5 @@ public:
 int	printf_mt(const char *s, ...);
 void RedirectIOToConsole();
 void BindStdHandlesToConsole();
-int Log(std::string msg);
-
+int Log(std::string context, std::string msg);
+void GetDateTimeString(std::string &out);

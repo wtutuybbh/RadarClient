@@ -1,7 +1,6 @@
 //#include "stdafx.h"
 #define WIN32_LEAN_AND_MEAN
 #include "C3DObject.h"
-#include "glm/glm.hpp"
 #include "glm/gtx/intersect.hpp"
 #include "CUserInterface.h"
 #include "CViewPortControl.h"

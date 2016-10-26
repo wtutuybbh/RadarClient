@@ -1,12 +1,14 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 //#include "CScene.h"
-#include "CCamera.h"
+//#include "CCamera.h"
 
-#include "Util.h"
+//#include "Util.h"
 #include "FreeImage.h"
 #include <GL/glew.h>
+#include "glm/glm.hpp"
 //#include <unordered_map>
 //#include "C3DObjectVBO.h"
 class C3DObjectVBO;
@@ -17,7 +19,7 @@ class C3DObjectProgram;
 //#include "CViewPortControl.h"
 class CViewPortControl;
 class CScene;
-#include <unordered_map>
+
 
 class CUserInterface;
 

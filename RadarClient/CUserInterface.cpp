@@ -59,7 +59,7 @@ LRESULT CUserInterface::Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
 LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	Log("Entered color setup.");
+	Log("CUserInterface::Button_Test", "Entered color setup.");
 	if (GetMainTableMode()==0)
 	{
 		ShowWindow(Elements[Grid_ID]->hWnd, SW_HIDE);

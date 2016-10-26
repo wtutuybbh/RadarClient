@@ -29,6 +29,10 @@
 #include "CUserInterface.h"
 #include <iostream>
 #include <fstream>
+#include "CRCSocket.h"
+#include "C3DObject.h"
+#include "C3DObjectVBO.h"
+#include "C3DObjectProgram.h"
 
 
 float CMesh::AverageHeight;
@@ -575,86 +579,23 @@ bool CScene::PrepareRayVBO()
 	Ray[2].x = maxDist * sin(rayWidth / 2) / mpph;
 	Ray[2].y = y0;
 	Ray[2].z = maxDist * cos(rayWidth / 2) / mpph;
-	/*int i0 = 0;
 
-	float d_rayW = rayWidth / rayDensity; //one arc step - 'width' dimension
-	float d_rayH = RAY_HEIGHT / rayDensity; // one arc step - 'height' dimension
-
-
-
-	float a, e;
-	int oneside = (rayDensity + 1) * (rayDensity + 1);
-	rayArraySize = 3;// rayDensity*rayDensity * 6 * 2 + rayDensity * 6 * 4;
-	
-
-	float ZERO_ELEVATION = glm::radians(CSettings::GetFloat(FloatZeroElevation));
-	a = -rayWidth / 2;
-	for (int i = 0; i <= rayDensity; i++) {
-		e = ZERO_ELEVATION - RAY_HEIGHT/2.0f;
-		for (int j = 0; j <= rayDensity; j++) {
-
-			Ray[i0].x = minDist * cos(e) * sin(a) / mpph;
-			Ray[i0].y = y0;// +minDist * sin(e) / mppv;
-			Ray[i0].z = minDist * cos(e) * cos(a) / mpph;
-			Ray[oneside + i0].x = maxDist * cos(e) * sin(a) / mpph;
-			Ray[oneside + i0].y = y0;// +maxDist * sin(e) / mppv;
-			Ray[oneside + i0].z = maxDist * cos(e) * cos(a) / mpph;
-			i0++;
-			e += d_rayH;
-		}
-		a += d_rayW;
-	}*/
 	rayArraySize = 3;
 	ray = new unsigned short[rayArraySize]; //ray index array
 	ray[0] = 0;
 	ray[1] = 1;
 	ray[2] = 2;
-	/*int k1 = 0, k2 = 6 * rayDensity * rayDensity, k3 = 6 * rayDensity * rayDensity * 2;
-	for (int i = 0; i < rayDensity; i++) {
-		for (int j = 0; j < rayDensity; j++) {
-			ray[k1++] = i * (rayDensity + 1) + j;
-			ray[k1++] = i * (rayDensity + 1) + j + 1;
-			ray[k1++] = (i + 1) * (rayDensity + 1) + j;
-			ray[k1++] = (i + 1) * (rayDensity + 1) + j;
-			ray[k1++] = i * (rayDensity + 1) + j + 1;
-			ray[k1++] = (i + 1) * (rayDensity + 1) + j + 1;
 
+	if (!RayObj)
+	{
+		//RayObj = new C3DObjectModel()
+		RayObj = new C3DObjectModel(Main,
+			new C3DObjectVBO(false),
+			NULL,
+			new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", NULL, NULL, "color"));
+		
+	}
 
-			ray[k2++] = oneside + i * (rayDensity + 1) + j;
-			ray[k2++] = oneside + i * (rayDensity + 1) + j + 1;
-			ray[k2++] = oneside + (i + 1) * (rayDensity + 1) + j;
-			ray[k2++] = oneside + (i + 1) * (rayDensity + 1) + j;
-			ray[k2++] = oneside + i * (rayDensity + 1) + j + 1;
-			ray[k2++] = oneside + (i + 1) * (rayDensity + 1) + j + 1;
-		}
-		ray[k3++] = i * (rayDensity + 1);
-		ray[k3++] = oneside + (i + 1) * (rayDensity + 1);
-		ray[k3++] = oneside + i * (rayDensity + 1);
-		ray[k3++] = i * (rayDensity + 1);
-		ray[k3++] = (i + 1) * (rayDensity + 1);
-		ray[k3++] = oneside + (i + 1) * (rayDensity + 1);
-
-		ray[k3++] = rayDensity * (rayDensity + 1) + i;
-		ray[k3++] = rayDensity * (rayDensity + 1) + i + 1;
-		ray[k3++] = oneside + rayDensity * (rayDensity + 1) + i;
-		ray[k3++] = oneside + rayDensity * (rayDensity + 1) + i;
-		ray[k3++] = rayDensity * (rayDensity + 1) + i + 1;
-		ray[k3++] = oneside + rayDensity * (rayDensity + 1) + i + 1;
-
-		ray[k3++] = (rayDensity + 1) * i + rayDensity;
-		ray[k3++] = oneside + (rayDensity + 1) * i + rayDensity;
-		ray[k3++] = (rayDensity + 1) * (i + 1) + rayDensity;
-		ray[k3++] = (rayDensity + 1) * (i + 1) + rayDensity;
-		ray[k3++] = oneside + (rayDensity + 1) * i + rayDensity;
-		ray[k3++] = oneside + (rayDensity + 1) * (i + 1) + rayDensity;
-
-		ray[k3++] = i;
-		ray[k3++] = oneside + i;
-		ray[k3++] = oneside + i + 1;
-		ray[k3++] = i;
-		ray[k3++] = oneside + i + 1;
-		ray[k3++] = i + 1;
-	}*/
 	return true;
 }
 

@@ -11,6 +11,8 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+#include <boost/log/trivial.hpp>
+
 namespace cnvrt {
 	double latdg2m(double dg, double lat) {
 		if (lat < 5) return dg * 110579;
@@ -464,12 +466,29 @@ void BindStdHandlesToConsole()
 	}
 }
 
-int Log(std::string msg)
+int Log(std::string context, std::string msg)
 {
 	HANDLE myConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 	static DWORD cCharsWritten;
-	WriteConsole(myConsoleHandle, msg.c_str(), msg.length(), &cCharsWritten, NULL);
+	std::stringstream s;
+	std::string DateTimeString;
+	GetDateTimeString(DateTimeString);
+	s << DateTimeString << "|" << context << ": " << msg << std::endl;
+	WriteConsole(myConsoleHandle, s.str().c_str(), s.str().length(), &cCharsWritten, NULL);
+	BOOST_LOG_TRIVIAL(trace) << s.str();
 	return (int)cCharsWritten;
+}
+
+void GetDateTimeString(std::string& out)
+{                                                                                                      
+	time_t rawtime;
+	struct tm * timeinfo;
+	char buffer[80];
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	strftime(buffer, 80, "%d-%m-%Y %I:%M:%S", timeinfo);
+	std::string tmp(buffer);
+	out.append(tmp);
 }
 
 //End of File

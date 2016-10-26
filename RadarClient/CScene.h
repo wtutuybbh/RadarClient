@@ -1,11 +1,17 @@
 #pragma once
-#include "CRCSocket.h"
+//#include "CRCSocket.h"
 #include "glm/glm.hpp"
 #include <string>
 #include <vector>
 #include "glm/detail/type_mat.hpp"
 #include <unordered_map>
 
+struct RIMAGE;
+struct RPOINTS;
+struct RPOINT;
+struct RDR_INITCL;
+struct RDRTRACK;
+class TRK;
 class CTrack;
 class CLine;
 
@@ -37,6 +43,7 @@ class old_C3DObject;
 class old_CMinimapPointer;
 class CMiniMapPointer;
 class CMesh;
+class CRCSocket;
 
 class CScene {
 	unsigned long mainDrawCount{ 0 };
@@ -99,7 +106,7 @@ public:
 	std::vector<CSector*> Sectors; //points
 
 	std::unordered_map<int, CTrack*> Tracks;
-	vector<int> SelectedTracksIds;
+	std::vector<int> SelectedTracksIds;
 
 	int SectorsCount;
 
@@ -129,6 +136,8 @@ public:
 
 	CMarkup *Markup {NULL};
 
+	C3DObjectModel *RayObj{ NULL };
+
 	glm::vec3 MeshSize;
 	glm::vec3 * m_Bounds{ NULL };
 	CScene(std::string alfFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize);
@@ -149,7 +158,7 @@ public:
 	void ClearSectors();
 	void Dump(CViewPortControl *vpControl);
 
-	void RefreshTracks(vector<TRK*> *tracks);
+	void RefreshTracks(std::vector<TRK*> *tracks);
 
 	void RefreshImages(RIMAGE* info, void* pixels);
 

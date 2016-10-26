@@ -481,7 +481,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	printf("printf test");
 	std::cout << "std::cout test" << endl;
 	fflush(stdout);*/
-	Log("Hello, world!");
+	Log("WinMain", "RadarClient started.");
 	//CMesh::AverageHeight = 0;
 	//CMesh::TotalVertexCount = 0;
 	CSettings::Init();
