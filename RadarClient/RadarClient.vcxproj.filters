@@ -24,9 +24,6 @@
     <ClCompile Include="CScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C3DObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -96,6 +93,12 @@
     <ClCompile Include="CRCTextureDataFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C3DObjectModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CMesh.h">
@@ -105,9 +108,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="C3DObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CCamera.h">
@@ -186,6 +186,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CRCTextureDataFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C3DObjectModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

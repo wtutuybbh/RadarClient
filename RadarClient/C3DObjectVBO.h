@@ -1,19 +1,26 @@
 #pragma once
-#include <GL/glew.h>
-//#include "Util.h"
+#include "stdafx.h"
+
+
+struct VBOData {
+	glm::vec4 vert;
+	glm::vec3 norm;
+	glm::vec4 color;
+	glm::vec2 texcoord;
+};
 
 class C3DObjectVBO
 {
 	//std::vector<VBOData>* buffer {NULL};
-	void * buffer{ NULL }, *vbuffer{ NULL };
+	void * buffer{ nullptr }, *vbuffer{ nullptr };
 	unsigned int vboId { 0 }, vaoId { 0 };
 	bool ready, clearAfter;
-	int bufferSize, elementSize{ sizeof(VBOData) };
+	int bufferSize, elementSize{ 0 };
 
-	std::vector<unsigned short *> *idxArrays {NULL};
-	std::vector<int> *idxLengths {NULL};
-	std::vector<GLenum> *idxModes {NULL};
-	std::vector<unsigned int> *idxIds{ NULL };
+	std::vector<unsigned short *> *idxArrays { nullptr };
+	std::vector<int> *idxLengths { nullptr };
+	std::vector<GLenum> *idxModes { nullptr };
+	std::vector<unsigned int> *idxIds{ nullptr };
 public:
 	virtual ~C3DObjectVBO();
 	bool NeedsReload {false};

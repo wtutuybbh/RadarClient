@@ -1,13 +1,8 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-//#include <windows.h>
-#include <unordered_map>
-#include <vector>
+#include "stdafx.h"
 
 #include "Util.h"
-
-#include "glm/glm.hpp"
 
 #define TEXT_LABEL_NOT_CONNECTED _T("Нет соединения")
 #define TEXT_LABEL_CONNECTED _T("Соединение установлено")

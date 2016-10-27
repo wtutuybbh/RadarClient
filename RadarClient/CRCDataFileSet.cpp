@@ -1,10 +1,7 @@
-#include "stdafx.h"
-#include <FreeImage.h>
-#include "CRCDataFile.h"
-#include "CRCAltitudeDataFile.h"
-#include "CRCTextureDataFile.h"
+//#include "stdafx.h"
 #include "CRCDataFileSet.h"
-#include "Util.h"
+#include "CRCTextureDataFile.h"
+#include "CRCAltitudeDataFile.h"
 
 using namespace boost::filesystem;
 using namespace std;

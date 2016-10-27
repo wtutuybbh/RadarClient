@@ -1,8 +1,8 @@
-#define WIN32_LEAN_AND_MEAN
+//#define WIN32_LEAN_AND_MEAN
 
 //#include "stdafx.h"
-#include "CRCSocket.h"
 #include "CRImage.h"
+#include "CRCSocket.h"
 #include "CSettings.h"
 #include "C3DObjectVBO.h"
 #include "C3DObjectProgram.h"

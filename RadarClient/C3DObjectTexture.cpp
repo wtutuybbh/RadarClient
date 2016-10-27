@@ -1,7 +1,5 @@
-#define WIN32_LEAN_AND_MEAN
+//#define WIN32_LEAN_AND_MEAN
 #include "C3DObjectTexture.h"
-#include <FreeImage.h>
-#include <GL/glew.h>
 
 void C3DObjectTexture::InitBits()
 {

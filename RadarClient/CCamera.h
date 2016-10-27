@@ -1,9 +1,6 @@
 #pragma once
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "glm/gtx/rotate_vector.hpp"
-#include "glm/detail/type_mat.hpp"
+#include "stdafx.h"
+
 typedef void(*LookAtCallback)(double eyex, double eyey, double eyez, double centerx, double centery, double centerz, double upx, double upy, double upz);
 enum MovementType { FORWARD, BACKWARD, STRAFE_L, STRAFE_R };
 
@@ -27,9 +24,6 @@ public:
 	
 
 	CCamera();
-	/*CCamera(float eyex, float eyey, float eyez, float centerx, float centery, float centerz, float upx, float upy, float upz, 
-		float fovy, float aspect, float zNear, float zFar,
-		float speed, LookAtCallback lookAt);*/
 	~CCamera();
 
 	void SetAll(float eyex, float eyey, float eyez, float centerx, float centery, float centerz, float upx, float upy, float upz,

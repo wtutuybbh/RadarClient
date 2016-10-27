@@ -1,6 +1,5 @@
 #pragma once
-#include <vector>
-#include <string>
+#include "stdafx.h"
 
 class CRCDataFile;
 enum DataFileType; //TODO: can lead to non-compilable state of project, beware

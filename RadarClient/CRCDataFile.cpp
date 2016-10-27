@@ -1,7 +1,6 @@
 //#include "stdafx.h"
 #include "CRCDataFile.h"
 #include "Util.h"
-#include <math.h>
 
 
 DataFileType CRCDataFile::GetTypeByExt(std::string ext)

@@ -1,28 +1,23 @@
 #pragma once
-#define WIN32_LEAN_AND_MEAN
+//#define WIN32_LEAN_AND_MEAN
 
-#include "CRCSocket.h"
 #include "CUserInterface.h"
+#include "CRCSocket.h"
 #include "CViewPortControl.h"
 #include "CCamera.h"
 #include "CScene.h"
 #include <CommCtrl.h>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <iomanip>
+
 #include "ZeeGrid.h"
 
 #include "Util.h"
 #include "CMesh.h"
 #include "CSettings.h"
-#include "CRCDataFileSet.h"
-#include "CRCAltitudeDataFile.h"
-#include "CRCTextureDataFile.h"
+
 #include <boost/filesystem/path.hpp>
-#include <boost/range/iterator_range_core.hpp>
-#include <boost/filesystem/operations.hpp>
-#include "CRCDataFile.h"
+
+
+
 
 LRESULT Button1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	return 0;
@@ -471,7 +466,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 		SendMessage(it->second->hWnd, WM_SETFONT, (WPARAM)Font, TRUE);
 	}
 
-	GridHWND = InfoGridHWND = NULL;
+	GridHWND = InfoGridHWND = nullptr;
 	InitGrid();
 
 	Trackbar_BegAzm_SetText(BegAzmValue_ID);

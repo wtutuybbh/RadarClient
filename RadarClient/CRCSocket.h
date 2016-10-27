@@ -1,38 +1,20 @@
 ﻿#pragma once
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
+#include "stdafx.h"
 
-#ifdef _DEBUG
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
-#define new DEBUG_NEW
-#else
-#include <stdlib.h>
-#endif
 
 #ifndef global1h
 #define global1h
 
-//#define WIN32_LEAN_AND_MEAN 1
-
-#include <iostream>
-#include <string>
-#include <ctime>
+////#define WIN32_LEAN_AND_MEAN 1
 
 #define WM_SOCKET 104
 
 #define MPI               3.14159265358979323846   /* Pi               */
 #define MPI2             1.57079632679489661923   /* Pi/2     */
 #define M_PI_180      0.01745329251994329      /* Pi/180   */
-#include <vector>
-#include <mutex>
 
 
-#include <windows.h>
+
 //#pragma comment(lib,"ws2_32")
 
 #include "Util.h"

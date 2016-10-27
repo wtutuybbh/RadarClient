@@ -1,8 +1,5 @@
 #pragma once
-#include <unordered_map>
-#include "glm/glm.hpp"
-#include "glm/detail/type_mat.hpp"
-#include <map>
+#include "stdafx.h"
 
 
 enum Settings

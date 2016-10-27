@@ -1,9 +1,6 @@
 #pragma once
 
-#ifndef GL_FRAMEWORK__INCLUDED
-#define GL_FRAMEWORK__INCLUDED
-
-#include <windows.h>								// Header File For Windows
+#include "stdafx.h"
 
 #include "Util.h"
 
@@ -55,4 +52,4 @@ void Draw(void);									// Perform All Your Scene Drawing
 //typedef glm::tvec3<GLdouble, glm::precision::defaultp> 
 
 void LookAtCallback_(double eyex, double eyey, double eyez, double centerx, double centery, double centerz, double upx, double upy, double upz);
-#endif												// GL_FRAMEWORK__INCLUDED
+												// GL_FRAMEWORK__INCLUDED

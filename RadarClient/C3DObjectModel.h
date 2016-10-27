@@ -1,28 +1,12 @@
 #pragma once
+#include "stdafx.h"
 
-#include <vector>
-#include <unordered_map>
-//#include "CScene.h"
-//#include "CCamera.h"
-
-//#include "Util.h"
-#include "FreeImage.h"
-#include <GL/glew.h>
-#include "glm/glm.hpp"
-//#include <unordered_map>
-//#include "C3DObjectVBO.h"
 class C3DObjectVBO;
-//#include "C3DObjectTexture.h"
 class C3DObjectTexture;
-//#include "C3DObjectProgram.h"
 class C3DObjectProgram;
-//#include "CViewPortControl.h"
 class CViewPortControl;
 class CScene;
-
-
 class CUserInterface;
-
 class CViewPortControl;
 
 class C3DObjectModel

@@ -1,18 +1,18 @@
 #pragma once
-#include <GL/GL.h>
+#include "stdafx.h"
 
-#pragma comment( lib, "opengl32.lib" )							// Search For OpenGL32.lib While Linking
-#pragma comment( lib, "glu32.lib" )								// Search For GLu32.lib While Linking
+//#pragma comment( lib, "opengl32.lib" )							// Search For OpenGL32.lib While Linking
+//#pragma comment( lib, "glu32.lib" )								// Search For GLu32.lib While Linking
 //#pragma comment( lib, "glaux.lib" )								// Search For GLaux.lib While Linking
 
-#ifndef CDS_FULLSCREEN											// CDS_FULLSCREEN Is Not Defined By Some
-#define CDS_FULLSCREEN 4										// Compilers. By Defining It This Way,
-#endif															// We Can Avoid Errors
+//#ifndef CDS_FULLSCREEN											// CDS_FULLSCREEN Is Not Defined By Some
+//#define CDS_FULLSCREEN 4										// Compilers. By Defining It This Way,
+//#endif															// We Can Avoid Errors
 
 // TUTORIAL
 // Mesh Generation Paramaters
-#define MESH_RESOLUTION 1.0f									// Pixels Per Vertex
-#define MESH_HEIGHTSCALE 2.0f									// Mesh Height Scale
+//#define MESH_RESOLUTION 1.0f									// Pixels Per Vertex
+//#define MESH_HEIGHTSCALE 2.0f									// Mesh Height Scale
 //#define NO_VBOS												// If Defined, VBOs Will Be Forced Off
 
 // VBO Extension Definitions, From glext.h
@@ -31,9 +31,9 @@ PFNGLBUFFERDATAARBPROC glBufferDataARB = NULL;					// VBO Data Loading Procedure
 PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB = NULL;			// VBO Deletion Procedure
 */
 
-#include "C3DObject.h"
+#include "C3DObjectModel.h"
 //#include "CScene.h"
-#include "FreeImage.h"
+//#include "FreeImage.h"
 //#include <vector>
 //#include "ShaderUtils.h"
 

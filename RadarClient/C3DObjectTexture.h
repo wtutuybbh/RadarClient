@@ -1,6 +1,5 @@
 #pragma once
-#include <FreeImage.h>
-#include <string>
+#include "stdafx.h"
 
 using namespace std;
 

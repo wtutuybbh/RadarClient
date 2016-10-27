@@ -1,15 +1,9 @@
 #pragma once
-#define WIN32_LEAN_AND_MEAN
-
-#include <GL/glew.h>
-#include <GL/glut.h>
-#include <GL/freeglut.h>
-
-#include <string>
+#include "CScene.h"
 
 #include "CRCPoint.h"
 #include "CTrack.h"
-#include "CScene.h"
+
 #include "CMesh.h"
 #include "CMarkup.h"
 #include "CSector.h"
@@ -17,22 +11,19 @@
 #include "CMinimapPointer.h"
 
 #include "Util.h"
-#define _USE_MATH_DEFINES 
-#include <math.h>
 
 #include "CCamera.h"
-#include <vector>
 #include "CSettings.h"
 #include "CViewPortControl.h"
 #include "CRImageSet.h"
 #include "CLine.h"
-#include "CUserInterface.h"
-#include <iostream>
-#include <fstream>
+
 #include "CRCSocket.h"
-#include "C3DObject.h"
+#include "C3DObjectModel.h"
 #include "C3DObjectVBO.h"
 #include "C3DObjectProgram.h"
+
+#include "CUserInterface.h"
 
 
 float CMesh::AverageHeight;

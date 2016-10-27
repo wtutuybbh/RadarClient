@@ -1,28 +1,11 @@
 #pragma once
+#include "stdafx.h"
 
 /* File custom.h
 * (custom control interface)
 */
 
-#ifndef VIEW_PORT_CONTROL_H
-#define VIEW_PORT_CONTROL_H
 
-#include <tchar.h>
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <windowsx.h>
-
-#include <GL/glew.h>
-#include <GL/glut.h>
-
-#define _USE_MATH_DEFINES 
-#include <math.h>
-
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "glm/gtx/rotate_vector.hpp"
-//#include "C3DObject.h"
 class C3DObjectModel;
 
 /* Window class */
@@ -87,5 +70,3 @@ public:
 
 	int Id;
 };
-
-#endif  /* CUSTOM_H */

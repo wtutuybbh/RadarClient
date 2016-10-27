@@ -1,7 +1,8 @@
-#define WIN32_LEAN_AND_MEAN
+//#define WIN32_LEAN_AND_MEAN
 #include "C3DObjectProgram.h"
 #include "ShaderUtils.h"
 #include "Util.h"
+#include "C3DObjectVBO.h"
 
 
 C3DObjectProgram::~C3DObjectProgram()
@@ -16,6 +17,7 @@ C3DObjectProgram::C3DObjectProgram(const char* vShaderFile, const char* fShaderF
 	this->textureAttribName = textureAttribName?string(textureAttribName):string();
 	this->normalAttribName = normalAttribName?string(normalAttribName):string();
 	this->colorAttribName = colorAttribName?string(colorAttribName):string();
+	this->elementSize = sizeof(VBOData);
 	this->ready = false;
 }
 

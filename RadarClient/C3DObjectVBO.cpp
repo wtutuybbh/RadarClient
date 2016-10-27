@@ -1,4 +1,4 @@
-#define WIN32_LEAN_AND_MEAN
+//#define WIN32_LEAN_AND_MEAN
 #include "C3DObjectVBO.h"
 
 C3DObjectVBO::~C3DObjectVBO()
@@ -27,6 +27,7 @@ C3DObjectVBO::C3DObjectVBO(bool clearAfter)
 	this->clearAfter = clearAfter;
 	this->ready = false;
 	this->bufferSize = 0;
+	this->elementSize = sizeof(VBOData);
 }
 
 C3DObjectVBO* C3DObjectVBO::InitStructure()

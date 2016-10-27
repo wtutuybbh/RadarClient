@@ -1,21 +1,5 @@
 #pragma once
-#include "C3DObject.h"
-#include <vector>
-
-/*class old_CMinimapPointer : public old_C3DObject
-{
-private:
-	//bool MiniMapVBOReady;
-
-public:
-	glm::vec2 Position;
-	float Direction; //azimuth angle
-	void old_CMinimapPointer::MiniMapDraw(CCamera *cam) override;
-	void old_CMinimapPointer::MiniMapBuildVBO() override;
-	explicit old_CMinimapPointer(CScene *scene);
-	~old_CMinimapPointer();
-
-};*/
+#include "C3DObjectModel.h"
 
 class CMiniMapPointer : public C3DObjectModel
 {

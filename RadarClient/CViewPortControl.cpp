@@ -1,10 +1,10 @@
-#define WIN32_LEAN_AND_MEAN
-
+//#define WIN32_LEAN_AND_MEAN
+#include "stdafx.h"
 #include "CViewPortControl.h"
 #include "CCamera.h"
 #include "CScene.h"
 #include "CUserInterface.h"
-#include "C3DObject.h"
+#include "C3DObjectModel.h"
 #include "Util.h"
 #include "CSettings.h"
 
@@ -81,8 +81,8 @@ LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wPara
 
 	case WM_MOUSEMOVE:
 		if (Camera) {
-			Camera->newPosition.x = GET_X_LPARAM(lParam);
-			Camera->newPosition.y = GET_Y_LPARAM(lParam);
+			Camera->newPosition.x = LOWORD(lParam);
+			Camera->newPosition.y = HIWORD(lParam);
 			if (wParam == MK_LBUTTON) {
 				Camera->Rotate(Camera->newPosition.x - Camera->startPosition.x, glm::vec3(0, -1, 0));
 				Camera->Rotate(Camera->newPosition.y - Camera->startPosition.y, glm::cross(glm::vec3(0, 1, 0), Camera->GetDirection()));
@@ -105,9 +105,9 @@ LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wPara
 	case WM_LBUTTONDOWN:
 		SetFocus(hwnd);
 		if (Camera) {
-			Camera->startPosition.x = GET_X_LPARAM(lParam);
-			Camera->startPosition.y = GET_Y_LPARAM(lParam);
-			C3DObjectModel* o = Get3DObject(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			Camera->startPosition.x = LOWORD(lParam);
+			Camera->startPosition.y = HIWORD(lParam);
+			C3DObjectModel* o = Get3DObject(LOWORD(lParam), HIWORD(lParam));
 			
 				if (Scene && UI)
 				{
@@ -427,7 +427,8 @@ bool CViewPortControl::InitGL()
 		GLenum en = glGetError();
 		const GLubyte *s = glewGetErrorString(err);
 		/* Problem: glewInit failed, something is seriously wrong. */
-		fprintf(stderr, "Error: %s\n", s);
+		Log("CViewPortControl::InitGL", "Problem: glewInit failed, something is seriously wrong.");
+		//fprintf(stderr, "Error: %s\n", s);
 	}
 
 	const GLubyte* version = glGetString(GL_VERSION);

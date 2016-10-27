@@ -1,8 +1,9 @@
-﻿#define WIN32_LEAN_AND_MEAN
+﻿//#define WIN32_LEAN_AND_MEAN
 
 //#include "stdafx.h"
-#include "Util.h"
+
 #include "CRCSocket.h"
+#include "Util.h"
 #include "CSettings.h"
 
 #ifndef min

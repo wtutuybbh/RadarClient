@@ -1,5 +1,5 @@
 #pragma once
-#include "C3DObject.h"
+#include "C3DObjectModel.h"
 class CMarkup :
 	public C3DObjectModel
 {

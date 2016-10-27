@@ -1,7 +1,5 @@
 #pragma once
-#include <vector>
-#include <GL/glew.h>
-#include "C3DObject.h"
+#include "C3DObjectModel.h"
 class CViewPortControl;
 class CRImage;
 struct RDR_INITCL;

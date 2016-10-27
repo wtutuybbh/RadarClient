@@ -1,10 +1,5 @@
 #pragma once
-//#include "CRCSocket.h"
-#include "glm/glm.hpp"
-#include <string>
-#include <vector>
-#include "glm/detail/type_mat.hpp"
-#include <unordered_map>
+#include "stdafx.h"
 
 struct RIMAGE;
 struct RPOINTS;
@@ -44,6 +39,8 @@ class old_CMinimapPointer;
 class CMiniMapPointer;
 class CMesh;
 class CRCSocket;
+class CUserInterface;
+class CViewPortControl;
 
 class CScene {
 	unsigned long mainDrawCount{ 0 };

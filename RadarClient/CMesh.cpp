@@ -1,31 +1,16 @@
-#define WIN32_LEAN_AND_MEAN
+//#define WIN32_LEAN_AND_MEAN
 
 #pragma once
-#include <fstream>
-#include <iostream>
 
-#include <GL/glew.h>
-#include <GL/glut.h>
-
-//#include <Windows.h>
 #include "CMesh.h"
 
 #include "Util.h"
 
 
-
-#include "glm/glm.hpp"
-
 #include "CScene.h"
-
-#include "Util.h"
-
-#include <float.h>
-#include "glm/gtx/intersect.inl"
 
 #define DATFILE_MAXLINELENGTH 256
 
-#include <math.h>
 #include "CViewPortControl.h"
 #include "CSettings.h"
 #include "C3DObjectProgram.h"

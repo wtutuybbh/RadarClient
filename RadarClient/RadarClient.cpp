@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "RadarClient.h"
 #include "CRCSocket.h"
 
 #ifdef _DEBUG
@@ -11,51 +12,12 @@
 #include <stdlib.h>
 #endif
 
-#include <stdio.h>
-
-#include <math.h>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <iostream>
-#include <fstream>
-
-#include <GL/glew.h>
-#include <GL/glut.h>
-
-
-
-#include <ctime>
-
-
-/***********************************************
-*                                              *
-*    Jeff Molofee's Revised OpenGL Basecode    *
-*  Huge Thanks To Maxwell Sayles & Peter Puck  *
-*            http://nehe.gamedev.net           *
-*                     2001                     *
-*                                              *
-***********************************************/
-
-//#include <windows.h>													// Header File For The Windows Library
-//#include <windowsx.h>
-#include <gl/gl.h>														// Header File For The OpenGL32 Library
-#include <gl/glu.h>														// Header File For The GLu32 Library
-
-#include "RadarClient.h"														// Header File For The NeHeGL Basecode
 #include "CMesh.h"
 #include "CScene.h"
 #include "Util.h"
 
 #include "CCamera.h"
-#define WIN32_LEAN_AND_MEAN
-
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "glm/gtx/rotate_vector.hpp"
-#include "glm/gtx/intersect.hpp"
-//#include "FreeImage.h"
+//#define WIN32_LEAN_AND_MEAN
 
 #include "CViewPortControl.h"
 #include "CMinimap.h"
@@ -65,6 +27,7 @@
 
 
 #include "CSettings.h"
+#include <GL/glut.h>
 
 //#include <vld.h>
 
@@ -103,7 +66,6 @@ CRCSocket *g_Socket;
 DebugWindowInfo g_dwi;
 #endif
 
-std::thread *g_LoggerThread = NULL;
 
 //std::mutex m;
 
@@ -118,11 +80,6 @@ void TerminateApplication(GL_Window* window)							// Terminate The Application
 	{
 		delete g_Socket;
 		g_Socket = NULL;
-	}
-	if (g_LoggerThread)
-	{
-		g_LoggerThread->detach();
-		delete g_LoggerThread;
 	}
 }
 

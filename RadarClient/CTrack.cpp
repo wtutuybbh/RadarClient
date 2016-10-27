@@ -1,7 +1,6 @@
-#define WIN32_LEAN_AND_MEAN
-
-#include "CRCSocket.h"
+//#define WIN32_LEAN_AND_MEAN
 #include "CTrack.h"
+#include "CRCSocket.h"
 #include "CSettings.h"
 #include "CViewPortControl.h"
 #include "C3DObjectVBO.h"

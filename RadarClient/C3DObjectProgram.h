@@ -1,6 +1,5 @@
 #pragma once
-//#include "Util.h"
-#include <string>
+#include "stdafx.h"
 
 using namespace std;
 
@@ -9,7 +8,7 @@ class C3DObjectProgram
 	bool ready;
 	string vShaderFile, fShaderFile, vertexAttribName, textureAttribName, normalAttribName, colorAttribName;
 	int vertexPlace{ 0 }, texcoorPlace{ 11 }, normalPlace{ 4 }, colorPlace{ 7 };
-	int elementSize{ sizeof(VBOData) };
+	int elementSize{ 0 };
 public:	
 	~C3DObjectProgram();
 	C3DObjectProgram(const char* vShaderFile, const char* fShaderFile, const char* vertexAttribName, const char * textureAttribName, const char * normalAttribName, const char * colorAttribName);

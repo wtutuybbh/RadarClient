@@ -1,5 +1,6 @@
-#define WIN32_LEAN_AND_MEAN
+//#define WIN32_LEAN_AND_MEAN
 #include "CMarkup.h"
+#include "Util.h"
 #include "CSettings.h"
 #include "CViewPortControl.h"
 #include "C3DObjectVBO.h"

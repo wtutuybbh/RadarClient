@@ -1,10 +1,5 @@
-#define WIN32_LEAN_AND_MEAN
+//#define WIN32_LEAN_AND_MEAN
 #include "CCamera.h"
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "glm/gtx/rotate_vector.hpp"
-
 #include "Util.h"
 
 CCamera::CCamera() //empty constructor. camera depends on scene, scene depends on camera... oh shit!
@@ -21,33 +16,6 @@ CCamera::CCamera() //empty constructor. camera depends on scene, scene depends o
 	mmTo = glm::vec3(0.0f, 0.0f, 0.0f);
 	mmUp = glm::vec3(0.0f, 0.0f, 1.0f);
 }
-
-/*CCamera::CCamera(float eyex, float eyey, float eyez, float centerx, float centery, float centerz, float upx, float upy, float upz,
-	float fovy, float aspect, float zNear, float zFar, 
-	float speed, LookAtCallback lookAt) {
-	
-	FixViewOnRadar = false;
-
-	Position.x = eyex;
-	Position.y = eyey;
-	Position.z = eyez;
-	Direction.x = centerx - eyex;
-	Direction.y = centery - eyey;
-	Direction.z = centerz - eyez;
-	Up.x = upx;
-	Up.y = upy;
-	Up.z = upz;
-
-	this->fovy = fovy;
-	this->aspect = aspect;
-	this->zNear = zNear;
-	this->zFar = zFar;
-
-	this->lookAt = lookAt;
-	Speed = speed;
-
-	
-}*/
 
 CCamera::~CCamera() {
 

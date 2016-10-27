@@ -1,10 +1,11 @@
-#define WIN32_LEAN_AND_MEAN
+//#define WIN32_LEAN_AND_MEAN
 
 //#include "stdafx.h"
-#include "CRCSocket.h"
+
 #include "CRImageSet.h"
 #include "CRImage.h"
 #include "Util.h"
+#include "CRCSocket.h"
 
 CRImageSet::~CRImageSet()
 {

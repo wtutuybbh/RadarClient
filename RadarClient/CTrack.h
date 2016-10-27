@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include "stdafx.h"
 #include "CSector.h"
 //#include #include "glm/glm.hpp"
 
