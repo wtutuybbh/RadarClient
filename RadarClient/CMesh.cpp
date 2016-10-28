@@ -1,12 +1,6 @@
-//#define WIN32_LEAN_AND_MEAN
-
-#pragma once
-
+#include "stdafx.h"
 #include "CMesh.h"
-
 #include "Util.h"
-
-
 #include "CScene.h"
 
 #define DATFILE_MAXLINELENGTH 256

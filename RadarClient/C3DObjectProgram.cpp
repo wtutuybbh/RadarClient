@@ -1,4 +1,4 @@
-//#define WIN32_LEAN_AND_MEAN
+#include "stdafx.h"
 #include "C3DObjectProgram.h"
 #include "ShaderUtils.h"
 #include "Util.h"

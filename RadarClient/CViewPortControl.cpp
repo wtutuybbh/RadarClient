@@ -1,5 +1,5 @@
-//#define WIN32_LEAN_AND_MEAN
 #include "stdafx.h"
+
 #include "CViewPortControl.h"
 #include "CCamera.h"
 #include "CScene.h"
@@ -7,13 +7,13 @@
 #include "C3DObjectModel.h"
 #include "Util.h"
 #include "CSettings.h"
+#include "CRCLogger.h"
 
 void CViewPortControl::Paint()
 {
 	PAINTSTRUCT ps;
 	HDC hdc;
-	RECT rect;
-	
+	RECT rect;	
 
 	GetClientRect(hWnd, &rect);
 
@@ -261,7 +261,7 @@ LRESULT CALLBACK CViewPortControl::stWinMsgHandler(HWND hwnd, UINT uMsg, WPARAM 
 			return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 	catch (...) {
-		MessageBox(HWND_DESKTOP, "Exception in CViewPortControl::stWinMsgHandler", "Error", MB_OK | MB_ICONEXCLAMATION);
+		CRCLogger::Log("CViewPortControl::stWinMsgHandler", "Exception");
 	}
 }
 
@@ -427,7 +427,7 @@ bool CViewPortControl::InitGL()
 		GLenum en = glGetError();
 		const GLubyte *s = glewGetErrorString(err);
 		/* Problem: glewInit failed, something is seriously wrong. */
-		Log("CViewPortControl::InitGL", "Problem: glewInit failed, something is seriously wrong.");
+		CRCLogger::Log("CViewPortControl::InitGL", "Problem: glewInit failed, something is seriously wrong.");
 		//fprintf(stderr, "Error: %s\n", s);
 	}
 

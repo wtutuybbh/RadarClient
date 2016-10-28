@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "CRCTextureDataFile.h"
 
 CRCTextureDataFile::CRCTextureDataFile(const std::string& imgFileName) :

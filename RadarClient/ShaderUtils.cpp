@@ -1,14 +1,4 @@
-//#define WIN32_LEAN_AND_MEAN
-
-/**
-* From the OpenGL Programming wikibook: http://en.wikibooks.org/wiki/OpenGL_Programming
-* This file is in the public domain.
-* Contributors: Sylvain Beucler
-*/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <GL/glew.h>
+#include "stdafx.h"
 
 /**
 * Store all the file's contents in memory, useful to pass shaders

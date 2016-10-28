@@ -88,7 +88,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=2;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -208,6 +208,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="CRCDataFile.cpp" />
     <ClCompile Include="CRCAltitudeDataFile.cpp" />
     <ClCompile Include="CRCDataFileSet.cpp" />
+    <ClCompile Include="CRCLogger.cpp" />
     <ClCompile Include="CRCTextureDataFile.cpp" />
     <ClCompile Include="CRImage.cpp" />
     <ClCompile Include="CRImageSet.cpp" />
@@ -225,7 +226,9 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="CMesh.cpp" />
     <ClCompile Include="CScene.cpp" />
     <ClCompile Include="ShaderUtils.cpp" />
-    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="CViewPortControl.cpp" />
   </ItemGroup>
@@ -238,6 +241,7 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CRCDataFile.h" />
     <ClInclude Include="CRCAltitudeDataFile.h" />
     <ClInclude Include="CRCDataFileSet.h" />
+    <ClInclude Include="CRCLogger.h" />
     <ClInclude Include="CRCTextureDataFile.h" />
     <ClInclude Include="CRImage.h" />
     <ClInclude Include="CRImageSet.h" />

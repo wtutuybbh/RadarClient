@@ -150,8 +150,3 @@ public:
 		return fputc(c, stdout) == EOF ? traits_type::eof() : c;
 	}
 };
-int	printf_mt(const char *s, ...);
-void RedirectIOToConsole();
-void BindStdHandlesToConsole();
-int Log(std::string context, std::string msg);
-void GetDateTimeString(std::string &out);

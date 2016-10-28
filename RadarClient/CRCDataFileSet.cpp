@@ -1,4 +1,4 @@
-//#include "stdafx.h"
+#include "stdafx.h"
 #include "CRCDataFileSet.h"
 #include "CRCTextureDataFile.h"
 #include "CRCAltitudeDataFile.h"

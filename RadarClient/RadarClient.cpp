@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#include "stdafx.h"
+
 #include "RadarClient.h"
 #include "CRCSocket.h"
 
@@ -17,7 +18,6 @@
 #include "Util.h"
 
 #include "CCamera.h"
-//#define WIN32_LEAN_AND_MEAN
 
 #include "CViewPortControl.h"
 #include "CMinimap.h"
@@ -28,6 +28,10 @@
 
 #include "CSettings.h"
 #include <GL/glut.h>
+#include "CRCLogger.h"
+
+using namespace logging::trivial;
+src::severity_logger< severity_level> lg;
 
 //#include <vld.h>
 
@@ -70,6 +74,8 @@ DebugWindowInfo g_dwi;
 //std::mutex m;
 
 bool g_Initialized = false;
+
+src::severity_logger<boost::log::trivial::severity_level> CRCLogger::logger;
 
 void TerminateApplication(GL_Window* window)							// Terminate The Application
 {
@@ -424,6 +430,11 @@ BOOL RegisterWindowClass(Application* application)						// Register A Window Cla
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	AllocConsole();
+	//CRCLogger::Init();	
+
+	string context = "WinMain";
+
+
 	/*AllocConsole();
 	HANDLE myConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 	DWORD cCharsWritten;
@@ -438,7 +449,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	printf("printf test");
 	std::cout << "std::cout test" << endl;
 	fflush(stdout);*/
-	Log("WinMain", "RadarClient started.");
+	CRCLogger::Log(context, "RadarClient started.");
 	//CMesh::AverageHeight = 0;
 	//CMesh::TotalVertexCount = 0;
 	CSettings::Init();
@@ -461,6 +472,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		_CrtSetBreakAlloc(lBreakAlloc);
 	}
 #endif
+	
 	std::ifstream settings_txt("settings.txt");
 	
 	if (!settings_txt) {
@@ -526,13 +538,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	settings_txt.close();
+	CRCLogger::Log(context, "Settings loaded.");
 
 	if (strcmp(lpCmdLine, "") == 0) {
+		CRCLogger::Log(context, "No parameters provided, using defaults. Usage: RadarClient lon lat 5 5 1300.");
 		g_lon = 37.631424;
 		g_lat = 54.792393;
 		g_mpph = 5.0f;
 		g_mppv = 5.0f;
-		g_texsize = 2048;
+		g_texsize = 1300;
 	}
 	else {
 		std::string strCmdLine(lpCmdLine);
@@ -543,6 +557,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		g_mpph= std::stof(v[2]);
 		g_mppv = std::stof(v[3]);
 		g_texsize = std::stoi(v[4]);
+
+		ostringstream  _s;
+		_s << "Parameters set from command line: lon=" << g_lon << ", lat=" << g_lat << ", mpph=" << g_mpph << ", mppv=" << g_mppv << ", texsize=" << g_texsize;
+		CRCLogger::Log(context, _s.str());
 	}
 	
 	CSettings::SetFloat(FloatMPPh, g_mpph);

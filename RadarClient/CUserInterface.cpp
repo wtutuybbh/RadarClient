@@ -1,5 +1,4 @@
-#pragma once
-//#define WIN32_LEAN_AND_MEAN
+#include "stdafx.h"
 
 #include "CUserInterface.h"
 #include "CRCSocket.h"
@@ -15,8 +14,7 @@
 #include "CSettings.h"
 
 #include <boost/filesystem/path.hpp>
-
-
+#include "CRCLogger.h"
 
 
 LRESULT Button1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -54,7 +52,7 @@ LRESULT CUserInterface::Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
 LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	Log("CUserInterface::Button_Test", "Entered color setup.");
+	CRCLogger::Log("CUserInterface::Button_Test", "Entered color setup.");
 	if (GetMainTableMode()==0)
 	{
 		ShowWindow(Elements[Grid_ID]->hWnd, SW_HIDE);
