@@ -30,8 +30,7 @@
 #include <GL/glut.h>
 #include "CRCLogger.h"
 
-using namespace logging::trivial;
-src::severity_logger< severity_level> lg;
+//using namespace logging::trivial;
 
 //#include <vld.h>
 
@@ -74,8 +73,6 @@ DebugWindowInfo g_dwi;
 //std::mutex m;
 
 bool g_Initialized = false;
-
-src::severity_logger<boost::log::trivial::severity_level> CRCLogger::logger;
 
 void TerminateApplication(GL_Window* window)							// Terminate The Application
 {
@@ -426,32 +423,30 @@ BOOL RegisterWindowClass(Application* application)						// Register A Window Cla
 	}
 	return TRUE;														// Return True (Success)
 }
+
+class outbuf2 : public std::streambuf {
+public:
+	outbuf2() {
+		setp(0, 0);
+	}
+
+	virtual int_type overflow(int_type c = traits_type::eof()) {
+		return fputc(c, stdout) == EOF ? traits_type::eof() : c;
+	}
+};
+
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	AllocConsole();
-	//CRCLogger::Init();	
+	freopen("CONOUT$", "w", stdout);
+	std::cout << "This works" << std::endl;
+
+	CRCLogger::Init();	
 
 	string context = "WinMain";
 
-
-	/*AllocConsole();
-	HANDLE myConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	DWORD cCharsWritten;
-	std::string str("enter game command\n");
-	WriteConsole(myConsoleHandle, str.c_str(), str.length(), &cCharsWritten, NULL);
-	char* command = (char*)malloc(100);
-	unsigned long charsRead = 0;
-	ReadConsole(myConsoleHandle, command, 100, &charsRead, NULL);*/
-
-	//RedirectIOToConsole();
-	/*BindStdHandlesToConsole();
-	printf("printf test");
-	std::cout << "std::cout test" << endl;
-	fflush(stdout);*/
-	CRCLogger::Log(context, "RadarClient started.");
-	//CMesh::AverageHeight = 0;
-	//CMesh::TotalVertexCount = 0;
+	CRCLogger::Info(context, "RadarClient started.");
 	CSettings::Init();
 	C3DObjectModel::_id = 0;
 	C3DObjectModel::_testid = 0;
@@ -538,10 +533,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	settings_txt.close();
-	CRCLogger::Log(context, "Settings loaded.");
+	CRCLogger::Info(context, "Settings loaded.");
 
 	if (strcmp(lpCmdLine, "") == 0) {
-		CRCLogger::Log(context, "No parameters provided, using defaults. Usage: RadarClient lon lat 5 5 1300.");
+		CRCLogger::Info(context, "No parameters provided, using defaults. Usage: RadarClient lon lat 5 5 1300.");
 		g_lon = 37.631424;
 		g_lat = 54.792393;
 		g_mpph = 5.0f;
@@ -560,7 +555,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		ostringstream  _s;
 		_s << "Parameters set from command line: lon=" << g_lon << ", lat=" << g_lat << ", mpph=" << g_mpph << ", mppv=" << g_mppv << ", texsize=" << g_texsize;
-		CRCLogger::Log(context, _s.str());
+		CRCLogger::Info(context, _s.str());
 	}
 	
 	CSettings::SetFloat(FloatMPPh, g_mpph);
@@ -588,12 +583,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	ZeroMemory(&keys, sizeof(Keys));									// Zero keys Structure
 
-																		// Ask The User If They Want To Start In FullScreen Mode?
-	/*if (MessageBox(HWND_DESKTOP, "Would You Like To Run In Fullscreen Mode?", "Start FullScreen?", MB_YESNO | MB_ICONQUESTION) == IDNO)
-	{
-		window.init.isFullScreen = FALSE;								// If Not, Run In Windowed Mode
-	}*/
-	//window.init.isFullScreen = FALSE;								// If Not, Run In Windowed Mode
 
 	// Register A Class For Our Window To Use
 	if (RegisterWindowClass(&application) == FALSE)					// Did Registering A Class Fail?
@@ -719,48 +708,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 debugreturn:
 	Deinitialize();
 	UnregisterClass(application.className, application.hInstance);		// UnRegister Window Class
-	return 0;
 	
-}																		// End Of WinMain()
-
-
-														
+	return 0;	
+}																		// End Of WinMain()												
 
 GL_Window*	g_window;
 Keys*		g_keys;
-
-// TUTORIAL
-// Based Off Of Code Supplied At OpenGL.org
-/*bool IsExtensionSupported(char* szTargetExtension)
-{
-	const unsigned char *pszExtensions = NULL;
-	const unsigned char *pszStart;
-	unsigned char *pszWhere, *pszTerminator;
-
-	// Extension names should not have spaces
-	pszWhere = (unsigned char *)strchr(szTargetExtension, ' ');
-	if (pszWhere || *szTargetExtension == '\0')
-		return false;
-
-	// Get Extensions String
-	pszExtensions =		
-
-	// Search The Extensions String For An Exact Copy
-	pszStart = pszExtensions;
-	for (;;)
-	{
-		pszWhere = (unsigned char *)strstr((const char *)pszStart, szTargetExtension);
-		if (!pszWhere)
-			break;
-		pszTerminator = pszWhere + strlen(szTargetExtension);
-		if (pszWhere == pszStart || *(pszWhere - 1) == ' ')
-			if (*pszTerminator == ' ' || *pszTerminator == '\0')
-				return true;
-		pszStart = pszTerminator;
-	}
-	return false;
-}*/
-//~TUTORIAL
 
 BOOL Initialize(GL_Window* window, Keys* keys)					// Any GL Init Code & User Initialiazation Goes Here
 {

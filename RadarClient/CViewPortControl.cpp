@@ -261,7 +261,7 @@ LRESULT CALLBACK CViewPortControl::stWinMsgHandler(HWND hwnd, UINT uMsg, WPARAM 
 			return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 	catch (...) {
-		CRCLogger::Log("CViewPortControl::stWinMsgHandler", "Exception");
+		CRCLogger::Info("CViewPortControl::stWinMsgHandler", "Exception");
 	}
 }
 
@@ -427,7 +427,7 @@ bool CViewPortControl::InitGL()
 		GLenum en = glGetError();
 		const GLubyte *s = glewGetErrorString(err);
 		/* Problem: glewInit failed, something is seriously wrong. */
-		CRCLogger::Log("CViewPortControl::InitGL", "Problem: glewInit failed, something is seriously wrong.");
+		CRCLogger::Info("CViewPortControl::InitGL", "Problem: glewInit failed, something is seriously wrong.");
 		//fprintf(stderr, "Error: %s\n", s);
 	}
 
