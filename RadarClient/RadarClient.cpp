@@ -442,8 +442,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	freopen("CONOUT$", "w", stdout);
 	std::cout << "This works" << std::endl;
 
-	CRCLogger::Init();	
-
 	string context = "WinMain";
 
 	CRCLogger::Info(context, "RadarClient started.");
