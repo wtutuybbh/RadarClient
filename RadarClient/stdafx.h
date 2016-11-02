@@ -25,6 +25,7 @@
 #include <boost/log/support/date_time.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/utility/setup.hpp>
+#include <boost/format.hpp>
 
 //Narrow-char thread-safe logger.
 typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_level> logger_t;
@@ -76,3 +77,10 @@ typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_le
 
 
 #include <ctime>
+
+#ifdef _DEBUG
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#define new DEBUG_NEW
+#endif

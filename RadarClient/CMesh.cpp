@@ -10,12 +10,16 @@
 #include "C3DObjectProgram.h"
 #include "C3DObjectVBO.h"
 #include "C3DObjectTexture.h"
+#include "CRCLogger.h"
 
 float CMesh::Y0;
 
 //int CMesh::TotalVertexCount;
 bool CMesh::LoadHeightmap(int vpId)
 {
+	string context = "CMesh::LoadHeightmap(int vpId)";
+	CRCLogger::Info(context, "Start, vpId=" + vpId);
+
 	iMapH = GetImageMapHeader(scn->imgFile.data(), scn->datFile.data());
 	if (!iMapH)
 		return false;
@@ -36,8 +40,6 @@ bool CMesh::LoadHeightmap(int vpId)
 
 	double px = (iMapH->imgLon1 - iMapH->imgLon0) / iMapH->sizeX;
 	double py = (iMapH->imgLat1 - iMapH->imgLat0) / iMapH->sizeY;
-
-	//int w = FreeImage_GetWidth((FIBITMAP*)subimage), h = FreeImage_GetHeight((FIBITMAP*)subimage);
 
 	aMap = GetAltitudeMap(scn->altFile.data(),
 		scn->geocenter.x - px * texsize / 2 - px * texsize * shiftX, 

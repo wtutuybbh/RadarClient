@@ -70,7 +70,7 @@ class CUserInterface
 private:
 	int mainTableMode {0};
 	int CurrentID;
-	int IsConnected_ID, Button_Connect_ID, Grid_ID, InfoGrid_ID, ColorGrid_ID, FixViewToRadar_ID, MeasureDistance_ID, Test_ID, Dump_ID, BegAzm_ID, ZeroElevation_ID, BegAzmValue_ID, ZeroElevationValue_ID;
+	int IsConnected_ID, Button_Connect_ID, Grid_ID, InfoGrid_ID, ColorGrid_ID, FixViewToRadar_ID, MeasureDistance_ID, Test_ID, BtnLoad_ID, BegAzm_ID, ZeroElevation_ID, BegAzmValue_ID, ZeroElevationValue_ID;
 	int ObjOptions_ID[3], MapOptions_ID[2], MarkupOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2], MapType_ID[2];
 	//int Info_ID[]
 	void SetChecked(int id, bool checked);
@@ -95,7 +95,7 @@ private:
 
 	virtual LRESULT Button_Connect(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT Button_Dump(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Button_Load(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MarkupOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -115,14 +115,14 @@ private:
 
 public:
 	int MinimapSize;
-	HWND ParentHWND;
-	HFONT hDlgFont;
+	HWND ParentHWND {nullptr};
+	HFONT hDlgFont {nullptr};
 	
 
 	ElementsMap Elements;
 
-	CViewPortControl *VPControl;
-	CRCSocket *Socket;
+	CViewPortControl *VPControl { nullptr };
+	CRCSocket *Socket { nullptr };
 
 	int InsertElement(DWORD xStyle, LPCSTR Class,LPCSTR Text, DWORD Style, int X, int Y, int Width, int Height, UIWndProc Action);
 	

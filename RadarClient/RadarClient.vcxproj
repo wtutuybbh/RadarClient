@@ -109,16 +109,15 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "$(SolutionDir)gdal\x86\Debug\gdal*.dll" "$(OutDir)"
-xcopy /y "$(SolutionDir)freeglut\bin\*.dll" "$(OutDir)"
-xcopy /y "$(SolutionDir)glew\bin\Release\Win32\*.dll" "$(OutDir)"
-xcopy /y "$(ProjectDir)GLSL\*.glsl" "$(OutDir)"
-xcopy /y "$(ProjectDir)GLSL\*.vert" "$(OutDir)"
-xcopy /y "$(ProjectDir)GLSL\*.frag" "$(OutDir)"
-xcopy /y "$(SolutionDir)Data\*.*" "$(OutDir)"
-xcopy /y "$(SolutionDir)Data\AltitudeData\*.*" "$(OutDir)AltitudeData\"
-xcopy /y "$(SolutionDir)Data\TextureData\*.*" "$(OutDir)TextureData\"
-xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
+      <Command>echo n | xcopy /-y "$(SolutionDir)freeglut\bin\*.dll" "$(OutDir)"
+echo n | xcopy /-y "$(SolutionDir)glew\bin\Release\Win32\*.dll" "$(OutDir)"
+echo n | xcopy /-y "$(ProjectDir)GLSL\*.glsl" "$(OutDir)"
+echo n | xcopy /-y "$(ProjectDir)GLSL\*.vert" "$(OutDir)"
+echo n | xcopy /-y "$(ProjectDir)GLSL\*.frag" "$(OutDir)"
+echo n | xcopy /-y "$(SolutionDir)Data\*.*" "$(OutDir)"
+echo n | xcopy /-y "$(SolutionDir)Data\AltitudeData\*.*" "$(OutDir)AltitudeData\"
+echo n | xcopy /-y "$(SolutionDir)Data\TextureData\*.*" "$(OutDir)TextureData\"
+echo n | xcopy /-y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <Bscmake>
       <PreserveSbr>true</PreserveSbr>
@@ -169,16 +168,15 @@ xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
       <AdditionalDependencies>FreeImage.lib;freeglut.lib;glew32.lib;legacy_stdio_definitions.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "$(SolutionDir)gdal\x86\Debug\gdal*.dll" "$(OutDir)"
-xcopy /y "$(SolutionDir)freeglut\bin\*.dll" "$(OutDir)"
-xcopy /y "$(SolutionDir)glew\bin\Release\Win32\*.dll" "$(OutDir)"
-xcopy /y "$(ProjectDir)GLSL\*.glsl" "$(OutDir)"
-xcopy /y "$(ProjectDir)GLSL\*.vert" "$(OutDir)"
-xcopy /y "$(ProjectDir)GLSL\*.frag" "$(OutDir)"
-xcopy /y "$(SolutionDir)Data\*.*" "$(OutDir)"
-xcopy /y "$(SolutionDir)Data\AltitudeData\*.*" "$(OutDir)AltitudeData\"
-xcopy /y "$(SolutionDir)Data\TextureData\*.*" "$(OutDir)TextureData\"
-xcopy /y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
+      <Command>echo n | xcopy /-y "$(SolutionDir)freeglut\bin\*.dll" "$(OutDir)"
+echo n | xcopy /-y "$(SolutionDir)glew\bin\Release\Win32\*.dll" "$(OutDir)"
+echo n | xcopy /-y "$(ProjectDir)GLSL\*.glsl" "$(OutDir)"
+echo n | xcopy /-y "$(ProjectDir)GLSL\*.vert" "$(OutDir)"
+echo n | xcopy /-y "$(ProjectDir)GLSL\*.frag" "$(OutDir)"
+echo n | xcopy /-y "$(SolutionDir)Data\*.*" "$(OutDir)"
+echo n | xcopy /-y "$(SolutionDir)Data\AltitudeData\*.*" "$(OutDir)AltitudeData\"
+echo n | xcopy /-y "$(SolutionDir)Data\TextureData\*.*" "$(OutDir)TextureData\"
+echo n | xcopy /-y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <Bscmake>
       <PreserveSbr>true</PreserveSbr>

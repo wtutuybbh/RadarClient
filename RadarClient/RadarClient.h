@@ -41,7 +41,7 @@ void TerminateApplication(GL_Window* window);		// Terminate The Application
 void ToggleFullscreen(GL_Window* window);			// Toggle Fullscreen / Windowed Mode
 
 													// These Are The Function You Must Provide
-BOOL Initialize(GL_Window* window, Keys* keys);	// Performs All Your Initialization
+BOOL Initialize();	// Performs All Your Initialization
 
 int Deinitialize(void);							// Performs All Your DeInitialization
 

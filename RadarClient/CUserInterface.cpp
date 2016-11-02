@@ -70,11 +70,12 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	return LRESULT();
 }
 
-LRESULT CUserInterface::Button_Dump(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CUserInterface::Button_Load(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (VPControl && VPControl->Scene)
+	if (Socket)
 	{
-		VPControl->Scene->Dump(VPControl);
+		//VPControl->Scene->Dump(VPControl);
+		Socket->Initialized = true;
 	}
 
 	return LRESULT();
@@ -322,6 +323,8 @@ void CUserInterface::Trackbar_ZeroElevation_SetText(int labelID)
 //TRACKBAR_CLASS
 CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
 {
+	string context = "CUserInterface::CUserInterface";
+	CRCLogger::Info(context, (boost::format("Start: parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%") % parentHWND % vpControl % socket % panelWidth).str());
 
 	this->ParentHWND = parentHWND;
 	this->VPControl = vpControl;
@@ -363,7 +366,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	MeasureDistance_ID = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_MEASURE_DISTANCE, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MeasureDistance);
 	
 	Test_ID = InsertElement(NULL, _T("BUTTON"), _T("Цвета"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth/2, ButtonHeight, &CUserInterface::Button_Test);
-	Dump_ID = InsertElement(NULL, _T("BUTTON"), TEXT_BUTTON_DUMP, WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X + ControlWidth / 2 + Column1X / 2, CurrentY, ControlWidth/2, ButtonHeight, &CUserInterface::Button_Dump);
+	BtnLoad_ID = InsertElement(NULL, _T("BUTTON"), _T("Загр. карту"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X + ControlWidth / 2 + Column1X / 2, CurrentY, ControlWidth/4 * 3, ButtonHeight, &CUserInterface::Button_Load);
 
 	CurrentY += VStepGrp;
 
@@ -609,6 +612,9 @@ void CUserInterface::Resize() const
 
 	gridHwnd = GetDlgItem(ParentHWND, InfoGrid_ID);
 	MoveWindow(gridHwnd, PanelWidth + 2* VPControl->Width / 3 + 2, VPControl->Height + 2, VPControl->Width / 3 - 2, clientRect.bottom - VPControl->Height - 2, TRUE);
+
+	gridHwnd = GetDlgItem(ParentHWND, ColorGrid_ID);
+	MoveWindow(gridHwnd, PanelWidth + 2 * VPControl->Width / 3 + 2, VPControl->Height + 2, VPControl->Width / 3 - 2, clientRect.bottom - VPControl->Height - 2, TRUE);
 	//SetWindowPos(gridHwnd, NULL, PanelWidth, VPControl->Height + 2, VPControl->Width, clientRect.bottom - VPControl->Height - 2, 0);
 }
 

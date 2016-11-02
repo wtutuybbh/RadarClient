@@ -5,8 +5,6 @@
 #ifndef global1h
 #define global1h
 
-////#define WIN32_LEAN_AND_MEAN 1
-
 #define WM_SOCKET 104
 
 #define MPI               3.14159265358979323846   /* Pi               */
@@ -346,7 +344,6 @@ struct Nchannel_Data
 
 //---------------------------------------------------------------------------
 //******************обмен по сети******************************************//
-//Byte hole[65535];
 
 
 /* очередь отправляемых данных
@@ -363,7 +360,7 @@ struct _client                     //Клиенты
 {
 	char *buff{ NULL };
 	SOCKET *Socket{ NULL };
-	unsigned int offset;
+	unsigned int offset { 0 };
 	vector<send_queue_element> send_queue;  // очередь отправляемых данных
 };
 
@@ -411,11 +408,7 @@ struct RDRCURRPOS
 	UTCtime       srvTime;
 	double E0;
 	char resv2[128 - 7 * 8 - 16];
-
 };
-
-
-
 
 class TRK
 {
@@ -428,15 +421,12 @@ public:
 	~TRK();
 };
 
-
-
-
-
 class CRCSocket
 {
 	bool OnceClosed;
 	char *hole{ NULL };
 	int LENDATAOTOBR {1};
+
 public:
 
 	bool Initialized {false};
@@ -449,15 +439,12 @@ public:
 	std::string ErrorText;
 	WSADATA WsaDat;
 	SOCKET Socket;
-	struct hostent *host{ NULL };
+	struct hostent *host{ nullptr };
 	SOCKADDR_IN SockAddr;
 	HWND hWnd;
-	//char szHistory[10000];
-	_client *client{ NULL };
+	_client *client{ nullptr };
 
 	//used when processing data:
-	//char *tm/*, *ReadBuf*/;
-	/*long ReadBufLength;*/
 	RDR_INITCL* s_rdrinit{ NULL };
 	RDR_INITCL rdrinit;
 	RPOINTS* info_p{ NULL };
@@ -479,34 +466,31 @@ public:
 	float Max_Amp, Min_Amp;
 	int b1, b2;
 
-	//std::mutex* m{ NULL };
-
-	CRCSocket(HWND hWnd/*, std::mutex* m*/);
+	CRCSocket(HWND hWnd);
 	~CRCSocket();
 
 	bool IsConnected;
 
 	void Init();
 	int Connect();
+
+	bool ReadLogEnabled{ true };
 	int Read();
+
 	int Close();
 	unsigned int PostData(WPARAM wParam, LPARAM lParam);
 	void OnSrvMsg_RDRTRACK(RDRTRACK* info, int N);
-	//void OnSrvMsg_DELTRACK(int* deltrackz, int N);
 	void OnSrvMsg_LOCATION(RDRCURRPOS* d);
-	void OnSrvMsg_RIMAGE(RIMAGE* info, void* pixels);
 	void OnSrvMsg_INIT(RDR_INITCL* s_rdrinit);
 	void DoInit(RDR_INITCL* init);
 	unsigned int _IMG_MapAmp2ColorRGB255(float Amp, float Min);
 	unsigned int MapAmp2ColorRGB255(float Amp, float Min);
 	int FindTrack(int id);
-	//void RectToPolar2d(double x, double y, double* phi, double* ro);
 	void FreeMemory(char *ptr);
 
 #ifdef _DEBUG
 	DebugWindowInfo *dwi{ NULL };
 #endif
-	//__event void ConnectionStateChange(bool isConnected);
 };
 
 

@@ -3,14 +3,16 @@
 #include "CRCSocket.h"
 #include "Util.h"
 #include "CSettings.h"
+#include "CRCLogger.h"
 
 #ifndef min
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 #endif
 
-CRCSocket::CRCSocket(HWND hWnd/*, std::mutex* m*/)
+CRCSocket::CRCSocket(HWND hWnd)
 {
-	//this->m = m;
+	string context = "CRCSocket::CRCSocket(HWND hWnd)";
+	CRCLogger::Info(context, (boost::format("Start: hWnd=%1%") % hWnd).str());
 
 	this->hWnd = hWnd;
 	OnceClosed = false;
@@ -44,19 +46,15 @@ CRCSocket::~CRCSocket()
 			delete[] client->buff;
 			client->buff = NULL;
 		}
-
 		delete client;
 		client = NULL;
-
 	}
 	if (s_rdrinit)
 		delete s_rdrinit;
 
-	/*if (info_p)
-		delete info_p;*/
-
 	for (auto it = begin(Tracks); it != end(Tracks); ++it)
 		delete (*it);
+
 	Tracks.clear();
 
 	for (auto it = begin(trak); it != end(trak); ++it)
@@ -69,9 +67,13 @@ CRCSocket::~CRCSocket()
 
 void CRCSocket::Init()
 {
+	string context = "CRCSocket::Init()";
+	CRCLogger::Info(context, "Start");
+
 	if (WSAStartup(MAKEWORD(2, 2), &WsaDat) != 0)
 	{
 		ErrorText = "Winsock error - Winsock initialization failed!";
+		CRCLogger::Error(context, ErrorText);
 		WSACleanup();
 	}
 
@@ -81,18 +83,21 @@ void CRCSocket::Init()
 	if (Socket == INVALID_SOCKET)
 	{
 		ErrorText = "Winsock error - Socket creation Failed!";
+		CRCLogger::Error(context, ErrorText);
 		WSACleanup();
 	}
 	int nResult = WSAAsyncSelect(Socket, hWnd, WM_SOCKET, (FD_CLOSE | FD_READ));
 	if (nResult)
 	{
-		MessageBox(hWnd, "WSAAsyncSelect failed", "Critical Error", MB_ICONERROR);
+		CRCLogger::Error(context, "WSAAsyncSelect failed");
+		MessageBox(hWnd, "WSAAsyncSelect failed", "Critical Error", MB_ICONERROR);		
 		SendMessage(hWnd, WM_DESTROY, NULL, NULL);
 	}
 	// Resolve IP address for hostname	
 	if ((host = gethostbyname(CSettings::GetString(StringHostName).c_str())) == NULL)
 	{
 		ErrorText = "Failed to resolve hostname!";
+		CRCLogger::Error(context, ErrorText);
 		WSACleanup();
 	}
 
@@ -101,8 +106,11 @@ void CRCSocket::Init()
 	SockAddr.sin_port = htons(CSettings::GetInt(IntPort));
 	SockAddr.sin_family = AF_INET;
 	SockAddr.sin_addr.s_addr = *((unsigned long*)host->h_addr);
-
-	client = new _client;
+	
+	if (!client)
+	{
+		client = new _client;
+	}
 	client->Socket = &Socket;
 	client->offset = 0;
 	client->buff = new char[TXRXBUFSIZE];
@@ -110,55 +118,61 @@ void CRCSocket::Init()
 	ErrorText = "";
 
 	IsConnected = false;
+
+	CRCLogger::Info(context, "End");
 }
 
 int CRCSocket::Connect()
 {
+	string context = "CRCSocket::Connect()";
+	CRCLogger::Info(context, "Start");
 	// Attempt to connect to server
-	if (OnceClosed)
+	if (OnceClosed) {
+		CRCLogger::Info(context, "Socket was once closed, need to run Init()...");
 		Init();
+		OnceClosed = false;
+	}
 
 	int cResult = connect(Socket, (SOCKADDR*)(&SockAddr), sizeof(SockAddr));
-	int errorCode = WSAGetLastError();
-	/*if (connect(Socket, (SOCKADDR*)(&SockAddr), sizeof(SockAddr)) != 0)
-	{
-		ErrorText = "Failed to establish connection with server!";
-		WSACleanup();
-		return -1;
-	}*/
-
-	// If iMode!=0, non-blocking mode is enabled.
-	/*u_long iMode = 1;
-	ioctlsocket(Socket, FIONBIO, &iMode);*/
-	/*if (cResult == 0 || errorCode == WSAEWOULDBLOCK) {
-		IsConnected = true;
-	}*/
+	//int errorCode = WSAGetLastError();
+	CRCLogger::Info(context, (boost::format("End: return %1%") % cResult).str());
 	return cResult;
 }
 
 int CRCSocket::Read()
-{
-	IsConnected = true;
-	PostMessage(hWnd, CM_CONNECT, IsConnected, NULL);
+{	
+	string context = "CRCSocket::Read()";
+	if (ReadLogEnabled) CRCLogger::Info(context, "Start");
+	if (!IsConnected && !OnceClosed)
+	{
+		CRCLogger::Info(context, "First read, setting state to 'Connected'");
+		IsConnected = true;
+		PostMessage(hWnd, CM_CONNECT, IsConnected, NULL);
+	}
+	if (!IsConnected)
+	{
+		CRCLogger::Error(context, "Not connected.");
+		return 0;
+	}	
+	if (!client->buff)
+	{
+		CRCLogger::Error(context, "client->buff is nullptr.");
+		return 0;
+	}			
 
-	char *szIncoming = NULL;
-	
+	char *szIncoming = NULL;	
 	_sh *sh;
 	int recev;
 	unsigned int offset, length;
 	char * OutBuff = NULL;
 
-	/*int inDataLength = recv(Socket,
-		(char*)szIncoming,
-		sizeof(szIncoming) / sizeof(szIncoming[0]),
-		0);*/
-
 	try {
 		szIncoming = new char[TXRXBUFSIZE];
 		ZeroMemory(szIncoming, sizeof(szIncoming));
 		recev = recv(Socket, client->buff + client->offset, TXRXBUFSIZE, 0);
-		/*strncat(szHistory, szIncoming, inDataLength);
-		strcat(szHistory, "\r\n");*/
+
+		if (ReadLogEnabled) CRCLogger::Info(context, (boost::format("recv returned %1% bytes of data") % recev).str());
+
 		offset = recev + client->offset;
 		if (offset < sizeof(_sh)) //приняли меньше шапки
 		{
@@ -173,7 +187,7 @@ int CRCSocket::Read()
 		{
 			try // защита на выделение памяти
 			{
-				OutBuff = new char[length];              // Выделим память под принятую порцию
+				OutBuff = new char[length];              // Выделим память под принятую порцию // operator delete[] in method FreeMemory()
 				memcpy(OutBuff, client->buff, length); // Скопируем принятые данные
 
 				PostMessage(hWnd, CM_POSTDATA, (WPARAM)OutBuff, length); //Отошлем в очередь на обработку
@@ -212,14 +226,13 @@ int CRCSocket::Read()
 }
 
 int CRCSocket::Close()
-{
-	
+{	
 	closesocket(Socket);
 	IsConnected = false;
 	OnceClosed = true;
 	if (client && client->buff) {
 		delete[] client->buff;
-		client->buff = NULL;
+		client->buff = nullptr;
 	}
 	PostMessage(hWnd, CM_CONNECT, IsConnected, NULL);
 	return 0;
@@ -227,12 +240,12 @@ int CRCSocket::Close()
 
 unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 {
+	string context = "CRCSocket::PostData()";
 	try
 	{
 		PointOK = TrackOK = ImageOK = false;
 		info_p = NULL;
 		pts = NULL;
-		//ReadBuf = (char*)wParam;
 		int readBufLength = lParam;
 
 		_sh *sh = (_sh*)wParam;
@@ -242,88 +255,128 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 
 		switch (sh->type)
 		{
-		case MSG_RPOINTS:
-		{
+			case MSG_RPOINTS:
+			{			
+				info_p = (RPOINTS*)(void*)PTR_D;
 
+				//test for data integrity:
+				int controlSum = readBufLength - sizeof(_sh) - sizeof(RPOINTS) - info_p->N*sizeof(RPOINT);
+				if (controlSum == 0)
+				{
+					PointOK = true;
+				}
+				else
+				{
+					CRCLogger::Error(context, "MSG_RPOINTS: readBufLength - sizeof(_sh) - sizeof(RPOINTS) - info_p->N*sizeof(RPOINT) != 0");
+					return -1;
+				}
 
-			info_p = (RPOINTS*)(void*)PTR_D;
+				pts = (RPOINT*)(void*)(info_p + 1);
+				b1 = info_p->d1;
+				b2 = info_p->d2;
 
-			//test for data integrity:
-			int controlSum = readBufLength - sizeof(_sh) - sizeof(RPOINTS) - info_p->N*sizeof(RPOINT);
-			if (controlSum == 0)			
-				PointOK = true;			
-			else
-				return -1;			
-
-			pts = (RPOINT*)(void*)(info_p + 1);
-			b1 = info_p->d1;
-			b2 = info_p->d2;
-#ifdef _DEBUG
-			if (info_p) {
-				std::stringstream s;
-				s << "MSG_RPOINTS. D=" << info_p->D << ", N=" << info_p->N << " d1=" << info_p->d1 << ", d2=" << info_p->d2 << " pts[0].B=" << pts[0].B;
-				DebugMessage(dwi, s.str());
+				if (ReadLogEnabled) 
+				{
+					if (info_p && pts)
+					{
+						CRCLogger::Info(context, (boost::format("MSG_RPOINTS. D=%1%, N=%2%, d1=%3%, d2=%4%, pts[0].B=%5%") % info_p->D % info_p->N % info_p->d1 % info_p->d2 % pts[0].B).str());
+					}
+					if (!info_p)
+					{
+						CRCLogger::Warn(context, "info_p is nullptr");
+					}
+					if (!pts)
+					{
+						CRCLogger::Warn(context, "pts is nullptr");
+					}		
+				}
 			}
-#endif
-		}
-		break;
-		case MSG_RIMAGE: {
-			RIMAGE *imginfo = (RIMAGE*)PTR_D;
-			//test for data integrity:
-			int controlSum = readBufLength - sizeof(_sh) - sizeof(RIMAGE) - imginfo->N * imginfo->NR * 4;
-			if (controlSum == 0)
-				ImageOK = true;
-			else
-				return -1;
-			//OnSrvMsg_RIMAGE((RIMAGE*)PTR_D, (void*)&((RIMAGE*)PTR_D)[1]);
-			info_i = (RIMAGE*)PTR_D;
-			pixels = (void*)&((RIMAGE*)PTR_D)[1];
 			break;
-		}
+			case MSG_RIMAGE: 
+			{
+				RIMAGE *imginfo = (RIMAGE*)PTR_D;
+				//test for data integrity:
+				int controlSum = readBufLength - sizeof(_sh) - sizeof(RIMAGE) - imginfo->N * imginfo->NR * 4;
+				if (controlSum == 0) 
+				{
+					ImageOK = true;
+				}
+				else
+				{
+					CRCLogger::Error(context, "MSG_RIMAGE: readBufLength - sizeof(_sh) - sizeof(RIMAGE) - imginfo->N * imginfo->NR * 4 != 0");
+					return -1;
+				}
+				info_i = (RIMAGE*)PTR_D;
+				pixels = (void*)&((RIMAGE*)PTR_D)[1];
+				if (ReadLogEnabled) 
+				{
+					if (info_i)
+					{
+						CRCLogger::Info(context, (boost::format("MSG_RIMAGE. D=%1%, N=%2%, d1=%3%, d2=%4%, NR=%5%") % info_i->D % info_i->N % info_i->d1 % info_i->d2 % info_i->NR).str());
+					}
+					if (!info_i)
+					{
+						CRCLogger::Warn(context, "info_i is nullptr");
+					}
+				}
+			}
 			break;
-		// 
-		case MSG_PTSTRK:
-			//Memo1->Lines->Add("PTSTRK");
-			break;
-		case MSG_OBJTRK: {
-			int N = *((int*)((void*)PTR_D));
-			RDRTRACK* pTK = (RDRTRACK*)(void*)(((char*)PTR_D) + 4);
-			OnSrvMsg_RDRTRACK(pTK, N);
-			//Memo1->Lines->Add("OBJTRK");
-			break;
-		}
-	
 			// 
-		case MSG_INIT: {
-			//Memo1->Lines->Add("MSGINIT");
-			if (!s_rdrinit)
-				s_rdrinit = new RDR_INITCL;
-
-			memcpy(s_rdrinit, (RDR_INITCL*)(void*)&sh[1], sizeof(RDR_INITCL));
-			//OnSrvMsg_INIT((RDR_INITCL*)(void*)&sh[1]);
-			//DoInit(s_rdrinit);	
-#ifdef _DEBUG
-			if (s_rdrinit) {
-				std::stringstream s;
-				s << "MSG_INIT. ViewStep=" << s_rdrinit->ViewStep << ", MaxNumSectPt=" << s_rdrinit->MaxNumSectPt << " Nazm=" << s_rdrinit->Nazm;
-				DebugMessage(dwi, s.str());
+			case MSG_PTSTRK:
+			{
+				if (ReadLogEnabled)
+				{
+					CRCLogger::Info(context, "MSG_PTSTRK");
+				}
 			}
-#endif
-		}
-		case MSG_LOCATION:
-		{
-			RDRCURRPOS* igpsp = (RDRCURRPOS*)(void*)((char*)PTR_D);
-			OnSrvMsg_LOCATION(igpsp);
 			break;
-		}
-		break;
-		default: 
-		{
-			return 0;;
-		}
+			case MSG_OBJTRK: 
+			{
+				int N = *((int*)((void*)PTR_D));
+				RDRTRACK* pTK = (RDRTRACK*)(void*)(((char*)PTR_D) + 4);
+				if (ReadLogEnabled) 
+				{
+					if (pTK)
+					{
+						CRCLogger::Info(context, (boost::format("MSG_OBJTRK. N=%1%, numTrack=%2%") % N % pTK->numTrack).str());
+					}
+					if (!pTK)
+					{
+						CRCLogger::Warn(context, "pTK is nullptr");
+					}
+				}
+				OnSrvMsg_RDRTRACK(pTK, N);			
+			}
+			break;
+			case MSG_INIT: 
+			{
+				if (!s_rdrinit)
+					s_rdrinit = new RDR_INITCL;
+
+				memcpy(s_rdrinit, (RDR_INITCL*)(void*)&sh[1], sizeof(RDR_INITCL));
+				if (ReadLogEnabled)
+				{
+					CRCLogger::Info(context, (boost::format("MSG_INIT. ViewStep=%1%, MaxNumSectPt=%2%, Nazm=%3%") % s_rdrinit->ViewStep % s_rdrinit->MaxNumSectPt % s_rdrinit->Nazm).str());
+				}
+			}
+			break;
+			case MSG_LOCATION:
+			{
+				RDRCURRPOS* igpsp = (RDRCURRPOS*)(void*)((char*)PTR_D);
+				if (ReadLogEnabled)
+				{
+					CRCLogger::Info(context, (boost::format("MSG_LOCATION. lon=%1%, lat=%2%") % igpsp->lon % igpsp->lat).str());
+				}
+				OnSrvMsg_LOCATION(igpsp);
+			}
+			break;
+			default: 
+			{
+				return 0;;
+			}
+			break;
 		}
 		return sh->type;
-
 	}
 	catch (...) {
 		return -1;
@@ -334,51 +387,28 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 
 void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 {
+	string context = "CRCSocket::OnSrvMsg_RDRTRACK";
 	for (int i = 0; i < N; i++)
 	{
 		// ищем трек
 		int Idx = FindTrack(info[i].numTrack);
-		//RectToPolar2d(info[i].X, info[i].Y, &info[i].X, &info[i].Y);
 		if (-1 == Idx)
 		{
+			if (ReadLogEnabled) CRCLogger::Info(context, (boost::format("MSG_OBJTRK. N=%1%, track not found, creating new") % N).str());
 			//создаём трек
 			TRK* t1 = new TRK(info[i].numTrack);
 			Tracks.push_back(t1);
 			// добавим точки
 			t1->InsertPoints(info + i, 1);
-
-			//UpdateTrackTable();
-			//Memo1->Lines->Add("äîáàâèëè òðåê Id = " + IntToStr(info[i].numTrack));
 		}
 		// уже есть
 		else if (Idx >= 0 && Idx < Tracks.size())
 		{
+			if (ReadLogEnabled) CRCLogger::Info(context, (boost::format("MSG_OBJTRK. N=%1%, track found") % N).str());
 			Tracks[Idx]->InsertPoints(info + i, 1);
-			//UpdateTrackTable();
-			//Memo1->Lines->Add("äîáàâèëè òî÷êó ê òðåêó Id = " + IntToStr(info[i].numTrack));
 		}
 	}
 }
-/*
-void CRCSocket::OnSrvMsg_DELTRACK(int* deltrackz, int N)
-{
-	m->lock();
-	for (int i = 0; i < min(N, Tracks.size()); i++)
-	{
-		for (auto it = Tracks.begin();
-		it != Tracks.end();) 
-		{
-
-			if ((*it)->id == deltrackz[i]) {
-				delete *it;
-				it = Tracks.erase(it);
-			}
-			else
-				++it;
-		}
-	}
-	m->unlock(); //against crash - but did not help
-}*/
 
 void CRCSocket::OnSrvMsg_LOCATION(RDRCURRPOS* d)
 {
@@ -388,14 +418,9 @@ void CRCSocket::OnSrvMsg_LOCATION(RDRCURRPOS* d)
 	Initialized = true;
 }
 
-void CRCSocket::OnSrvMsg_RIMAGE(RIMAGE* info, void* pixels)
-{	
-}
-
 void CRCSocket::OnSrvMsg_INIT(RDR_INITCL* s_rdrinit)
 {
 	this->s_rdrinit = s_rdrinit;
-	//DoInit(s_rdrinit);
 }
 
 unsigned CRCSocket::_IMG_MapAmp2ColorRGB255(float Amp, float Min)
@@ -403,9 +428,6 @@ unsigned CRCSocket::_IMG_MapAmp2ColorRGB255(float Amp, float Min)
 	unsigned int colorImg;
 	int i;
 	float iScale = 3;
-	//	if(maxValue-minValue>=0.01) iScale=1024.0/(maxValue-minValue);
-	//    else	iScale=102400;
-
 
 	colorImg = (Amp - Min)*iScale;
 	if (colorImg >= 1024)
@@ -515,13 +537,8 @@ int CRCSocket::FindTrack(int id) // если в массиве trak нашли �
 }*/
 
 void CRCSocket::FreeMemory(char *readBuf)
-{
-	delete [] readBuf;
-	/*if (ReadBuf && ReadBufLength > 0) {
-		delete [] ReadBuf;
-		ReadBufLength = 0;
-		ReadBuf = NULL;
-	}*/
+{	
+	delete [] readBuf; // operator new in method Read() (variable OutBuf)
 }
 
 TRK::TRK(int _id)

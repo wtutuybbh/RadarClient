@@ -3,16 +3,6 @@
 #include "RadarClient.h"
 #include "CRCSocket.h"
 
-#ifdef _DEBUG
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
-#define new DEBUG_NEW
-#else
-#include <stdlib.h>
-#endif
-
 #include "CMesh.h"
 #include "CScene.h"
 #include "Util.h"
@@ -74,6 +64,11 @@ DebugWindowInfo g_dwi;
 
 bool g_Initialized = false;
 
+bool g_AltPressed = false;
+
+GL_Window*	g_window;
+Keys*		g_keys;
+
 void TerminateApplication(GL_Window* window)							// Terminate The Application
 {
 	PostMessage(window->hWnd, WM_QUIT, 0, 0);							// Send A WM_QUIT Message
@@ -95,6 +90,8 @@ void ToggleFullscreen(GL_Window* window)								// Toggle Fullscreen/Windowed
 
 BOOL ChangeScreenResolution(int width, int height, int bitsPerPixel)	// Change The Screen Resolution
 {
+	string context = "ChangeScreenResolution";
+	CRCLogger::Info(context, "Start");
 	DEVMODE dmScreenSettings;											// Device Mode
 	ZeroMemory(&dmScreenSettings, sizeof(DEVMODE));					// Make Sure Memory Is Cleared
 	dmScreenSettings.dmSize = sizeof(DEVMODE);				// Size Of The Devmode Structure
@@ -104,14 +101,18 @@ BOOL ChangeScreenResolution(int width, int height, int bitsPerPixel)	// Change T
 	dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 	if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
 	{
+		CRCLogger::Error(context, "ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL => return false");
 		return FALSE;													// Display Change Failed, Return False
 	}
+	CRCLogger::Info(context, "End => return true");
 	return TRUE;														// Display Change Was Successful, Return True
 }
 
 BOOL CreateMainWindow(GL_Window* window)									// This Code Creates Window
 {
-	
+	string context = "CreateMainWindow";
+	CRCLogger::Info(context, "Start");
+
 	DWORD windowStyle = WS_OVERLAPPEDWINDOW;							// Define Our Window Style
 	DWORD windowExtendedStyle = WS_EX_APPWINDOW;						// Define The Window's Extended Style
 
@@ -135,6 +136,7 @@ BOOL CreateMainWindow(GL_Window* window)									// This Code Creates Window
 
 	if (window->hWnd == 0)												// Was Window Creation A Success?
 	{
+		CRCLogger::Error(context, "window->hWnd == 0 => return false");
 		return FALSE;													// If Not Return False
 	}
 
@@ -149,12 +151,16 @@ BOOL CreateMainWindow(GL_Window* window)									// This Code Creates Window
 
 	window->lastTickCount = GetTickCount();							// Get Tick Count
 
+	CRCLogger::Info(context, "End => return true");
 	return TRUE;														// Window Creating Was A Success
 																		// Initialization Will Be Done In WM_CREATE
 }
 
 BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL Window & Release Resources
 {
+	string context = "DestroyWindowGL";
+	CRCLogger::Info(context, "Start");
+
 	if (hWnd != 0)												// Does The Window Have A Handle?
 	{
 		if (hDC != 0)											// Does The Window Have A Device Context?
@@ -169,18 +175,14 @@ BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL
 		}
 		DestroyWindow(hWnd);									// Destroy The Window
 	}
-
-	/*if (window->init.isFullScreen)										// Is Window In Fullscreen Mode
-	{
-		ChangeDisplaySettings(NULL, 0);									// Switch Back To Desktop Resolution
-		ShowCursor(TRUE);												// Show The Cursor
-	}*/
+	CRCLogger::Info(context, "End => return true");
 	return TRUE;														// Return True
 }
 
 // Process Window Message Callbacks
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	string context = "WindowProc";
 	
 
 	// Get The Window Context
@@ -220,7 +222,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_CREATE:													// Window Creation
 	{
-		
+		CRCLogger::Info(context, "WM_CREATE");
 		CREATESTRUCT* creation = (CREATESTRUCT*)(lParam);			// Store Window Structure Pointer
 		window = (GL_Window*)(creation->lpCreateParams);
 		SetWindowLong(hWnd, GWL_USERDATA, (LONG)(window));
@@ -234,11 +236,13 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//This will ensure that the application icon gets changed too.
 			SendMessage(GetWindow(hWnd, GW_OWNER), WM_SETICON, ICON_SMALL, (LPARAM)g_hIcon);
 			SendMessage(GetWindow(hWnd, GW_OWNER), WM_SETICON, ICON_BIG, (LPARAM)g_hIcon);
+
+			CRCLogger::Info(context, "Icon loaded successfully");
 		}
-
-
-		/*CreateWindowEx((DWORD)VIEW_PORT_WC, NULL, NULL, WS_CHILD | WS_VISIBLE,
-			0, 0, 100, 100, hWnd, (HMENU)VIEW_PORT_CONTROL_ID, window->init.application->hInstance, NULL);*/
+		else
+		{
+			CRCLogger::Warn(context, "Icon not loaded");
+		}
 		
 		RECT clientRect;
 
@@ -264,6 +268,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		g_UI->dwi = &g_dwi;
 		g_Socket->dwi = &g_dwi;
 #endif // _DEBUG
+		CRCLogger::Info(context, "WM_CREATE: End");
 	}
 	return 0;														// Return
 
@@ -296,12 +301,18 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 				  break;															// Break
 
-	case WM_KEYDOWN: {											// Update Keyboard Buffers For Keys Pressed
+	case WM_KEYDOWN: 
+	{											// Update Keyboard Buffers For Keys Pressed
 		if ((wParam >= 0) && (wParam <= 255))						// Is Key (wParam) In A Valid Range?
 		{
 			window->keys->keyDown[wParam] = TRUE;					// Set The Selected Key (wParam) To True
-			return 0;												// Return
+			//return 0;												// Return
 		}
+		if (g_AltPressed && wParam == 76) // Alt + L
+		{
+			Initialize();
+		}
+		CRCLogger::Info(context, (boost::format("WM_KEYDOWN: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
 	}
 					 break;															// Break
 
@@ -309,11 +320,31 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if ((wParam >= 0) && (wParam <= 255))						// Is Key (wParam) In A Valid Range?
 		{
 			window->keys->keyDown[wParam] = FALSE;					// Set The Selected Key (wParam) To False
-			return 0;												// Return
+			//return 0;												// Return
 		}
+		CRCLogger::Info(context, (boost::format("WM_KEYUP: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
 	}
 				   break;															// Break
-
+	case WM_SYSKEYDOWN:
+	{
+		if (wParam == 18)
+		{
+			g_AltPressed = true;
+		}
+		CRCLogger::Info(context, (boost::format("WM_SYSKEYDOWN: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
+		return 0;
+	}
+	break;
+	case WM_SYSKEYUP:
+	{
+		if (wParam == 18)
+		{
+			g_AltPressed = false;
+		}
+		CRCLogger::Info(context, (boost::format("WM_SYSKEYUP: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
+		return 0;
+	}
+	break;
 	case WM_TOGGLEFULLSCREEN: {							// Toggle FullScreen Mode On/Off
 		g_createFullScreen = (g_createFullScreen == TRUE) ? FALSE : TRUE;
 		PostMessage(hWnd, WM_QUIT, 0, 0);
@@ -336,16 +367,20 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SendMessage(hWnd, WM_DESTROY, NULL, NULL);
 			break;
 		}
-		switch (WSAGETSELECTEVENT(lParam)) {
+		switch (WSAGETSELECTEVENT(lParam)) 
+		{
 		case FD_READ:
-			if (g_Socket)
+			if (g_Socket) 
+			{
 				g_Socket->Read();
+			}
 			break;
 
 		case FD_CLOSE:
 			if (g_Socket)
+			{
 				g_Socket->Close();
-
+			}
 			break;
 		}
 	}
@@ -439,8 +474,11 @@ public:
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	AllocConsole();
+	HWND console = GetConsoleWindow();
+	SetWindowPos(console, HWND_TOPMOST, 0, 0, 0, 0, SWP_DRAWFRAME | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+	ShowWindow(console, SW_NORMAL);
+
 	freopen("CONOUT$", "w", stdout);
-	std::cout << "This works" << std::endl;
 
 	string context = "WinMain";
 
@@ -469,7 +507,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	std::ifstream settings_txt("settings.txt");
 	
 	if (!settings_txt) {
-		MessageBox(HWND_DESKTOP, "files.txt not found.", MB_OK, MB_ICONERROR);
+		MessageBox(HWND_DESKTOP, "settings.txt not found.", MB_OK, MB_ICONERROR);
 		return 0;
 	}
 	std::getline(settings_txt, g_altFile);
@@ -550,10 +588,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		g_mpph= std::stof(v[2]);
 		g_mppv = std::stof(v[3]);
 		g_texsize = std::stoi(v[4]);
-
-		ostringstream  _s;
-		_s << "Parameters set from command line: lon=" << g_lon << ", lat=" << g_lat << ", mpph=" << g_mpph << ", mppv=" << g_mppv << ", texsize=" << g_texsize;
-		CRCLogger::Info(context, _s.str());
+		
+		CRCLogger::Info(context, (boost::format("Parameters set from command line: lon=%1%, lat=%2%, mpph=%3%, mppv=%4%, texsize=%5%") % g_lon % g_lat % g_mpph % g_mppv % g_texsize).str());
 	}
 	
 	CSettings::SetFloat(FloatMPPh, g_mpph);
@@ -605,29 +641,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	g_isProgramLooping = TRUE;											// Program Looping Is Set To TRUE
 	//g_createFullScreen = window.init.isFullScreen;						// g_createFullScreen Is Set To User Default
-	
+	CRCLogger::Info(context, (boost::format("-=point before message loop=-")).str());
 	while (g_isProgramLooping)											// Loop Until WM_QUIT Is Received
 	{
-		// Create A Window
-		//window.init.isFullScreen = g_createFullScreen;					// Set Init Param Of Window Creation To Fullscreen?
-		
 		if (CreateMainWindow(&window) == TRUE)							// Was Window Creation Successful?
 		{
-			//
-#ifdef _DEBUG
-			g_dwi.DebugEdit_ID = 1;
-			OpenDebugWindow(hInstance, SW_SHOWMINIMIZED, window.hWnd, &g_dwi);
-			DebugMessage(&g_dwi, "Hello");
-#endif
-			
-			//if (0/*Initialize(&window, &keys) == FALSE*/)					// Call User Intialization
-			//{
-				// Failure
-				//TerminateApplication(&window);							// Close Window, This Will Handle The Shutdown
-			//}
-
-			//else														// Otherwise (Start The Message Pump)
-			//{	// Initialize was a success
+			g_window = &window;
+			g_keys = &keys;
 				isMessagePumpActive = TRUE;								// Set isMessagePumpActive To TRUE
 				
 				while (isMessagePumpActive == TRUE)						// While The Message Pump Is Active
@@ -635,17 +655,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					if (!g_Initialized) {
 						if (g_Socket && g_Socket->Initialized) 
 						{
-							Initialize(&window, &keys);
-							g_Initialized = true;
-						}
-						
+							Initialize();
+							
+						}						
 					}
 					// Success Creating Window.  Check For Window Messages
-#ifdef _DEBUG
-					if (PeekMessage(&msg, g_dwi.hWnd, 0, 0, PM_REMOVE) != 0) {
-						DispatchMessage(&msg);
-					}
-#endif
 					if (PeekMessage(&msg, window.hWnd, 0, 0, PM_REMOVE) != 0)
 					{
 						// Check For WM_QUIT Message
@@ -703,21 +717,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			g_isProgramLooping = FALSE;									// Terminate The Loop
 		}
 	}																	// While (isProgramLooping)
-debugreturn:
+
 	Deinitialize();
 	UnregisterClass(application.className, application.hInstance);		// UnRegister Window Class
 	
 	return 0;	
 }																		// End Of WinMain()												
 
-GL_Window*	g_window;
-Keys*		g_keys;
 
-BOOL Initialize(GL_Window* window, Keys* keys)					// Any GL Init Code & User Initialiazation Goes Here
+
+BOOL Initialize()					// Any GL Init Code & User Initialiazation Goes Here
 {
-	g_window = window;
-	g_keys = keys;
-
+	string context = "Initialize";
+	CRCLogger::Info(context, "Start");
 
 
 
@@ -730,23 +742,23 @@ BOOL Initialize(GL_Window* window, Keys* keys)					// Any GL Init Code & User In
 	g_Minimap->Scene = g_vpControl->Scene;	
 	g_Minimap->UI = g_UI;
 	g_Minimap->Camera = g_vpControl->Scene->Camera;
-
-	// Build The VBOs
 	
 	g_vpControl->Camera->SetAll(0, 0, 0, 0, 0, 1, 0, 1, 0, 
 		60.0f, 4.0f/3.0f, 1.0f, 10000.0f,
 		0.01, LookAtCallback_);
 
-
 	g_UI->FillInfoGrid(g_vpControl->Scene);
 
+	g_Initialized = true;
 
+	CRCLogger::Info(context, "End (returned true).");
 	return TRUE;												// Return TRUE (Initialization Successful)
 }
 
 int Deinitialize(void)										// Any User DeInitialization Goes Here
 {
-
+	string context = "Deinitialize";
+	CRCLogger::Info(context, "Start");
 	if (g_vpControl) {
 		if (g_vpControl->Scene)
 			delete g_vpControl->Scene;
@@ -758,7 +770,9 @@ int Deinitialize(void)										// Any User DeInitialization Goes Here
 	if (g_UI)
 		delete g_UI;
 	if (g_hIcon)
-		DestroyIcon((HICON)g_hIcon);
+		DestroyIcon((HICON)g_hIcon);	
+
+	CRCLogger::Info(context, "End - return 0");
 	return 0;
 }
 

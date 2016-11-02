@@ -164,6 +164,9 @@ glm::mat4 CViewPortControl::GetViewMatrix() const
 
 CViewPortControl::CViewPortControl(LPCSTR className)
 {
+	std::string context = "CViewPortControl::CViewPortControl(LPCSTR className)";
+	CRCLogger::Info(context, (boost::format("Start: className=%1%") % className).str());
+
 	ClassName = className;
 
 	hRC = NULL;
@@ -267,6 +270,7 @@ LRESULT CALLBACK CViewPortControl::stWinMsgHandler(HWND hwnd, UINT uMsg, WPARAM 
 
 bool CViewPortControl::Register(void)
 {
+	std::string context = "CViewPortControl::Register";
 	WNDCLASSEXA wc = { 0 };
 	wc.cbSize = sizeof(wc);
 	wc.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
@@ -286,6 +290,7 @@ bool CViewPortControl::Register(void)
 	{
 		// NOTE: Failure, Should Never Happen
 		MessageBox(HWND_DESKTOP, "CViewPortControl: RegisterClassEx Failed!", "Error", MB_OK | MB_ICONEXCLAMATION);
+		CRCLogger::Error(context, "RegisterClassEx Failed");
 		return FALSE;													// Return False (Failure)
 	}
 	return TRUE;
