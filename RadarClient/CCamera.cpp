@@ -1,9 +1,13 @@
 #include "stdafx.h"
 #include "CCamera.h"
 #include "Util.h"
+#include "CRCLogger.h"
 
 CCamera::CCamera() //empty constructor. camera depends on scene, scene depends on camera... oh shit!
 {
+	std::string context = "CCamera::CCamera";
+	CRCLogger::Info(context, "Start");
+
 	flag0 = 1;
 
 	left = -1;

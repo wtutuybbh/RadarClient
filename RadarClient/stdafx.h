@@ -13,7 +13,9 @@
 #include <windowsx.h>
 #endif
 
+#include <memory>
 #include <stdio.h>
+#include <cstdio>
 #include <tchar.h>
 #include <stdlib.h>
 #include <FreeImage.h>

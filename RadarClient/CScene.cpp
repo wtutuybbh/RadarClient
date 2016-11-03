@@ -24,6 +24,7 @@
 #include "C3DObjectProgram.h"
 
 #include "CUserInterface.h"
+#include "CRCLogger.h"
 
 
 float CMesh::AverageHeight;
@@ -50,8 +51,10 @@ void CScene::ClearSelection()
 	}
 }
 
-CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize) {
-
+CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize) 
+{
+	std::string context = "CScene::CScene";
+	CRCLogger::Info(context, "Start");
 	rdrinit = NULL;
 
 	SectorsCount = 0;

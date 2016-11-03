@@ -382,6 +382,14 @@ float CMesh::PtHeight(int nX, int nY) const
 
 CMesh::CMesh(int vpId, CScene* scn, bool clearAfter, float shiftX, float shiftZ) : C3DObjectModel(vpId, NULL, NULL, NULL)
 {
+	std::string context = "CMesh::CMesh";
+	CRCLogger::Info(context, (boost::format("Start: vpId=%1%, scn=%2%, clearAfter=%3%, shiftX=%4%, shiftZ=%5%") 
+		% vpId 
+		% scn 
+		% clearAfter 
+		% shiftX 
+		% shiftZ).str());
+
 	this->scn = scn;
 	aMap = NULL;
 	Bounds = NULL;
@@ -421,7 +429,9 @@ CMesh::~CMesh()
 
 bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)
 {
-	
+	string context = "CMesh::IntersectLine";
+	CRCLogger::Info(context, string_format("Start: vpId=%d, orig_=(%f, %f, %f), dir_=(%f, %f, %f)", vpId, orig_.x, orig_.y, orig_.z, dir_.x, dir_.y, dir_.z));
+
 	glm::vec4 planeOrig(0, AverageHeight, 0, 1), planeNormal(0, 1, 0, 0);
 	float distance;
 	glm::vec4 orig(orig_, 1);
