@@ -100,6 +100,7 @@
       <CompileAs>CompileAsCpp</CompileAs>
       <BrowseInformation>true</BrowseInformation>
       <ShowIncludes>false</ShowIncludes>
+      <StructMemberAlignment>8Bytes</StructMemberAlignment>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -158,6 +159,7 @@ echo n | xcopy /-y "$(SolutionDir)FreeImage\*.dll" "$(OutDir)"</Command>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BrowseInformation>true</BrowseInformation>
       <ShowIncludes>false</ShowIncludes>
+      <StructMemberAlignment>8Bytes</StructMemberAlignment>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
