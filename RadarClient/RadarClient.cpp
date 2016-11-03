@@ -731,8 +731,6 @@ BOOL Initialize()					// Any GL Init Code & User Initialiazation Goes Here
 	string context = "Initialize";
 	CRCLogger::Info(context, "Start");
 
-
-
 	g_vpControl->Scene = new CScene(g_altFile, g_imgFile, g_datFile, g_lon, g_lat, g_mpph, g_mppv, g_texsize);	 
 	g_vpControl->Scene->Socket = g_Socket;
 	g_vpControl->Scene->UI = g_UI;
