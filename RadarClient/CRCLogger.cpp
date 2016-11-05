@@ -21,6 +21,12 @@ void CRCLogger::Info(std::string context, std::string msg)
 	INFO << s.str();
 }
 
+void CRCLogger::Info(std::string requestID, std::string context, std::string msg)
+{
+	BOOST_LOG_SCOPED_THREAD_TAG("RequestID", requestID);
+	Info(context, msg);
+}
+
 void CRCLogger::Warn(std::string context, std::string msg)
 {
 	std::stringstream s;
@@ -28,12 +34,25 @@ void CRCLogger::Warn(std::string context, std::string msg)
 	WARN << s.str();
 }
 
+void CRCLogger::Warn(std::string requestID, std::string context, std::string msg)
+{
+	BOOST_LOG_SCOPED_THREAD_TAG("RequestID", requestID);
+	Warn(context, msg);
+}
+
 void CRCLogger::Error(std::string context, std::string msg)
 {
 	std::stringstream s;
 	s << context << " : " << msg;
-	ERROR << s.str();
+	ERROR_ << s.str();
 }
+
+void CRCLogger::Error(std::string requestID, std::string context, std::string msg)
+{
+	BOOST_LOG_SCOPED_THREAD_TAG("RequestID", requestID);
+	Error(context, msg);
+}
+
 namespace attrs = boost::log::attributes;
 namespace expr = boost::log::expressions;
 namespace logging = boost::log;

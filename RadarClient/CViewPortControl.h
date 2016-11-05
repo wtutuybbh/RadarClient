@@ -26,6 +26,7 @@ class CViewPortControl {
 	static LRESULT CALLBACK stWinMsgHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	bool Register(void);
 	void Init();
+	static const std::string requestID;
 public:
 	CScene *Scene{ NULL };
 	CCamera *Camera{ NULL };

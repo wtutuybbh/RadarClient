@@ -68,6 +68,7 @@ typedef std::unordered_map<int, InterfaceElement *> ElementsMap;
 class CUserInterface
 {
 private:
+	static const std::string requestID;
 	int mainTableMode {0};
 	int CurrentID;
 	int IsConnected_ID, Button_Connect_ID, Grid_ID, InfoGrid_ID, ColorGrid_ID, FixViewToRadar_ID, MeasureDistance_ID, Test_ID, BtnLoad_ID, BegAzm_ID, ZeroElevation_ID, BegAzmValue_ID, ZeroElevationValue_ID;

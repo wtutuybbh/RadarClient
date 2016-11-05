@@ -2,7 +2,7 @@
 
 #define INFO  BOOST_LOG_SEV(my_logger::get(), boost::log::trivial::info)
 #define WARN  BOOST_LOG_SEV(my_logger::get(), boost::log::trivial::warning)
-#define ERROR BOOST_LOG_SEV(my_logger::get(), boost::log::trivial::error)
+#define ERROR_ BOOST_LOG_SEV(my_logger::get(), boost::log::trivial::error)
 
 #define SYS_LOGFILE "example.log"
 
@@ -16,11 +16,12 @@ namespace keywords = boost::log::keywords;
 
 class CRCLogger
 {
-public:
 	static void Info(std::string context, std::string msg);
-	//static void Info()
 	static void Warn(std::string context, std::string msg);
 	static void Error(std::string context, std::string msg);
 	static void GetDateTimeString(std::string &out);
-
+public:	
+	static void Info(std::string requestID, std::string context, std::string msg);	
+	static void Warn(std::string requestID, std::string context, std::string msg);	
+	static void Error(std::string requestID, std::string context, std::string msg);	
 };

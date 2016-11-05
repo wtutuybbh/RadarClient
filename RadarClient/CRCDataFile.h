@@ -10,6 +10,7 @@ enum DataFileType
 class CRCDataFile
 {
 protected:
+	static const std::string requestID;
 	std::string fileName{ "" };
 	double lon0{ 0 }, lat0{ 0 }, lon1{ 180 }, lat1{90};
 	int width{ 0 }, height{ 0 };

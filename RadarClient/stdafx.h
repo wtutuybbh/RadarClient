@@ -31,6 +31,7 @@
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>
 #include <boost/log/sinks/text_multifile_backend.hpp>
+#include <boost/log/attributes/scoped_attribute.hpp>
 //Narrow-char thread-safe logger.
 typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_level> logger_t;
 

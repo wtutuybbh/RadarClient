@@ -423,6 +423,8 @@ public:
 
 class CRCSocket
 {
+	static const std::string requestID;
+
 	bool OnceClosed;
 	char *hole{ NULL };
 	int LENDATAOTOBR {1};

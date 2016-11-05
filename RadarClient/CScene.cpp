@@ -31,6 +31,8 @@ float CMesh::AverageHeight;
 CMesh **CMesh::Meshs;
 int CMesh::TotalMeshsCount;
 
+const std::string CScene::requestID = "CScene";
+
 void CScene::PushSelection(C3DObjectModel* o)
 {
 	if (o)
@@ -54,7 +56,7 @@ void CScene::ClearSelection()
 CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize) 
 {
 	std::string context = "CScene::CScene";
-	CRCLogger::Info(context, "Start");
+	CRCLogger::Info(requestID, context, "Start");
 	rdrinit = NULL;
 
 	SectorsCount = 0;

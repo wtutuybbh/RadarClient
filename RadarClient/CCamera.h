@@ -6,6 +6,7 @@ enum MovementType { FORWARD, BACKWARD, STRAFE_L, STRAFE_R };
 
 class CCamera {
 private:
+	static const std::string requestID;
 	glm::vec3 Position;
 	glm::vec3 Up0;	
 public:

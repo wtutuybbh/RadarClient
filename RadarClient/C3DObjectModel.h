@@ -10,9 +10,9 @@ class CUserInterface;
 class CViewPortControl;
 
 class C3DObjectModel
-{
-	
+{	
 protected:
+	static const std::string requestID;
 	std::unordered_map<int, C3DObjectVBO*> vbo;
 	std::unordered_map<int, C3DObjectTexture*> tex;
 	std::unordered_map<int, C3DObjectProgram*> prog;

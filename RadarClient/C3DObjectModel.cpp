@@ -7,6 +7,7 @@
 #include "C3DObjectVBO.h"
 #include "C3DObjectTexture.h"
 
+const std::string C3DObjectModel::requestID = "C3DObjectModel";
 
 void C3DObjectModel::SetCartesianCoordinates(glm::vec4 c)
 {

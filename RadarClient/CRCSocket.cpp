@@ -9,10 +9,12 @@
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 #endif
 
+const std::string CRCSocket::requestID = "CRCSocket";
+
 CRCSocket::CRCSocket(HWND hWnd)
 {
-	string context = "CRCSocket::CRCSocket(HWND hWnd)";
-	CRCLogger::Info(context, (boost::format("Start: hWnd=%1%") % hWnd).str());
+	string context = "CRCSocket::CRCSocket";
+	CRCLogger::Info(requestID, context, (boost::format("Start: hWnd=%1%") % hWnd).str());
 
 	this->hWnd = hWnd;
 	OnceClosed = false;
@@ -68,12 +70,12 @@ CRCSocket::~CRCSocket()
 void CRCSocket::Init()
 {
 	string context = "CRCSocket::Init()";
-	CRCLogger::Info(context, "Start");
+	CRCLogger::Info(requestID, context, "Start");
 
 	if (WSAStartup(MAKEWORD(2, 2), &WsaDat) != 0)
 	{
 		ErrorText = "Winsock error - Winsock initialization failed!";
-		CRCLogger::Error(context, ErrorText);
+		CRCLogger::Error(requestID, context, ErrorText);
 		WSACleanup();
 	}
 
@@ -83,13 +85,13 @@ void CRCSocket::Init()
 	if (Socket == INVALID_SOCKET)
 	{
 		ErrorText = "Winsock error - Socket creation Failed!";
-		CRCLogger::Error(context, ErrorText);
+		CRCLogger::Error(requestID, context, ErrorText);
 		WSACleanup();
 	}
 	int nResult = WSAAsyncSelect(Socket, hWnd, WM_SOCKET, (FD_CLOSE | FD_READ));
 	if (nResult)
 	{
-		CRCLogger::Error(context, "WSAAsyncSelect failed");
+		CRCLogger::Error(requestID, context, "WSAAsyncSelect failed");
 		MessageBox(hWnd, "WSAAsyncSelect failed", "Critical Error", MB_ICONERROR);		
 		SendMessage(hWnd, WM_DESTROY, NULL, NULL);
 	}
@@ -97,7 +99,7 @@ void CRCSocket::Init()
 	if ((host = gethostbyname(CSettings::GetString(StringHostName).c_str())) == NULL)
 	{
 		ErrorText = "Failed to resolve hostname!";
-		CRCLogger::Error(context, ErrorText);
+		CRCLogger::Error(requestID, context, ErrorText);
 		WSACleanup();
 	}
 
@@ -119,16 +121,16 @@ void CRCSocket::Init()
 
 	IsConnected = false;
 
-	CRCLogger::Info(context, "End");
+	CRCLogger::Info(requestID, context, "End");
 }
 
 int CRCSocket::Connect()
 {
 	string context = "CRCSocket::Connect()";
-	CRCLogger::Info(context, "Start");
+	CRCLogger::Info(requestID, context, "Start");
 	// Attempt to connect to server
 	if (OnceClosed) {
-		CRCLogger::Info(context, "Socket was once closed, need to run Init()...");
+		CRCLogger::Info(requestID, context, "Socket was once closed, need to run Init()...");
 		Init();
 		OnceClosed = false;
 	}
@@ -141,36 +143,37 @@ int CRCSocket::Connect()
 		wchar_t *s = NULL;
 		FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL, error,
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
 			(LPWSTR)&s, 0, NULL);
 		wstring ws(s);
 
 		string str(ws.begin(), ws.end());
-		CRCLogger::Error(context, (boost::format("cResult == SOCKET_ERROR: WSAGetLastError returned %1%, %2%") % error % str).str());
+		str = str.substr(0, str.length() - 1);
+		CRCLogger::Error(requestID, context, (boost::format("cResult == SOCKET_ERROR: WSAGetLastError returned %1%, %2%") % error % str).str());
 	}
 	//int errorCode = WSAGetLastError();
-	CRCLogger::Info(context, (boost::format("End: return %1%") % cResult).str());
+	CRCLogger::Info(requestID, context, (boost::format("End: return %1%") % cResult).str());
 	return cResult;
 }
 
 int CRCSocket::Read()
 {	
 	string context = "CRCSocket::Read()";
-	if (ReadLogEnabled) CRCLogger::Info(context, "Start");
+	if (ReadLogEnabled) CRCLogger::Info(requestID, context, "Start");
 	if (!IsConnected && !OnceClosed)
 	{
-		CRCLogger::Info(context, "First read, setting state to 'Connected'");
+		CRCLogger::Info(requestID, context, "First read, setting state to 'Connected'");
 		IsConnected = true;
 		PostMessage(hWnd, CM_CONNECT, IsConnected, NULL);
 	}
 	if (!IsConnected)
 	{
-		CRCLogger::Error(context, "Not connected.");
+		CRCLogger::Error(requestID, context, "Not connected.");
 		return 0;
 	}	
 	if (!client->buff)
 	{
-		CRCLogger::Error(context, "client->buff is nullptr.");
+		CRCLogger::Error(requestID, context, "client->buff is nullptr.");
 		return 0;
 	}			
 
@@ -185,7 +188,7 @@ int CRCSocket::Read()
 		ZeroMemory(szIncoming, sizeof(szIncoming));
 		recev = recv(Socket, client->buff + client->offset, TXRXBUFSIZE, 0);
 
-		if (ReadLogEnabled) CRCLogger::Info(context, (boost::format("recv returned %1% bytes of data") % recev).str());
+		if (ReadLogEnabled) CRCLogger::Info(requestID, context, (boost::format("recv returned %1% bytes of data") % recev).str());
 
 		offset = recev + client->offset;
 		if (offset < sizeof(_sh)) //приняли меньше шапки
@@ -281,7 +284,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				}
 				else
 				{
-					CRCLogger::Error(context, "MSG_RPOINTS: readBufLength - sizeof(_sh) - sizeof(RPOINTS) - info_p->N*sizeof(RPOINT) != 0");
+					CRCLogger::Error(requestID, context, "MSG_RPOINTS: readBufLength - sizeof(_sh) - sizeof(RPOINTS) - info_p->N*sizeof(RPOINT) != 0");
 					return -1;
 				}
 
@@ -293,15 +296,15 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				{
 					if (info_p && pts)
 					{
-						CRCLogger::Info(context, (boost::format("MSG_RPOINTS. D=%1%, N=%2%, d1=%3%, d2=%4%, pts[0].B=%5%") % info_p->D % info_p->N % info_p->d1 % info_p->d2 % pts[0].B).str());
+						CRCLogger::Info(requestID, context, (boost::format("MSG_RPOINTS. D=%1%, N=%2%, d1=%3%, d2=%4%, pts[0].B=%5%") % info_p->D % info_p->N % info_p->d1 % info_p->d2 % pts[0].B).str());
 					}
 					if (!info_p)
 					{
-						CRCLogger::Warn(context, "info_p is nullptr");
+						CRCLogger::Warn(requestID, context, "info_p is nullptr");
 					}
 					if (!pts)
 					{
-						CRCLogger::Warn(context, "pts is nullptr");
+						CRCLogger::Warn(requestID, context, "pts is nullptr");
 					}		
 				}
 			}
@@ -317,7 +320,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				}
 				else
 				{
-					CRCLogger::Error(context, "MSG_RIMAGE: readBufLength - sizeof(_sh) - sizeof(RIMAGE) - imginfo->N * imginfo->NR * 4 != 0");
+					CRCLogger::Error(requestID, context, "MSG_RIMAGE: readBufLength - sizeof(_sh) - sizeof(RIMAGE) - imginfo->N * imginfo->NR * 4 != 0");
 					return -1;
 				}
 				info_i = (RIMAGE*)PTR_D;
@@ -326,11 +329,11 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				{
 					if (info_i)
 					{
-						CRCLogger::Info(context, (boost::format("MSG_RIMAGE. D=%1%, N=%2%, d1=%3%, d2=%4%, NR=%5%") % info_i->D % info_i->N % info_i->d1 % info_i->d2 % info_i->NR).str());
+						CRCLogger::Info(requestID, context, (boost::format("MSG_RIMAGE. D=%1%, N=%2%, d1=%3%, d2=%4%, NR=%5%") % info_i->D % info_i->N % info_i->d1 % info_i->d2 % info_i->NR).str());
 					}
 					if (!info_i)
 					{
-						CRCLogger::Warn(context, "info_i is nullptr");
+						CRCLogger::Warn(requestID, context, "info_i is nullptr");
 					}
 				}
 			}
@@ -340,7 +343,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			{
 				if (ReadLogEnabled)
 				{
-					CRCLogger::Info(context, "MSG_PTSTRK");
+					CRCLogger::Info(requestID, context, "MSG_PTSTRK");
 				}
 			}
 			break;
@@ -352,11 +355,11 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				{
 					if (pTK)
 					{
-						CRCLogger::Info(context, (boost::format("MSG_OBJTRK. N=%1%, numTrack=%2%") % N % pTK->numTrack).str());
+						CRCLogger::Info(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, numTrack=%2%") % N % pTK->numTrack).str());
 					}
 					if (!pTK)
 					{
-						CRCLogger::Warn(context, "pTK is nullptr");
+						CRCLogger::Warn(requestID, context, "pTK is nullptr");
 					}
 				}
 				OnSrvMsg_RDRTRACK(pTK, N);			
@@ -370,7 +373,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				memcpy(s_rdrinit, (RDR_INITCL*)(void*)&sh[1], sizeof(RDR_INITCL));
 				if (ReadLogEnabled)
 				{
-					CRCLogger::Info(context, (boost::format("MSG_INIT. ViewStep=%1%, MaxNumSectPt=%2%, Nazm=%3%") % s_rdrinit->ViewStep % s_rdrinit->MaxNumSectPt % s_rdrinit->Nazm).str());
+					CRCLogger::Info(requestID, context, (boost::format("MSG_INIT. ViewStep=%1%, MaxNumSectPt=%2%, Nazm=%3%") % s_rdrinit->ViewStep % s_rdrinit->MaxNumSectPt % s_rdrinit->Nazm).str());
 				}
 			}
 			break;
@@ -379,7 +382,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				RDRCURRPOS* igpsp = (RDRCURRPOS*)(void*)((char*)PTR_D);
 				if (ReadLogEnabled)
 				{
-					CRCLogger::Info(context, (boost::format("MSG_LOCATION. lon=%1%, lat=%2%") % igpsp->lon % igpsp->lat).str());
+					CRCLogger::Info(requestID, context, (boost::format("MSG_LOCATION. lon=%1%, lat=%2%") % igpsp->lon % igpsp->lat).str());
 				}
 				OnSrvMsg_LOCATION(igpsp);
 			}
@@ -408,7 +411,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		int Idx = FindTrack(info[i].numTrack);
 		if (-1 == Idx)
 		{
-			if (ReadLogEnabled) CRCLogger::Info(context, (boost::format("MSG_OBJTRK. N=%1%, track not found, creating new") % N).str());
+			if (ReadLogEnabled) CRCLogger::Info(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track not found, creating new") % N).str());
 			//создаём трек
 			TRK* t1 = new TRK(info[i].numTrack);
 			Tracks.push_back(t1);
@@ -418,7 +421,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		// уже есть
 		else if (Idx >= 0 && Idx < Tracks.size())
 		{
-			if (ReadLogEnabled) CRCLogger::Info(context, (boost::format("MSG_OBJTRK. N=%1%, track found") % N).str());
+			if (ReadLogEnabled) CRCLogger::Info(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track found") % N).str());
 			Tracks[Idx]->InsertPoints(info + i, 1);
 		}
 	}

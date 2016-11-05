@@ -9,6 +9,8 @@
 #include "CSettings.h"
 #include "CRCLogger.h"
 
+const std::string CViewPortControl::requestID = "CViewPortControl";
+
 void CViewPortControl::Paint()
 {
 	PAINTSTRUCT ps;
@@ -164,8 +166,8 @@ glm::mat4 CViewPortControl::GetViewMatrix() const
 
 CViewPortControl::CViewPortControl(LPCSTR className)
 {
-	std::string context = "CViewPortControl::CViewPortControl(LPCSTR className)";
-	CRCLogger::Info(context, (boost::format("Start: className=%1%") % className).str());
+	std::string context = "CViewPortControl::CViewPortControl";
+	CRCLogger::Info(requestID, context, (boost::format("Start: className=%1%") % className).str());
 
 	ClassName = className;
 
@@ -264,7 +266,7 @@ LRESULT CALLBACK CViewPortControl::stWinMsgHandler(HWND hwnd, UINT uMsg, WPARAM 
 			return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 	catch (...) {
-		CRCLogger::Info("CViewPortControl::stWinMsgHandler", "Exception");
+		CRCLogger::Info(requestID, "CViewPortControl::stWinMsgHandler", "Exception");
 	}
 }
 
@@ -290,7 +292,7 @@ bool CViewPortControl::Register(void)
 	{
 		// NOTE: Failure, Should Never Happen
 		MessageBox(HWND_DESKTOP, "CViewPortControl: RegisterClassEx Failed!", "Error", MB_OK | MB_ICONEXCLAMATION);
-		CRCLogger::Error(context, "RegisterClassEx Failed");
+		CRCLogger::Error(requestID, context, "RegisterClassEx Failed");
 		return FALSE;													// Return False (Failure)
 	}
 	return TRUE;
@@ -432,7 +434,7 @@ bool CViewPortControl::InitGL()
 		GLenum en = glGetError();
 		const GLubyte *s = glewGetErrorString(err);
 		/* Problem: glewInit failed, something is seriously wrong. */
-		CRCLogger::Info("CViewPortControl::InitGL", "Problem: glewInit failed, something is seriously wrong.");
+		CRCLogger::Info(requestID, "CViewPortControl::InitGL", "Problem: glewInit failed, something is seriously wrong.");
 		//fprintf(stderr, "Error: %s\n", s);
 	}
 

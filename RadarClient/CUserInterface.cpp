@@ -16,6 +16,7 @@
 #include <boost/filesystem/path.hpp>
 #include "CRCLogger.h"
 
+const std::string CUserInterface::requestID = "CUserInterface";
 
 LRESULT Button1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	return 0;
@@ -52,7 +53,7 @@ LRESULT CUserInterface::Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
 LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	CRCLogger::Info("CUserInterface::Button_Test", "Entered color setup.");
+	CRCLogger::Info(requestID, "CUserInterface::Button_Test", "Entered color setup.");
 	if (GetMainTableMode()==0)
 	{
 		ShowWindow(Elements[Grid_ID]->hWnd, SW_HIDE);
@@ -324,7 +325,7 @@ void CUserInterface::Trackbar_ZeroElevation_SetText(int labelID)
 CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
 {
 	string context = "CUserInterface::CUserInterface";
-	CRCLogger::Info(context, (boost::format("Start: parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%") % parentHWND % vpControl % socket % panelWidth).str());
+	CRCLogger::Info(requestID, context, (boost::format("Start: parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%") % parentHWND % vpControl % socket % panelWidth).str());
 
 	this->ParentHWND = parentHWND;
 	this->VPControl = vpControl;
