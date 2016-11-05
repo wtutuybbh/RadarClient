@@ -71,6 +71,9 @@ Keys*		g_keys;
 
 std::string requestID = "RadarClient";
 
+bool hasVBO = GLEW_ARB_vertex_buffer_object == TRUE;
+bool hasVAO = GLEW_ARB_vertex_array_object == TRUE;
+
 void TerminateApplication(GL_Window* window)							// Terminate The Application
 {
 	PostMessage(window->hWnd, WM_QUIT, 0, 0);							// Send A WM_QUIT Message
@@ -653,7 +656,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				
 				while (isMessagePumpActive == TRUE)						// While The Message Pump Is Active
 				{
-					if (!g_Initialized) {
+					if (!g_Initialized && hasVBO && hasVAO) {
 						if (g_Socket && g_Socket->Initialized) 
 						{
 							Initialize();
@@ -731,9 +734,6 @@ BOOL Initialize()					// Any GL Init Code & User Initialiazation Goes Here
 {
 	string context = "Initialize";
 	CRCLogger::Info(requestID, context, "Start");
-
-	bool hasVBO = GLEW_ARB_vertex_buffer_object == TRUE;
-	bool hasVAO = GLEW_ARB_vertex_array_object == TRUE;
 
 	if (!hasVBO || !hasVAO)
 	{
