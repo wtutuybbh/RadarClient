@@ -134,6 +134,20 @@ int CRCSocket::Connect()
 	}
 
 	int cResult = connect(Socket, (SOCKADDR*)(&SockAddr), sizeof(SockAddr));
+	if (cResult == SOCKET_ERROR)
+	{
+		int error = WSAGetLastError();
+
+		wchar_t *s = NULL;
+		FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, error,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPWSTR)&s, 0, NULL);
+		wstring ws(s);
+
+		string str(ws.begin(), ws.end());
+		CRCLogger::Error(context, (boost::format("cResult == SOCKET_ERROR: WSAGetLastError returned %1%, %2%") % error % str).str());
+	}
 	//int errorCode = WSAGetLastError();
 	CRCLogger::Info(context, (boost::format("End: return %1%") % cResult).str());
 	return cResult;

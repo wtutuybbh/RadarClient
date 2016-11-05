@@ -196,6 +196,14 @@ bool CMesh::LoadHeightmap(int vpId)
 
 AltitudeMap* CMesh::GetAltitudeMap(const char* fileName, double lon1, double lat1, double lon2, double lat2)
 {
+	string context = "CMesh::GetAltitudeMap";
+	CRCLogger::Info(context, (boost::format("Start: fileName=%1%, lon1=%2%, lat1=%3%, lon2=%4%, lat2=%5%")
+		% fileName
+		% lon1
+		% lat1
+		% lon2
+		% lat2).str());
+
 	HINSTANCE hDLL;               // Handle to DLL
 	GDPALTITUDEMAP gdpAltitudeMap;    // Function pointer
 	GDPALTITUDEMAP_SIZES gdpAltitudeMap_Sizes;    // Function pointer
@@ -243,29 +251,46 @@ AltitudeMap* CMesh::GetAltitudeMap(const char* fileName, double lon1, double lat
 			aMapH->dlat = LL[7];
 			aMapH->lonSW = LL[8];
 			aMapH->latSW = LL[9];
+
+			CRCLogger::Info(context, (boost::format("aMapH overwrite? sizeX=%1%, sizeY=%2%, iLonStart=%3%, iLatStart=%4%, iLonEnd=%5%, iLatEnd=%6%, Nlon=%7%, Nlat=%8%, lon0=%9%, lat0=%10%, dlon=%11%, dlat=%12%, lonSW=%13%, latSW=%14%")
+				% aMapH->sizeX % aMapH->sizeY % aMapH->iLonStart % aMapH->iLatStart % aMapH->iLonEnd % aMapH->iLatEnd % aMapH->Nlon % aMapH->Nlat % aMapH->lon0	% aMapH->lat0 % aMapH->dlon	% aMapH->dlat % aMapH->lonSW % aMapH->latSW).str());
+
 			short *data;
 			data = new short[size[0] * size[1]];
+			
 			if (data) {
+				CRCLogger::Info(context, (boost::format("size of data is %1%")
+					% (size[0] * size[1])).str());
 				result = gdpAltitudeMap(fileName, LL, size, data);
 				if (result == 0) {
 					aMap = new AltitudeMap;
 					aMap->sizeX = size[0];
 					aMap->sizeY = size[1];
 					aMap->data = data;
-
 					FreeLibrary(hDLL);
-
+					CRCLogger::Info(context, "Return, success.");
 					return aMap;
 				}
 			}
+			CRCLogger::Error(context, (boost::format("new short[size[0] * size[1]] failed. (size[0] * size[1] = %1%)")
+				% (size[0] * size[1])).str());
 		}
 		FreeLibrary(hDLL);
 	}
+	CRCLogger::Error(context, "LoadLibrary failed.");
 	return NULL;
 }
 
 AltitudeMapHeader* CMesh::GetAltitudeMapHeader(const char* fileName, double lon1, double lat1, double lon2, double lat2)
 {
+	string context = "CMesh::GetAltitudeMapHeader";
+	CRCLogger::Info(context, (boost::format("Start: fileName=%1%, lon1=%2%, lat1=%3%, lon2=%4%, lat2=%5%")
+		% fileName
+		% lon1
+		% lat1
+		% lon2
+		% lat2).str());
+
 	HINSTANCE hDLL;               // Handle to DLL
 	GDPALTITUDEMAP_SIZES gdpAltitudeMap_Sizes;    // Function pointer
 	double LL[10];
@@ -309,10 +334,16 @@ AltitudeMapHeader* CMesh::GetAltitudeMapHeader(const char* fileName, double lon1
 			aMapH->dlat = LL[7];
 			aMapH->lonSW = LL[8];
 			aMapH->latSW = LL[9];
+
+			CRCLogger::Info(context, (boost::format("Return: sizeX=%1%, sizeY=%2%, iLonStart=%3%, iLatStart=%4%, iLonEnd=%5%, iLatEnd=%6%, Nlon=%7%, Nlat=%8%, lon0=%9%, lat0=%10%, dlon=%11%, dlat=%12%, lonSW=%13%, latSW=%14%")
+				% aMapH->sizeX % aMapH->sizeY % aMapH->iLonStart % aMapH->iLatStart % aMapH->iLonEnd % aMapH->iLatEnd % aMapH->Nlon % aMapH->Nlat % aMapH->lon0 % aMapH->lat0 % aMapH->dlon % aMapH->dlat % aMapH->lonSW % aMapH->latSW).str());
+
 			return aMapH;
 		}
+		CRCLogger::Error(context, "gdpAltitudeMap_Sizes returned 0.");
 		FreeLibrary(hDLL);
 	}
+	CRCLogger::Error(context, "LoadLibrary failed.");
 	return NULL;
 }
 
@@ -430,7 +461,14 @@ CMesh::~CMesh()
 bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)
 {
 	string context = "CMesh::IntersectLine";
-	CRCLogger::Info(context, string_format("Start: vpId=%d, orig_=(%f, %f, %f), dir_=(%f, %f, %f)", vpId, orig_.x, orig_.y, orig_.z, dir_.x, dir_.y, dir_.z));
+	CRCLogger::Info(context, (boost::format("Start: vpId=%1%, orig_=(%2%, %3%, %4%), dir_=(%5%, %6%, %7%")
+		% vpId
+		% orig_.x
+		% orig_.y
+		% orig_.z
+		% dir_.x
+		% dir_.y
+		% dir_.z).str());
 
 	glm::vec4 planeOrig(0, AverageHeight, 0, 1), planeNormal(0, 1, 0, 0);
 	float distance;

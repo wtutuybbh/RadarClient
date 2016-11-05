@@ -1,7 +1,46 @@
 #include "stdafx.h"
 #include "CRCDataFile.h"
 #include "Util.h"
+#include "CRCLogger.h"
 
+CRCDataFile::CRCDataFile(DataFileType type) : type(type)
+{
+	CRCLogger::Info("CRCDataFile::CRCDataFile", (boost::format("Start: type=%1%") % type).str());
+}
+CRCDataFile::CRCDataFile(DataFileType type, double lon0, double lat0, double lon1, double lat1, int width, int height) : type(type), lon0(lon0),
+lat0(lat0),
+lon1(lon1),
+lat1(lat1),
+width(width),
+height(height)
+{
+	CRCLogger::Info("CRCDataFile::CRCDataFile", (boost::format("Start: type=%1%, lon0=%2%, lat0=%3%, lon1=%4%, lat1=%5%, width=%6%, height=%7%") 
+		% type
+		% lon0
+		% lat0
+		% lat1
+		% width
+		% height).str());
+}
+CRCDataFile::CRCDataFile(DataFileType type, const std::string& fileName, double lon0, double lat0, double lon1, double lat1, int width, int height)
+	: fileName(fileName),
+	lon0(lon0),
+	lat0(lat0),
+	lon1(lon1),
+	lat1(lat1),
+	width(width),
+	height(height),
+	type(type)
+{
+	CRCLogger::Info("CRCDataFile::CRCDataFile", (boost::format("Start: type=%1%, fileName=%2%, lon0=%3%, lat0=%4%, lon1=%5%, lat1=%6%, width=%7%, height=%8%")
+		% type
+		% fileName
+		% lon0
+		% lat0
+		% lat1
+		% width
+		% height).str());
+}
 
 DataFileType CRCDataFile::GetTypeByExt(std::string ext)
 {

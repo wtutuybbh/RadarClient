@@ -18,7 +18,9 @@ class CRCLogger
 {
 public:
 	static void Info(std::string context, std::string msg);
+	//static void Info()
 	static void Warn(std::string context, std::string msg);
 	static void Error(std::string context, std::string msg);
 	static void GetDateTimeString(std::string &out);
+
 };

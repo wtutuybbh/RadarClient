@@ -18,28 +18,10 @@ protected:
 	void *data{ NULL };
 	//float *resolutionX{ NULL }, *resolutionY{ NULL };
 public:
-	CRCDataFile(DataFileType type) : type(type)
-	{		
-	}
-	CRCDataFile(DataFileType type, double lon0, double lat0, double lon1, double lat1, int width, int height) : type(type), lon0(lon0),
-		lat0(lat0),
-		lon1(lon1),
-		lat1(lat1),
-		width(width),
-		height(height)
-	{
-	}
-	CRCDataFile(DataFileType type, const std::string& fileName, double lon0, double lat0, double lon1, double lat1, int width, int height)
-		: fileName(fileName),
-		lon0(lon0),
-		lat0(lat0),
-		lon1(lon1),
-		lat1(lat1),
-		width(width),
-		height(height),
-		type(type)
-	{
-	}
+	CRCDataFile(DataFileType type);
+	CRCDataFile(DataFileType type, double lon0, double lat0, double lon1, double lat1, int width, int height);
+	CRCDataFile(DataFileType type, const std::string& fileName, double lon0, double lat0, double lon1, double lat1, int width, int height);
+
 	static DataFileType GetTypeByExt(std::string ext);
 	virtual ~CRCDataFile();
 	DataFileType Type();

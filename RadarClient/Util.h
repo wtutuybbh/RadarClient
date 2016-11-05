@@ -150,5 +150,3 @@ public:
 		return fputc(c, stdout) == EOF ? traits_type::eof() : c;
 	}
 };
-
-template<typename ... Args> std::string string_format(const std::string& format, Args ... args);

@@ -28,7 +28,9 @@
 #include <boost/log/trivial.hpp>
 #include <boost/log/utility/setup.hpp>
 #include <boost/format.hpp>
-
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/preprocessor/repetition/enum_params.hpp>
+#include <boost/log/sinks/text_multifile_backend.hpp>
 //Narrow-char thread-safe logger.
 typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_level> logger_t;
 
@@ -68,7 +70,6 @@ typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_le
 #include <sstream>
 #include <iomanip>
 
-#include <boost/preprocessor/repetition/enum_params.hpp>
 
 
 #include <tchar.h>

@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "CRCLogger.h"
 
+
 void CRCLogger::GetDateTimeString(std::string& out)
 {
 	time_t rawtime;
@@ -61,6 +62,27 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, logger_t)
 			<< expr::smessage
 			)
 	);
+	
+	boost::shared_ptr< logging::core > core = logging::core::get();
+	boost::shared_ptr< sinks::text_multifile_backend > backend =
+		boost::make_shared< sinks::text_multifile_backend >();
+	// Set up the file naming pattern
+	backend->set_file_name_composer
+	(
+		sinks::file::as_file_name_composer(expr::stream << "logs/" << expr::attr< std::string >("RequestID") << ".log")
+	);
+	// Wrap it into the frontend and register in the core.
+	// The backend requires synchronization in the frontend.
+	typedef sinks::synchronous_sink< sinks::text_multifile_backend > sink_t;
+	boost::shared_ptr< sink_t > sink(new sink_t(backend));
+
+	// Set the formatter
+	sink->set_formatter
+	(
+		expr::stream << "[RequestID: " << expr::attr<std::string>("RequestID") << "] " << expr::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S [") << expr::attr<boost::log::trivial::severity_level>("Severity") << "]: " << expr::smessage
+	);
+
+	core->add_sink(sink);
 
 	logging::core::get()->set_filter
 	(
