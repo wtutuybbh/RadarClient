@@ -122,7 +122,6 @@ BOOL CreateMainWindow(GL_Window* window)									// This Code Creates Window
 
 	AdjustWindowRectEx(&windowRect, windowStyle, 0, windowExtendedStyle);
 
-
 	// Create The  Window
 	window->hWnd = CreateWindowEx(windowExtendedStyle,					// Extended Style
 		window->init.application->className,	// Class Name
@@ -732,6 +731,22 @@ BOOL Initialize()					// Any GL Init Code & User Initialiazation Goes Here
 {
 	string context = "Initialize";
 	CRCLogger::Info(requestID, context, "Start");
+
+	bool hasVBO = GLEW_ARB_vertex_buffer_object == TRUE;
+	bool hasVAO = GLEW_ARB_vertex_array_object == TRUE;
+
+	if (!hasVBO || !hasVAO)
+	{
+		if (!hasVBO)
+		{
+			CRCLogger::Error(requestID, context, "GLEW_ARB_vertex_buffer_object = FALSE. End (returned false). Perhaps you are launching this program via RDP?");
+		}
+		if (!hasVAO)
+		{
+			CRCLogger::Error(requestID, context, "GLEW_ARB_vertex_array_object = FALSE. End (returned false). Perhaps you are launching this program via RDP?");
+		}
+		return false;
+	}
 
 	g_vpControl->Scene = new CScene(g_altFile, g_imgFile, g_datFile, g_lon, g_lat, g_mpph, g_mppv, g_texsize);	 
 	g_vpControl->Scene->Socket = g_Socket;
