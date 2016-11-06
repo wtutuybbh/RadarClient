@@ -70,10 +70,14 @@ class CUserInterface
 private:
 	static const std::string requestID;
 	int mainTableMode {0};
-	int CurrentID;
+	int CurrentID {1}; // incremental ID counter
+
+	//single elements
 	int IsConnected_ID, Button_Connect_ID, Grid_ID, InfoGrid_ID, ColorGrid_ID, FixViewToRadar_ID, MeasureDistance_ID, Test_ID, BtnLoad_ID, BegAzm_ID, ZeroElevation_ID, BegAzmValue_ID, ZeroElevationValue_ID;
+
+	//group elements
 	int ObjOptions_ID[3], MapOptions_ID[2], MarkupOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2], MapType_ID[2];
-	//int Info_ID[]
+
 	void SetChecked(int id, bool checked);
 
 	glm::vec3 GetDirection();
@@ -87,10 +91,10 @@ private:
 	HFONT Font; // user interface font
 
 	HWND GridHWND, InfoGridHWND; //ZeeGrid's window handle
-	int Column1X, Column2X, Column3X;
-	int VStep, VStepGrp;
+	int Column1X{ 10 }, Column2X, Column3X;
+	int VStep{ 21 }, VStepGrp{ 30 };
 	int PanelWidth;
-	int ButtonHeight, ControlWidth, ControlWidthL, ControlWidthXL;
+	int ButtonHeight{ 19 }, ControlWidth, ControlWidthL, ControlWidthXL;
 	int GridX, GridY, InfoGridX, InfoGridY;
 	int GridWidth, InfoGridWidth;
 
@@ -119,7 +123,6 @@ public:
 	HWND ParentHWND {nullptr};
 	HFONT hDlgFont {nullptr};
 	
-
 	ElementsMap Elements;
 
 	CViewPortControl *VPControl { nullptr };
