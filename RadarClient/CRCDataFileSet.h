@@ -6,6 +6,7 @@ enum DataFileType; //TODO: can lead to non-compilable state of project, beware
 
 class CRCDataFileSet
 {
+	static const std::string requestID;
 	std::vector<CRCDataFile *> _files;
 public:
 	void AddTextureFile(std::string imgFile);

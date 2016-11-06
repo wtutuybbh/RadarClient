@@ -2,68 +2,131 @@
 #include "CRCDataFileSet.h"
 #include "CRCTextureDataFile.h"
 #include "CRCAltitudeDataFile.h"
+#include "CRCLogger.h"
 
 using namespace boost::filesystem;
 using namespace std;
 
 #define DATFILE_MAXLINELENGTH 256
 
-
+const std::string CRCDataFileSet::requestID = "CRCDataFileSet";
 
 void CRCDataFileSet::AddTextureFile(std::string imgFile)
 {
-	
-	auto file = new CRCTextureDataFile(imgFile);
+	std::string context = "CRCDataFileSet::AddTextureFile";
+	CRCLogger::Info(requestID, context, (boost::format("Start... imgFile=%1%") % imgFile).str());
+
+	CRCTextureDataFile * file;
+	try 
+	{
+		file = new CRCTextureDataFile(imgFile);
+	}
+	catch (const std::exception& ex)
+	{
+		CRCLogger::Error(requestID, context, "CRCTextureDataFile constructor throwed exception: " + std::string(ex.what()));
+		return;
+	}
+	if (!file)
+	{
+		CRCLogger::Error(requestID, context, "file is nullptr for some reason.");
+		return;
+	}
 	_files.push_back(file);
+	CRCLogger::Info(requestID, context, (boost::format("End. Ok. _files collection now contains %1% elements.") % _files.size()).str());
 }
 
 void CRCDataFileSet::AddAltitudeFile(std::string altFile)
 {
-	auto file = new CRCAltitudeDataFile(altFile);
-	_files.push_back(file);
+	std::string context = "CRCDataFileSet::AddAltitudeFile";
+	CRCLogger::Info(requestID, context, (boost::format("Start... altFile=%1%") % altFile).str());
 
+	CRCAltitudeDataFile * file;
+	try
+	{
+		file = new CRCAltitudeDataFile(altFile);
+	}
+	catch (const std::exception& ex)
+	{
+		CRCLogger::Error(requestID, context, "CRCAltitudeDataFile constructor throwed exception: " + std::string(ex.what()));
+		return;
+	}
+	if (!file)
+	{
+		CRCLogger::Error(requestID, context, "file is nullptr for some reason.");
+		return;
+	}
+	_files.push_back(file);
+	CRCLogger::Info(requestID, context, (boost::format("End. Ok. _files collection now contains %1% elements.") % _files.size()).str());
 }
 
 void CRCDataFileSet::AddFile(CRCDataFile* file)
 {
+	std::string context = "CRCDataFileSet::AddFile";
+	
+	if (!file)
+	{
+		CRCLogger::Error(requestID, context, "file is nullptr.");
+		return;
+	}
+	CRCLogger::Info(requestID, context, (boost::format("Start... file->fileName=%1%...") % file->GetName()).str());
 	_files.push_back(file);
+	CRCLogger::Info(requestID, context, (boost::format("End. Ok. _files collection now contains %1% elements.") % _files.size()).str());
 }
 
 void CRCDataFileSet::AddFile(DataFileType type, std::string file)
 {
+	std::string context = "CRCDataFileSet::AddFile";
+	if (file.empty())
+	{
+		CRCLogger::Error(requestID, context, "file is empty.");
+		return;
+	}
+	if (type == Undefined)
+	{
+		CRCLogger::Error(requestID, context, "Undefined type is not allowed.");
+		return;
+	}
+	
+	CRCLogger::Info(requestID, context, (boost::format("Start... type=%1%, file=%2%") % type % file).str());
+
 	switch (type)
 	{
-	case Texture:
-	{
-		AddTextureFile(file);
+	case Texture:	
+		AddTextureFile(file);	
+		break;
+	case Altitude:	
+		AddAltitudeFile(file);		
+		break;
+	default:
+		CRCLogger::Error(requestID, context, "Unknown type detected, need code refactoring.");
+		break;
 	}
-	break;
-	case Altitude:
-	{
-		AddAltitudeFile(file);
-	}
-	break;
-	}
+	CRCLogger::Info(requestID, context, "End. Ok.");
 }
 
 void CRCDataFileSet::AddFiles(std::string dir, DataFileType typeFilter, std::string extFilter)
 {
+	std::string context = "CRCDataFileSet::AddFiles";
+	CRCLogger::Info(requestID, context, (boost::format("Start... dir=%1%, typeFilter=%2%, extFilter=%3%") % dir % typeFilter % extFilter).str());
+
 	boost::filesystem::path p(dir);
 
-	if (is_directory(p)) {
-		//std::cout << p << " is a directory containing:\n";
-
-		for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {})) {
-			std::string filename = entry.path().filename().generic_string();
-			std::string ext = filename.substr(filename.length() - 3, 3);
-			DataFileType type = CRCDataFile::GetTypeByExt(ext);
-			if ((extFilter == "" || ext == extFilter) && (type!=Undefined && typeFilter == type))
-			{
-				string file = entry.path().generic_string();
-				AddFile(type, file);
-			}
+	if (!is_directory(p)) {
+		CRCLogger::Error(requestID, context, (boost::format("dir=%1% is not a directory") % dir).str());
+		return;
+	}
+	for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {})) {
+		std::string filename = entry.path().filename().generic_string();
+		std::string ext = filename.substr(filename.length() - 3, 3);
+		DataFileType type = CRCDataFile::GetTypeByExt(ext);
+		if ((extFilter == "" || ext == extFilter) && (type!=Undefined && typeFilter == type))
+		{			
+			string file = entry.path().generic_string();
+			CRCLogger::Info(requestID, context, (boost::format("Will add file=%1%") % file).str());
+			AddFile(type, file);
 		}
 	}
+	CRCLogger::Info(requestID, context, "End. Ok.");	
 }
 
 int CRCDataFileSet::CountFilesOfGivenType(DataFileType type)
@@ -71,7 +134,7 @@ int CRCDataFileSet::CountFilesOfGivenType(DataFileType type)
 	int size = 0;
 	for (auto it = begin(_files); it != end(_files); ++it)
 	{
-		if (*it != NULL && (*it)->Type() == type)
+		if (*it != nullptr && (*it)->Type() == type)
 			size++;
 	}
 	return size;
@@ -84,10 +147,13 @@ CRCDataFile* CRCDataFileSet::GetFile(int index)
 
 CRCDataFileSet::~CRCDataFileSet()
 {
+	std::string context = "CRCDataFileSet::~CRCDataFileSet";
+	CRCLogger::Info(requestID, context, (boost::format("Destroying CRCDataFileSet object, containing %1% files") % _files.size()).str());
 	for (auto it = begin(_files); it != end(_files); ++it)
 	{
 		if (*it != NULL)
 			delete *it;
 	}
 	_files.empty();
+	CRCLogger::Info(requestID, context, "End. Ok.");
 }
