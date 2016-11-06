@@ -170,7 +170,7 @@ glm::mat4 CViewPortControl::GetViewMatrix() const
 CViewPortControl::CViewPortControl(LPCSTR className)
 {
 	std::string context = "CViewPortControl::CViewPortControl";
-	CRCLogger::Info(requestID, context, (boost::format("Start: className=%1%") % className).str());
+	CRCLogger::Info(requestID, context, (boost::format("Start... className=%1%") % className).str());
 
 	ClassName = className;
 

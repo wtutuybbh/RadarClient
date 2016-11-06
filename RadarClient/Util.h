@@ -154,3 +154,6 @@ public:
 std::string num2str(double num, std::streamsize precision);
 
 std::string mat4row2str(glm::mat4 m, int row, std::streamsize precision);
+
+//for copy-paste:
+//CRCLogger::Info(requestID, context, (boost::format("%1%") % 1).str());

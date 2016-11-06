@@ -1,4 +1,10 @@
-﻿#include "stdafx.h"
+﻿//usage:
+//
+//CRCLogger::Info(requestID, context, (boost::format("%1%") % 1).str());
+//CRCLogger::Warn(requestID, context, (boost::format("%1%") % 1).str());
+//CRCLogger::Error(requestID, context, (boost::format("%1%") % 1).str());
+
+#include "stdafx.h"
 
 #define INFO  BOOST_LOG_SEV(my_logger::get(), boost::log::trivial::info)
 #define WARN  BOOST_LOG_SEV(my_logger::get(), boost::log::trivial::warning)

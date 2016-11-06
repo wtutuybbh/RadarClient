@@ -51,11 +51,13 @@ LRESULT CUserInterface::Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	return LRESULT();
 }
 
-LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CUserInterface::Button_Colors(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	CRCLogger::Info(requestID, "CUserInterface::Button_Test", "Entered color setup.");
+	std::string context = "CUserInterface::Button_Colors";
+	
 	if (GetMainTableMode()==0)
 	{
+		CRCLogger::Info(requestID, context, "Switched to color setup.");
 		ShowWindow(Elements[Grid_ID]->hWnd, SW_HIDE);
 		ShowWindow(Elements[ColorGrid_ID]->hWnd, SW_SHOWNOACTIVATE);
 		SetMainTableMode(1);
@@ -63,6 +65,7 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	}
 	if (GetMainTableMode() == 1)
 	{
+		CRCLogger::Info(requestID, context, "Switched back to info.");
 		ShowWindow(Elements[Grid_ID]->hWnd, SW_SHOWNOACTIVATE);
 		ShowWindow(Elements[ColorGrid_ID]->hWnd, SW_HIDE);
 		SetMainTableMode(0);
@@ -325,7 +328,7 @@ void CUserInterface::Trackbar_ZeroElevation_SetText(int labelID)
 CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
 {
 	string context = "CUserInterface::CUserInterface";
-	CRCLogger::Info(requestID, context, (boost::format("Start: parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%...") % parentHWND % vpControl % socket % panelWidth).str());
+	CRCLogger::Info(requestID, context, (boost::format("Start... parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%...") % parentHWND % vpControl % socket % panelWidth).str());
 
 	this->ParentHWND = parentHWND;
 	this->VPControl = vpControl;
@@ -366,7 +369,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 
 	MeasureDistance_ID = InsertElement(NULL, _T("BUTTON"), TEXT_CHECKBOX_MEASURE_DISTANCE, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MeasureDistance);
 	
-	Test_ID = InsertElement(NULL, _T("BUTTON"), _T("Цвета"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth/2, ButtonHeight, &CUserInterface::Button_Test);
+	Test_ID = InsertElement(NULL, _T("BUTTON"), _T("Цвета"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth/2, ButtonHeight, &CUserInterface::Button_Colors);
 	BtnLoad_ID = InsertElement(NULL, _T("BUTTON"), _T("Загр. карту"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X + ControlWidth / 2 + Column1X / 2, CurrentY, ControlWidth/4 * 3, ButtonHeight, &CUserInterface::Button_Load);
 
 	CurrentY += VStepGrp;

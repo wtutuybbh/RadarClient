@@ -6,7 +6,8 @@
 class CRCTextureDataFile :
 	public CRCDataFile
 {
-	int bytespp;
+	int bytespp { 24 };
+	int alpha{ 255 }; // parameter for Paste operation
 public:
 	CRCTextureDataFile(const std::string& imgFileName);
 	CRCTextureDataFile(double lon0, double lat0, double lon1, double lat1, int width, int height);

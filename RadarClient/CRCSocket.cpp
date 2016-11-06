@@ -14,7 +14,7 @@ const std::string CRCSocket::requestID = "CRCSocket";
 CRCSocket::CRCSocket(HWND hWnd)
 {
 	string context = "CRCSocket::CRCSocket";
-	CRCLogger::Info(requestID, context, (boost::format("Start: hWnd=%1%") % hWnd).str());
+	CRCLogger::Info(requestID, context, (boost::format("Start... hWnd=%1%") % hWnd).str());
 
 	this->hWnd = hWnd;
 	OnceClosed = false;

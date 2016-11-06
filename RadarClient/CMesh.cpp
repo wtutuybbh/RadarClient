@@ -197,7 +197,7 @@ bool CMesh::LoadHeightmap(int vpId)
 AltitudeMap* CMesh::GetAltitudeMap(const char* fileName, double lon1, double lat1, double lon2, double lat2)
 {
 	string context = "CMesh::GetAltitudeMap";
-	CRCLogger::Info(requestID, context, (boost::format("Start: fileName=%1%, lon1=%2%, lat1=%3%, lon2=%4%, lat2=%5%")
+	CRCLogger::Info(requestID, context, (boost::format("Start... fileName=%1%, lon1=%2%, lat1=%3%, lon2=%4%, lat2=%5%")
 		% fileName
 		% lon1
 		% lat1
@@ -284,7 +284,7 @@ AltitudeMap* CMesh::GetAltitudeMap(const char* fileName, double lon1, double lat
 AltitudeMapHeader* CMesh::GetAltitudeMapHeader(const char* fileName, double lon1, double lat1, double lon2, double lat2)
 {
 	string context = "CMesh::GetAltitudeMapHeader";
-	CRCLogger::Info(requestID, context, (boost::format("Start: fileName=%1%, lon1=%2%, lat1=%3%, lon2=%4%, lat2=%5%")
+	CRCLogger::Info(requestID, context, (boost::format("Start... fileName=%1%, lon1=%2%, lat1=%3%, lon2=%4%, lat2=%5%")
 		% fileName
 		% lon1
 		% lat1
@@ -414,7 +414,7 @@ float CMesh::PtHeight(int nX, int nY) const
 CMesh::CMesh(int vpId, CScene* scn, bool clearAfter, float shiftX, float shiftZ) : C3DObjectModel(vpId, NULL, NULL, NULL)
 {
 	std::string context = "CMesh::CMesh";
-	CRCLogger::Info(requestID, context, (boost::format("Start: vpId=%1%, scn=%2%, clearAfter=%3%, shiftX=%4%, shiftZ=%5%") 
+	CRCLogger::Info(requestID, context, (boost::format("Start... vpId=%1%, scn=%2%, clearAfter=%3%, shiftX=%4%, shiftZ=%5%") 
 		% vpId 
 		% scn 
 		% clearAfter 
@@ -461,7 +461,7 @@ CMesh::~CMesh()
 bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)
 {
 	string context = "CMesh::IntersectLine";
-	CRCLogger::Info(requestID, context, (boost::format("Start: vpId=%1%, orig_=(%2%, %3%, %4%), dir_=(%5%, %6%, %7%")
+	CRCLogger::Info(requestID, context, (boost::format("Start... vpId=%1%, orig_=(%2%, %3%, %4%), dir_=(%5%, %6%, %7%")
 		% vpId
 		% orig_.x
 		% orig_.y

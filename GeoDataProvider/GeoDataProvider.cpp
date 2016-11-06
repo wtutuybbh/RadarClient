@@ -288,7 +288,6 @@ extern "C"
 				infile.seekg(UHL_SIZE + DSI_SIZE + ACC_SIZE + (size[2] + m) * blocksize + 8 + size[3] * 2);
 				for (int p = 0; p < size[1]; p++) {
 					infile.read((char *)chr2, 2);
-					//((nX % m_pTextureImage->sizeX) + ((nY % m_pTextureImage->sizeY) * m_pTextureImage->sizeX))
 					data[p + m * size[1]] = ((short)(unsigned char)chr2[0] << 8) + (short)(unsigned char)chr2[1];
 				}
 			}
@@ -302,7 +301,6 @@ extern "C"
 				infile.seekg((size[3] + p) * blocksize + size[2] * 2);
 				for (int m = 0; m < size[0]; m++) {
 					infile.read((char *)chr2, 2);
-					//((nX % m_pTextureImage->sizeX) + ((nY % m_pTextureImage->sizeY) * m_pTextureImage->sizeX))
 					data[p + m * size[1]] = (unsigned char)chr2[1] << 8  | (unsigned char)chr2[0];
 				}
 			}
