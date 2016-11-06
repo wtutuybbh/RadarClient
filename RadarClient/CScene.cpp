@@ -230,7 +230,7 @@ CScene::~CScene() {
 	Sectors.clear();
 
 	for (auto it = begin(Tracks); it != end(Tracks); ++it)
-		delete it->second;
+		delete it->second; //TODO: here it fails
 	Tracks.clear();
 
 	if (begAzmLine)

@@ -174,7 +174,6 @@ BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL
 			if (hRC != 0)										// Does The Window Have A Rendering Context?
 			{
 				wglDeleteContext(hRC);							// Release The Rendering Context
-
 			}
 			ReleaseDC(hWnd, hDC);						// Release The Device Context
 		}

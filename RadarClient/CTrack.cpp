@@ -5,6 +5,7 @@
 #include "CSettings.h"
 #include "CViewPortControl.h"
 #include "C3DObjectVBO.h"
+#include "CRCLogger.h"
 
 
 CTrack::CTrack(int id, bool selected)
@@ -23,6 +24,22 @@ CTrack::~CTrack()
 
 void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK*>* trackPoints)
 {
+	C3DObjectVBO *_vbo = nullptr;
+	try 
+	{
+		_vbo = vbo.at(Main);
+		if (!_vbo)
+		{
+			CRCLogger::Error(requestID, "CTrack::Refresh", "vbo.at(Main) is null. RETURN.");
+			return;
+		}
+	}
+	catch (std::out_of_range ex)
+	{
+		CRCLogger::Error(requestID, "CTrack::Refresh", "no vbo at index Main. RETURN.");
+		return;
+	}
+	void *_vbuffer = _vbo->GetBuffer();
 	vector<VBOData> *vbuffer = (vector<VBOData> *)vbo.at(Main)->GetBuffer();
 	if (vbuffer) {
 		vbuffer->clear();
