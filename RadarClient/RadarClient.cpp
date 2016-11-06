@@ -71,8 +71,9 @@ Keys*		g_keys;
 
 std::string requestID = "RadarClient";
 
-bool hasVBO = GLEW_ARB_vertex_buffer_object == TRUE;
-bool hasVAO = GLEW_ARB_vertex_array_object == TRUE;
+//считаем, что VBA и VBO у нас есть, чтобы запустилась первая проверка:
+bool hasVBO = true;
+bool hasVAO = true;
 
 void TerminateApplication(GL_Window* window)							// Terminate The Application
 {
@@ -163,7 +164,7 @@ BOOL CreateMainWindow(GL_Window* window)									// This Code Creates Window
 BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL Window & Release Resources
 {
 	string context = "DestroyWindowGL";
-	CRCLogger::Info(requestID, context, "Start");
+	CRCLogger::Info(requestID, context, (boost::format("Start... hwnd=%1%, hDC=%2%, hRC=%3%") % hWnd % hDC % hRC).str());
 
 	if (hWnd != 0)												// Does The Window Have A Handle?
 	{
@@ -734,6 +735,9 @@ BOOL Initialize()					// Any GL Init Code & User Initialiazation Goes Here
 {
 	string context = "Initialize";
 	CRCLogger::Info(requestID, context, "Start");
+
+	hasVBO = GLEW_ARB_vertex_buffer_object == TRUE;
+	hasVAO = GLEW_ARB_vertex_array_object == TRUE;
 
 	if (!hasVBO || !hasVAO)
 	{

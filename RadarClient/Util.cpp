@@ -357,3 +357,27 @@ float MinimumDistance(glm::vec3 v, glm::vec3 w, glm::vec3 p)
 	const glm::vec3 projection = v + t * (w - v);  // Projection falls on the segment
 	return glm::distance(p, projection);
 }
+
+// returns string representation of matrix row (for logging)
+std::string mat4row2str(glm::mat4 m, int row, std::streamsize precision)
+{
+	if (row > 3)
+	{
+		return std::string("Error - parameter row=") + std::to_string(row) + std::string(" out of range [0 ... 3]");
+	}
+	if (precision < 0)
+	{
+		precision = 0;
+	}
+	const float *pSource = (const float*)glm::value_ptr(m);
+
+	return num2str(*(pSource + 4 * row), precision) + ", " + num2str(*(pSource + 4 * row + 1), precision) + ", " + num2str(*(pSource + 4 * row + 2), precision) + ", " + num2str(*(pSource + 4 * row + 3), precision);
+}
+
+std::string num2str(double num, std::streamsize precision)
+{
+	std::ostringstream ss;
+	ss << std::fixed << std::setprecision(precision);
+	ss << num;
+	return ss.str();
+}

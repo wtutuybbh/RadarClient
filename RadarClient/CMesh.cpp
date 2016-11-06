@@ -259,8 +259,8 @@ AltitudeMap* CMesh::GetAltitudeMap(const char* fileName, double lon1, double lat
 			data = new short[size[0] * size[1]];
 			
 			if (data) {
-				CRCLogger::Info(requestID, context, (boost::format("size of data is %1%")
-					% (size[0] * size[1])).str());
+				CRCLogger::Info(requestID, context, (boost::format("size of data is %1% (%2% * %3%)")
+					% (size[0] * size[1]) % size[0] % size[1]).str());
 				result = gdpAltitudeMap(fileName, LL, size, data);
 				if (result == 0) {
 					aMap = new AltitudeMap;

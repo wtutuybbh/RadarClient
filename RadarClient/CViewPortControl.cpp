@@ -105,6 +105,9 @@ LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wPara
 		}
 		break;
 	case WM_LBUTTONDOWN:
+		std::string context = "CViewPortControl::ViewPortControlProc:WM_LBUTTONDOWN";
+		CRCLogger::Info(requestID, context, (boost::format("Start... hwnd=%1%, uMsg=%2%, wParam=%3%, lParam=%4%; x=LOWORD(lParam)=%5%, y=HIWORD(lParam)=%6%") 
+			% hwnd % uMsg % wParam % lParam % LOWORD(lParam) % HIWORD(lParam)).str());
 		SetFocus(hwnd);
 		if (Camera) {
 			Camera->startPosition.x = LOWORD(lParam);
@@ -189,6 +192,9 @@ CViewPortControl::~CViewPortControl()
 
 C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 {
+	std::string context = "CViewPortControl::Get3DObject";
+	CRCLogger::Info(requestID, context, (boost::format("Start... x=%1%, y=%2%") % x % y).str());
+
 	glm::vec4 viewport = glm::vec4(0, 0, Width, Height);
 
 	glm::vec3 p0 = glm::unProject(glm::vec3(x, Height - y - 1, 0.0f), Camera->GetView(), Camera->GetProjection(), viewport);
@@ -196,6 +202,7 @@ C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 
 	if(UI->MeasureDistance())
 	{
+		CRCLogger::Info(requestID, context, "Measure distance option is on, calling Scene->GetPointOnSurface(p0, p1)...");
 		Scene->GetPointOnSurface(p0, p1);
 	}
 	int index;
@@ -246,6 +253,7 @@ bool CViewPortControl::MakeCurrent()
 LRESULT CALLBACK CViewPortControl::stWinMsgHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	CViewPortControl *vpc;
+	
 	if (uMsg == WM_NCCREATE)
 	{
 		// get the pointer to the window from
@@ -314,41 +322,11 @@ void CViewPortControl::Unregister(void)
 
 bool CViewPortControl::InitGL()
 {
+	std::string context = "CViewPortControl::InitGL";
+	CRCLogger::Info(requestID, context, "Start...");
+
 	DWORD windowStyle = WS_OVERLAPPEDWINDOW;							// Define Our Window Style
 	DWORD windowExtendedStyle = WS_EX_APPWINDOW;						// Define The Window's Extended Style
-	/*
-	PIXELFORMATDESCRIPTOR pfd =											// pfd Tells Windows How We Want Things To Be
-	{
-		sizeof(PIXELFORMATDESCRIPTOR),									// Size Of This Pixel Format Descriptor
-		1,																// Version Number
-		PFD_DRAW_TO_WINDOW |											// Format Must Support Window
-		PFD_SUPPORT_OPENGL |											// Format Must Support OpenGL
-		PFD_DOUBLEBUFFER,												// Must Support Double Buffering
-		PFD_TYPE_RGBA,													// Request An RGBA Format
-		32,										// Select Our Color Depth
-		0, 0, 0, 0, 0, 0,												// Color Bits Ignored
-		8,																// No Alpha Buffer
-		0,																// Shift Bit Ignored
-		0,																// No Accumulation Buffer
-		0, 0, 0, 0,														// Accumulation Bits Ignored
-		24,																// 16Bit Z-Buffer (Depth Buffer)  
-		8,																// No Stencil Buffer
-		0,																// No Auxiliary Buffer
-		PFD_MAIN_PLANE,													// Main Drawing Layer
-		0,																// Reserved
-		PFD_TYPE_RGBA, 0, 0															// Layer Masks Ignored
-	};
-
-	ZeroMemory(&pfd, sizeof(pfd));
-
-	pfd.nSize = sizeof(pfd);
-	pfd.cColorBits = 24;
-	pfd.cAlphaBits = 8;
-	pfd.nVersion = 1;
-	pfd.cDepthBits = 32;
-	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL;
-	pfd.iPixelType = PFD_TYPE_RGBA;
-	pfd.iLayerType = PFD_MAIN_PLANE;*/
 
 	PIXELFORMATDESCRIPTOR pfd =             // pfd tells windows how we want things to be
 	{
@@ -386,6 +364,7 @@ bool CViewPortControl::InitGL()
 		// Failed
 		DestroyWindow(hWnd);									// Destroy The Window
 		hWnd = 0;												// Zero The Window Handle
+		CRCLogger::Error(requestID, context, "hDC == 0, return false");
 		return FALSE;													// Return False
 	}
 
@@ -398,6 +377,7 @@ bool CViewPortControl::InitGL()
 		hDC = 0;												// Zero The Device Context
 		DestroyWindow(hWnd);									// Destroy The Window
 		hWnd = 0;												// Zero The Window Handle
+		CRCLogger::Error(requestID, context, "PixelFormat == 0, return false");
 		return FALSE;													// Return False
 	}
 
@@ -408,6 +388,7 @@ bool CViewPortControl::InitGL()
 		hDC = 0;												// Zero The Device Context
 		DestroyWindow(hWnd);									// Destroy The Window
 		hWnd = 0;												// Zero The Window Handle
+		CRCLogger::Error(requestID, context, (boost::format("SetPixelFormat(hDC=%1%, PixelFormat=%2%, &pfd=%3%) == FALSE, return false") % hDC % PixelFormat % (int)(&pfd)).str());
 		return FALSE;													// Return False
 	}
 
@@ -419,13 +400,16 @@ bool CViewPortControl::InitGL()
 		hDC = 0;												// Zero The Device Context
 		DestroyWindow(hWnd);									// Destroy The Window
 		hWnd = 0;												// Zero The Window Handle
+		CRCLogger::Error(requestID, context, "hRC == 0, return false");
 		return FALSE;													// Return False
 	}
 
-	//return true;
 	// Make The Rendering Context Our Current Rendering Context
 	if (!MakeCurrent())
+	{
+		CRCLogger::Error(requestID, context, "MakeCurrent() == false, return false");
 		return false;
+	}
 
 	GLenum err = glewInit();
 
@@ -434,8 +418,7 @@ bool CViewPortControl::InitGL()
 		GLenum en = glGetError();
 		const GLubyte *s = glewGetErrorString(err);
 		/* Problem: glewInit failed, something is seriously wrong. */
-		CRCLogger::Info(requestID, "CViewPortControl::InitGL", "Problem: glewInit failed, something is seriously wrong.");
-		//fprintf(stderr, "Error: %s\n", s);
+		CRCLogger::Error(requestID, "CViewPortControl::InitGL", "Problem: glewInit failed, something is seriously wrong.");
 	}
 
 	const GLubyte* version = glGetString(GL_VERSION);
@@ -449,6 +432,7 @@ bool CViewPortControl::InitGL()
 	glShadeModel(GL_SMOOTH);									// Select Smooth Shading
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);			// Set Perspective Calculations To Most Accurate
 
+	CRCLogger::Info(requestID, context, "Success, return true.");
 	return true;
 }
 

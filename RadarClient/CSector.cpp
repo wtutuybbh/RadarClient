@@ -6,6 +6,7 @@
 #include "CViewPortControl.h"
 #include "C3DObjectVBO.h"
 #include "C3DObjectProgram.h"
+#include "CRCLogger.h"
 
 
 CSector::CSector() : C3DObjectModel(Main, new C3DObjectVBO(false), nullptr, new C3DObjectProgram("CSector.v.glsl", "CSector.f.glsl", "vertex", nullptr, nullptr, "color"))
@@ -86,13 +87,40 @@ void CSector::BindUniforms(CViewPortControl* vpControl)
 
 int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 {
+	std::string context = "CSector::GetPoint";
+
+	if (!vpControl)
+	{
+		CRCLogger::Error(requestID, context, (boost::format("vpControl is nullptr, screenPoint=(%1%, %2%)") % screenPoint.x % screenPoint.y).str());
+		return -1;
+	}
+
+	CRCLogger::Info(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
+
 	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
 
+	//so, it works only if buffer elements have datatype of VBOData (or identical) and organized using std::vector
 	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
 
-	if (!buffer || buffer->size() == 0)
+	if (!buffer || buffer->size() == 0) 
+	{
+		if (!buffer)
+		{
+			CRCLogger::Error(requestID, context, "buffer is nullptr, RETURN -1");
+		}
+		if (buffer->size() == 0)
+		{
+			CRCLogger::Error(requestID, context, "buffer->size() == 0, RETURN -1");
+		}
 		return -1;
-	glm::mat4 mv = vpControl->GetViewMatrix() * GetModelMatrix(vpControl);
+	}
+	glm::mat4 mv = vpControl->GetViewMatrix() * GetModelMatrix(vpControl);	
+
+	CRCLogger::Info(requestID, context, (boost::format("mv[0]=(%1%)") % mat4row2str(mv, 0, 3)).str());
+	CRCLogger::Info(requestID, context, (boost::format("mv[1]=(%1%)") % mat4row2str(mv, 1, 3)).str());
+	CRCLogger::Info(requestID, context, (boost::format("mv[2]=(%1%)") % mat4row2str(mv, 2, 3)).str());
+	CRCLogger::Info(requestID, context, (boost::format("mv[3]=(%1%)") % mat4row2str(mv, 3, 3)).str());
+
 	glm::mat4 proj = vpControl->GetProjMatrix();
 	for (int i = 0; i < buffer->size(); i++)
 	{

@@ -833,6 +833,16 @@ C3DObjectModel * CScene::GetObjectAtMiniMapPosition(int vpId, glm::vec3 p0, glm:
 }
 C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 screenPoint, int& index)
 {
+	index = -1;
+	std::string context = "CScene::GetPointOnSurface";
+
+	if (!vpControl)
+	{
+		CRCLogger::Error(requestID, context, (boost::format("vpControl is nullptr, screenPoint=(%1%, %2%)") % screenPoint.x % screenPoint.y).str());
+		return nullptr;
+	}
+
+	CRCLogger::Info(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)")	% vpControl->Id % screenPoint.x % screenPoint.y).str());
 
 	for (int i = 0; i < Sectors.size(); i++)
 	{
@@ -844,20 +854,36 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 				Sectors[i]->SelectPoint(Main, index);
 				Sectors[i]->SelectPoint(MiniMap, index);
 				CRCPointModel *point = new CRCPointModel(vpControl->Id, this->y0, this->mpph, this->mppv, 0, 0, 0);
-				point->SetCartesianCoordinates(Sectors[i]->GetPointCoords(vpControl, index));
+				auto coords = Sectors[i]->GetPointCoords(vpControl, index);
+				point->SetCartesianCoordinates(coords);
+				CRCLogger::Info(requestID, context, (boost::format("Sector %1%, index=%2%, RETURN point=(%3%, %4%, %5%)") 
+					% i % index % coords.x % coords.y % coords.z).str());
 				return point;
 			}
 		}
 	}
+	CRCLogger::Info(requestID, context, "Point not found");
 	return NULL;	
 }
 
 C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, glm::vec2 screenPoint, int& index)
 {
+	index = -1;
+	std::string context = "CScene::GetFirstTrackBetweenPoints";
+
+	if (!vpControl)
+	{
+		CRCLogger::Error(requestID, context, (boost::format("vpControl is nullptr, screenPoint=(%1%, %2%)") % screenPoint.x % screenPoint.y).str());
+		return nullptr;
+	}
+
+	CRCLogger::Info(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
+
 	for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
 	{
 		if (it->second)
 		{
+			CRCLogger::Warn(requestID, context, "Next call to GetPoint will be from CTrack class");
 			index = it->second->GetPoint(vpControl, screenPoint);
 			if (index >= 0)
 			{
@@ -866,18 +892,25 @@ C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, 
 				it->second->SelectPoint(MiniMap, index);
 				it->second->SelectTrack(Main, true);
 				it->second->SelectTrack(MiniMap, true);
+				CRCLogger::Info(requestID, context, (boost::format("Track ID=%1%, index=%2%") % it->second->ID % index).str());
+				return it->second;
 			}
 		}
 	}
+	CRCLogger::Info(requestID, context, "Track not found");
 	return NULL;
 }
 
 C3DObjectModel* CScene::GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const
 {
+	std::string context = "CScene::GetPointOnSurface";
+	CRCLogger::Info(requestID, context, (boost::format("Start... p0=(%1%, %2%, %3%), p1=(%4%, %5%, %6%)")
+		% p0.x % p0.y % p0.z % p1.x % p1.y % p1.z).str());
 	glm::vec3 dir = p1 - p0, position;
 	if (CMesh::Meshs && CMesh::Meshs[0]) {
 		CMesh::Meshs[0]->IntersectLine(Main, p0, dir, position);
 	}
+	CRCLogger::Error(requestID, context, "Not implemented!");
 	return NULL;
 }
 

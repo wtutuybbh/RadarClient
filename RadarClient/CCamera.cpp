@@ -59,13 +59,6 @@ void CCamera::SetProjection(float fovy, float aspect, float zNear, float zFar)
 
 void CCamera::SetPosition(float x, float y, float z)
 {
-	/*glm::vec3 prod = glm::cross(glm::normalize(Up0), glm::normalize(GetDirection()));
-	if (glm::length(prod) < 0.000001) { //collinearity test
-		Up = glm::vec3(0, 0, 1);
-	}
-	else {
-		Up = glm::normalize(glm::normalize(GetDirection()) + Up0);
-	}*/
 	Position = glm::vec3(x, y, z);	
 }
 
@@ -75,10 +68,8 @@ void CCamera::SetPositionXZ(float x, float z)
 }
 
 void CCamera::LookAt() {
-	//m_view = glm::lookAt(m_position, m_position + m_direction, m_up);
 	glm::vec3 to = Position + GetDirection();
 	lookAt(Position.x, Position.y, Position.z, to.x, to.y, to.z, Up.x, Up.y, Up.z);
-	//gluLookAt(Position.x, Position.y, Position.z, to.x, to.y, to.z, Up.x, Up.y, Up.z);
 }
 void CCamera::MoveByView(double shift) {
 	glm::vec3 dir = glm::normalize(GetDirection());
@@ -101,7 +92,6 @@ void CCamera::Move(glm::vec3 const & direction, bool preserveDirection)
 	{
 		Position += direction;
 	}
-
 }
 
 void CCamera::ApplyMovement(MovementType movement)
@@ -136,8 +126,6 @@ glm::mat4 CCamera::GetProjection()
 glm::mat4 CCamera::GetMiniMapView()
 {	
 	return glm::lookAt(mmPosition, mmTo, mmUp);
-
-	//return glm::lookAt(glm::vec3(0.0f, 1000.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 glm::mat4 CCamera::GetMiniMapProjection()

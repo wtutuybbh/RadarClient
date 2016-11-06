@@ -150,3 +150,7 @@ public:
 		return fputc(c, stdout) == EOF ? traits_type::eof() : c;
 	}
 };
+
+std::string num2str(double num, std::streamsize precision);
+
+std::string mat4row2str(glm::mat4 m, int row, std::streamsize precision);

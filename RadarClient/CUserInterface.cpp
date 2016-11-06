@@ -325,7 +325,7 @@ void CUserInterface::Trackbar_ZeroElevation_SetText(int labelID)
 CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
 {
 	string context = "CUserInterface::CUserInterface";
-	CRCLogger::Info(requestID, context, (boost::format("Start: parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%") % parentHWND % vpControl % socket % panelWidth).str());
+	CRCLogger::Info(requestID, context, (boost::format("Start: parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%...") % parentHWND % vpControl % socket % panelWidth).str());
 
 	this->ParentHWND = parentHWND;
 	this->VPControl = vpControl;
@@ -350,7 +350,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	hgridmod = LoadLibrary("ZeeGrid.dll");
 	if (!hgridmod)
 	{
-		MessageBox(parentHWND, "Unable to load ZeeGrid.DLL", "Error", MB_OK);
+		CRCLogger::Error(requestID, context, "Unable to load ZeeGrid.DLL");
 		PostQuitMessage(0);
 	}
 
@@ -615,7 +615,7 @@ void CUserInterface::Resize() const
 	MoveWindow(gridHwnd, PanelWidth + 2* VPControl->Width / 3 + 2, VPControl->Height + 2, VPControl->Width / 3 - 2, clientRect.bottom - VPControl->Height - 2, TRUE);
 
 	gridHwnd = GetDlgItem(ParentHWND, ColorGrid_ID);
-	MoveWindow(gridHwnd, PanelWidth + 2 * VPControl->Width / 3 + 2, VPControl->Height + 2, VPControl->Width / 3 - 2, clientRect.bottom - VPControl->Height - 2, TRUE);
+	MoveWindow(gridHwnd, PanelWidth, VPControl->Height + 2, 2 * VPControl->Width / 3, clientRect.bottom - VPControl->Height - 2, TRUE);
 	//SetWindowPos(gridHwnd, NULL, PanelWidth, VPControl->Height + 2, VPControl->Width, clientRect.bottom - VPControl->Height - 2, 0);
 }
 
