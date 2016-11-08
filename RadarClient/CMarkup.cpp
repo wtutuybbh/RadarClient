@@ -9,8 +9,8 @@
 
 CMarkup::CMarkup(glm::vec4 origin) : C3DObjectModel (Main,
 	new C3DObjectVBO(false),
-	NULL,
-	new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", NULL, NULL, "color"))
+	nullptr,
+	new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"))
 {
 
 	int markDistance = CSettings::GetInt(IntMarkupMarkDistance);
@@ -132,7 +132,7 @@ CMarkup::CMarkup(glm::vec4 origin) : C3DObjectModel (Main,
 
 	vbo.insert_or_assign(MiniMap, mmvbo);
 
-	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", NULL, NULL, "color"));
+	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
 
 	tex.insert_or_assign(MiniMap, nullptr);
 

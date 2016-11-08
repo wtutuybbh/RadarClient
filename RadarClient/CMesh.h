@@ -41,11 +41,11 @@ class CScene;
 
 typedef struct {
 	GLint sizeX, sizeY;
-	short *data{ NULL };
+	short *data{ nullptr };
 } AltitudeMap;
 
 typedef struct {
-	char *fileName{ NULL };
+	char *fileName{ nullptr };
 	int sizeX, sizeY, iLonStart, iLatStart, iLonEnd, iLatEnd, Nlon, Nlat;
 	double lon0, lat0, dlon, dlat, lonSW, latSW;
 } AltitudeMapHeader;
@@ -123,7 +123,7 @@ typedef int(_cdecl * GDPALTITUDEMAP_SIZES)(const char *, double *, int *);
 
 class CMesh : public C3DObjectModel
 {
-	CScene *scn{ NULL };
+	CScene *scn{ nullptr };
 	
 	bool LoadHeightmap(int vpId);
 	AltitudeMap* GetAltitudeMap(const char *fileName, double lon1, double lat1, double lon2, double lat2);
@@ -131,14 +131,14 @@ class CMesh : public C3DObjectModel
 	ImageMapHeader* GetImageMapHeader(const char *imgFile, const char *datFile);
 	float PtHeight(int nX, int nY) const;
 	int texsize;
-	AltitudeMap* aMap{ NULL };							// Heightmap Data
-	AltitudeMapHeader* aMapH{ NULL };
-	ImageMapHeader* iMapH{ NULL };
-	glm::vec3 * Bounds{ NULL };
+	AltitudeMap* aMap{ nullptr };							// Heightmap Data
+	AltitudeMapHeader* aMapH{ nullptr };
+	ImageMapHeader* iMapH{ nullptr };
+	glm::vec3 * Bounds{ nullptr };
 	
 
-	void *bitmap{ NULL };
-	FIBITMAP *subimage{ NULL };
+	void *bitmap{ nullptr };
+	FIBITMAP *subimage{ nullptr };
 
 	bool clearAfter;
 

@@ -1,9 +1,9 @@
 ﻿#include "stdafx.h"
 #include "CRCLogger.h"
 
-
 void CRCLogger::GetDateTimeString(std::string& out)
 {
+
 	time_t rawtime;
 	struct tm * timeinfo;
 	char buffer[80];

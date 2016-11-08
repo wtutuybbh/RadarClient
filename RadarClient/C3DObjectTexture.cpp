@@ -30,11 +30,11 @@ void C3DObjectTexture::LoadToGPU()
 		if (useBits && bits)
 		{
 			delete[] bits;
-			bits = NULL;
+			bits = nullptr;
 		}
 		if (clearAfter) {
 			FreeImage_Unload(image);
-			image = NULL;
+			image = nullptr;
 		}
 	}
 }
@@ -81,7 +81,7 @@ C3DObjectTexture::C3DObjectTexture(const char* imgFile, const char *textureUnifo
 	InitBits();
 
 	FreeImage_Unload(image);
-	image = NULL;
+	image = nullptr;
 
 	this->textureUniformName = (char *)textureUniformName;
 
@@ -115,5 +115,5 @@ void C3DObjectTexture::Bind(unsigned int programId) const
 void C3DObjectTexture::UnloadImage()
 {
 	FreeImage_Unload(image);
-	image = NULL;
+	image = nullptr;
 }

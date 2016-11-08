@@ -130,7 +130,7 @@ float CUserInterface::GetHeight()
 
 int CUserInterface::InsertElement(DWORD xStyle, LPCSTR _class, LPCSTR text, DWORD style, int x, int y, int width, int height, UIWndProc action)
 {
-	Elements.insert({ CurrentID, new InterfaceElement{ CurrentID, xStyle, _class, text, style, x, y, width, height, NULL, action } });
+	Elements.insert({ CurrentID, new InterfaceElement{ CurrentID, xStyle, _class, text, style, x, y, width, height, nullptr, action } });
 	CurrentID++;
 	return CurrentID-1;
 }
@@ -486,13 +486,16 @@ CUserInterface::~CUserInterface()
 
 void CUserInterface::ConnectionStateChanged(bool IsConnected) const
 {
-	if (IsConnected) {
-		SetDlgItemText(ParentHWND, IsConnected_ID, TEXT_LABEL_CONNECTED);
-		SetDlgItemText(ParentHWND, Button_Connect_ID, TEXT_BUTTON_DISCONNECT);
+	std::string context = "CUserInterface::ConnectionStateChanged";
+	if (IsConnected) 
+	{
+		SetDlgItemText(ParentHWND, IsConnected_ID, _T("Есть коннект"));
+		SetDlgItemText(ParentHWND, Button_Connect_ID, _T("Стоп"));
 	}
-	else {
-		SetDlgItemText(ParentHWND, IsConnected_ID, TEXT_LABEL_NOT_CONNECTED);
-		SetDlgItemText(ParentHWND, Button_Connect_ID, TEXT_BUTTON_CONNECT);
+	else 
+	{
+		SetDlgItemText(ParentHWND, IsConnected_ID, _T("Нет коннекта"));
+		SetDlgItemText(ParentHWND, Button_Connect_ID, _T("Соединить"));
 	}
 }
 
@@ -654,7 +657,7 @@ void CUserInterface::InitGrid()
 	SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, 2, (LPARAM)"Значение");
 	SendMessage(InfoGridHWND, ZGM_AUTOSIZE_ALL_COLUMNS, 0, 0);
 	
-	FillInfoGrid(NULL);
+	FillInfoGrid(nullptr);
 }
 
 HFONT CUserInterface::GetFont()

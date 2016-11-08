@@ -83,7 +83,7 @@ void TerminateApplication(GL_Window* window)							// Terminate The Application
 	if (g_Socket)
 	{
 		delete g_Socket;
-		g_Socket = NULL;
+		g_Socket = nullptr;
 	}
 }
 
@@ -139,7 +139,7 @@ BOOL CreateMainWindow(GL_Window* window)									// This Code Creates Window
 		window->init.application->hInstance, // Pass The Window Instance
 		window);
 
-	if (window->hWnd == 0)												// Was Window Creation A Success?
+	if (window->hWnd == nullptr)												// Was Window Creation A Success?
 	{
 		CRCLogger::Error(requestID, context, "window->hWnd == 0 => return false");
 		return FALSE;													// If Not Return False
@@ -166,12 +166,12 @@ BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL
 	string context = "DestroyWindowGL";
 	CRCLogger::Info(requestID, context, (boost::format("Start... hwnd=%1%, hDC=%2%, hRC=%3%") % hWnd % hDC % hRC).str());
 
-	if (hWnd != 0)												// Does The Window Have A Handle?
+	if (hWnd != nullptr)												// Does The Window Have A Handle?
 	{
-		if (hDC != 0)											// Does The Window Have A Device Context?
+		if (hDC != nullptr)											// Does The Window Have A Device Context?
 		{
-			wglMakeCurrent(hDC, 0);							// Set The Current Active Rendering Context To Zero
-			if (hRC != 0)										// Does The Window Have A Rendering Context?
+			wglMakeCurrent(hDC, nullptr);							// Set The Current Active Rendering Context To Zero
+			if (hRC != nullptr)										// Does The Window Have A Rendering Context?
 			{
 				wglDeleteContext(hRC);							// Release The Rendering Context
 			}
@@ -231,7 +231,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		window = (GL_Window*)(creation->lpCreateParams);
 		SetWindowLong(hWnd, GWL_USERDATA, (LONG)(window));
 
-		g_hIcon = LoadImage(0, _T("radar.ico"), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+		g_hIcon = LoadImage(nullptr, _T("radar.ico"), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 		if (g_hIcon) {
 			//Change both icons to the same icon handle.
 			SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)g_hIcon);
@@ -452,7 +452,7 @@ BOOL RegisterWindowClass(Application* application)						// Register A Window Cla
 	windowClass.lpfnWndProc = (WNDPROC)(WindowProc);				// WindowProc Handles Messages
 	windowClass.hInstance = application->hInstance;				// Set The Instance
 	windowClass.hbrBackground = (HBRUSH)(COLOR_MENU + 1);			// Class Background Brush Color
-	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);			// Load The Arrow Pointer
+	windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);			// Load The Arrow Pointer
 	windowClass.lpszClassName = application->className;				// Sets The Applications Classname
 	if (RegisterClassEx(&windowClass) == 0)							// Did Registering The Class Fail?
 	{
@@ -466,7 +466,7 @@ BOOL RegisterWindowClass(Application* application)						// Register A Window Cla
 class outbuf2 : public std::streambuf {
 public:
 	outbuf2() {
-		setp(0, 0);
+		setp(nullptr, nullptr);
 	}
 
 	virtual int_type overflow(int_type c = traits_type::eof()) {
@@ -476,7 +476,7 @@ public:
 
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
+{	
 	AllocConsole();
 	HWND console = GetConsoleWindow();
 	SetWindowPos(console, HWND_TOPMOST, 0, 0, 0, 0, SWP_DRAWFRAME | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
@@ -486,12 +486,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	string context = "WinMain";
 
+	LOG(Info_, requestID, context, "TEST hInstance=%d", hInstance);
+
+	LOG_INFO_("LOG_INFO_ test %d %f %f", 12, 3.7, 5.2);
+
 	CRCLogger::Info(requestID, context, "RadarClient started.");
 	CSettings::Init();
 	C3DObjectModel::_id = 0;
 	C3DObjectModel::_testid = 0;
 
-	g_hIcon = NULL;
+	g_hIcon = nullptr;
 
 	Application			application;									// Application Structure
 	GL_Window			window;											// Window Structure

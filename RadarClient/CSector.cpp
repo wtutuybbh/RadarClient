@@ -23,7 +23,31 @@ CSector::CSector() : C3DObjectModel(Main, new C3DObjectVBO(false), nullptr, new 
 
 CSector::~CSector()
 {
-	delete (vector<VBOData>*)vbo.at(Main)->GetBuffer();
+	C3DObjectVBO* _vbo;
+	try
+	{
+		_vbo = (C3DObjectVBO*)vbo.at(Main);
+		if (_vbo)
+		{
+			auto _b = _vbo->GetBuffer();
+			if (_b)
+			{
+				delete _b;
+			}
+			else
+			{
+				CRCLogger::Warn(requestID, "CSector DESTRUCTOR", "buffer is nullptr");
+			}
+		}
+		else
+		{
+			CRCLogger::Warn(requestID, "CSector DESTRUCTOR", "vbo at Main is nullptr");
+		}
+	}
+	catch (std::out_of_range ex)
+	{
+		CRCLogger::Warn(requestID, "CSector DESTRUCTOR", "no vbo at Main");
+	}	
 }
 
 float CSector::maxAmp = 0;
@@ -35,7 +59,7 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 		return;
 	//mpph, mppv, pts[i].R * init->dR, init->begAzm + pts[i].B * init->dAzm, ZERO_ELEVATION + init->begElv + pts[i].E * init->dElv
 	float r, a, e;
-	vector<VBOData> *vbuffer = (vector<VBOData> *)vbo.at(Main)->GetBuffer();
+	vector<VBOData> *vbuffer = (vector<VBOData> *)GetBufferAt(Main);
 	if (vbuffer) {
 		vbuffer->clear();
 		vbuffer->resize(info_p->N);
@@ -51,15 +75,17 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 		a = init->begAzm + pts[i].B * init->dAzm;
 		e = zeroElevation + init->begElv + pts[i].E * init->dElv;
 		(*vbuffer)[i].vert = origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0);
-		(*vbuffer)[i].norm.x = pts[i].Amp;
-		
-		(*vbuffer)[i].color = GetColor(pts[i].Amp);
-		
+		(*vbuffer)[i].norm.x = pts[i].Amp;		
+		(*vbuffer)[i].color = GetColor(pts[i].Amp);		
 	}
+	
 	vbo.at(Main)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
 	vbo.at(Main)->NeedsReload = true;
-	vbo.at(MiniMap)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
-	vbo.at(MiniMap)->NeedsReload = true;
+	if (vbo.find(MiniMap) != vbo.end())
+	{
+		vbo.at(MiniMap)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
+		vbo.at(MiniMap)->NeedsReload = true;
+	}
 }
 
 void CSector::Dump(CViewPortControl* vpControl, std::ofstream *outfile)
@@ -85,6 +111,7 @@ void CSector::BindUniforms(CViewPortControl* vpControl)
 	glUniform1fv(ps_loc, 1, &PointSize);
 }
 
+#define CSector_GetPoint_LogInfo false
 int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 {
 	std::string context = "CSector::GetPoint";
@@ -95,7 +122,8 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 		return -1;
 	}
 
-	CRCLogger::Info(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
+	if (CSector_GetPoint_LogInfo) 
+		CRCLogger::Info(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
 
 	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
 
@@ -116,10 +144,13 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 	}
 	glm::mat4 mv = vpControl->GetViewMatrix() * GetModelMatrix(vpControl);	
 
-	CRCLogger::Info(requestID, context, (boost::format("mv[0]=(%1%)") % mat4row2str(mv, 0, 3)).str());
-	CRCLogger::Info(requestID, context, (boost::format("mv[1]=(%1%)") % mat4row2str(mv, 1, 3)).str());
-	CRCLogger::Info(requestID, context, (boost::format("mv[2]=(%1%)") % mat4row2str(mv, 2, 3)).str());
-	CRCLogger::Info(requestID, context, (boost::format("mv[3]=(%1%)") % mat4row2str(mv, 3, 3)).str());
+	if (CSector_GetPoint_LogInfo)
+	{
+		CRCLogger::Info(requestID, context, (boost::format("mv[0]=(%1%)") % mat4row2str(mv, 0, 3)).str());
+		CRCLogger::Info(requestID, context, (boost::format("mv[1]=(%1%)") % mat4row2str(mv, 1, 3)).str());
+		CRCLogger::Info(requestID, context, (boost::format("mv[2]=(%1%)") % mat4row2str(mv, 2, 3)).str());
+		CRCLogger::Info(requestID, context, (boost::format("mv[3]=(%1%)") % mat4row2str(mv, 3, 3)).str());
+	}
 
 	glm::mat4 proj = vpControl->GetProjMatrix();
 	for (int i = 0; i < buffer->size(); i++)

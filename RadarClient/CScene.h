@@ -46,7 +46,7 @@ class CScene {
 	unsigned long mainDrawCount{ 0 };
 	static const std::string requestID;
 public:
-	CLine *begAzmLine{ NULL };
+	CLine *begAzmLine{ nullptr };
 
 	float maxAmp = 0;
 
@@ -54,7 +54,7 @@ public:
 	float mppv; // meters per pixel horizontal
 	glm::vec2 geocenter; //geographic coordinates of center point (place of the radar)
 	int msize; // area square's side length in meters
-	glm::vec3 *meshBounds{ NULL };
+	glm::vec3 *meshBounds{ nullptr };
 
 	std::string altFile, imgFile, datFile;
 	
@@ -80,8 +80,8 @@ public:
 
 	int numCircles, marksPerCircle, segmentsPerCircle;
 
-	glm::vec3 *AxisGrid{ NULL }, *Ray{ NULL };
-	CColorRGBA *AxisGridColor{ NULL }, *RayColor{ NULL };
+	glm::vec3 *AxisGrid{ nullptr }, *Ray{ nullptr };
+	CColorRGBA *AxisGridColor{ nullptr }, *RayColor{ nullptr };
 
 
 
@@ -93,10 +93,10 @@ public:
 	float viewAngle;
 
 	///arrays for different VBO objects:
-	unsigned short *markup{ NULL };
-	unsigned short **circles{ NULL };
-	unsigned short *ray{ NULL };
-	unsigned short *info{ NULL };
+	unsigned short *markup{ nullptr };
+	unsigned short **circles{ nullptr };
+	unsigned short *ray{ nullptr };
+	unsigned short *info{ nullptr };
 
 	int zeroLevel = ZEROLEVEL_ACTUALHEIGHT;
 	float y0;
@@ -108,36 +108,36 @@ public:
 
 	int SectorsCount;
 
-	CCamera *Camera{ NULL };
+	CCamera *Camera{ nullptr };
 
-	CRCSocket *Socket{ NULL };
-	CUserInterface *UI{ NULL };
+	CRCSocket *Socket{ nullptr };
+	CUserInterface *UI{ nullptr };
 
 	bool VBOisBuilt, RayVBOisBuilt, MiniMapVBOisBuilt;
 
 
-	RDR_INITCL * rdrinit{NULL};
+	RDR_INITCL * rdrinit{ nullptr };
 	bool Initialized;
 
 	std::vector<C3DObjectModel*> Selection;
 	void PushSelection(C3DObjectModel *o);
 	void ClearSelection();
 
-	CMesh* Mesh{ NULL };
-	CMesh* Mesh1{ NULL };
-	CMesh* Mesh2{ NULL };
-	CMesh* Mesh3{ NULL };
+	CMesh* Mesh{ nullptr };
+	CMesh* Mesh1{ nullptr };
+	CMesh* Mesh2{ nullptr };
+	CMesh* Mesh3{ nullptr };
 
-	CMiniMapPointer *mmPointer {NULL};
+	CMiniMapPointer *mmPointer { nullptr };
 
-	CRImageSet *ImageSet {NULL};
+	CRImageSet *ImageSet { nullptr };
 
-	CMarkup *Markup {NULL};
+	CMarkup *Markup { nullptr };
 
-	C3DObjectModel *RayObj{ NULL };
+	C3DObjectModel *RayObj{ nullptr };
 
 	glm::vec3 MeshSize;
-	glm::vec3 * m_Bounds{ NULL };
+	glm::vec3 * m_Bounds{ nullptr };
 	CScene(std::string alfFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize);
 	~CScene();
 

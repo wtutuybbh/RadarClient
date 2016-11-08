@@ -141,7 +141,7 @@ void CViewPortControl::Add(HWND parent, int x, int y, int w, int h)
 		WS_VISIBLE | WS_CHILD,
 		x, y, w, h,
 		parent,
-		NULL, GetModuleHandle(0), this
+		nullptr, GetModuleHandle(nullptr), this
 		);
 }
 void CViewPortControl::SetPosition(int x, int y, int w, int h)
@@ -150,7 +150,7 @@ void CViewPortControl::SetPosition(int x, int y, int w, int h)
 	Height = h;
 	X = x;
 	Y = y;
-	SetWindowPos(hWnd, NULL, x, y, w, h, 0);
+	SetWindowPos(hWnd, nullptr, x, y, w, h, 0);
 }
 
 glm::mat4 CViewPortControl::GetProjMatrix() const
@@ -174,13 +174,13 @@ CViewPortControl::CViewPortControl(LPCSTR className)
 
 	ClassName = className;
 
-	hRC = NULL;
-	hDC = NULL;
+	hRC = nullptr;
+	hDC = nullptr;
 	Init();
 
-	Scene = NULL;
-	Camera = NULL;
-	UI = NULL;
+	Scene = nullptr;
+	Camera = nullptr;
+	UI = nullptr;
 	Register();
 }
 
@@ -239,11 +239,11 @@ bool CViewPortControl::MakeCurrent()
 	{
 		// Failed
 		wglDeleteContext(hRC);									// Delete The Rendering Context
-		hRC = 0;												// Zero The Rendering Context
+		hRC = nullptr;												// Zero The Rendering Context
 		ReleaseDC(hWnd, hDC);							// Release Our Device Context
-		hDC = 0;												// Zero The Device Context
+		hDC = nullptr;												// Zero The Device Context
 		DestroyWindow(hWnd);									// Destroy The Window
-		hWnd = 0;												// Zero The Window Handle
+		hWnd = nullptr;												// Zero The Window Handle
 		return FALSE;													// Return False
 	}
 
@@ -285,16 +285,16 @@ bool CViewPortControl::Register(void)
 	wc.cbSize = sizeof(wc);
 	wc.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc = (WNDPROC)stWinMsgHandler;// ViewPortControlProc;
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wc.lpszClassName = ClassName;
 
-	wc.hInstance = GetModuleHandle(0);
-	wc.hIcon = 0;
-	wc.lpszMenuName = 0;
+	wc.hInstance = GetModuleHandle(nullptr);
+	wc.hIcon = nullptr;
+	wc.lpszMenuName = nullptr;
 	wc.hbrBackground = (HBRUSH)GetSysColorBrush(COLOR_BTNFACE);
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
-	wc.hIconSm = 0;
+	wc.hIconSm = nullptr;
 
 	if (RegisterClassEx(&wc) == 0)							// Did Registering The Class Fail?
 	{
@@ -317,7 +317,7 @@ void CViewPortControl::Init()
 
 void CViewPortControl::Unregister(void)
 {
-	UnregisterClass(ClassName, NULL);
+	UnregisterClass(ClassName, nullptr);
 }
 
 bool CViewPortControl::InitGL()
@@ -359,11 +359,11 @@ bool CViewPortControl::InitGL()
 
 	hDC = GetDC(hWnd);
 
-	if (hDC == 0)												// Did We Get A Device Context?
+	if (hDC == nullptr)												// Did We Get A Device Context?
 	{
 		// Failed
 		DestroyWindow(hWnd);									// Destroy The Window
-		hWnd = 0;												// Zero The Window Handle
+		hWnd = nullptr;												// Zero The Window Handle
 		CRCLogger::Error(requestID, context, "hDC == 0, return false");
 		return FALSE;													// Return False
 	}
@@ -374,9 +374,9 @@ bool CViewPortControl::InitGL()
 	{
 		// Failed
 		ReleaseDC(hWnd, hDC);							// Release Our Device Context
-		hDC = 0;												// Zero The Device Context
+		hDC = nullptr;												// Zero The Device Context
 		DestroyWindow(hWnd);									// Destroy The Window
-		hWnd = 0;												// Zero The Window Handle
+		hWnd = nullptr;												// Zero The Window Handle
 		CRCLogger::Error(requestID, context, "PixelFormat == 0, return false");
 		return FALSE;													// Return False
 	}
@@ -385,21 +385,21 @@ bool CViewPortControl::InitGL()
 	{
 		// Failed
 		ReleaseDC(hWnd, hDC);							// Release Our Device Context
-		hDC = 0;												// Zero The Device Context
+		hDC = nullptr;												// Zero The Device Context
 		DestroyWindow(hWnd);									// Destroy The Window
-		hWnd = 0;												// Zero The Window Handle
+		hWnd = nullptr;												// Zero The Window Handle
 		CRCLogger::Error(requestID, context, (boost::format("SetPixelFormat(hDC=%1%, PixelFormat=%2%, &pfd=%3%) == FALSE, return false") % hDC % PixelFormat % (int)(&pfd)).str());
 		return FALSE;													// Return False
 	}
 
 	hRC = wglCreateContext(hDC);						// Try To Get A Rendering Context
-	if (hRC == 0)												// Did We Get A Rendering Context?
+	if (hRC == nullptr)												// Did We Get A Rendering Context?
 	{
 		// Failed
 		ReleaseDC(hWnd, hDC);							// Release Our Device Context
-		hDC = 0;												// Zero The Device Context
+		hDC = nullptr;												// Zero The Device Context
 		DestroyWindow(hWnd);									// Destroy The Window
-		hWnd = 0;												// Zero The Window Handle
+		hWnd = nullptr;												// Zero The Window Handle
 		CRCLogger::Error(requestID, context, "hRC == 0, return false");
 		return FALSE;													// Return False
 	}

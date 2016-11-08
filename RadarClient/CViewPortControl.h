@@ -28,9 +28,9 @@ class CViewPortControl {
 	void Init();
 	static const std::string requestID;
 public:
-	CScene *Scene{ NULL };
-	CCamera *Camera{ NULL };
-	CUserInterface *UI{ NULL };
+	CScene *Scene{ nullptr };
+	CCamera *Camera{ nullptr };
+	CUserInterface *UI{ nullptr };
 	HWND hWnd;
 	HDC hDC;
 	HGLRC hRC;

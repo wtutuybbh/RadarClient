@@ -41,8 +41,6 @@ void CScene::PushSelection(C3DObjectModel* o)
 
 void CScene::ClearSelection()
 {
-	for (auto it = begin(Selection); it != end(Selection); ++it)
-		delete *it;
 	Selection.clear();
 	for (int i = 0; i < Sectors.size(); i++)
 	{
@@ -57,7 +55,7 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 {
 	std::string context = "CScene::CScene";
 	CRCLogger::Info(requestID, context, "Start");
-	rdrinit = NULL;
+	rdrinit = nullptr;
 
 	SectorsCount = 0;
 
@@ -168,19 +166,19 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 
 	RotatingSpeed = 120;	
 
-	AxisGrid = NULL;
-	AxisGridColor = NULL;
-	Ray = NULL;
-	RayColor = NULL;
+	AxisGrid = nullptr;
+	AxisGridColor = nullptr;
+	Ray = nullptr;
+	RayColor = nullptr;
 	Ray_VBOName = 0;
 	Ray_VBOName_c = 0;
 
 	RayVBOisBuilt = VBOisBuilt = MiniMapVBOisBuilt = false;
 
-	circles = NULL;
-	markup = NULL;
-	info = NULL;
-	ray = NULL;
+	circles = nullptr;
+	markup = nullptr;
+	info = nullptr;
+	ray = nullptr;
 
 	Initialized = false;
 }
@@ -219,7 +217,7 @@ CScene::~CScene() {
 			delete CMesh::Meshs[i];
 		}
 		delete[] CMesh::Meshs;
-		CMesh::Meshs = NULL;
+		CMesh::Meshs = nullptr;
 	}
 
 	if (info)
@@ -277,7 +275,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	if (UI->GetCheckboxState_Points()) {
 		for (int i = 0; i < Sectors.size(); i++) {
-			if (Sectors[i] != NULL)
+			if (Sectors[i] != nullptr)
 				Sectors[i]->Draw(vpControl, GL_POINTS);
 		}
 	}
@@ -322,11 +320,11 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glBindBuffer(GL_ARRAY_BUFFER, AxisGrid_VBOName);
-	glVertexPointer(3, GL_FLOAT, 0, 0);
+	glVertexPointer(3, GL_FLOAT, 0, nullptr);
 
 	glEnableClientState(GL_COLOR_ARRAY);
 	glBindBuffer(GL_ARRAY_BUFFER, AxisGrid_VBOName_c);
-	glColorPointer(4, GL_FLOAT, 0, 0);		
+	glColorPointer(4, GL_FLOAT, 0, nullptr);
 
 
 
@@ -351,11 +349,11 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glBindBuffer(GL_ARRAY_BUFFER, Ray_VBOName);
-		glVertexPointer(3, GL_FLOAT, 0, 0);
+		glVertexPointer(3, GL_FLOAT, 0, nullptr);
 
 		glEnableClientState(GL_COLOR_ARRAY);
 		glBindBuffer(GL_ARRAY_BUFFER, Ray_VBOName_c);
-		glColorPointer(4, GL_FLOAT, 0, 0);
+		glColorPointer(4, GL_FLOAT, 0, nullptr);
 
 		glDrawElements(GL_LINE_LOOP, rayArraySize, GL_UNSIGNED_SHORT, ray);
 	}
@@ -383,7 +381,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	if (UI->GetCheckboxState_Points()) {
 		for (int i = 0; i < Sectors.size(); i++) {
-			if (Sectors[i] != NULL)
+			if (Sectors[i] != nullptr)
 				Sectors[i]->Draw(vpControl, GL_POINTS);
 		}
 	}
@@ -587,8 +585,8 @@ bool CScene::PrepareRayVBO()
 		//RayObj = new C3DObjectModel()
 		RayObj = new C3DObjectModel(Main,
 			new C3DObjectVBO(false),
-			NULL,
-			new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", NULL, NULL, "color"));
+			nullptr,
+			new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
 		
 	}
 
@@ -629,8 +627,8 @@ bool CScene::BuildRayVBO()
 		glBindBuffer(GL_ARRAY_BUFFER, Ray_VBOName_c);
 		glBufferData(GL_ARRAY_BUFFER, vertexCount_Ray * 4 * sizeof(float), RayColor, GL_STATIC_DRAW);
 
-		delete Ray; Ray = NULL;
-		delete RayColor; RayColor = NULL;
+		delete Ray; Ray = nullptr;
+		delete RayColor; RayColor = nullptr;
 
 		return true;
 	}
@@ -667,7 +665,7 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 	
 	int currentSector = SectorsCount * (min / init->Nazm);
 
-	if (Sectors[currentSector] == NULL)
+	if (Sectors[currentSector] == nullptr)
 	{
 		Sectors[currentSector] = new CSector();
 	}
@@ -724,7 +722,8 @@ void CScene::RefreshTracks(vector<TRK*>* tracks)
 		bool insertNew = true;
 		for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
 		{
-			if (it->first == tracks->at(i)->id) {
+			if (it->first == tracks->at(i)->id) 
+			{
 				it->second->Found = tracks->at(i)->Found = true;
 				it->second->Refresh(glm::vec4(0, y0, 0, 1), mpph, mppv, &tracks->at(i)->P);
 				it->second->SelectTrack(Main, std::find(SelectedTracksIds.begin(), SelectedTracksIds.end(), tracks->at(i)->id) != SelectedTracksIds.end());
@@ -740,39 +739,47 @@ void CScene::RefreshTracks(vector<TRK*>* tracks)
 			Tracks.insert_or_assign(tracks->at(i)->id, t);			
 		}
 	}
-	for (auto it = Tracks.begin(); it != Tracks.end();) {
-		if (!it->second->Found) {
+	for (auto it = Tracks.begin(); it != Tracks.end();) 
+	{
+		if (!it->second->Found) 
+		{
+			CRCLogger::Info(requestID, "CScene::RefreshTracks", (boost::format("going to delete track with id=%1%") % it->second->ID).str());
 			delete it->second;
 			it = Tracks.erase(it);
 		}
-		else {
+		else 
+		{
 			it->second->Found = false;
 			++it;
 		}
 	}
 	UI->FillInfoGrid(this);
-
-	//m->unlock();
 }
 
 void CScene::RefreshImages(RIMAGE* info, void* pixels)
 {
 	if (ImageSet)
+	{
 		ImageSet->Refresh(glm::vec4(0, y0, 0, 1), mpph, mppv, rdrinit, info, pixels);
+	}
 }
 
 void CScene::Init(RDR_INITCL* init)
 {
 	if (!init)
+	{
 		return;
-
+	}
+		
 	rdrinit = init;
 
 	if (UI)
 	{
-			float ba_deg = glm::degrees(init->begAzm);
+		float ba_deg = glm::degrees(init->begAzm);
 		while (ba_deg < 0)
+		{
 			ba_deg = 360 + ba_deg; //circle magic
+		}			
 		UI->SetTrackbarValue_BegAzm(100.0 * (ba_deg-CSettings::GetFloat(FloatMinBegAzm)) / (CSettings::GetFloat(FloatMaxBegAzm) - CSettings::GetFloat(FloatMinBegAzm)));
 		UI->SetTrackbarValue_ZeroElevation(100.0 * CSettings::GetFloat(FloatZeroElevation) / 90.0);
 
@@ -795,7 +802,7 @@ void CScene::Init(RDR_INITCL* init)
 	Sectors.resize(SectorsCount);
 	for (int i = 0; i < Sectors.size(); i++)
 	{
-		Sectors[i] = NULL;
+		Sectors[i] = nullptr;
 	}
 
 	if (!ImageSet)
@@ -829,10 +836,12 @@ C3DObjectModel * CScene::GetObjectAtMiniMapPosition(int vpId, glm::vec3 p0, glm:
 	if (mmPointer->IntersectLine(vpId, orig, dir, pos)) {
 		return mmPointer;
 	}
-	return NULL;
+	return nullptr;
 }
+
 C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 screenPoint, int& index)
 {
+#define CScene_GetSectorPoint_LogInfo false
 	index = -1;
 	std::string context = "CScene::GetPointOnSurface";
 
@@ -842,7 +851,10 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 		return nullptr;
 	}
 
-	CRCLogger::Info(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)")	% vpControl->Id % screenPoint.x % screenPoint.y).str());
+	if (CScene_GetSectorPoint_LogInfo)
+	{
+		CRCLogger::Info(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
+	}
 
 	for (int i = 0; i < Sectors.size(); i++)
 	{
@@ -856,18 +868,22 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 				CRCPointModel *point = new CRCPointModel(vpControl->Id, this->y0, this->mpph, this->mppv, 0, 0, 0);
 				auto coords = Sectors[i]->GetPointCoords(vpControl, index);
 				point->SetCartesianCoordinates(coords);
-				CRCLogger::Info(requestID, context, (boost::format("Sector %1%, index=%2%, RETURN point=(%3%, %4%, %5%)") 
-					% i % index % coords.x % coords.y % coords.z).str());
+				CRCLogger::Info(requestID, context, (boost::format("(vpControl.Id=%1%, screenPoint=(%2%, %3%)) -> (Sector %4%, index=%5%, RETURN point=(%6%, %7%, %8%))") 
+					% vpControl->Id % screenPoint.x % screenPoint.y % i % index % coords.x % coords.y % coords.z).str());
 				return point;
 			}
 		}
 	}
-	CRCLogger::Info(requestID, context, "Point not found");
-	return NULL;	
+	if (CScene_GetSectorPoint_LogInfo) 
+	{
+		CRCLogger::Info(requestID, context, "Point not found");
+	}
+	return nullptr;
 }
 
 C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, glm::vec2 screenPoint, int& index)
 {
+#define CScene_GetFirstTrackBetweenPoints_LogInfo false
 	index = -1;
 	std::string context = "CScene::GetFirstTrackBetweenPoints";
 
@@ -877,13 +893,15 @@ C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, 
 		return nullptr;
 	}
 
-	CRCLogger::Info(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
+	if (CScene_GetFirstTrackBetweenPoints_LogInfo)
+	{
+		CRCLogger::Info(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
+	}
 
 	for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
 	{
 		if (it->second)
-		{
-			CRCLogger::Warn(requestID, context, "Next call to GetPoint will be from CTrack class");
+		{			
 			index = it->second->GetPoint(vpControl, screenPoint);
 			if (index >= 0)
 			{
@@ -892,13 +910,17 @@ C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, 
 				it->second->SelectPoint(MiniMap, index);
 				it->second->SelectTrack(Main, true);
 				it->second->SelectTrack(MiniMap, true);
-				CRCLogger::Info(requestID, context, (boost::format("Track ID=%1%, index=%2%") % it->second->ID % index).str());
+				
+				CRCLogger::Info(requestID, context, (boost::format("(vpControl.Id=%1%, screenPoint=(%2%, %3%)) -> (Track ID=%4%, index=%5%)") % vpControl->Id % screenPoint.x % screenPoint.y % it->second->ID % index).str());
 				return it->second;
 			}
 		}
 	}
-	CRCLogger::Info(requestID, context, "Track not found");
-	return NULL;
+	if (CScene_GetFirstTrackBetweenPoints_LogInfo)
+	{
+		CRCLogger::Info(requestID, context, "Track not found");
+	}
+	return nullptr;
 }
 
 C3DObjectModel* CScene::GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const
@@ -911,7 +933,7 @@ C3DObjectModel* CScene::GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const
 		CMesh::Meshs[0]->IntersectLine(Main, p0, dir, position);
 	}
 	CRCLogger::Error(requestID, context, "Not implemented!");
-	return NULL;
+	return nullptr;
 }
 
 glm::vec2 CScene::CameraXYForMiniMap() const

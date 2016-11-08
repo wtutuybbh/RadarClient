@@ -9,11 +9,11 @@ struct RDRTRACK;
 class CTrack :	public CSector
 {
 public:
-	int ID;
+	int ID {-1};
 	bool Found;
 	bool Selected;
 	CTrack(int id, bool selected);
-	~CTrack();
+	~CTrack() override;
 	void Refresh(glm::vec4 origin, float mpph, float mppv, std::vector<RDRTRACK*>* trackPoints);
 	void SelectTrack(int vpId, bool selectState);
 };

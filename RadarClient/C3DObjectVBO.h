@@ -11,11 +11,12 @@ struct VBOData {
 
 class C3DObjectVBO
 {
-	//std::vector<VBOData>* buffer {NULL};
-	void * buffer{ nullptr }, *vbuffer{ nullptr };
+	static const std::string requestID;
+
+	void *buffer{ nullptr }, *vbuffer{ nullptr };
 	unsigned int vboId { 0 }, vaoId { 0 };
-	bool ready, clearAfter;
-	int bufferSize, elementSize{ 0 };
+	bool ready{ false }, clearAfter;
+	int bufferSize{ 0 }, elementSize{ sizeof(VBOData) };
 
 	std::vector<unsigned short *> *idxArrays { nullptr };
 	std::vector<int> *idxLengths { nullptr };
@@ -23,11 +24,10 @@ class C3DObjectVBO
 	std::vector<unsigned int> *idxIds{ nullptr };
 public:
 	virtual ~C3DObjectVBO();
-	bool NeedsReload {false};
+	bool NeedsReload { false };
 
-	C3DObjectVBO(bool clearAfter);
+	explicit C3DObjectVBO(bool clearAfter);
 	virtual C3DObjectVBO* InitStructure();
-	//virtual void SetBuffer(std::vector<VBOData>* buffer);
 	virtual void SetBuffer(void *vbuffer, void* buffer, int size);
 	void Bind() const;
 	void LoadToGPU();
@@ -37,7 +37,6 @@ public:
 	static void UnBind();
 	void Draw(GLenum mode) const;
 
-	//std::vector<VBOData>* GetBuffer() const;
 	void* GetBuffer() const;
 
 	virtual void AddIndexArray(unsigned short *idxArray, int length, GLenum mode);

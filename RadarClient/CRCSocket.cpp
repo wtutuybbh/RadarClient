@@ -20,18 +20,18 @@ CRCSocket::CRCSocket(HWND hWnd)
 	OnceClosed = false;
 	
 
-	this->info_p = NULL;
-	this->info_i = NULL;
+	this->info_p = nullptr;
+	this->info_i = nullptr;
 
-	this->pts = NULL;
-	this->s_rdrinit = NULL;
+	this->pts = nullptr;
+	this->s_rdrinit = nullptr;
 
 	hole = new char[TXRXBUFSIZE];
 
 
-	s_rdrinit = NULL;
+	s_rdrinit = nullptr;
 
-	client = NULL;
+	client = nullptr;
 
 	PointOK = TrackOK = ImageOK = false;
 
@@ -46,10 +46,10 @@ CRCSocket::~CRCSocket()
 	if (client) {
 		if (client->buff) {
 			delete[] client->buff;
-			client->buff = NULL;
+			client->buff = nullptr;
 		}
 		delete client;
-		client = NULL;
+		client = nullptr;
 	}
 	if (s_rdrinit)
 		delete s_rdrinit;
@@ -96,7 +96,7 @@ void CRCSocket::Init()
 		SendMessage(hWnd, WM_DESTROY, NULL, NULL);
 	}
 	// Resolve IP address for hostname	
-	if ((host = gethostbyname(CSettings::GetString(StringHostName).c_str())) == NULL)
+	if ((host = gethostbyname(CSettings::GetString(StringHostName).c_str())) == nullptr)
 	{
 		ErrorText = "Failed to resolve hostname!";
 		CRCLogger::Error(requestID, context, ErrorText);
@@ -140,11 +140,11 @@ int CRCSocket::Connect()
 	{
 		int error = WSAGetLastError();
 
-		wchar_t *s = NULL;
+		wchar_t *s = nullptr;
 		FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL, error,
+			nullptr, error,
 			MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
-			(LPWSTR)&s, 0, NULL);
+			(LPWSTR)&s, 0, nullptr);
 		wstring ws(s);
 
 		string str(ws.begin(), ws.end());
@@ -177,11 +177,11 @@ int CRCSocket::Read()
 		return 0;
 	}			
 
-	char *szIncoming = NULL;	
+	char *szIncoming = nullptr;
 	_sh *sh;
 	int recev;
 	unsigned int offset, length;
-	char * OutBuff = NULL;
+	char * OutBuff = nullptr;
 
 	try {
 		szIncoming = new char[TXRXBUFSIZE];
@@ -261,13 +261,13 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 	try
 	{
 		PointOK = TrackOK = ImageOK = false;
-		info_p = NULL;
-		pts = NULL;
+		info_p = nullptr;
+		pts = nullptr;
 		int readBufLength = lParam;
 
 		_sh *sh = (_sh*)wParam;
 
-		sh->times = time(NULL);
+		sh->times = time(nullptr);
 		PTR_D = &sh[1];
 
 		switch (sh->type)
@@ -292,7 +292,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				b1 = info_p->d1;
 				b2 = info_p->d2;
 
-				if (ReadLogEnabled) 
+				if (PostDataLogEnabled)
 				{
 					if (info_p && pts)
 					{
@@ -325,7 +325,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				}
 				info_i = (RIMAGE*)PTR_D;
 				pixels = (void*)&((RIMAGE*)PTR_D)[1];
-				if (ReadLogEnabled) 
+				if (PostDataLogEnabled)
 				{
 					if (info_i)
 					{
@@ -341,7 +341,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			// 
 			case MSG_PTSTRK:
 			{
-				if (ReadLogEnabled)
+				if (PostDataLogEnabled)
 				{
 					CRCLogger::Info(requestID, context, "MSG_PTSTRK");
 				}
@@ -351,7 +351,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			{
 				int N = *((int*)((void*)PTR_D));
 				RDRTRACK* pTK = (RDRTRACK*)(void*)(((char*)PTR_D) + 4);
-				if (ReadLogEnabled) 
+				if (PostDataLogEnabled)
 				{
 					if (pTK)
 					{
@@ -371,7 +371,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 					s_rdrinit = new RDR_INITCL;
 
 				memcpy(s_rdrinit, (RDR_INITCL*)(void*)&sh[1], sizeof(RDR_INITCL));
-				if (ReadLogEnabled)
+				if (PostDataLogEnabled)
 				{
 					CRCLogger::Info(requestID, context, (boost::format("MSG_INIT. ViewStep=%1%, MaxNumSectPt=%2%, Nazm=%3%") % s_rdrinit->ViewStep % s_rdrinit->MaxNumSectPt % s_rdrinit->Nazm).str());
 				}
@@ -380,7 +380,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			case MSG_LOCATION:
 			{
 				RDRCURRPOS* igpsp = (RDRCURRPOS*)(void*)((char*)PTR_D);
-				if (ReadLogEnabled)
+				if (PostDataLogEnabled)
 				{
 					CRCLogger::Info(requestID, context, (boost::format("MSG_LOCATION. lon=%1%, lat=%2%") % igpsp->lon % igpsp->lat).str());
 				}
@@ -411,7 +411,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		int Idx = FindTrack(info[i].numTrack);
 		if (-1 == Idx)
 		{
-			if (ReadLogEnabled) CRCLogger::Info(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track not found, creating new") % N).str());
+			if (PostDataLogEnabled) CRCLogger::Info(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track not found, creating new") % N).str());
 			//создаём трек
 			TRK* t1 = new TRK(info[i].numTrack);
 			Tracks.push_back(t1);
@@ -421,7 +421,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		// уже есть
 		else if (Idx >= 0 && Idx < Tracks.size())
 		{
-			if (ReadLogEnabled) CRCLogger::Info(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track found") % N).str());
+			if (PostDataLogEnabled) CRCLogger::Info(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track found") % N).str());
 			Tracks[Idx]->InsertPoints(info + i, 1);
 		}
 	}
@@ -553,9 +553,12 @@ int CRCSocket::FindTrack(int id) // если в массиве trak нашли �
 	*ro = 0.75 * sqrt(x1*x1 + y1*y1) / 1;
 }*/
 
-void CRCSocket::FreeMemory(char *readBuf)
+void CRCSocket::FreeMemory(char *readBuf) const
 {	
-	delete [] readBuf; // operator new in method Read() (variable OutBuf)
+	if (readBuf)
+	{
+		delete[] readBuf; // operator new in method Read() (variable OutBuf)
+	}	
 }
 
 TRK::TRK(int _id)
@@ -570,6 +573,7 @@ TRK::TRK(int _id)
 }
 TRK::~TRK()
 {
+	CRCLogger::Info(CRCSocket::requestID, "TRK DESTRUCTOR", (boost::format("id=%1%") % this->id).str());
 	for (int i = 0; i < P.size(); i++)
 	{
 		if (P.at(i))

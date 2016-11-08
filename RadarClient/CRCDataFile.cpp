@@ -57,7 +57,7 @@ DataFileType CRCDataFile::GetTypeByExt(std::string ext)
 
 CRCDataFile::~CRCDataFile()
 {
-	CRCLogger::Info(requestID, "CRCDataFile::~CRCDataFile", (boost::format("Destroying CRCDataFile object, fileName=%1%, data=%2%, type=%3%") % fileName % data % type).str());
+	CRCLogger::Info(requestID, "CRCDataFile DESTRUCTOR", (boost::format("Destroying CRCDataFile object, fileName=%1%, data=%2%, type=%3%") % fileName % data % type).str());
 }
 
 DataFileType CRCDataFile::Type() const

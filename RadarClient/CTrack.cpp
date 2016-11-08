@@ -19,6 +19,11 @@ CTrack::CTrack(int id, bool selected)
 
 CTrack::~CTrack()
 {
+#define CTrack_DESTRUCTOR_LogInfo false
+	if (CTrack_DESTRUCTOR_LogInfo)
+	{
+		CRCLogger::Info(requestID, "CTrack DESTRUCTOR", (boost::format("ID = %1%") % ID).str());
+	}	
 }
 
 

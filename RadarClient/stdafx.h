@@ -16,6 +16,7 @@
 #include <memory>
 #include <stdio.h>
 #include <cstdio>
+#include <cstdarg>
 #include <tchar.h>
 #include <stdlib.h>
 #include <FreeImage.h>

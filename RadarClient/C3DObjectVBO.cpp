@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "C3DObjectVBO.h"
+#include "CRCLogger.h"
+
+const std::string C3DObjectVBO::requestID = "C3DObjectVBO";
 
 C3DObjectVBO::~C3DObjectVBO()
 {
@@ -23,17 +26,14 @@ C3DObjectVBO::~C3DObjectVBO()
 
 C3DObjectVBO::C3DObjectVBO(bool clearAfter)
 {
-	this->buffer = NULL;
 	this->clearAfter = clearAfter;
-	this->ready = false;
-	this->bufferSize = 0;
-	this->elementSize = sizeof(VBOData);
 }
 
 C3DObjectVBO* C3DObjectVBO::InitStructure()
 {
 	auto b = new std::vector<VBOData>;
-	//default structure
+
+	//default structure (2 triangles)
 	b->push_back({ glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 	b->push_back({ glm::vec4(-1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
 	b->push_back({ glm::vec4(1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
@@ -46,6 +46,7 @@ C3DObjectVBO* C3DObjectVBO::InitStructure()
 
 	return this;
 }
+
 
 void C3DObjectVBO::SetBuffer(void *vbuffer, void* buffer, int size)
 {
@@ -68,8 +69,6 @@ void C3DObjectVBO::LoadToGPU()
 		glGenBuffers(1, &vboId);
 		glBindBuffer(GL_ARRAY_BUFFER, vboId);
 		glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(VBOData), buffer, GL_STATIC_DRAW);
-		//bufferSize = buffer->size();
-
 
 		if (idxArrays)
 		{
@@ -88,7 +87,7 @@ void C3DObjectVBO::LoadToGPU()
 
 void C3DObjectVBO::Reload()
 {
-	if (buffer == NULL || bufferSize == 0)
+	if (buffer == nullptr || bufferSize == 0)
 	{
 		return;
 	}
@@ -113,7 +112,7 @@ bool C3DObjectVBO::Ready() const
 
 bool C3DObjectVBO::HasBuffer() const
 {
-	return buffer != NULL && bufferSize > 0;
+	return buffer != nullptr && bufferSize > 0;
 }
 
 void C3DObjectVBO::UnBind()
@@ -129,19 +128,16 @@ void C3DObjectVBO::Draw(GLenum mode) const
 	{
 		GLenum mode;
 		GLsizei count;
-		//const void * indices;
 		int id;
 		for (int i = 0; i < idxArrays->size(); i++)
 		{
 			mode = idxModes->at(i);
 			count = idxLengths->at(i);
-			//indices = idxArrays->at(i);
 			id = idxIds->at(i);
 			
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
-			glDrawElements(mode, count, GL_UNSIGNED_SHORT, (void*)0);
+			glDrawElements(mode, count, GL_UNSIGNED_SHORT, (void*)nullptr);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-			//glDrawElements(mode, count, GL_UNSIGNED_SHORT, indices);
 		}
 	}
 	else

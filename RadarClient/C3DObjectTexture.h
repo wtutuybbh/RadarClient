@@ -8,10 +8,10 @@ class C3DObjectTexture
 	string imgFile;
 	unsigned int textureId;
 	char *textureUniformName;
-	FIBITMAP *image {NULL};
+	FIBITMAP *image { nullptr };
 	int sizeX;
 	int sizeY;
-	unsigned char *bits { NULL };
+	unsigned char *bits { nullptr };
 	void InitBits();
 	bool ready {false};
 	bool useBits;

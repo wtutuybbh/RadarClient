@@ -228,19 +228,19 @@ HWND OpenDebugWindow(HINSTANCE hInst, int nShowCmd, HWND mainWindow, DebugWindow
 	windowclassforwindow2.cbSize = sizeof(WNDCLASSEX);
 	windowclassforwindow2.cbWndExtra = NULL;
 	windowclassforwindow2.hbrBackground = (HBRUSH)COLOR_WINDOW;
-	windowclassforwindow2.hCursor = LoadCursor(NULL, IDC_ARROW);
-	windowclassforwindow2.hIcon = NULL;
-	windowclassforwindow2.hIconSm = NULL;
+	windowclassforwindow2.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	windowclassforwindow2.hIcon = nullptr;
+	windowclassforwindow2.hIconSm = nullptr;
 	windowclassforwindow2.hInstance = hInst;
 	windowclassforwindow2.lpfnWndProc = (WNDPROC)DebugWndProc;
 	windowclassforwindow2.lpszClassName = _T("Debug window");
-	windowclassforwindow2.lpszMenuName = NULL;
+	windowclassforwindow2.lpszMenuName = nullptr;
 	windowclassforwindow2.style = CS_HREDRAW | CS_VREDRAW;
 
 	if (!RegisterClassEx(&windowclassforwindow2))
 	{
 		int nResult = GetLastError();
-		MessageBox(NULL,
+		MessageBox(nullptr,
 			_T("Window class creation failed for window 2"),
 			_T("Window Class Failed"),
 			MB_ICONERROR);
@@ -254,15 +254,15 @@ HWND OpenDebugWindow(HINSTANCE hInst, int nShowCmd, HWND mainWindow, DebugWindow
 		150,
 		640,
 		480,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		hInst, dwi);
 
 	if (!handleforwindow2)
 	{
 		int nResult = GetLastError();
 
-		MessageBox(NULL,
+		MessageBox(nullptr,
 			_T("Window creation failed"),
 			_T("Window Creation Failed"),
 			MB_ICONERROR);
@@ -300,9 +300,9 @@ LRESULT CALLBACK DebugWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					 break;
 	case WM_CREATE: {
 		if (dwi) {
-			dwi->Edit_hWnd = CreateWindowEx(NULL,
+			dwi->Edit_hWnd = CreateWindowEx(0,
 				_T("EDIT"),
-				NULL,
+				nullptr,
 				WS_CHILD | WS_VISIBLE | WS_VSCROLL |
 				ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL,
 				0,
@@ -311,8 +311,8 @@ LRESULT CALLBACK DebugWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				0,
 				hWnd,
 				(HMENU)dwi->DebugEdit_ID,
-				GetModuleHandle(NULL),
-				NULL);
+				GetModuleHandle(nullptr),
+				nullptr);
 			return 0;
 		}
 	}
@@ -380,4 +380,47 @@ std::string num2str(double num, std::streamsize precision)
 	ss << std::fixed << std::setprecision(precision);
 	ss << num;
 	return ss.str();
+}
+
+std::string format(const char *fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	std::string buf = vformat(fmt, ap);
+	va_end(ap);
+	return buf;
+}
+
+std::string vformat(const char *fmt, va_list ap)
+{
+	// Allocate a buffer on the stack that's big enough for us almost
+	// all the time.
+	size_t size = 1024;
+	char *buf = new char[size];
+
+	// Try to vsnprintf into our buffer.
+	va_list apcopy;
+	va_copy(apcopy, ap);
+	int needed = vsnprintf(&buf[0], size, fmt, ap);
+	// NB. On Windows, vsnprintf returns -1 if the string didn't fit the
+	// buffer.  On Linux & OSX, it returns the length it would have needed.
+
+	if (needed <= size && needed >= 0) {
+		// It fit fine the first time, we're done.
+		std::string ret(&buf[0]);
+		delete[] buf;
+		return ret;
+	}
+	else {
+		// vsnprintf reported that it wanted to write more characters
+		// than we allotted.  So do a malloc of the right size and try again.
+		// This doesn't happen very often if we chose our initial size
+		// well.
+		std::vector <char> buf;
+		size = needed;
+		buf.resize(size);
+		needed = vsnprintf(&buf[0], size, fmt, apcopy);
+		std::string ret(&buf[0]);
+		return ret;
+	}
 }

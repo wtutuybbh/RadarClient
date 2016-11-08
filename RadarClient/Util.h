@@ -143,7 +143,7 @@ static inline std::string trimmed(std::string s) {
 class outbuf : public std::streambuf {
 public:
 	outbuf() {
-		setp(0, 0);
+		setp(nullptr, nullptr);
 	}
 
 	virtual int_type overflow(int_type c = traits_type::eof()) {
@@ -155,5 +155,8 @@ std::string num2str(double num, std::streamsize precision);
 
 std::string mat4row2str(glm::mat4 m, int row, std::streamsize precision);
 
+std::string format(const char *fmt, ...);
+
+std::string vformat(const char *fmt, va_list ap);
 //for copy-paste:
 //CRCLogger::Info(requestID, context, (boost::format("%1%") % 1).str());

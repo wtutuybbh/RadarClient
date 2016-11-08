@@ -143,7 +143,7 @@ bool CMesh::LoadHeightmap(int vpId)
 	}
 	LocalAverageHeight /= aMap->sizeY * aMap->sizeX;
 
-	prog.insert_or_assign(vpId, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", NULL, "color"));
+	prog.insert_or_assign(vpId, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color"));
 	//prog->CreateProgram();
 	
 	/*for (auto it = buffer->begin(); it != buffer->end(); ++it)
@@ -213,14 +213,14 @@ AltitudeMap* CMesh::GetAltitudeMap(const char* fileName, double lon1, double lat
 
 
 	hDLL = LoadLibrary("GeoDataProvider.dll");
-	if (hDLL != NULL)
+	if (hDLL != nullptr)
 	{
 		gdpAltitudeMap = (GDPALTITUDEMAP)GetProcAddress(hDLL, "gdpAltitudeMap");
 		gdpAltitudeMap_Sizes = (GDPALTITUDEMAP_SIZES)GetProcAddress(hDLL, "gdpAltitudeMap_Sizes");
 		if (!gdpAltitudeMap)
 		{
 			FreeLibrary(hDLL);
-			return NULL;
+			return nullptr;
 		}
 		LL[0] = lon1;
 		LL[1] = lat1;
@@ -230,7 +230,7 @@ AltitudeMap* CMesh::GetAltitudeMap(const char* fileName, double lon1, double lat
 		if (result == 0) {
 			if (!aMapH) {
 				aMapH = new AltitudeMapHeader;
-				aMapH->fileName = NULL;
+				aMapH->fileName = nullptr;
 			}
 			if (aMapH->fileName)
 				delete[] aMapH->fileName;
@@ -278,7 +278,7 @@ AltitudeMap* CMesh::GetAltitudeMap(const char* fileName, double lon1, double lat
 		FreeLibrary(hDLL);
 	}
 	CRCLogger::Error(requestID, context, "LoadLibrary failed.");
-	return NULL;
+	return nullptr;
 }
 
 AltitudeMapHeader* CMesh::GetAltitudeMapHeader(const char* fileName, double lon1, double lat1, double lon2, double lat2)
@@ -297,13 +297,13 @@ AltitudeMapHeader* CMesh::GetAltitudeMapHeader(const char* fileName, double lon1
 	int size[8], result;
 
 	hDLL = LoadLibrary("GeoDataProvider.dll");
-	if (hDLL != NULL)
+	if (hDLL != nullptr)
 	{
 		gdpAltitudeMap_Sizes = (GDPALTITUDEMAP_SIZES)GetProcAddress(hDLL, "gdpAltitudeMap_Sizes");
 		if (!gdpAltitudeMap_Sizes)
 		{
 			FreeLibrary(hDLL);
-			return NULL;
+			return nullptr;
 		}
 		LL[0] = lon1;
 		LL[1] = lat1;
@@ -313,7 +313,7 @@ AltitudeMapHeader* CMesh::GetAltitudeMapHeader(const char* fileName, double lon1
 		if (result == 0) {
 			if (!aMapH) {
 				aMapH = new AltitudeMapHeader;
-				aMapH->fileName = NULL;
+				aMapH->fileName = nullptr;
 			}
 			if (aMapH->fileName)
 				delete[] aMapH->fileName;
@@ -344,31 +344,35 @@ AltitudeMapHeader* CMesh::GetAltitudeMapHeader(const char* fileName, double lon1
 		FreeLibrary(hDLL);
 	}
 	CRCLogger::Error(requestID, context, "LoadLibrary failed.");
-	return NULL;
+	return nullptr;
 }
 
 ImageMapHeader* CMesh::GetImageMapHeader(const char* imgFile, const char* datFile)
 {
-	try {
+	try 
+	{
 		bitmap = FreeImage_Load(FreeImage_GetFileType(imgFile, 0), imgFile);
 	}
-	catch (...) {
-		return false;
+	catch (...) 
+	{
+		return nullptr;
 	}
 	//access to data: ((FIBITMAP *)bitmap)->data
 
 	std::ifstream infile;
 
-	try {
+	try 
+	{
 		infile.open(datFile, std::ifstream::in | std::ifstream::binary);
 	}
-	catch (...) {
-
-		return false;
+	catch (...) 
+	{
+		return nullptr;
 	}
 
-	if (!infile) {
-		return false;
+	if (!infile) 
+	{
+		return nullptr;
 	}
 	char line[DATFILE_MAXLINELENGTH];
 	infile.getline(line, DATFILE_MAXLINELENGTH); //useless 1st line
@@ -384,7 +388,7 @@ ImageMapHeader* CMesh::GetImageMapHeader(const char* imgFile, const char* datFil
 				imgLon0 = v;
 			if (v > imgLon1)
 				imgLon1 = v;
-			pch = strtok(NULL, ",");
+			pch = strtok(nullptr, ",");
 			v = atof(pch);
 			if (v < imgLat0)
 				imgLat0 = v;
@@ -411,7 +415,7 @@ float CMesh::PtHeight(int nX, int nY) const
 	return (float)aMap->data[nPos];
 }
 
-CMesh::CMesh(int vpId, CScene* scn, bool clearAfter, float shiftX, float shiftZ) : C3DObjectModel(vpId, NULL, NULL, NULL)
+CMesh::CMesh(int vpId, CScene* scn, bool clearAfter, float shiftX, float shiftZ) : C3DObjectModel(vpId, nullptr, nullptr, nullptr)
 {
 	std::string context = "CMesh::CMesh";
 	CRCLogger::Info(requestID, context, (boost::format("Start... vpId=%1%, scn=%2%, clearAfter=%3%, shiftX=%4%, shiftZ=%5%") 
@@ -422,10 +426,10 @@ CMesh::CMesh(int vpId, CScene* scn, bool clearAfter, float shiftX, float shiftZ)
 		% shiftZ).str());
 
 	this->scn = scn;
-	aMap = NULL;
-	Bounds = NULL;
-	iMapH = NULL;
-	aMapH = NULL;
+	aMap = nullptr;
+	Bounds = nullptr;
+	iMapH = nullptr;
+	aMapH = nullptr;
 	this->texsize = scn->texsize;
 	this->clearAfter = clearAfter;
 	this->shiftX = shiftX;
@@ -637,7 +641,7 @@ void CMesh::Init(int vpId)
 
 		vbo.insert_or_assign(vpId, newvbo);
 
-		C3DObjectProgram *newprog = new C3DObjectProgram("Minimap.v.glsl", "Minimap.f.glsl", "vertex", "texcoor", NULL, NULL);
+		C3DObjectProgram *newprog = new C3DObjectProgram("Minimap.v.glsl", "Minimap.f.glsl", "vertex", "texcoor", nullptr, nullptr);
 		prog.insert_or_assign(vpId, newprog);
 
 		int minimapTexSize = CSettings::GetInt(IntMinimapTextureSize);

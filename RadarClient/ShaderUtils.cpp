@@ -7,7 +7,7 @@
 char* file_read(const char* filename)
 {
 	FILE* in = fopen(filename, "rb");
-	if (in == NULL) return NULL;
+	if (in == nullptr) return nullptr;
 
 	int res_size = BUFSIZ;
 	char* res = (char*)malloc(res_size);
@@ -47,9 +47,9 @@ void print_log(GLuint object)
 	char* log = (char*)malloc(log_length);
 
 	if (glIsShader(object))
-		glGetShaderInfoLog(object, log_length, NULL, log);
+		glGetShaderInfoLog(object, log_length, nullptr, log);
 	else if (glIsProgram(object))
-		glGetProgramInfoLog(object, log_length, NULL, log);
+		glGetProgramInfoLog(object, log_length, nullptr, log);
 
 	fprintf(stderr, "%s", log);
 	free(log);
@@ -61,7 +61,7 @@ void print_log(GLuint object)
 GLuint create_shader(const char* filename, GLenum type)
 {
 	const GLchar* source = file_read(filename);
-	if (source == NULL) {
+	if (source == nullptr) {
 		fprintf(stderr, "Error opening %s: ", filename); perror("");
 		return 0;
 	}
@@ -94,7 +94,7 @@ GLuint create_shader(const char* filename, GLenum type)
 #endif
 		,
 		source };
-	glShaderSource(res, 3, sources, NULL);
+	glShaderSource(res, 3, sources, nullptr);
 	free((void*)source);
 
 	glCompileShader(res);

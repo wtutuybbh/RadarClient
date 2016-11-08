@@ -114,7 +114,7 @@ CRCTextureDataFile::CRCTextureDataFile(const std::string& imgFileName) :
 				lon0 = v;
 			if (v > lon1)
 				lon1 = v;
-			pch = strtok(NULL, ",");
+			pch = strtok(nullptr, ",");
 			v = atof(pch);
 			if (v < lat0)
 				lat0 = v;

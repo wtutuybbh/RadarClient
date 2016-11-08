@@ -9,6 +9,24 @@
 
 const std::string C3DObjectModel::requestID = "C3DObjectModel";
 
+void* C3DObjectModel::GetBufferAt(int index)
+{
+	C3DObjectVBO* _vbo;
+	try
+	{
+		_vbo = (C3DObjectVBO*)vbo.at(index);
+		if (_vbo)
+		{
+			return _vbo->GetBuffer();
+		}				
+	}
+	catch (...)
+	{
+		
+	}
+	return nullptr;
+}
+
 void C3DObjectModel::SetCartesianCoordinates(glm::vec4 c)
 {
 	cartesianCoords = glm::vec3(c);
@@ -64,9 +82,9 @@ C3DObjectModel::C3DObjectModel(C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObje
 	this->tex.insert_or_assign(Main, tex);
 	this->prog.insert_or_assign(Main, prog);
 
-	this->vbo.insert_or_assign(MiniMap, vbo ? vbo->Clone() : NULL);
-	this->tex.insert_or_assign(MiniMap, tex ? tex->Clone() : NULL);
-	this->prog.insert_or_assign(MiniMap, prog ? prog->Clone() : NULL);
+	this->vbo.insert_or_assign(MiniMap, vbo ? vbo->Clone() : nullptr);
+	this->tex.insert_or_assign(MiniMap, tex ? tex->Clone() : nullptr);
+	this->prog.insert_or_assign(MiniMap, prog ? prog->Clone() : nullptr);
 
 	translateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
 	scaleMatrix.insert_or_assign(Main, glm::mat4(1.0f));

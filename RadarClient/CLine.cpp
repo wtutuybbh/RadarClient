@@ -6,8 +6,8 @@
 
 CLine::CLine(int vpId, glm::vec4 a, glm::vec4 b, LineStyle style) : C3DObjectModel(Main,
 	new C3DObjectVBO(false),
-	NULL,
-	new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", NULL, NULL, "color"))
+	nullptr,
+	new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"))
 {
 	vector<VBOData> *buffer = new vector<VBOData>(2);
 	buffer->at(0).vert = a;
@@ -22,7 +22,7 @@ CLine::CLine(int vpId, glm::vec4 a, glm::vec4 b, LineStyle style) : C3DObjectMod
 
 	vbo.insert_or_assign(MiniMap, mmvbo);
 
-	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", NULL, NULL, "color"));
+	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
 
 	tex.insert_or_assign(MiniMap, nullptr);
 

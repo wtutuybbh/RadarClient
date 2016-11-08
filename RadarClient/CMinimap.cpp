@@ -69,10 +69,10 @@ LRESULT CMinimap::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 
 		}
 		if (IsCameraHere((int)LOWORD(lParam), (int)HIWORD(lParam))) {
-			SetCursor(LoadCursor(NULL, IDC_HAND));
+			SetCursor(LoadCursor(nullptr, IDC_HAND));
 		}
 		else {
-			SetCursor(LoadCursor(NULL, IDC_ARROW));
+			SetCursor(LoadCursor(nullptr, IDC_ARROW));
 		}
 		if (CameraDrag) {
 

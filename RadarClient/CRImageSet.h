@@ -7,7 +7,7 @@ struct RIMAGE;
 class CRImageSet
 {
 public:
-	std::vector<CRImage*> *Images{ NULL };
+	std::vector<CRImage*> *Images{ nullptr };
 	float prevAzimuth {0.0f}; //azimuth from previous scan
 	CRImageSet();
 	~CRImageSet();

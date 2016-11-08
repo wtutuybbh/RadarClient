@@ -147,11 +147,11 @@ CRCDataFile* CRCDataFileSet::GetFile(int index)
 
 CRCDataFileSet::~CRCDataFileSet()
 {
-	std::string context = "CRCDataFileSet::~CRCDataFileSet";
+	std::string context = "CRCDataFileSet DESTRUCTOR";
 	CRCLogger::Info(requestID, context, (boost::format("Destroying CRCDataFileSet object, containing %1% files") % _files.size()).str());
 	for (auto it = begin(_files); it != end(_files); ++it)
 	{
-		if (*it != NULL)
+		if (*it != nullptr)
 			delete *it;
 	}
 	_files.empty();

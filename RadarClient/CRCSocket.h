@@ -304,8 +304,8 @@ struct Nchannel_Data
 	int SampleCount; // количество отсчетов в канале
 	int SampleSize;  // в байтах на 1 канал
 	int AZMT;       // 8200 едениц = 360 градусов
-	float* ch1offs{ NULL }; // резерв
-	float* ch2offs{ NULL }; // резерв
+	float* ch1offs{ nullptr }; // резерв
+	float* ch2offs{ nullptr }; // резерв
 
 	unsigned int type; //= 0 - олдскул записи. поля ниже не существуют.
 					   //  1 - имитатор. версия 1.1 / 4байта float, 2 канала, ch1=ch2, после модуля опт фильтр /
@@ -352,14 +352,14 @@ struct Nchannel_Data
 
 struct send_queue_element
 {
-	char* data{ NULL }; // массив + заголовок точнее то что от них осталось отправить
+	char* data{ nullptr }; // массив + заголовок точнее то что от них осталось отправить
 	int length; // размер
 };
 
 struct _client                     //Клиенты
 {
-	char *buff{ NULL };
-	SOCKET *Socket{ NULL };
+	char *buff{ nullptr };
+	SOCKET *Socket{ nullptr };
 	unsigned int offset { 0 };
 	vector<send_queue_element> send_queue;  // очередь отправляемых данных
 };
@@ -423,13 +423,14 @@ public:
 
 class CRCSocket
 {
-	static const std::string requestID;
+	
 
 	bool OnceClosed;
-	char *hole{ NULL };
+	char *hole{ nullptr };
 	int LENDATAOTOBR {1};
 
 public:
+	static const std::string requestID;
 
 	bool Initialized {false};
 	bool PointOK, TrackOK, ImageOK;
@@ -447,18 +448,18 @@ public:
 	_client *client{ nullptr };
 
 	//used when processing data:
-	RDR_INITCL* s_rdrinit{ NULL };
+	RDR_INITCL* s_rdrinit{ nullptr };
 	RDR_INITCL rdrinit;
-	RPOINTS* info_p{ NULL };
-	RPOINT* pts{ NULL };
-	RDRCURRPOS *CurrentPosition {NULL};
+	RPOINTS* info_p{ nullptr };
+	RPOINT* pts{ nullptr };
+	RDRCURRPOS *CurrentPosition { nullptr };
 
-	RIMAGE* info_i{ NULL };
-	void * pixels{ NULL };
+	RIMAGE* info_i{ nullptr };
+	void * pixels{ nullptr };
 
 	long Buf[TXRXBUFSIZE];
 
-	void* PTR_D{ NULL };
+	void* PTR_D{ nullptr };
 
 	int n_view_in_scan;
 	int ActiveSeans;
@@ -476,7 +477,8 @@ public:
 	void Init();
 	int Connect();
 
-	bool ReadLogEnabled{ true };
+	bool ReadLogEnabled{ false };
+	bool PostDataLogEnabled{ false };
 	int Read();
 
 	int Close();
@@ -488,10 +490,10 @@ public:
 	unsigned int _IMG_MapAmp2ColorRGB255(float Amp, float Min);
 	unsigned int MapAmp2ColorRGB255(float Amp, float Min);
 	int FindTrack(int id);
-	void FreeMemory(char *ptr);
+	void FreeMemory(char *ptr) const;
 
 #ifdef _DEBUG
-	DebugWindowInfo *dwi{ NULL };
+	DebugWindowInfo *dwi{ nullptr };
 #endif
 };
 

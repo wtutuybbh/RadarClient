@@ -128,7 +128,9 @@ CRCAltitudeDataFile::CRCAltitudeDataFile(double lon0, double lat0, double lon1, 
 CRCAltitudeDataFile::~CRCAltitudeDataFile()
 {
 	if (data)
+	{
 		delete data;
+	}
 }
 
 short CRCAltitudeDataFile::ValueAt(int x, int y)
@@ -225,7 +227,7 @@ bool CRCAltitudeDataFile::Open()
 		int result;
 
 		hDLL = LoadLibrary("GeoDataProvider.dll");
-		if (hDLL != NULL)
+		if (hDLL != nullptr)
 		{
 			gdpAltitudeMap = (GDPALTITUDEMAP)GetProcAddress(hDLL, "gdpAltitudeMap");
 			if (!gdpAltitudeMap)

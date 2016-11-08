@@ -13,11 +13,11 @@ CMiniMapPointer::CMiniMapPointer(int vpId, CScene *scene) :
 	C3DObjectModel(vpId, 
 		new C3DObjectVBO(false), 
 		new C3DObjectTexture("video.png", "tex"), 
-		new C3DObjectProgram("MiniMapPointer.v.glsl", "MiniMapPointer.f.glsl", "vertex", "texcoor", NULL, NULL))
+		new C3DObjectProgram("MiniMapPointer.v.glsl", "MiniMapPointer.f.glsl", "vertex", "texcoor", nullptr, nullptr))
 {
 	this->Scene = scene;
 	std::vector<VBOData> *buffer = new std::vector<VBOData>;
-	float y = 1;// (m_Bounds[0].y + m_Bounds[1].y) / 2;
+	float y = 1;
 	buffer->push_back({ glm::vec4(-scene->MeshSize.x, y,-scene->MeshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
 	buffer->push_back({ glm::vec4(-scene->MeshSize.x, y, scene->MeshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
 	buffer->push_back({ glm::vec4(scene->MeshSize.x, y, scene->MeshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });

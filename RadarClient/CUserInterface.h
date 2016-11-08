@@ -4,42 +4,6 @@
 
 #include "Util.h"
 
-#define TEXT_LABEL_NOT_CONNECTED _T("Нет соединения")
-#define TEXT_LABEL_CONNECTED _T("Соединение установлено")
-#define TEXT_LABEL_SHOW _T("Выводить:")
-#define TEXT_LABEL_VIEW _T("Вид местности:")
-#define TEXT_LABEL_MARKUP _T("Разметка:")
-#define TEXT_LABEL_CAMERA_POSITION _T("Положение камеры:")
-#define TEXT_LABEL_CAMERA_DIRECTION _T("Направление камеры:")
-
-#define TEXT_BUTTON_CONNECT _T("Cоединить")
-#define TEXT_BUTTON_DISCONNECT _T("Разъединить")
-#define TEXT_BUTTON_TEST _T("Тест")
-#define TEXT_BUTTON_DUMP _T("Дамп")
-
-#define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_RADAR _T("От радара")
-#define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_100M_ABOVE_RADAR _T("100м над радаром")
-#define TEXT_RADIOBUTTON_CAMERA_POSITION_FROM_1000M_ABOVE_RADAR _T("1км над радаром")
-
-#define TEXT_RADIOBUTTON_CAMERA_DIRECTION_FROM_RADAR_TO_NORTH _T("От радара на север")
-#define TEXT_RADIOBUTTON_CAMERA_DIRECTION_TO_RADAR _T("К радару")
-#define TEXT_RADIOBUTTON_CAMERA_DIRECTION_TO_SOUTH _T("На юг")
-
-
-#define TEXT_CHECKBOX_POINTS _T("Точки")
-#define TEXT_CHECKBOX_SERIES _T("Траектории")
-#define TEXT_CHECKBOX_RLI _T("RLI-изображения")
-#define TEXT_CHECKBOX_FIXVIEWTORADAR _T("Вид на радар")
-#define TEXT_CHECKBOX_MEASURE_DISTANCE _T("Измерения")
-
-#define TEXT_CHECKBOX_LANDSCAPE _T("Ландшафт")
-#define TEXT_CHECKBOX_MAP _T("Карта")
-
-#define TEXT_CHECKBOX_MARKUP_LINES _T("Линии")
-#define TEXT_CHECKBOX_MARKUP_LABELS _T("Числа")
-
-#define TEXT_INFOGRID_NAME _T("Информация")
-
 class CScene;
 class CViewPortControl;
 class CRCSocket;

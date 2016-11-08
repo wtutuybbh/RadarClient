@@ -11,6 +11,7 @@ CSettings::CSettings()
 CSettings::~CSettings()
 {
 }
+
 std::unordered_map<int, glm::vec4> CSettings::colors;
 std::unordered_map<int, float> CSettings::floats;
 std::unordered_map<int, int> CSettings::ints;

@@ -9,8 +9,8 @@
 #include "C3DObjectProgram.h"
 
 
-C3DObjectVBO* CRCPointModel::vbo_s = NULL;
-C3DObjectProgram* CRCPointModel::prog_s = NULL;
+C3DObjectVBO* CRCPointModel::vbo_s = nullptr;
+C3DObjectProgram* CRCPointModel::prog_s = nullptr;
 
 void CRCPointModel::InitStructure()
 {
@@ -18,10 +18,10 @@ void CRCPointModel::InitStructure()
 	std::vector<VBOData>* buffer = CRCPointModel::CreateSphereR1(1);
 	vbo_s->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 
-	CRCPointModel::prog_s = new C3DObjectProgram("CRCPoint.v.glsl", "CRCPoint.f.glsl", "vertex", NULL, "normal", NULL);
+	CRCPointModel::prog_s = new C3DObjectProgram("CRCPoint.v.glsl", "CRCPoint.f.glsl", "vertex", nullptr, "normal", nullptr);
 }
 
-CRCPointModel::CRCPointModel(int vpId, float y0, float mpph, float mppv, float r, float a, float e): C3DObjectModel(vpId, CRCPointModel::vbo_s, NULL, CRCPointModel::prog_s)
+CRCPointModel::CRCPointModel(int vpId, float y0, float mpph, float mppv, float r, float a, float e): C3DObjectModel(vpId, CRCPointModel::vbo_s, nullptr, CRCPointModel::prog_s)
 {
 #if defined(CRCPOINT_CONSTRUCTOR_USES_RADIANS)
 	cartesianCoords = glm::vec3(-r * sin(a) * cos(e) / mpph, y0 + r * sin(e) / mppv, r * cos(a) * cos(e) / mpph); //we always add y0 (height of the radar relative to sea level) to all cartesian coordinates 
@@ -45,7 +45,7 @@ CRCPointModel::~CRCPointModel()
 {
 	auto obj = vbo.at(Main);
 
-	vector<VBOData>* buffer = NULL;
+	vector<VBOData>* buffer = nullptr;
 	if (obj) 
 		buffer = (vector<VBOData>*)obj->GetBuffer();
 

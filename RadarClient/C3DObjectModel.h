@@ -18,6 +18,7 @@ protected:
 	std::unordered_map<int, C3DObjectProgram*> prog;
 	std::unordered_map<int, glm::mat4> scaleMatrix, rotateMatrix, translateMatrix, modelMatrix;
 	glm::vec3 cartesianCoords, sphericalCoords, geoCoords;
+	void *GetBufferAt(int index);
 public:
 	static int _id, _testid;
 	int id;
@@ -29,7 +30,7 @@ public:
 	void SetCartesianCoordinates(float x, float y, float z);
 
 
-	CScene *Scene {NULL};
+	CScene *Scene {nullptr};
 	glm::vec4 Color {glm::vec4()};
 	C3DObjectModel(int vpId, C3DObjectVBO *vbo, C3DObjectTexture *tex, C3DObjectProgram *prog);
 	C3DObjectModel(C3DObjectVBO *vbo, C3DObjectTexture *tex, C3DObjectProgram *prog);
