@@ -627,12 +627,9 @@ void CUserInterface::InitGrid()
 		InfoGridHWND = GetDlgItem(ParentHWND, InfoGrid_ID);
 
 	SendMessage(GridHWND, ZGM_SETFONT, 2, (LPARAM)Font);
-
-
 	SendMessage(GridHWND, ZGM_DIMGRID, 7, 0);
 	SendMessage(GridHWND, ZGM_SHOWROWNUMBERS, TRUE, 0);
 
-	//set column header titles
 	SendMessage(GridHWND, ZGM_SETCELLTEXT, 1, (LPARAM)"ID");
 	SendMessage(GridHWND, ZGM_SETCELLTEXT, 2, (LPARAM)"Кол-во точек");
 	SendMessage(GridHWND, ZGM_SETCELLTEXT, 3, (LPARAM)"Начальная точка");
@@ -647,17 +644,14 @@ void CUserInterface::InitGrid()
 
 	//auto size all columns
 	SendMessage(GridHWND, ZGM_AUTOSIZE_ALL_COLUMNS, 0, 0);
-
-
-
 	SendMessage(InfoGridHWND, ZGM_SETFONT, 2, (LPARAM)Font);
 	SendMessage(InfoGridHWND, ZGM_DIMGRID, 2, 0);
 	SendMessage(InfoGridHWND, ZGM_SHOWROWNUMBERS, FALSE, 0);
+
 	SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, 1, (LPARAM)"Параметр");
 	SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, 2, (LPARAM)"Значение");
+
 	SendMessage(InfoGridHWND, ZGM_AUTOSIZE_ALL_COLUMNS, 0, 0);
-	
-	FillInfoGrid(nullptr);
 }
 
 HFONT CUserInterface::GetFont()
@@ -691,21 +685,19 @@ void CUserInterface::FillGrid(vector<TRK*> *tracks)
 	int npoints;
 	std::stringstream ss;
 	for (i = 0; i < tracks->size(); i++) {
-		if (i>nrows)
+		if (i > nrows)
+		{
 			SendMessage(GridHWND, ZGM_APPENDROW, 0, 0);
+		}
 		int offset = ncols*(i + 1);
 		SendMessage(GridHWND, ZGM_SETCELLINT, offset + 1, (LPARAM)&(tracks->at(i)->id));
 
 		npoints = tracks->at(i)->P.size();
 		SendMessage(GridHWND, ZGM_SETCELLINT, offset + 2, (LPARAM)&npoints);
 
-		ss.str(std::string());
-		ss << std::fixed << std::setprecision(4) << tracks->at(i)->P.at(0)->X << "," << tracks->at(i)->P.at(0)->Y;
-		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 3, (LPARAM)ss.str().c_str());
+		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 3, formatmsg("%.4f,%.4f", tracks->at(i)->P.at(0)->X, tracks->at(i)->P.at(0)->Y));
 		
-		ss.str(std::string());
-		ss << std::fixed << std::setprecision(4) << tracks->at(i)->P.at(npoints-1)->X << "," << tracks->at(i)->P.at(npoints - 1)->Y;
-		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 4, (LPARAM)ss.str().c_str());
+		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 4, formatmsg("%.4f,%.4f", tracks->at(i)->P.at(npoints - 1)->X, tracks->at(i)->P.at(npoints - 1)->Y));
 
 		ss.str(std::string());
 		glm::vec3 speed(tracks->at(i)->P.at(npoints - 1)->vX, tracks->at(i)->P.at(npoints - 1)->vY, tracks->at(i)->P.at(npoints - 1)->vZ);
@@ -720,17 +712,21 @@ void CUserInterface::FillGrid(vector<TRK*> *tracks)
 
 void CUserInterface::FillInfoGrid(CScene* scene)
 {
+	std::string context = "CUserInterface::FillInfoGrid";
 	if (!scene)
 	{
+		LOG_WARN_("Called with parameter scene=nullptr");
 		return;
 	}
 	if (!InfoGridHWND)
+	{
 		InfoGridHWND = GetDlgItem(ParentHWND, InfoGrid_ID);
+	}
+
 	int nrows = SendMessage(InfoGridHWND, ZGM_GETROWS, 0, 0);
 	int ncols = SendMessage(InfoGridHWND, ZGM_GETCOLS, 0, 0);
 
 	SendMessage(InfoGridHWND, ZGM_EMPTYGRID, 1, 0);
-
 	
 	std::stringstream ss;
 	int r = 1;

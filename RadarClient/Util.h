@@ -156,6 +156,9 @@ std::string num2str(double num, std::streamsize precision);
 std::string mat4row2str(glm::mat4 m, int row, std::streamsize precision);
 
 std::string format(const char *fmt, ...);
+#define formatc(fmt, ...) format(fmt, __VA_ARGS__).c_str()
+#define formatmsg(fmt, ...) (LPARAM)format(fmt, __VA_ARGS__).c_str()
+
 
 std::string vformat(const char *fmt, va_list ap);
 //for copy-paste:
