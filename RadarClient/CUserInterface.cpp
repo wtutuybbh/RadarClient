@@ -16,6 +16,8 @@
 #include <boost/filesystem/path.hpp>
 #include "CRCLogger.h"
 
+#include "CRCGridCell.h"
+
 const std::string CUserInterface::requestID = "CUserInterface";
 
 LRESULT Button1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -730,25 +732,24 @@ void CUserInterface::FillInfoGrid(CScene* scene)
 	
 	std::stringstream ss;
 	int r = 1;
-	SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 1, (LPARAM)"Местоположение радара");
-	ss.str(std::string());
-	ss << std::fixed << std::setprecision(4) << scene->geocenter.x << ", " << scene->geocenter.y;
-	SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, (LPARAM)ss.str().c_str());
+	//SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 1, formatmsg("Местоположение радара"));
+
+	//*(&(CRCGridCell::CRCGridCell(InfoGridHWND, ncols, r, 1))) = "test";
+	GRIDCELL(InfoGridHWND, ncols * r + 1) = "test"; //format("Местоположение радара");
+	MY_IMPL_2(InfoGridHWND, ncols * r + 1) = "test";
+
+
+
+
+	SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, formatmsg("%.4f, %.4f", scene->geocenter.x, scene->geocenter.y));
 
 	if (scene->Socket->IsConnected) {
 		r++;
 		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 1, (LPARAM)"Угол места, от");
-		ss.str(std::string());
-		ss << std::fixed << std::setprecision(4) << scene->minE;
-		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, (LPARAM)ss.str().c_str());
-
+		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, formatmsg("%.4f", scene->minE));
 		r++;
 		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 1, (LPARAM)"Угол места, до");
-		ss.str(std::string());
-		ss << std::fixed << std::setprecision(4) << scene->maxE;
-		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, (LPARAM)ss.str().c_str());
-
-		
+		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, formatmsg("%.4f", scene->maxE));		
 	}
 
 	if (scene->Selection.size()>0)

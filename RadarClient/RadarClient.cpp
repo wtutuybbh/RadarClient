@@ -486,7 +486,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	string context = "WinMain";
 
-	LOG(Info_, requestID, context, "TEST hInstance=%d", hInstance);
+	LOG(Info, requestID, context, "TEST hInstance=%d", hInstance);
 
 	LOG_INFO_("LOG_INFO_ test %d %f %f", 12, 3.7, 5.2);
 

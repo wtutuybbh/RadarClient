@@ -143,3 +143,12 @@ public:
 #endif
 };
 
+/*
+GRID(InfoGrid, r, c) = formatmsg("Местоположение радара");
+
+must be translated into:
+
+
+SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + c, formatmsg("Местоположение радара"));
+*/
+

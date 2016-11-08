@@ -101,7 +101,7 @@
       <BrowseInformation>true</BrowseInformation>
       <ShowIncludes>false</ShowIncludes>
       <StructMemberAlignment>8Bytes</StructMemberAlignment>
-      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessToFile>true</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -161,7 +161,7 @@ xcopy "$(SolutionDir)FreeImage\*.dll" "$(OutDir)" /s /d</Command>
       <BrowseInformation>true</BrowseInformation>
       <ShowIncludes>false</ShowIncludes>
       <StructMemberAlignment>8Bytes</StructMemberAlignment>
-      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessToFile>true</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -212,6 +212,7 @@ xcopy "$(SolutionDir)FreeImage\*.dll" "$(OutDir)" /s /d</Command>
     <ClCompile Include="CRCDataFile.cpp" />
     <ClCompile Include="CRCAltitudeDataFile.cpp" />
     <ClCompile Include="CRCDataFileSet.cpp" />
+    <ClCompile Include="CRCGridCell.cpp" />
     <ClCompile Include="CRCLogger.cpp" />
     <ClCompile Include="CRCTextureDataFile.cpp" />
     <ClCompile Include="CRImage.cpp" />
@@ -245,6 +246,7 @@ xcopy "$(SolutionDir)FreeImage\*.dll" "$(OutDir)" /s /d</Command>
     <ClInclude Include="CRCDataFile.h" />
     <ClInclude Include="CRCAltitudeDataFile.h" />
     <ClInclude Include="CRCDataFileSet.h" />
+    <ClInclude Include="CRCGridCell.h" />
     <ClInclude Include="CRCLogger.h" />
     <ClInclude Include="CRCTextureDataFile.h" />
     <ClInclude Include="CRImage.h" />
