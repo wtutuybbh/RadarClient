@@ -733,6 +733,7 @@ void CScene::RefreshTracks(vector<TRK*>* tracks)
 		}
 		if (insertNew)
 		{
+			LOG_INFO(requestID, "CScene::RefreshTracks", "new track, id=%d", tracks->at(i)->id);
 			CTrack *t = new CTrack(tracks->at(i)->id, std::find(SelectedTracksIds.begin(), SelectedTracksIds.end(), tracks->at(i)->id) != SelectedTracksIds.end());
 			t->Refresh(glm::vec4(0, y0, 0, 1), mpph, mppv, &tracks->at(i)->P);
 			t->Found = true;
@@ -766,11 +767,20 @@ void CScene::RefreshImages(RIMAGE* info, void* pixels)
 
 void CScene::Init(RDR_INITCL* init)
 {
+	std::string context = "CScene::Init";
 	if (!init)
 	{
+		LOG_ERROR_("parameter init is nullptr");
 		return;
 	}
-		
+	LOG_INFO_("Start... init=%#010x{begAzm=%.4f, dAzm=%.4f, Nazm=%.4f, begElv=%.4f, dElv=%.4f, Nelv=%.4f, ViewStep=%.4f}", init, init->begAzm, init->dAzm, init->Nazm, init->begElv, init->dElv, init->Nelv, init->ViewStep);
+	
+	if (init->ViewStep == 0)
+	{
+		LOG_ERROR_("init->ViewStep == 0");
+		return;
+	}
+
 	rdrinit = init;
 
 	if (UI)
@@ -782,15 +792,16 @@ void CScene::Init(RDR_INITCL* init)
 		}			
 		UI->SetTrackbarValue_BegAzm(100.0 * (ba_deg-CSettings::GetFloat(FloatMinBegAzm)) / (CSettings::GetFloat(FloatMaxBegAzm) - CSettings::GetFloat(FloatMinBegAzm)));
 		UI->SetTrackbarValue_ZeroElevation(100.0 * CSettings::GetFloat(FloatZeroElevation) / 90.0);
-
-		int markDistance = CSettings::GetInt(IntMarkupMarkDistance);
-		int numCircles = CSettings::GetInt(IntMarkupNumCircles);
-		int marksPerCircle = CSettings::GetInt(IntMarkupMarksPerCircle);
-		int r = markDistance * numCircles * marksPerCircle;
-
-		begAzmLine = new CLine(Main, glm::vec4(0, y0, 0, 1), glm::vec4(- r * sin(init->begAzm), y0, r * cos(init->begAzm), 1), Simple);
 	}
-
+	else
+	{
+		LOG_WARN_("UI not initialized");
+	}
+	int markDistance = CSettings::GetInt(IntMarkupMarkDistance);
+	int numCircles = CSettings::GetInt(IntMarkupNumCircles);
+	int marksPerCircle = CSettings::GetInt(IntMarkupMarksPerCircle);
+	int r = markDistance * numCircles * marksPerCircle;
+	begAzmLine = new CLine(Main, glm::vec4(0, y0, 0, 1), glm::vec4(-r * sin(init->begAzm), y0, r * cos(init->begAzm), 1), Simple);
 	minE = init->begElv;
 	maxE = init->begElv + init->dElv * init->Nelv;
 	if (minE==0 && maxE==0)
@@ -806,7 +817,9 @@ void CScene::Init(RDR_INITCL* init)
 	}
 
 	if (!ImageSet)
+	{
 		ImageSet = new CRImageSet();
+	}
 
 	Initialized = true;	
 }

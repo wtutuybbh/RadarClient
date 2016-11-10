@@ -19,3 +19,9 @@ CRCGridCell& CRCGridCell::operator=(const std::string value)
 	SendMessage(hWnd, ZGM_SETCELLTEXT, index, (LPARAM)value.c_str());
 	return *this;
 }
+
+CRCGridCell& CRCGridCell::operator=(const int value)
+{
+	SendMessage(hWnd, ZGM_SETCELLINT, index, (LPARAM)&value);
+	return *this;
+}

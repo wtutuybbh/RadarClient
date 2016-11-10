@@ -17,6 +17,7 @@
 #include "CRCLogger.h"
 
 #include "CRCGridCell.h"
+#include "CRCDataFileSet.h"
 
 const std::string CUserInterface::requestID = "CUserInterface";
 
@@ -83,6 +84,13 @@ LRESULT CUserInterface::Button_Load(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 		//VPControl->Scene->Dump(VPControl);
 		Socket->Initialized = true;
 	}
+
+	return LRESULT();
+}
+
+LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	CRCDataFileSet set();
 
 	return LRESULT();
 }
@@ -366,13 +374,16 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 
 	MeasureDistance_ID = InsertElement(NULL, _T("BUTTON"), _T("Измерения"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MeasureDistance);
 	
-	Test_ID = InsertElement(NULL, _T("BUTTON"), _T("Цвета"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth/2, ButtonHeight, &CUserInterface::Button_Colors);
+	BtnColors_ID = InsertElement(NULL, _T("BUTTON"), _T("Цвета"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth/2, ButtonHeight, &CUserInterface::Button_Colors);
 	BtnLoad_ID = InsertElement(NULL, _T("BUTTON"), _T("Загр. карту"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X + ControlWidth / 2 + Column1X / 2, CurrentY, ControlWidth/4 * 3, ButtonHeight, &CUserInterface::Button_Load);
 
 	CurrentY += VStepGrp;
 
+
 	Button_Connect_ID = InsertElement(NULL, _T("BUTTON"), _T("Cоединить"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, Column1X, CurrentY, ControlWidthL, ButtonHeight, &CUserInterface::Button_Connect);
 	IsConnected_ID = InsertElement(NULL, _T("STATIC"), _T("Нет соединения"), WS_VISIBLE | WS_CHILD, Column2X, CurrentY, ControlWidthL, ButtonHeight, NULL);
+	BtnTest_ID = InsertElement(NULL, _T("BUTTON"), _T("Тест"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth / 2, ButtonHeight, &CUserInterface::Button_Test);
+
 	
 	CurrentY += VStepGrp;
 
@@ -692,19 +703,17 @@ void CUserInterface::FillGrid(vector<TRK*> *tracks)
 			SendMessage(GridHWND, ZGM_APPENDROW, 0, 0);
 		}
 		int offset = ncols*(i + 1);
-		SendMessage(GridHWND, ZGM_SETCELLINT, offset + 1, (LPARAM)&(tracks->at(i)->id));
+		GRIDCELL(GridHWND, offset + 1) = tracks->at(i)->id;
 
 		npoints = tracks->at(i)->P.size();
-		SendMessage(GridHWND, ZGM_SETCELLINT, offset + 2, (LPARAM)&npoints);
+		GRIDCELL(GridHWND, offset + 2) = npoints;
 
-		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 3, formatmsg("%.4f,%.4f", tracks->at(i)->P.at(0)->X, tracks->at(i)->P.at(0)->Y));
+		GRIDCELL(GridHWND, offset + 3) = format("%.4f,%.4f", tracks->at(i)->P.at(0)->X, tracks->at(i)->P.at(0)->Y);
 		
-		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 4, formatmsg("%.4f,%.4f", tracks->at(i)->P.at(npoints - 1)->X, tracks->at(i)->P.at(npoints - 1)->Y));
+		GRIDCELL(GridHWND, offset + 4) = format("%.4f,%.4f", tracks->at(i)->P.at(npoints - 1)->X, tracks->at(i)->P.at(npoints - 1)->Y);
 
-		ss.str(std::string());
 		glm::vec3 speed(tracks->at(i)->P.at(npoints - 1)->vX, tracks->at(i)->P.at(npoints - 1)->vY, tracks->at(i)->P.at(npoints - 1)->vZ);
-		ss << std::fixed << std::setprecision(4) <<  glm::length(speed);
-		SendMessage(GridHWND, ZGM_SETCELLTEXT, offset + 5, (LPARAM)ss.str().c_str());
+		GRIDCELL(GridHWND, offset + 5) = format("%.4f", glm::length(speed));
 	}
 	for (; i < nrows; i++) {
 		SendMessage(GridHWND, ZGM_DELETEROW, i, 0);
@@ -735,21 +744,17 @@ void CUserInterface::FillInfoGrid(CScene* scene)
 	//SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 1, formatmsg("Местоположение радара"));
 
 	//*(&(CRCGridCell::CRCGridCell(InfoGridHWND, ncols, r, 1))) = "test";
-	GRIDCELL(InfoGridHWND, ncols * r + 1) = "test"; //format("Местоположение радара");
-	MY_IMPL_2(InfoGridHWND, ncols * r + 1) = "test";
 
-
-
-
-	SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, formatmsg("%.4f, %.4f", scene->geocenter.x, scene->geocenter.y));
+	GRIDCELL(InfoGridHWND, ncols * r + 1) = "Местоположение радара";
+	GRIDCELL(InfoGridHWND, ncols * r + 2) = format("%.4f, %.4f", scene->geocenter.x, scene->geocenter.y);
 
 	if (scene->Socket->IsConnected) {
 		r++;
-		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 1, (LPARAM)"Угол места, от");
-		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, formatmsg("%.4f", scene->minE));
+		GRIDCELL(InfoGridHWND, ncols * r + 1) = "Угол места, от";
+		GRIDCELL(InfoGridHWND, ncols * r + 2) = format("%.4f", scene->minE);
 		r++;
-		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 1, (LPARAM)"Угол места, до");
-		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, formatmsg("%.4f", scene->maxE));		
+		GRIDCELL(InfoGridHWND, ncols * r + 1) = "Угол места, до";
+		GRIDCELL(InfoGridHWND, ncols * r + 2) = format("%.4f", scene->maxE);
 	}
 
 	if (scene->Selection.size()>0)

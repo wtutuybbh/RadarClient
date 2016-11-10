@@ -37,7 +37,20 @@ private:
 	int CurrentID {1}; // incremental ID counter
 
 	//single elements
-	int IsConnected_ID, Button_Connect_ID, Grid_ID, InfoGrid_ID, ColorGrid_ID, FixViewToRadar_ID, MeasureDistance_ID, Test_ID, BtnLoad_ID, BegAzm_ID, ZeroElevation_ID, BegAzmValue_ID, ZeroElevationValue_ID;
+	int IsConnected_ID;
+	int Button_Connect_ID;
+	int Grid_ID;
+	int InfoGrid_ID;
+	int ColorGrid_ID;
+	int FixViewToRadar_ID;
+	int MeasureDistance_ID;
+	int BtnTest_ID;
+	int BtnColors_ID;
+	int BtnLoad_ID;
+	int BegAzm_ID;
+	int ZeroElevation_ID;
+	int BegAzmValue_ID;
+	int ZeroElevationValue_ID;
 
 	//group elements
 	int ObjOptions_ID[3], MapOptions_ID[2], MarkupOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2], MapType_ID[2];
@@ -65,6 +78,7 @@ private:
 	virtual LRESULT Button_Connect(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Button_Colors(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Button_Load(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MarkupOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

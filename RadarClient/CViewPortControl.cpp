@@ -105,9 +105,9 @@ LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wPara
 		}
 		break;
 	case WM_LBUTTONDOWN:
-		std::string context = "CViewPortControl::ViewPortControlProc:WM_LBUTTONDOWN";
+		/*std::string context = "CViewPortControl::ViewPortControlProc:WM_LBUTTONDOWN";
 		CRCLogger::Info(requestID, context, (boost::format("Start... hwnd=%1%, uMsg=%2%, wParam=%3%, lParam=%4%; x=LOWORD(lParam)=%5%, y=HIWORD(lParam)=%6%") 
-			% hwnd % uMsg % wParam % lParam % LOWORD(lParam) % HIWORD(lParam)).str());
+			% hwnd % uMsg % wParam % lParam % LOWORD(lParam) % HIWORD(lParam)).str());*/
 		SetFocus(hwnd);
 		if (Camera) {
 			Camera->startPosition.x = LOWORD(lParam);
@@ -128,6 +128,7 @@ LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wPara
 					UI->FillInfoGrid(Scene);
 				}									
 		}
+
 		break;
 	}
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -207,7 +208,15 @@ C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 	}
 	int index;
 	C3DObjectModel *o = Scene->GetSectorPoint(this, glm::vec2(x, y), index);
+	if (o)
+	{
+		LOG_INFO_("Scene->GetSectorPoint: (x=%.4f, y=%.4f) => (o: %s)", x, y, typeid(o).name());
+	}
 	C3DObjectModel *t = Scene->GetFirstTrackBetweenPoints(this, glm::vec2(x, y), index);
+	if (t)
+	{
+		LOG_INFO_("Scene->GetFirstTrackBetweenPoints: (x=%.4f, y=%.4f) => (t: %s)", x, y, typeid(t).name());
+	}
 	if (o && !t) {
 		o->SetColor(glm::vec4(0, 1, 0, 1));
 		return o;
