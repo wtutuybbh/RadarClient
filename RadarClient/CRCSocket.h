@@ -479,7 +479,7 @@ public:
 	int Connect();
 
 	bool ReadLogEnabled{ false };
-	bool PostDataLogEnabled{ false };
+	bool PostDataLogEnabled{ true };
 	int Read();
 
 	int Close();

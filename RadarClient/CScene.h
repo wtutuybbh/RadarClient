@@ -117,7 +117,7 @@ public:
 
 
 	RDR_INITCL * rdrinit{ nullptr };
-	bool Initialized;
+	bool Initialized { false };
 
 	std::vector<C3DObjectModel*> Selection;
 	void PushSelection(C3DObjectModel *o);

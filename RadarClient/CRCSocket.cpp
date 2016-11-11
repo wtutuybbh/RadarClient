@@ -297,6 +297,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 					if (info_p && pts)
 					{
 						CRCLogger::Info(requestID, context, (boost::format("MSG_RPOINTS. D=%1%, N=%2%, d1=%3%, d2=%4%, pts[0].B=%5%") % info_p->D % info_p->N % info_p->d1 % info_p->d2 % pts[0].B).str());
+						//TODO: pts may be empty...
 					}
 					if (!info_p)
 					{

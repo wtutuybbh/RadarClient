@@ -179,8 +179,6 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	markup = nullptr;
 	info = nullptr;
 	ray = nullptr;
-
-	Initialized = false;
 }
 CScene::~CScene() {
 	ClearSelection();
@@ -773,7 +771,7 @@ void CScene::Init(RDR_INITCL* init)
 		LOG_ERROR__("parameter init is nullptr");
 		return;
 	}
-	LOG_INFO__("Start... init=%#010x{begAzm=%.4f, dAzm=%.4f, Nazm=%.4f, begElv=%.4f, dElv=%.4f, Nelv=%.4f, ViewStep=%.4f}", init, init->begAzm, init->dAzm, init->Nazm, init->begElv, init->dElv, init->Nelv, init->ViewStep);
+	LOG_INFO__("Start... init=%#010x{begAzm=%.4f, dAzm=%.4f, Nazm=%d, begElv=%.4f, dElv=%.4f, Nelv=%d, ViewStep=%d}", init, init->begAzm, init->dAzm, init->Nazm, init->begElv, init->dElv, init->Nelv, init->ViewStep);
 	
 	if (init->ViewStep == 0)
 	{

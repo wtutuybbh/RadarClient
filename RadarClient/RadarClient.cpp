@@ -1,28 +1,17 @@
 ﻿#include "stdafx.h"
-
 #include "RadarClient.h"
 #include "CRCSocket.h"
-
 #include "CMesh.h"
 #include "CScene.h"
 #include "Util.h"
-
 #include "CCamera.h"
-
 #include "CViewPortControl.h"
 #include "CMinimap.h"
-
 #include "CUserInterface.h"
-
-
 
 #include "CSettings.h"
 #include <GL/glut.h>
 #include "CRCLogger.h"
-
-//using namespace logging::trivial;
-
-//#include <vld.h>
 
 #define VIEW_PORT_CONTROL_ID     100
 
@@ -35,17 +24,12 @@
 static BOOL g_isProgramLooping;											// Window Creation Loop, For FullScreen/Windowed Toggle																		// Between Fullscreen / Windowed Mode
 static BOOL g_createFullScreen;											// If TRUE, Then Create Fullscreen
 
-//old_CMesh*		g_pMesh = NULL;										// Mesh Data
-//CScene*		g_Scn = NULL;
 float		g_flYRot = 0.0f;									// Rotation
 int			g_nFPS = 0, g_nFrames = 0;							// FPS and FPS Counter
 DWORD		g_dwLastFPS = 0;									// Last FPS Check Time	
 float g_mpph, g_mppv, g_lon, g_lat;
 int g_texsize;
 std::string g_altFile, g_imgFile, g_datFile;
-//CCamera* g_Cam=NULL;
-
-
 
 HWND g_ViewPortControl_hWnd;
 
@@ -486,11 +470,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	string context = "WinMain";
 
-	LOG(Info, requestID, context, "TEST hInstance=%d", hInstance);
+	LOG_INFO__("RadarClient started.");
 
-	LOG_INFO__("LOG_INFO_ test %d %f %f", 12, 3.7, 5.2);
-
-	CRCLogger::Info(requestID, context, "RadarClient started.");
+	LOG_INFO__("sizeof(RDR_INITCL) = %d", sizeof(RDR_INITCL));
+		
 	CSettings::Init();
 	C3DObjectModel::_id = 0;
 	C3DObjectModel::_testid = 0;
@@ -731,8 +714,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	
 	return 0;	
 }																		// End Of WinMain()												
-
-
 
 BOOL Initialize()					// Any GL Init Code & User Initialiazation Goes Here
 {

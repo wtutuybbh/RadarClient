@@ -134,8 +134,9 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	}
 	LOG_INFO("Test", "Test", "Finished, time=%f", float(clock() - begin_time) / CLOCKS_PER_SEC);
 
+	//print resulting values to log file (only first row):
 	std::ostringstream ss;
-	for (auto x = 0; x < width; x++)
+	for (auto x = 0; x < 1; x++)
 	{
 		ss.str(std::string());
 		for (auto y = 0; y < height; y++)
