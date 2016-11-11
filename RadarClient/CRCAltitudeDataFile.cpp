@@ -2,6 +2,7 @@
 #include "CRCAltitudeDataFile.h"
 #include "Util.h"
 #include "CRCLogger.h"
+#include "CRCGeoDataProvider.h"
 
 //(experimental method of log management)
 //Errors are always logged!
@@ -63,74 +64,52 @@ CRCAltitudeDataFile::CRCAltitudeDataFile(const std::string& dt2FileName):
 	}
 
 	fileName = dt2FileName;
-
-	HINSTANCE hDLL;               // Handle to DLL
-	GDPALTITUDEMAP_SIZES gdpAltitudeMap_Sizes;    // Function pointer
 	double LL[10];
 	int size[8], result;
 
-	hDLL = LoadLibrary(_T("GeoDataProvider.dll"));
+	LL[0] = 0;
+	LL[1] = 0;
+	LL[2] = 180;
+	LL[3] = 180;
 
-	if (hDLL != nullptr)
+	if (LOG_ENABLED && CRCAltitudeDataFile_v1_LOG)
 	{
-		gdpAltitudeMap_Sizes = (GDPALTITUDEMAP_SIZES)GetProcAddress(hDLL, "gdpAltitudeMap_Sizes");
-		if (!gdpAltitudeMap_Sizes)
-		{
-			CRCLogger::Error(requestID, context, "Function gdpAltitudeMap_Sizes not loaded. Will throw exception().");
-			FreeLibrary(hDLL);
-			throw std::exception("Function gdpAltitudeMap_Sizes not loaded");
-		}
-		LL[0] = 0;
-		LL[1] = 0;
-		LL[2] = 180;
-		LL[3] = 180;
-
-		if (LOG_ENABLED && CRCAltitudeDataFile_v1_LOG)
-		{
-			CRCLogger::Info(requestID, context, (boost::format("gdpAltitudeMap_Sizes... fileName=%1%, LL={%2%, %3%, %4%, %5%}, size={%6%, %7%, %8%, %9%, %10%, %11%, %12%, %13%}")
-				% fileName
-				% LL[0] % LL[1] % LL[2] % LL[3]
-				% size[0] % size[1] % size[2] % size[3] % size[4] % size[5] % size[6] % size[7]).str());
-		}
-
-		result = gdpAltitudeMap_Sizes(fileName.c_str(), LL, size);
-
-		auto result_string = (boost::format("gdpAltitudeMap_Sizes returned: result=%1%, LL={%2%, %3%, %4%, %5%, %6%, %7%, %8%, %9%, %10%, %11%}, size={%12%, %13%, %14%, %15%, %16%, %17%, %18%, %19%}")
-			% result
-			% LL[0] % LL[1] % LL[2] % LL[3] % LL[4] % LL[5] % LL[6] % LL[7] % LL[8] % LL[9]
-			% size[0] % size[1] % size[2] % size[3] % size[4] % size[5] % size[6] % size[7]).str();
-
-		if (result != 0)
-		{
-			std::string error_string = (boost::format("%1%. Will throw exception().") % result_string).str();
-			CRCLogger::Error(requestID, context, error_string);
-			FreeLibrary(hDLL);
-			throw std::exception(error_string.c_str());
-		}
-
-		if (LOG_ENABLED && CRCAltitudeDataFile_v1_LOG)
-		{
-			CRCLogger::Info(requestID, context, result_string);
-		}
-
-		lon0 = LL[8];
-		lat0 = LL[9];
-		lon1 = LL[8] + LL[6] * (size[6] - 1);
-		lat1 = LL[9] + LL[7] * (size[7] - 1);
-		width = size[6];
-		height = size[7];
-		size_set_max();		
-		FreeLibrary(hDLL);
-		if (LOG_ENABLED && CRCAltitudeDataFile_v1_LOG)
-		{
-			CRCLogger::Info(requestID, context, (boost::format("Object created from file %1%, (lon0=%2%, lat0=%3%), (lon1=%4%, lat1=%5%), (width=%6%, height=%7%)")
-				% fileName % lon0 % lat0 % lon1 % lat1 % width % height).str());
-		}
+		CRCLogger::Info(requestID, context, (boost::format("gdpAltitudeMap_Sizes... fileName=%1%, LL={%2%, %3%, %4%, %5%}, size={%6%, %7%, %8%, %9%, %10%, %11%, %12%, %13%}")
+			% fileName
+			% LL[0] % LL[1] % LL[2] % LL[3]
+			% size[0] % size[1] % size[2] % size[3] % size[4] % size[5] % size[6] % size[7]).str());
 	}
-	else
+
+	result = CRCGeoDataProvider::GetAltitudeMapSizes(fileName.c_str(), LL, size);
+
+	auto result_string = (boost::format("gdpAltitudeMap_Sizes returned: result=%1%, LL={%2%, %3%, %4%, %5%, %6%, %7%, %8%, %9%, %10%, %11%}, size={%12%, %13%, %14%, %15%, %16%, %17%, %18%, %19%}")
+		% result
+		% LL[0] % LL[1] % LL[2] % LL[3] % LL[4] % LL[5] % LL[6] % LL[7] % LL[8] % LL[9]
+		% size[0] % size[1] % size[2] % size[3] % size[4] % size[5] % size[6] % size[7]).str();
+
+	if (result != 0)
 	{
-		CRCLogger::Error(requestID, context, "GeoDataProvider.dll not loaded. Will throw exception().");
-		throw std::exception("GeoDataProvider.dll not loaded");
+		std::string error_string = (boost::format("%1%. Will throw exception().") % result_string).str();
+		CRCLogger::Error(requestID, context, error_string);
+		throw std::exception(error_string.c_str());
+	}
+
+	if (LOG_ENABLED && CRCAltitudeDataFile_v1_LOG)
+	{
+		CRCLogger::Info(requestID, context, result_string);
+	}
+
+	lon0 = LL[8];
+	lat0 = LL[9];
+	lon1 = LL[8] + LL[6] * (size[6] - 1);
+	lat1 = LL[9] + LL[7] * (size[7] - 1);
+	width = size[6];
+	height = size[7];
+	size_set_max();		
+	if (LOG_ENABLED && CRCAltitudeDataFile_v1_LOG)
+	{
+		CRCLogger::Info(requestID, context, (boost::format("Object created from file %1%, (lon0=%2%, lat0=%3%), (lon1=%4%, lat1=%5%), (width=%6%, height=%7%)")
+			% fileName % lon0 % lat0 % lon1 % lat1 % width % height).str());
 	}
 }
 
@@ -295,84 +274,61 @@ bool CRCAltitudeDataFile::Open()
 		CRCLogger::Info(requestID, context, "Start...");
 	}
 	if (!fileName.empty() && !data)
-	{
-		HINSTANCE hDLL;               // Handle to DLL
-		GDPALTITUDEMAP gdpAltitudeMap;    // Function pointer
-		//GDPALTITUDEMAP_SIZES gdpAltitudeMap_Sizes;    // Function pointer
+	{		
 		double LL[10];
 		int result;
 
-		hDLL = LoadLibrary("GeoDataProvider.dll");
-		if (hDLL != nullptr)
+		LL[0] = lon0;
+		LL[1] = lat0;
+		LL[2] = lon1;
+		LL[3] = lat1;
+
+		try
 		{
-			gdpAltitudeMap = (GDPALTITUDEMAP)GetProcAddress(hDLL, "gdpAltitudeMap");
-			if (!gdpAltitudeMap)
+			data = new short[width * height];
+			if (!data)
 			{
-				FreeLibrary(hDLL);
-				CRCLogger::Error(requestID, context, "Function gdpAltitudeMap not loaded. RETURN FALSE.");
-				return false;
+				throw std::bad_alloc();
 			}
-			LL[0] = lon0;
-			LL[1] = lat0;
-			LL[2] = lon1;
-			LL[3] = lat1;
-
-			try
-			{
-				data = new short[width * height];
-				if (!data)
-				{
-					throw std::bad_alloc();
-				}
-			}
-			catch (std::bad_alloc e)
-			{
-				CRCLogger::Error(requestID, context, "memory for data not allocated. RETURN FALSE.");
-				return false;
-			}
-			short *sdata = (short*)data;
-			if (LOG_ENABLED && CRCAltitudeDataFile_Open_LOG)
-			{
-				CRCLogger::Info(requestID, context, (boost::format("gdpAltitudeMap... fileName=%1%, LL={%2%, %3%, %4%, %5%}, size={%6%, %7%, %8%, %9%, %10%, %11%, %12%, %13%}")
-					% fileName
-					% LL[0] % LL[1] % LL[2] % LL[3]
-					% size[0] % size[1] % size[2] % size[3] % size[4] % size[5] % size[6] % size[7]).str());
-			}
-			result = gdpAltitudeMap(fileName.c_str(), LL, size, sdata);
-
-			auto result_string = (boost::format("gdpAltitudeMap returned: result=%1%, data=%2% {%3%, %4%, %5%, %6%, %7%, %8%, %9%, ..., %10%, %11%, %12%}") 
-				% result
-				% data % sdata[0] % sdata[1] % sdata[2] % sdata[3] % sdata[4] % sdata[5] % sdata[6] % sdata[width * height - 3] % sdata[width * height - 2] % sdata[width * height - 1]).str();
-
-			if (result != 0) {
-				CRCLogger::Error(requestID, context, result_string + ". RETURN FALSE.");
-				delete[] data;
-				data = nullptr;
-				FreeLibrary(hDLL);
-				return false;
-			}							
-			FreeLibrary(hDLL);
-			if (LOG_ENABLED && CRCAltitudeDataFile_Open_LOG)
-			{
-				CRCLogger::Info(requestID, context, result_string + ". RETURN TRUE");
-			}
-			return true;
 		}
-		else
+		catch (std::bad_alloc e)
 		{
-			CRCLogger::Error(requestID, context, "GeoDataProvider.dll not loaded. RETURN FALSE.");
+			CRCLogger::Error(requestID, context, "memory for data not allocated. RETURN FALSE.");
+			return false;
 		}
+		short *sdata = (short*)data;
+		if (LOG_ENABLED && CRCAltitudeDataFile_Open_LOG)
+		{
+			CRCLogger::Info(requestID, context, (boost::format("CRCGeoDataProvider::GetAltitudeMap... fileName=%1%, LL={%2%, %3%, %4%, %5%}, size={%6%, %7%, %8%, %9%, %10%, %11%, %12%, %13%}")
+				% fileName
+				% LL[0] % LL[1] % LL[2] % LL[3]
+				% size[0] % size[1] % size[2] % size[3] % size[4] % size[5] % size[6] % size[7]).str());
+		}
+		result = CRCGeoDataProvider::GetAltitudeMap(fileName.c_str(), LL, size, sdata);
+
+		auto result_string = (boost::format("CRCGeoDataProvider::GetAltitudeMap returned: result=%1%, data=%2% {%3%, %4%, %5%, %6%, %7%, %8%, %9%, ..., %10%, %11%, %12%}") 
+			% result
+			% data % sdata[0] % sdata[1] % sdata[2] % sdata[3] % sdata[4] % sdata[5] % sdata[6] % sdata[width * height - 3] % sdata[width * height - 2] % sdata[width * height - 1]).str();
+
+		if (result != 0) {
+			CRCLogger::Error(requestID, context, result_string + ". RETURN FALSE.");
+			delete[] data;
+			data = nullptr;
+			return false;
+		}							
+		if (LOG_ENABLED && CRCAltitudeDataFile_Open_LOG)
+		{
+			CRCLogger::Info(requestID, context, result_string + ". RETURN TRUE");
+		}
+		return true;
 	}
-	else 
+	if (fileName.empty())
 	{
-		if (fileName.empty())
-		{
-			CRCLogger::Error(requestID, context, "fileName is empty. RETURN FALSE.");
-		}
-		if (data)
-		{
-			CRCLogger::Error(requestID, context, "data is not nullptr (file already opened). RETURN FALSE.");
-		}
+		CRCLogger::Error(requestID, context, "fileName is empty. RETURN FALSE.");
+	}
+	if (data)
+	{
+		CRCLogger::Error(requestID, context, "data is not nullptr (file already opened). RETURN FALSE.");
 	}
 	return false;
 }

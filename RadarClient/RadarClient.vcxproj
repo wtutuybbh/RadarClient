@@ -212,6 +212,7 @@ xcopy "$(SolutionDir)FreeImage\*.dll" "$(OutDir)" /s /d</Command>
     <ClCompile Include="CRCDataFile.cpp" />
     <ClCompile Include="CRCAltitudeDataFile.cpp" />
     <ClCompile Include="CRCDataFileSet.cpp" />
+    <ClCompile Include="CRCGeoDataProvider.cpp" />
     <ClCompile Include="CRCGridCell.cpp" />
     <ClCompile Include="CRCLogger.cpp" />
     <ClCompile Include="CRCTextureDataFile.cpp" />
@@ -246,6 +247,7 @@ xcopy "$(SolutionDir)FreeImage\*.dll" "$(OutDir)" /s /d</Command>
     <ClInclude Include="CRCDataFile.h" />
     <ClInclude Include="CRCAltitudeDataFile.h" />
     <ClInclude Include="CRCDataFileSet.h" />
+    <ClInclude Include="CRCGeoDataProvider.h" />
     <ClInclude Include="CRCGridCell.h" />
     <ClInclude Include="CRCLogger.h" />
     <ClInclude Include="CRCTextureDataFile.h" />

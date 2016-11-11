@@ -5,7 +5,6 @@
 #include "CScene.h"
 #include "CUserInterface.h"
 #include "C3DObjectModel.h"
-#include "Util.h"
 #include "CSettings.h"
 #include "CRCLogger.h"
 

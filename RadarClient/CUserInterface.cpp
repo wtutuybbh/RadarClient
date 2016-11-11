@@ -13,7 +13,7 @@
 #include "CMesh.h"
 #include "CSettings.h"
 
-#include <boost/filesystem/path.hpp>
+
 #include "CRCLogger.h"
 
 #include "CRCGridCell.h"

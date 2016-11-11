@@ -22,6 +22,7 @@
 #include <FreeImage.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/sources/global_logger_storage.hpp>
@@ -89,3 +90,6 @@ typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_le
 #define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #define new DEBUG_NEW
 #endif
+
+//for CRCGeoDataProvider and CRCTextureDataFile:
+#define DATFILE_MAXLINELENGTH 256

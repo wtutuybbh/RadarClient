@@ -1,7 +1,7 @@
 #pragma once
+#include "stdafx.h"
 #include "CRCDataFile.h"
 
-#define DATFILE_MAXLINELENGTH 256
 
 class CRCTextureDataFile :
 	public CRCDataFile

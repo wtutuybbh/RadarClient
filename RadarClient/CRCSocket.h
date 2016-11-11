@@ -271,8 +271,9 @@ struct RPOINTS
 	int N;
 	short d1;
 	short d2;
-	short D;
-	short resv1[3];
+	short D;	
+	short resv1;
+	unsigned int ObserveCount;
 };
 
 struct RIMAGE
