@@ -65,6 +65,11 @@ DataFileType CRCDataFile::Type() const
 	return type;
 }
 
+std::string CRCDataFile::TypeName() const
+{
+	return GetDataFileTypeName(type);
+}
+
 void CRCDataFile::ApplyIntersection(CRCDataFile& src)
 {
 	//TODO:
@@ -129,4 +134,21 @@ void CRCDataFile::SetName(std::string fileName)
 std::string CRCDataFile::GetName() const
 {
 	return fileName;
+}
+
+std::string CRCDataFile::GetDataFileTypeName(DataFileType t)
+{
+	if (t == Altitude)
+	{
+		return "Altitude";
+	}
+	if (t == Texture)
+	{
+		return "Texture";
+	}
+	if (t == Undefined)
+	{
+		return "Undefined";
+	}
+	return std::string();
 }

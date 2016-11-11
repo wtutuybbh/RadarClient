@@ -19,5 +19,6 @@ public:
 	int CountFilesOfGivenType(DataFileType type);
 	CRCDataFile *GetFile(int index);
 	~CRCDataFileSet();
+	std::vector<CRCDataFile *> &Files();
 };
 

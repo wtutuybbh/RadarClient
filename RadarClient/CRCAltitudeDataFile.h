@@ -1,5 +1,6 @@
 #pragma once
 #include "CRCDataFile.h"
+
 class CRCAltitudeDataFile :
 	public CRCDataFile
 {
@@ -23,7 +24,7 @@ public:
 
 	short ValueAt(int x, int y);
 	short ValueAt(double lon, double lat);
-	void SetValue(int x, int y, short val/*, float resX, float resY*/);
+	void SetValue(int x, int y, short val/*, float resX, float resY*/) const;
 
 	void ApplyIntersection(CRCDataFile &src) override;
 

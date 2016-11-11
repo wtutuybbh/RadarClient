@@ -81,6 +81,7 @@ float MinimumDistance(glm::vec3 v, glm::vec3 w, glm::vec3 p);
 #define CRCPOINT_CONSTRUCTOR_USES_RADIANS
 
 //https://helloacm.com/cc-function-to-compute-the-bilinear-interpolation/
+
 inline float BilinearInterpolation(float q11, float q12, float q21, float q22, float x1, float x2, float y1, float y2, float x, float y)
 {
 	float x2x1, y2y1, x2x, y2y, yy1, xx1;

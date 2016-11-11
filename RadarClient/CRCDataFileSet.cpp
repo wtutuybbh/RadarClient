@@ -157,3 +157,8 @@ CRCDataFileSet::~CRCDataFileSet()
 	_files.empty();
 	CRCLogger::Info(requestID, context, "End. Ok.");
 }
+
+std::vector<CRCDataFile*>& CRCDataFileSet::Files()
+{
+	return _files;
+}

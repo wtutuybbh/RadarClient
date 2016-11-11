@@ -210,12 +210,12 @@ C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 	C3DObjectModel *o = Scene->GetSectorPoint(this, glm::vec2(x, y), index);
 	if (o)
 	{
-		LOG_INFO_("Scene->GetSectorPoint: (x=%.4f, y=%.4f) => (o: %s)", x, y, typeid(o).name());
+		LOG_INFO__("Scene->GetSectorPoint: (x=%.4f, y=%.4f) => (o: %s)", x, y, typeid(o).name());
 	}
 	C3DObjectModel *t = Scene->GetFirstTrackBetweenPoints(this, glm::vec2(x, y), index);
 	if (t)
 	{
-		LOG_INFO_("Scene->GetFirstTrackBetweenPoints: (x=%.4f, y=%.4f) => (t: %s)", x, y, typeid(t).name());
+		LOG_INFO__("Scene->GetFirstTrackBetweenPoints: (x=%.4f, y=%.4f) => (t: %s)", x, y, typeid(t).name());
 	}
 	if (o && !t) {
 		o->SetColor(glm::vec4(0, 1, 0, 1));

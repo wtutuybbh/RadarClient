@@ -13,13 +13,16 @@
 #define LOG(severity, requestID, context, text, ...) CRCLogger::##severity(requestID, context, format(text, __VA_ARGS__))
 
 #define LOG_INFO(requestID, context, text, ...) LOG(Info_, requestID, context, text, __VA_ARGS__)
-#define LOG_INFO_(text, ...) LOG_INFO(requestID, context, text, __VA_ARGS__)
+#define LOG_INFO_(context, text, ...) LOG_INFO(requestID, context, text, __VA_ARGS__)
+#define LOG_INFO__(text, ...) LOG_INFO(requestID, context, text, __VA_ARGS__)
 
 #define LOG_WARN(requestID, context, text, ...) LOG(Warn_, requestID, context, text, __VA_ARGS__)
-#define LOG_WARN_(text, ...) LOG_WARN(requestID, context, text, __VA_ARGS__)
+#define LOG_WARN_(context, text, ...) LOG_WARN(requestID, context, text, __VA_ARGS__)
+#define LOG_WARN__(text, ...) LOG_WARN(requestID, context, text, __VA_ARGS__)
 
 #define LOG_ERROR(requestID, context, text, ...) LOG(Error_, requestID, context, text, __VA_ARGS__)
-#define LOG_ERROR_(text, ...) LOG_ERROR(requestID, context, text, __VA_ARGS__)
+#define LOG_ERROR_(context, text, ...) LOG_ERROR(requestID, context, text, __VA_ARGS__)
+#define LOG_ERROR__(text, ...) LOG_ERROR(requestID, context, text, __VA_ARGS__)
 
 #define INFO  BOOST_LOG_SEV(my_logger::get(), boost::log::trivial::info)
 #define WARN  BOOST_LOG_SEV(my_logger::get(), boost::log::trivial::warning)

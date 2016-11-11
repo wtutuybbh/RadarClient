@@ -488,7 +488,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	LOG(Info, requestID, context, "TEST hInstance=%d", hInstance);
 
-	LOG_INFO_("LOG_INFO_ test %d %f %f", 12, 3.7, 5.2);
+	LOG_INFO__("LOG_INFO_ test %d %f %f", 12, 3.7, 5.2);
 
 	CRCLogger::Info(requestID, context, "RadarClient started.");
 	CSettings::Init();

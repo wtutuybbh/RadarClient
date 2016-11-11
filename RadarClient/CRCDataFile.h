@@ -25,6 +25,7 @@ public:
 	static DataFileType GetTypeByExt(std::string ext);
 	virtual ~CRCDataFile();
 	DataFileType Type() const;
+	std::string  TypeName() const;
 	virtual void ApplyIntersection(CRCDataFile &src);
 	bool GetIntersection(CRCDataFile &src, int &x0, int &y0, int &x1, int &y1) const;
 	void FitSize(float resX, float resY); // set height, width and new boundaries
@@ -35,5 +36,6 @@ public:
 	int Height() const;
 	void SetName(std::string fileName);
 	std::string GetName() const;
+	static std::string GetDataFileTypeName(DataFileType t);
 };
 

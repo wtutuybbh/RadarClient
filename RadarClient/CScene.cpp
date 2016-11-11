@@ -770,14 +770,14 @@ void CScene::Init(RDR_INITCL* init)
 	std::string context = "CScene::Init";
 	if (!init)
 	{
-		LOG_ERROR_("parameter init is nullptr");
+		LOG_ERROR__("parameter init is nullptr");
 		return;
 	}
-	LOG_INFO_("Start... init=%#010x{begAzm=%.4f, dAzm=%.4f, Nazm=%.4f, begElv=%.4f, dElv=%.4f, Nelv=%.4f, ViewStep=%.4f}", init, init->begAzm, init->dAzm, init->Nazm, init->begElv, init->dElv, init->Nelv, init->ViewStep);
+	LOG_INFO__("Start... init=%#010x{begAzm=%.4f, dAzm=%.4f, Nazm=%.4f, begElv=%.4f, dElv=%.4f, Nelv=%.4f, ViewStep=%.4f}", init, init->begAzm, init->dAzm, init->Nazm, init->begElv, init->dElv, init->Nelv, init->ViewStep);
 	
 	if (init->ViewStep == 0)
 	{
-		LOG_ERROR_("init->ViewStep == 0");
+		LOG_ERROR__("init->ViewStep == 0");
 		return;
 	}
 
@@ -795,7 +795,7 @@ void CScene::Init(RDR_INITCL* init)
 	}
 	else
 	{
-		LOG_WARN_("UI not initialized");
+		LOG_WARN__("UI not initialized");
 	}
 	int markDistance = CSettings::GetInt(IntMarkupMarkDistance);
 	int numCircles = CSettings::GetInt(IntMarkupNumCircles);

@@ -18,6 +18,7 @@
 
 #include "CRCGridCell.h"
 #include "CRCDataFileSet.h"
+#include "CRCAltitudeDataFile.h"
 
 const std::string CUserInterface::requestID = "CUserInterface";
 
@@ -90,8 +91,59 @@ LRESULT CUserInterface::Button_Load(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	CRCDataFileSet set();
+	const clock_t begin_time = clock();
 
+	CRCDataFileSet set;
+
+	set.AddFiles("AltitudeData", Altitude, "");
+
+	LOG_INFO("Test", "Test", "set contains %d files", set.Files().size());
+
+	glm::vec2 radar_pos(37.706709, 56.005268);
+
+	float max_range = 8000;
+
+	double lonm = cnvrt::londg2m(1, radar_pos.y);
+	double latm = cnvrt::latdg2m(1, radar_pos.x);
+	if (lonm == 0 || latm == 0)
+	{
+		LOG_ERROR("Test", "Test", "lonm=%f latm=%f", lonm, latm);
+	}
+	double max_range_lon = max_range / lonm;
+	double max_range_lat = max_range / latm;
+	LOG_INFO("Test", "Test", "lonm=%f latm=%f max_range_lon=%f max_range_lat=%f", 
+		lonm,
+		latm,
+		max_range_lon,
+		max_range_lat);
+
+	double lon0 = radar_pos.x - max_range_lon;
+	double lat0 = radar_pos.y - max_range_lat;
+	double lon1 = radar_pos.x + max_range_lon;
+	double lat1 = radar_pos.y + max_range_lat;
+
+	int width = 200;
+	int height = 200;
+
+
+	CRCAltitudeDataFile myfile(lon0, lat0, lon1, lat1, width, height);
+
+	for(auto i = 0; i < set.Files().size(); i++)
+	{
+		myfile.ApplyIntersection(*set.GetFile(i));
+	}
+	LOG_INFO("Test", "Test", "Finished, time=%f", float(clock() - begin_time) / CLOCKS_PER_SEC);
+
+	std::ostringstream ss;
+	for (auto x = 0; x < width; x++)
+	{
+		ss.str(std::string());
+		for (auto y = 0; y < height; y++)
+		{
+			ss << myfile.ValueAt(x, y) << ";";
+		}
+		LOG_INFO("TestResult", "Test", ss.str().c_str());
+	}
 	return LRESULT();
 }
 
@@ -726,7 +778,7 @@ void CUserInterface::FillInfoGrid(CScene* scene)
 	std::string context = "CUserInterface::FillInfoGrid";
 	if (!scene)
 	{
-		LOG_WARN_("Called with parameter scene=nullptr");
+		LOG_WARN__("Called with parameter scene=nullptr");
 		return;
 	}
 	if (!InfoGridHWND)
