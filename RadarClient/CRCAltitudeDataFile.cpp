@@ -65,7 +65,7 @@ CRCAltitudeDataFile::CRCAltitudeDataFile(const std::string& dt2FileName):
 
 	fileName = dt2FileName;
 	double LL[10] = { 0 };
-	//int size[8] = { 0 };
+	
 	int result;
 
 	LL[2] = 180;

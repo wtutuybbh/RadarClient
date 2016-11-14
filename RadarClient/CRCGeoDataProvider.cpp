@@ -269,6 +269,11 @@ int CRCGeoDataProvider::GetAltitudeMapSizes(const char* fileName, double* LL, in
 		LOG_ERROR__("unknown file type (%s)", ext);
 		return -8;
 	}
+	if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMapSizes_LOG)
+	{
+		LOG_INFO__("LL={%.6f, %.6f, %.6f, %.6f}", LL[0], LL[1], LL[2], LL[3]);
+	}
+
 	iLonStart = ceil((LL[0] - lonSW) / dlon);
 	iLatStart = ceil((LL[1] - latSW) / dlat);
 	iLonEnd = floor((LL[2] - lonSW) / dlon);

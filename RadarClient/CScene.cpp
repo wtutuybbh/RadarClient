@@ -556,8 +556,8 @@ bool CScene::PrepareVBOs()
 
 bool CScene::PrepareRayVBO()
 {
-	if (!Initialized)
-		return false;
+	/*if (!Initialized)
+		return false;*/
 
 	Ray = new glm::vec3[vertexCount_Ray]; //ray vertex array
 	Ray[0].x = 0;
