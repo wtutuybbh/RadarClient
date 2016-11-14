@@ -100,7 +100,7 @@ int CRCGeoDataProvider::GetAltitudeMapSizes(const char* fileName, double* LL, in
 	{
 		if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMapSizes_LOG)
 		{
-			LOG_INFO__("input detected as dt2 file");
+			LOG_INFO__("input detected as DT2 file");
 		}
 		try 
 		{
@@ -166,7 +166,7 @@ int CRCGeoDataProvider::GetAltitudeMapSizes(const char* fileName, double* LL, in
 	{
 		if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMapSizes_LOG)
 		{
-			LOG_INFO__("input detected as bil file, will read corresponding hdr file");
+			LOG_INFO__("input detected as BIL file, will read corresponding hdr file");
 		}
 		//there should be header file, *.hdr:
 		std::string hdrFileName = strFileName.substr(0, strFileName.length() - 3).append("hdr");

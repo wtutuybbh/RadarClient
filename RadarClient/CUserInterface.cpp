@@ -95,9 +95,26 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 	CRCDataFileSet set;
 
-	set.AddFiles("AltitudeData", Altitude, "");
+	//set.AddFiles("AltitudeData", Altitude, "");
+	set.AddAltitudeFile("AltitudeData/n55_e037_1arc_v3.bil");
+	set.AddAltitudeFile("AltitudeData/n56_e037_1arc_v3.bil");
 
 	LOG_INFO("Test", "Test", "set contains %d files", set.Files().size());
+
+	auto file = (CRCAltitudeDataFile *)set.GetFile(0);
+
+	file->Open();
+
+	std::ostringstream ss;
+	for (auto y = 0; y < file->Height(); y++)
+	{
+		ss.str(std::string());
+		for (auto x = 0; x < file->Width(); x++)
+		{
+			ss << file->ValueAt(x, y) << ";";
+		}
+		LOG_INFO("FileContents", "Test", ss.str().c_str());
+	}
 
 	glm::vec2 radar_pos(37.706709, 56.005268);
 
@@ -135,7 +152,7 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	LOG_INFO("Test", "Test", "Finished, time=%f", float(clock() - begin_time) / CLOCKS_PER_SEC);
 
 	//print resulting values to log file (only first row):
-	std::ostringstream ss;
+	
 	for (auto x = 0; x < 1; x++)
 	{
 		ss.str(std::string());
