@@ -4,7 +4,7 @@
 class CRCAltitudeDataFile :
 	public CRCDataFile
 {
-	int size[8]; //for compatibility with GeoDataProvider.dll!gdpAltitudeMap() function:
+	int size[9]; //for compatibility with GeoDataProvider.dll!gdpAltitudeMap() function:
 	//size[0] - width (lon component) of block
 	//size[1] - height (lat component) of block
 	//size[2] - x0 (lon component) of block
@@ -13,6 +13,7 @@ class CRCAltitudeDataFile :
 	//size[5] - y1 (lat component) of block
 	//size[6] - width (lon component) of whole file
 	//size[7] - height (lat component) of whole file
+	//size[8] - data read methos (see GDP::DataReadMethod, GDP::CRCGeoDataProvider::GetAltitudeMap)
 	void size_set_max();
 	void size_set(int x0, int y0, int x1, int y1);
 public:

@@ -7,7 +7,11 @@
 #define CRCGeoDataProvider_GetAltitudeMapSizes_LOG true
 #define CRCGeoDataProvider_GetAltitudeMap_LOG true
 
+using namespace GDP;
+
 const std::string CRCGeoDataProvider::requestID = "CRCGeoDataProvider";
+
+
 
 void CRCGeoDataProvider::ltrim(std::string& s)
 {
@@ -75,7 +79,8 @@ int CRCGeoDataProvider::GetAltitudeMapSizes(const char* fileName, double* LL, in
 
 	if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMapSizes_LOG)
 	{
-		LOG_INFO__("Start... fileName=%s, LL[0]=%.6f, LL[1]=%.6f, LL[2]=%.6f, LL[3]=%.6f", fileName, LL[0], LL[1], LL[2], LL[3]);
+		LOG_INFO__("Start... fileName=%s, LL[0]=%.6f, LL[1]=%.6f, LL[2]=%.6f, LL[3]=%.6f, LL[4]=%.6f, LL[5]=%.6f, LL[6]=%.6f, LL[7]=%.6f, LL[8]=%.6f, LL[9]=%.6f", 
+			fileName, LL[0], LL[1], LL[2], LL[3], LL[4], LL[5], LL[6], LL[7], LL[8], LL[9]);
 	}
 	char chr1[1], chr2[2], chr3[3], chr4[5];
 
@@ -365,8 +370,8 @@ int CRCGeoDataProvider::GetAltitudeMap(const char* fileName, double* LL, int* si
 	{
 		LOG_INFO__("Start (part 1)... fileName=%s. size={width=%d, height=%d, x0=%d, y0=%d, x1=%d, y1=%d, filewidth=%d, fileheight=%d}",
 			fileName, size[0], size[1], size[2], size[3], size[4], size[5], size[6], size[7]);
-		LOG_INFO__("Start (part 2)... fileName=%s. LL={.,.,.,., lon0=%.6f, lat0=%.6f, dlon=%.6f, dlat=%.6f, lonSW=%.6f, latSW=%.6f}",
-			fileName, LL[4], LL[5], LL[6], LL[7], LL[8], LL[9]);
+		LOG_INFO__("Start (part 2)... fileName=%s, LL[0]=%.6f, LL[1]=%.6f, LL[2]=%.6f, LL[3]=%.6f, LL[4]=%.6f, LL[5]=%.6f, LL[6]=%.6f, LL[7]=%.6f, LL[8]=%.6f, LL[9]=%.6f",
+			fileName, LL[0], LL[1], LL[2], LL[3], LL[4], LL[5], LL[6], LL[7], LL[8], LL[9]);
 	}
 	volatile char chr2[2];
 
@@ -374,16 +379,39 @@ int CRCGeoDataProvider::GetAltitudeMap(const char* fileName, double* LL, int* si
 	{
 		if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMap_LOG)
 		{
-			LOG_INFO__("input detected as dt2 file");
+			LOG_INFO__("input detected as DT2 file, method=%d", size[8]);
 		}
-		int blocksize = 12 + size[7] * 2;
-		for (int m = 0; m < size[0]; m++) {
-			infile.seekg(UHL_SIZE + DSI_SIZE + ACC_SIZE + (size[2] + m) * blocksize + 8 + size[3] * 2);
-			for (int p = 0; p < size[1]; p++) {
-				infile.read((char *)chr2, 2);
-				data[p + m * size[1]] = ((short)(unsigned char)chr2[0] << 8) + (short)(unsigned char)chr2[1];
+		int blocksize;
+		switch (size[8])
+		{
+		case (int)GDP::UseRegionSize:
+			blocksize = 12 + size[7] * 2;
+			for (int m = 0; m < size[0]; m++) {
+				infile.seekg(UHL_SIZE + DSI_SIZE + ACC_SIZE + (size[2] + m) * blocksize + 8 + size[3] * 2);
+				for (int p = 0; p < size[1]; p++) {
+					infile.read((char *)chr2, 2);
+					data[p + m * size[1]] = ((short)(unsigned char)chr2[0] << 8) + (short)(unsigned char)chr2[1];
+				}
 			}
+			break;
+		case (int)GDP::UseFullSize:
+			blocksize = 12 + size[7] * 2;
+			//p ~ lat
+			//m ~ lon
+			for (int m = 0; m < size[0]; m++) {
+				infile.seekg(UHL_SIZE + DSI_SIZE + ACC_SIZE + (size[2] + m) * blocksize + 8 + size[3] * 2);
+				for (int p = 0; p < size[1]; p++) {
+					infile.read((char *)chr2, 2);
+					data[size[3] + p + (m + size[2]) * size[7]] = (unsigned char)chr2[1] << 8 | (unsigned char)chr2[0];
+				}
+			}
+			break;
+		default:
+			LOG_ERROR__("unknown method");
+			return -9;
+			break;
 		}
+		
 		infile.close();
 		if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMap_LOG)
 		{
@@ -402,17 +430,47 @@ int CRCGeoDataProvider::GetAltitudeMap(const char* fileName, double* LL, int* si
 	if (ext.compare("bil") == 0) {
 		if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMap_LOG)
 		{
-			LOG_INFO__("input detected as bil file");
+			LOG_INFO__("input detected as BIL file, method=%d", size[8]);
 		}
 		//Band interleaved by line, nbands=1, nbits=16 supported only
-		int blocksize = size[6] * 2;
-		for (int p = 0; p < size[1]; p++) {
-			infile.seekg((size[3] + p) * blocksize + size[2] * 2);
-			for (int m = 0; m < size[0]; m++) {
-				infile.read((char *)chr2, 2);
-				data[p + m * size[1]] = (unsigned char)chr2[1] << 8 | (unsigned char)chr2[0];
+		int blocksize;
+		switch(size[8])
+		{
+		case (int)GDP::UseRegionSize:
+			blocksize = size[6] * 2;
+			for (int p = 0; p < size[1]; p++) {
+				infile.seekg((size[3] + p) * blocksize + size[2] * 2);
+				for (int m = 0; m < size[0]; m++) {
+					infile.read((char *)chr2, 2);
+					data[p + m * size[1]] = (unsigned char)chr2[1] << 8 | (unsigned char)chr2[0];
+				}
 			}
+			break;
+		case (int)GDP::UseFullSize:
+			//p ~ lat
+			//m ~ lon
+			
+			for (int p = 0; p < size[1]; p++) {
+				//size={width=463, height=240, x0=1041, y0=3361, x1=1503, y1=3600, filewidth=1801, fileheight=3601}
+				// =1801*3360+1040 :
+				int rowstart = (size[3] + p)*size[6] + size[2];
+				infile.seekg(rowstart*2);
+				for (int m = 0; m < size[0]; m++) {
+					infile.read((char *)chr2, 2);
+					data[rowstart + m] = (unsigned char)chr2[1] << 8 | (unsigned char)chr2[0];
+				}
+				if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMap_LOG)
+				{
+					LOG_INFO__("loaded values data[%d] = %d ... data[%d] = %d", rowstart, data[rowstart], rowstart + size[0] - 1, data[rowstart + size[0] - 1]);
+				}
+			}
+			break;
+		default:
+			LOG_ERROR__("unknown method");
+			return -9;
+			break;
 		}
+
 		infile.close();
 		if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMap_LOG)
 		{
