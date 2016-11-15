@@ -126,6 +126,7 @@ class CMesh : public C3DObjectModel
 	CScene *scn{ nullptr };
 	
 	bool LoadHeightmap(int vpId);
+	bool LoadHeightmap_v2(int vpId);
 	AltitudeMap* GetAltitudeMap(const char *fileName, double lon1, double lat1, double lon2, double lat2);
 	AltitudeMapHeader* GetAltitudeMapHeader(const char *fileName, double lon1, double lat1, double lon2, double lat2);
 	ImageMapHeader* GetImageMapHeader(const char *imgFile, const char *datFile);

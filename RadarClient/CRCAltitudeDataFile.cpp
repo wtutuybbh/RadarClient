@@ -13,7 +13,7 @@
 #define CRCAltitudeDataFile_ApplyIntersection_LOG true
 #define CRCAltitudeDataFile_Open_LOG true
 #define CRCAltitudeDataFile_Close_LOG true
-#define CRCAltitudeDataFile_ValueAt_v1_LOG true
+#define CRCAltitudeDataFile_ValueAt_v1_LOG false
 #define CRCAltitudeDataFile_ValueAt_v2_LOG false
 #define CRCAltitudeDataFile_size_set_max_LOG true
 #define CRCAltitudeDataFile_size_set_LOG true
@@ -173,10 +173,10 @@ short CRCAltitudeDataFile::ValueAt(double lon, double lat)
 	{
 		if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)
 		{
-			LOG_INFO_("CRCAltitudeDataFile::ValueAt(lon, lat)", "Start... lon=%.6f, lat=%.6f", lon, lat);
+			LOG_INFO("ValueAt", "CRCAltitudeDataFile::ValueAt(lon, lat)", "Start... lon=%.6f, lat=%.6f", lon, lat);
 		}
-		float xf = width * (lon - lon0) / (lon1 - lon0);
-		float yf = height * (lat - lat0) / (lat1 - lat0);
+		float xf = (width - 1) * (lon - lon0) / (lon1 - lon0);
+		float yf = (height - 1) * (lat - lat0) / (lat1 - lat0);
 
 		int x0 = floor(xf), x1 = ceil(xf);
 		int y0 = floor(yf), y1 = ceil(yf);
@@ -188,21 +188,21 @@ short CRCAltitudeDataFile::ValueAt(double lon, double lat)
 
 		if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)
 		{
-			LOG_INFO_("CRCAltitudeDataFile::ValueAt(lon, lat)", "xf=%.6f, yf=%.6f, x0=%d, y0=%d, x1=%d, y1=%d", xf, yf, x0, y0, x1, y1);
+			LOG_INFO("ValueAt", "CRCAltitudeDataFile::ValueAt(lon, lat)", "xf=%.6f, yf=%.6f, x0=%d, y0=%d, x1=%d, y1=%d", xf, yf, x0, y0, x1, y1);
 		}
 
 		short *adata = (short *)data;		
 		float ret = BilinearInterpolation(adata[y0*width + x0], adata[y1*width + x0], adata[y0*width + x1], adata[y1*width + x1], x0, x1, y0, y1, xf, yf);
 		if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)
 		{
-			LOG_INFO_("CRCAltitudeDataFile::ValueAt(double lon, double lat)", "BilinearInterpolation(q11=%d, q12=%d, q21=%d, q22=%d, x1=%d, x2=%d, y1=%d, y2=%d, x=%.6f, y=%.6f) = %.6f",
+			LOG_INFO("ValueAt", "CRCAltitudeDataFile::ValueAt(double lon, double lat)", "BilinearInterpolation(q11=%d, q12=%d, q21=%d, q22=%d, x1=%d, x2=%d, y1=%d, y2=%d, x=%.6f, y=%.6f) = %.6f",
 				adata[y0*width + x0], adata[y1*width + x0], adata[y0*width + x1], adata[y1*width + x1], x0, x1, y0, y1, xf, yf, ret);
 		}
 		return ret;
 	}
 	if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)
 	{
-		LOG_WARN_("CRCAltitudeDataFile::ValueAt(double lon, double lat)", "Out of bounds! lon=%.6f, lat=%.6f", lon, lat);
+		LOG_WARN("ValueAt", "CRCAltitudeDataFile::ValueAt(double lon, double lat)", "Out of bounds! lon=%.6f, lat=%.6f", lon, lat);
 	}
 	return 0;
 }
@@ -265,8 +265,12 @@ void CRCAltitudeDataFile::ApplyIntersection(CRCDataFile& src)
 	}
 	for (int x = this_x0; x <= this_x1; x++)
 	{
-		for (int y = this_y0; y < this_y1; y++)
+		for (int y = this_y0; y <= this_y1; y++)
 		{
+			if (y==0 && x == 1)
+			{
+				int bp = 0;
+			}
 			SetValue(x, y, asrc->ValueAt(lon0 + x * dlon, lat0 + y * dlat));
 		}
 	}
@@ -291,7 +295,7 @@ bool CRCAltitudeDataFile::Open()
 
 		try
 		{
-			data = new short[width * height];
+			data = new short[width * height]();
 			if (!data)
 			{
 				throw std::bad_alloc();

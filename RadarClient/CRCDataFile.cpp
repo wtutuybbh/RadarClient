@@ -83,15 +83,15 @@ bool CRCDataFile::GetIntersection(CRCDataFile& src, int& x0, int& y0, int& x1, i
 	if (this->lon1 < src.lon0 || this->lon0 > src.lon1 || this->lat1 < src.lat0 || this->lat0 > src.lat1)
 		return false;
 
-	double lon_res = (this->lon1 - this->lon0) / width, lat_res = (this->lat1 - this->lat0) / height;
+	double lon_res = (this->lon1 - this->lon0) / (width - 1), lat_res = (this->lat1 - this->lat0) / (height - 1);
 
 	x0 = floor(zero_if_negative(src.lon0 - this->lon0) / lon_res);	
-	x1 = floor((min(this->lon1, src.lon1) - this->lon0) / lon_res);
+	x1 = ceil((min(this->lon1, src.lon1) - this->lon0) / lon_res);
 	if (x1 >= width)
 		x1--;
 
-	y0 = zero_if_negative(src.lat0 - this->lat0) / lat_res;
-	y1 = floor((min(this->lat1, src.lat1) - this->lat0) / lat_res);
+	y0 = floor(zero_if_negative(src.lat0 - this->lat0) / lat_res);
+	y1 = ceil((min(this->lat1, src.lat1) - this->lat0) / lat_res);
 	if (y1 >= height)
 		y1--;
 

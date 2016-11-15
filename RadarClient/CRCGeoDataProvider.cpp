@@ -269,21 +269,31 @@ int CRCGeoDataProvider::GetAltitudeMapSizes(const char* fileName, double* LL, in
 		LOG_ERROR__("unknown file type (%s)", ext);
 		return -8;
 	}
-	if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMapSizes_LOG)
-	{
-		LOG_INFO__("LL={%.6f, %.6f, %.6f, %.6f}", LL[0], LL[1], LL[2], LL[3]);
-	}
+	
 
 	iLonStart = ceil((LL[0] - lonSW) / dlon);
 	iLatStart = ceil((LL[1] - latSW) / dlat);
 	iLonEnd = floor((LL[2] - lonSW) / dlon);
 	iLatEnd = floor((LL[3] - latSW) / dlat);
 
+	if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMapSizes_LOG)
+	{
+		LOG_INFO__("### fileName=%s, LL={%.6f, %.6f, %.6f, %.6f}, lonSW=%.6f, latSW=%.6f, iLonStart=%d, iLatStart=%d, iLonEnd=%d, iLatEnd=%d", 
+			fileName, LL[0], LL[1], LL[2], LL[3], lonSW, latSW, iLonStart, iLatStart, iLonEnd, iLatEnd);
+	}
+
 	if (iLonStart < 0) iLonStart = 0;
 	if (iLonEnd >= Nlon) iLonEnd = Nlon - 1;
 
 	if (iLatStart < 0) iLatStart = 0;
 	if (iLatEnd >= Nlat) iLatEnd = Nlat - 1;
+
+	if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMapSizes_LOG)
+	{
+		LOG_INFO__("### fileName=%s, LL={%.6f, %.6f, %.6f, %.6f}, lonSW=%.6f, latSW=%.6f, iLonStart=%d, iLatStart=%d, iLonEnd=%d, iLatEnd=%d",
+			fileName, LL[0], LL[1], LL[2], LL[3], lonSW, latSW, iLonStart, iLatStart, iLonEnd, iLatEnd);
+	}
+
 
 	size[0] = iLonEnd - iLonStart + 1;
 	size[1] = iLatEnd - iLatStart + 1;
@@ -458,16 +468,17 @@ int CRCGeoDataProvider::GetAltitudeMap(const char* fileName, double* LL, int* si
 			for (int p = 0; p < size[1]; p++) {
 				//size={width=463, height=240, x0=1041, y0=3361, x1=1503, y1=3600, filewidth=1801, fileheight=3601}
 				// =1801*3360+1040 :
-				int rowstart = (size[3] + p)*size[6] + size[2];
-				infile.seekg(rowstart*2);
+				int rowstart_file = (size[7] - size[5] - 1 + p)*size[6] + size[2];
+				int rowstart_data = (size[5] - p) * size[6] + size[2];
+				infile.seekg(rowstart_file *2);
 				for (int m = 0; m < size[0]; m++) {
 					infile.read((char *)chr2, 2);
-					data[rowstart + m] = (unsigned char)chr2[1] << 8 | (unsigned char)chr2[0];
+					data[rowstart_data + m] = (unsigned char)chr2[1] << 8 | (unsigned char)chr2[0];
 				}
-				if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMap_LOG)
+				/*if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMap_LOG)
 				{
-					LOG_INFO__("loaded values data[%d] = %d ... data[%d] = %d", rowstart, data[rowstart], rowstart + size[0] - 1, data[rowstart + size[0] - 1]);
-				}
+					LOG_INFO__("loaded values data[%d] = %d ... data[%d] = %d", rowstart_data, data[rowstart_data], rowstart_data - size[0] + 1, data[rowstart_data - size[0] + 1]);
+				}*/
 			}
 			break;
 		default:

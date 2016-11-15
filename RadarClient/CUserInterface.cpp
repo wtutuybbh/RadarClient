@@ -101,11 +101,13 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 	LOG_INFO("Test", "Test", "set contains %d files", set.Files().size());
 
+	std::ostringstream ss;
+	/*
 	auto file = (CRCAltitudeDataFile *)set.GetFile(0);
 
 	file->Open();
 
-	std::ostringstream ss;
+	
 	for (auto y = 0; y < file->Height(); y++)
 	{
 		ss.str(std::string());
@@ -114,7 +116,7 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 			ss << file->ValueAt(x, y) << ";";
 		}
 		LOG_INFO("FileContents", "Test", ss.str().c_str());
-	}
+	}*/
 
 	glm::vec2 radar_pos(37.706709, 56.005268);
 
@@ -151,9 +153,24 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	}
 	LOG_INFO("Test", "Test", "Finished, time=%f", float(clock() - begin_time) / CLOCKS_PER_SEC);
 
+	auto file = (CRCAltitudeDataFile *)set.GetFile(0);
+
+	file->Open();
+
+	/*
+	for (auto y = file->Height()-1; y >= 0; y--)
+	{
+		ss.str(std::string());
+		for (auto x = 0; x < file->Width(); x++)
+		{
+			ss << file->ValueAt(x, y) << ";";
+		}
+		LOG_INFO("FileContents", "Test", ss.str().c_str());
+	}*/
+
 	//print resulting values to log file (only first row):
 	
-	for (auto x = 0; x < 1; x++)
+	for (auto x = 0; x < width; x++)
 	{
 		ss.str(std::string());
 		for (auto y = 0; y < height; y++)
