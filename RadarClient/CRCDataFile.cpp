@@ -126,6 +126,46 @@ int CRCDataFile::Height() const
 	return height;
 }
 
+double CRCDataFile::DLon() const
+{
+	if (width > 1) 
+	{
+		return (lon1 - lon0) / (width-1);
+	}
+	LOG_INFO_("CRCDataFile::DLon", "(fileName=%s) error: width<=1", fileName);
+	return 0;
+}
+
+double CRCDataFile::DLat() const
+{
+	if (height > 1)
+	{
+		return (lat1 - lat0) / (height-1);
+	}
+	LOG_INFO_("CRCDataFile::DLat", "(fileName=%s) error: height<=1", fileName);
+	return 0;
+}
+
+double CRCDataFile::Lon0() const
+{
+	return lon0;
+}
+
+double CRCDataFile::Lat0() const
+{
+	return lat0;
+}
+
+double CRCDataFile::Lon1() const
+{
+	return lon1;
+}
+
+double CRCDataFile::Lat1() const
+{
+	return lat1;
+}
+
 void CRCDataFile::SetName(std::string fileName)
 {
 	this->fileName = fileName;

@@ -11,13 +11,19 @@
 #include "C3DObjectVBO.h"
 #include "C3DObjectTexture.h"
 #include "CRCLogger.h"
+#include "CRCAltitudeDataFile.h"
+#include "CRCDataFileSet.h"
+
+#define LOG_ENABLED true
+#define CMesh_LoadHeightmap_LOG true
 
 float CMesh::Y0;
 
 //int CMesh::TotalVertexCount;
-bool CMesh::LoadHeightmap(int vpId)
+
+bool CMesh::LoadHeightmap_old(int vpId)
 {
-	string context = "CMesh::LoadHeightmap(int vpId)";
+	string context = "CMesh::LoadHeightmap_old(int vpId)";
 	CRCLogger::Info(requestID, context, "Start, vpId=" + vpId);
 
 	iMapH = GetImageMapHeader(scn->imgFile.data(), scn->datFile.data());
@@ -49,22 +55,12 @@ bool CMesh::LoadHeightmap(int vpId)
 
 	if (!aMap)
 		return false;
-	//std::ofstream outfile("new.txt", std::ofstream::binary);
-
-
-	// Generate Vertex Field
-	//int m_nVertexCount = (int)((aMap->sizeX - 1) * (aMap->sizeY - 1) * 6);
-	//	m_pVertices = new CVec[m_nVertexCount];						// Allocate Vertex Data
-	//m_pVertices = new glm::vec3[m_nVertexCount];						// Allocate Vertex Data
-																		//m_pTexCoords = new CTexCoord[m_nVertexCount];				// Allocate Tex Coord Data
-	//m_pTexCoords = new glm::vec2[m_nVertexCount];				// Allocate Tex Coord Data
 
 	std::vector<VBOData> * buffer = new std::vector<VBOData> ((aMap->sizeX - 1) * (aMap->sizeY - 1) * 6);
 
 
 	int nX, nZ, nTri, nIndex = 0;									// Create Variables
 	float flX, flZ;
-	//	char buff[100];
 	short maxheight = 0, minheight = 10000;
 	for (int i = 0; i < aMap->sizeX * aMap->sizeY; i++) {
 		if (aMap->data[i] > maxheight) maxheight = aMap->data[i];
@@ -88,9 +84,7 @@ bool CMesh::LoadHeightmap(int vpId)
 	for (nZ = 0; nZ < aMap->sizeY - 1; nZ++)
 	{
 		for (nX = 0; nX < aMap->sizeX - 1; nX++)
-		{
-			//sprintf(buff, "%d;", aMap->data[((nX % aMap->sizeX) * aMap->sizeY + ((nZ % aMap->sizeY) ))]);
-			//outfile.write(buff, strlen(buff));			
+		{			
 			for (nTri = 0; nTri < 6; nTri++)
 			{
 				// Using This Quick Hack, Figure The X,Z Position Of The Point
@@ -116,19 +110,6 @@ bool CMesh::LoadHeightmap(int vpId)
 				rcutils::takeminmax(tmp.vert.y, &(Bounds[0].y), &(Bounds[1].y));
 				rcutils::takeminmax(tmp.vert.z, &(Bounds[0].z), &(Bounds[1].z));
 
-				/*m_pVertices[nIndex].x = lonStretch * (-flX + (aMap->sizeX / 2.0));
-				rcutils::takeminmax(m_pVertices[nIndex].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-
-				m_pVertices[nIndex].y = (PtHeight((int)flX, (int)flZ) ) / scn->mppv;
-				rcutils::takeminmax(m_pVertices[nIndex].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-
-				m_pVertices[nIndex].z = latStretch * (flZ - (aMap->sizeY / 2.0));
-				rcutils::takeminmax(m_pVertices[nIndex].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-
-				// Stretch The Texture Across The Entire Mesh
-				m_pTexCoords[nIndex].x = flX / aMap->sizeX;
-				m_pTexCoords[nIndex].y = flZ / aMap->sizeY;*/
-
 				if (nTri == 0)
 					LocalAverageHeight += tmp.vert.y;
 				// Increment Our Index
@@ -137,22 +118,10 @@ bool CMesh::LoadHeightmap(int vpId)
 
 			}
 		}
-		//buff[0] = endl;
-		//outfile << std::endl;
-		//outfile.write(buff, 2);
 	}
 	LocalAverageHeight /= aMap->sizeY * aMap->sizeX;
 
 	prog.insert_or_assign(vpId, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color"));
-	//prog->CreateProgram();
-	
-	/*for (auto it = buffer->begin(); it != buffer->end(); ++it)
-	{
-		float level = ((*it).vert.y - m_Bounds[0].y) / (m_Bounds[1].y - m_Bounds[0].y);
-		(*it).color = CSettings::GetColor(ColorAltitudeLowest)*(1-level) + CSettings::GetColor(ColorAltitudeHighest)*level;
-		(*it).color.a = 0.95;
-	}*/
-
 
 	vbo.insert_or_assign(vpId, new C3DObjectVBO(clearAfter));
 	vbo.at(vpId)->SetBuffer(buffer, &(*buffer)[0], buffer->size());
@@ -165,29 +134,215 @@ bool CMesh::LoadHeightmap(int vpId)
 	tex.insert_or_assign(vpId, new C3DObjectTexture(subimage, "tex", true, false));
 
 
-	//outfile.close();
-	// Load The Texture Into OpenGL
-	/*glGenTextures(1, &m_nTextureId);							// Get An Open ID
-	glBindTexture(GL_TEXTURE_2D, m_nTextureId);*/				// Bind The Texture
-
-
-															//ofstream outfile 
-															//unsigned char * tmpdata = new unsigned char[aMap->sizeX * aMap->sizeY * 3];
-
-															/*for (int i = 0; i < aMap->sizeX * aMap->sizeY; i++) {
-															tmpdata[i * 3] = aMap->data[i]*255.0 / maxheight;
-															tmpdata[i * 3 + 1] = tmpdata[i * 3];
-															tmpdata[i * 3 + 2] = tmpdata[i * 3];
-															}*/
-
-	/*glTexImage2D(GL_TEXTURE_2D, 0, 3, texsize, texsize, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(subimage));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);*/
-
-	//delete tmpdata;
-	// Free The Altitude Data
-
+	
 	CenterHeight = PtHeight(min(max(aMap->sizeX / 2 + aMap->sizeX * shiftX - 1, 0), aMap->sizeX - 1), min(max(aMap->sizeY / 2 - aMap->sizeY * shiftZ, 0), aMap->sizeY-1));
+	Y0 = CenterHeight / scn->mppv;
+
+
+	return true;
+}
+
+bool CMesh::LoadHeightmap(int vpId)
+{
+	string context = "CMesh::LoadHeightmap(int vpId)";
+	if (!scn)
+	{
+		LOG_ERROR__("scn is nullptr");
+		return;
+	}
+	if (LOG_ENABLED && CMesh_LoadHeightmap_LOG)
+	{
+		CRCLogger::Info(requestID, context, "Start, vpId=" + vpId);
+	}
+
+	iMapH = GetImageMapHeader(scn->imgFile.data(), scn->datFile.data());
+	if (!iMapH)
+	{
+		LOG_ERROR__("GetImageMapHeader returned nullptr");
+		return false;
+	}
+	if (iMapH->sizeX == 0)
+	{
+		LOG_ERROR__("iMapH->sizeX == 0");
+		return false;
+	}
+	if (iMapH->sizeY == 0)
+	{
+		LOG_ERROR__("iMapH->sizeY == 0");
+		return false;
+	}
+	float pxlon = (iMapH->imgLon1 - iMapH->imgLon0) / iMapH->sizeX;
+	if (pxlon <= 0)
+	{
+		LOG_ERROR__("pxlon <= 0");
+		return false;
+	}
+	float pxlat = (iMapH->imgLon1 - iMapH->imgLon0) / iMapH->sizeX;
+	if (pxlat <= 0)
+	{
+		LOG_ERROR__("pxlat <= 0");
+		return false;
+	}
+
+
+
+	glm::vec2 radar_pos(scn->geocenter.x, scn->geocenter.y);
+
+	float max_range = CSettings::GetFloat(FloatMaxDistance);
+
+	if (LOG_ENABLED && CMesh_LoadHeightmap_LOG)
+	{
+		LOG_INFO__("geocenter=(%.6f, %.6f) max_range=%.6f",
+			scn->geocenter.x,
+			scn->geocenter.y,
+			max_range);
+	}
+
+
+	double lonm = cnvrt::londg2m(1, radar_pos.y);
+	double latm = cnvrt::latdg2m(1, radar_pos.x);
+	if (lonm == 0 || latm == 0)
+	{
+		LOG_ERROR__("lonm=%f latm=%f", lonm, latm);
+	}
+	double max_range_lon = max_range / lonm;
+	double max_range_lat = max_range / latm;
+	if (LOG_ENABLED && CMesh_LoadHeightmap_LOG)
+	{
+		LOG_INFO__("lonm=%f latm=%f max_range_lon=%f max_range_lat=%f",
+			lonm,
+			latm,
+			max_range_lon,
+			max_range_lat);
+	}
+	
+
+	double lon0 = radar_pos.x - max_range_lon;
+	double lat0 = radar_pos.y - max_range_lat;
+	double lon1 = radar_pos.x + max_range_lon;
+	double lat1 = radar_pos.y + max_range_lat;
+
+	int cx = iMapH->sizeX * (scn->geocenter.x - iMapH->imgLon0) / (iMapH->imgLon1 - iMapH->imgLon0);
+	int cy = iMapH->sizeY * (scn->geocenter.y - iMapH->imgLat0) / (iMapH->imgLat1 - iMapH->imgLat0);
+
+	int top = iMapH->sizeY - cy - texsize / 2 + 1 - texsize * shiftZ;
+	int left = cx - texsize / 2 + 1 - texsize * shiftX;
+	int bottom = top + texsize;
+	int right = left + texsize;
+
+	subimage = FreeImage_Copy((FIBITMAP*)bitmap, left, top, right, bottom);
+
+	double px = (iMapH->imgLon1 - iMapH->imgLon0) / iMapH->sizeX;
+	double py = (iMapH->imgLat1 - iMapH->imgLat0) / iMapH->sizeY;
+
+	CRCDataFileSet set;
+
+	set.AddFiles("AltitudeData", Altitude, "");
+
+	
+	/*double lon0 = scn->geocenter.x - px * texsize / 2 - px * texsize * shiftX;
+	double lat0 = scn->geocenter.y - py * texsize / 2 + py * texsize * shiftZ;
+	double lon1 = scn->geocenter.x + px * texsize / 2 - px * texsize * shiftX;
+	double lat1 = scn->geocenter.y + py * texsize / 2 + py * texsize * shiftZ;*/
+
+	int width = 200;
+	int height = 200;
+
+
+	CRCAltitudeDataFile alt_(lon0, lat0, lon1, lat1, width, height);
+
+	for (auto i = 0; i < set.Files().size(); i++)
+	{
+		alt_.ApplyIntersection(*set.GetFile(i));
+	}
+
+	std::vector<VBOData> * buffer = new std::vector<VBOData>((alt_.Width() - 1) * (alt_.Height() - 1) * 6);
+
+	short *data = (short *)alt_.Data();
+
+	int nX, nZ, nTri, nIndex = 0;									// Create Variables
+	float flX, flZ;
+	short maxheight = 0, minheight = 10000;
+	for (int i = 0; i < alt_.Width() * alt_.Height(); i++) {
+		
+		if (data[i] > maxheight) maxheight = data[i];
+		if (data[i] < minheight) minheight = data[i];
+	}
+	Bounds = new glm::vec3[2];
+	Bounds[0].x = Bounds[0].y = Bounds[0].z = FLT_MAX;
+	Bounds[1].x = Bounds[1].y = Bounds[1].z = FLT_MIN;
+
+	double dlon = alt_.DLon();
+	double dlat = alt_.DLat();
+
+	double latSW = alt_.Lat0(); 
+
+	float lonStretch = dlon * cnvrt::londg2m(1, latSW + dlat * (alt_.Width() - 1) / 2.0) / scn->mpph;
+	float latStretch = dlat * cnvrt::latdg2m(1, latSW + dlat * (alt_.Width() - 1) / 2.0) / scn->mpph;
+
+	float absoluteShiftX = shiftX * lonStretch * (alt_.Width() - 1);
+	float absoluteShiftZ = shiftZ * latStretch * (alt_.Height() - 1);
+
+	LocalAverageHeight = 0;
+
+	VBOData tmp;
+	float minh = CSettings::GetFloat(FloatMinAltitude), maxh = CSettings::GetFloat(FloatMaxAltitude), h, level;
+	glm::vec4 mincolor = CSettings::GetColor(ColorAltitudeLowest), maxcolor = CSettings::GetColor(ColorAltitudeHighest);
+	for (nZ = 0; nZ < alt_.Height() - 1; nZ++)
+	{
+		for (nX = 0; nX < alt_.Width() - 1; nX++)
+		{
+			for (nTri = 0; nTri < 6; nTri++)
+			{
+				// Using This Quick Hack, Figure The X,Z Position Of The Point
+				flX = (float)nX + ((nTri == 1 || nTri == 2 || nTri == 5) ? 1.0f : 0.0f);
+				flZ = (float)nZ + ((nTri == 2 || nTri == 4 || nTri == 5) ? 1.0f : 0.0f);
+
+				// Set The Data, Using PtHeight To Obtain The Y Value
+				h = alt_.ValueAt((int)flX, (int)flZ);
+				level = (h - minh) / (maxh - minh);
+				tmp = {
+					glm::vec4(
+						absoluteShiftX + lonStretch * (-flX + alt_.Width() / 2.0),
+						h / scn->mppv,
+						absoluteShiftZ + latStretch * (flZ - alt_.Height() / 2.0),
+						1),
+					glm::vec3(0, 1, 0),
+					mincolor * (1 - level) + maxcolor * level,
+					glm::vec2(flX / alt_.Width(), flZ / alt_.Height()) };
+
+				buffer->push_back(tmp);
+
+				rcutils::takeminmax(tmp.vert.x, &(Bounds[0].x), &(Bounds[1].x));
+				rcutils::takeminmax(tmp.vert.y, &(Bounds[0].y), &(Bounds[1].y));
+				rcutils::takeminmax(tmp.vert.z, &(Bounds[0].z), &(Bounds[1].z));
+
+				if (nTri == 0)
+					LocalAverageHeight += tmp.vert.y;
+				// Increment Our Index
+				nIndex++;
+
+
+			}
+		}
+	}
+	LocalAverageHeight /= alt_.Height() * alt_.Width();
+
+	prog.insert_or_assign(vpId, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color"));
+
+	vbo.insert_or_assign(vpId, new C3DObjectVBO(clearAfter));
+	vbo.at(vpId)->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+
+	if (FreeImage_GetBPP(subimage) != 32)
+	{
+		FIBITMAP* tempImage = subimage;
+		subimage = FreeImage_ConvertTo32Bits(tempImage);
+	}
+	tex.insert_or_assign(vpId, new C3DObjectTexture(subimage, "tex", true, false));
+
+
+
+	CenterHeight = alt_.ValueAt(min(max(alt_.Width() / 2 + alt_.Width() * shiftX - 1, 0), alt_.Width() - 1), min(max(alt_.Height() / 2 - alt_.Height() * shiftZ, 0), alt_.Height() - 1));
 	Y0 = CenterHeight / scn->mppv;
 
 

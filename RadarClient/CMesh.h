@@ -55,69 +55,6 @@ typedef struct {
 	double imgLon0, imgLat0, imgLon1, imgLat1;
 } ImageMapHeader;
 
-//class CVert;													// Vertex Class
-
-//typedef CVert CVec;												// The Definitions Are Synonymous
-
-//class CTexCoord;												// Texture Coordinate Class
-
-
-/*class old_CMesh : old_C3DObject
-{
-public:
-	// Mesh Data
-	int				m_nVertexCount;								// Vertex Count
-	glm::vec3*		m_pVertices;								// Vertex Data
-	glm::vec2*		m_pTexCoords;								// Texture Coordinates
-	unsigned int	m_nTextureId;								// Texture ID
-	
-
-																// Vertex Buffer Object Names
-	unsigned int	m_nVBOVertices;								// Vertex VBO Name
-	unsigned int	m_nVBOTexCoords;							// Texture Coordinate VBO Name
-
-	CScene *scn;
-																// Temporary Data
-	AltitudeMap* aMap;							// Heightmap Data
-	AltitudeMapHeader* aMapH;
-	ImageMapHeader* iMapH;
-
-	glm::vec3 * m_Bounds;
-	glm::vec3 * old_CMesh::GetBounds() override;
-
-	void *bitmap;
-
-	float CenterHeight, AverageHeight;
-
-	int texsize;
-
-	FIBITMAP *subimage;
-	
-	old_CMesh(CScene *scn);													// Mesh Constructor
-	~old_CMesh();													// Mesh Deconstructor
-
-	AltitudeMap* GetAltitudeMap(const char *fileName, double lon1, double lat1, double lon2, double lat2);
-	AltitudeMapHeader* GetAltitudeMapHeader(const char *fileName, double lon1, double lat1, double lon2, double lat2);
-																// Heightmap Loader
-	bool LoadHeightmap();
-	//bool PrepareAndBuildMinimapVBO();
-
-	void MiniMapBindTextureImage() override;
-
-	// Single Point Height
-	float PtHeight(int nX, int nY);
-	// VBO Build Function
-	void BuildVBOs();
-
-	ImageMapHeader* GetImageMapHeader(const char *imgFile, const char *datFile);
-
-	void Draw(CCamera *cam) override;
-	void MiniMapDraw(CCamera *cam) override;
-
-	bool IntersectLine(glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position) override;
-};*/
-
-
 typedef int(_cdecl * GDPALTITUDEMAP)(const char *, double *, int *, short *);
 typedef int(_cdecl * GDPALTITUDEMAP_SIZES)(const char *, double *, int *);
 
@@ -125,8 +62,8 @@ class CMesh : public C3DObjectModel
 {
 	CScene *scn{ nullptr };
 	
+	bool LoadHeightmap_old(int vpId);
 	bool LoadHeightmap(int vpId);
-	bool LoadHeightmap_v2(int vpId);
 	AltitudeMap* GetAltitudeMap(const char *fileName, double lon1, double lat1, double lon2, double lat2);
 	AltitudeMapHeader* GetAltitudeMapHeader(const char *fileName, double lon1, double lat1, double lon2, double lat2);
 	ImageMapHeader* GetImageMapHeader(const char *imgFile, const char *datFile);

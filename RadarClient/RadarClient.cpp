@@ -348,11 +348,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_SOCKET: {
 		if (WSAGETSELECTERROR(lParam))
 		{
-			MessageBox(hWnd,
+			/*MessageBox(hWnd,
 				"Connection to server failed",
 				"Error",
 				MB_OK | MB_ICONERROR);
-			SendMessage(hWnd, WM_DESTROY, NULL, NULL);
+			SendMessage(hWnd, WM_DESTROY, NULL, NULL);*/
+			LOG_ERROR__("Connection to server failed");
 			break;
 		}
 		switch (WSAGETSELECTEVENT(lParam)) 

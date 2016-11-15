@@ -76,7 +76,16 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	m_Bounds = new glm::vec3[2];
 	m_Bounds[0].x = m_Bounds[0].y = m_Bounds[0].z = FLT_MAX;
 	m_Bounds[1].x = m_Bounds[1].y = m_Bounds[1].z = FLT_MIN;
-	Mesh = new CMesh(Main, this, true, 0.5, 0.5);
+	Mesh = new CMesh(Main, this, true, 0, 0);
+	rcutils::takeminmax(Mesh->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(Mesh->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(Mesh->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+	rcutils::takeminmax(Mesh->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(Mesh->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(Mesh->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+
+
+	/*Mesh = new CMesh(Main, this, true, 0.5, 0.5);
 	rcutils::takeminmax(Mesh->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
 	rcutils::takeminmax(Mesh->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
 	rcutils::takeminmax(Mesh->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
@@ -106,27 +115,30 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	rcutils::takeminmax(Mesh3->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
 
 	CMesh::AverageHeight = (Mesh->LocalAverageHeight + Mesh1->LocalAverageHeight + Mesh2->LocalAverageHeight + Mesh3->LocalAverageHeight)/4;
-
+*/
 
 
 	MeshSize = m_Bounds[1] - m_Bounds[0];
 
-	Camera->MeshSize = Mesh->Size = Mesh1->Size = Mesh2->Size = Mesh3->Size = MeshSize;
+	Camera->MeshSize = Mesh->Size = /*Mesh1->Size = Mesh2->Size = Mesh3->Size =*/ MeshSize;
 
 	Mesh->Init(MiniMap);
-	Mesh1->Init(MiniMap);
-	Mesh2->Init(MiniMap);
-	Mesh3->Init(MiniMap);
+	//Mesh1->Init(MiniMap);
+	//Mesh2->Init(MiniMap);
+	//Mesh3->Init(MiniMap);
 
-	CMesh::Meshs = new CMesh*[4];
+	CMesh::Meshs = new CMesh*[1];
 	CMesh::Meshs[0] = Mesh;
-	CMesh::Meshs[1] = Mesh1;
+	/*CMesh::Meshs[1] = Mesh1;
 	CMesh::Meshs[2] = Mesh2;
-	CMesh::Meshs[3] = Mesh3;
-	CMesh::TotalMeshsCount = 4;
+	CMesh::Meshs[3] = Mesh3;*/
+	CMesh::TotalMeshsCount = 1;
 
 	mmPointer = new CMiniMapPointer(MiniMap, this);
-	y0 = (Mesh->CenterHeight + Mesh1->CenterHeight + Mesh2->CenterHeight + Mesh3->CenterHeight) / 4 / mppv;
+	//y0 = (Mesh->CenterHeight + Mesh1->CenterHeight + Mesh2->CenterHeight + Mesh3->CenterHeight) / 4 / mppv;
+	y0 = Mesh->CenterHeight / mppv;
+
+
 	Markup = new CMarkup(glm::vec4(0, y0, 0, 1));	
 
 	numCircles = 7;
@@ -261,13 +273,13 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	//Mesh->UseTexture = vpControl->DisplayMap;
 	glDisable(GL_LINE_SMOOTH);
 
-	Mesh->UseTexture = Mesh1->UseTexture = Mesh2->UseTexture = Mesh3->UseTexture = vpControl->DisplayMap;
-	Mesh->UseAltitudeMap = Mesh1->UseAltitudeMap = Mesh2->UseAltitudeMap = Mesh3->UseAltitudeMap = vpControl->DisplayLandscape;
+	Mesh->UseTexture = /*Mesh1->UseTexture = Mesh2->UseTexture = Mesh3->UseTexture =*/ vpControl->DisplayMap;
+	Mesh->UseAltitudeMap = /*Mesh1->UseAltitudeMap = Mesh2->UseAltitudeMap = Mesh3->UseAltitudeMap =*/ vpControl->DisplayLandscape;
 
 	Mesh->Draw(vpControl, GL_TRIANGLES);
-	Mesh1->Draw(vpControl, GL_TRIANGLES);
+	/*Mesh1->Draw(vpControl, GL_TRIANGLES);
 	Mesh2->Draw(vpControl, GL_TRIANGLES);
-	Mesh3->Draw(vpControl, GL_TRIANGLES);
+	Mesh3->Draw(vpControl, GL_TRIANGLES);*/
 
 	//return false;
 	glEnable(GL_PROGRAM_POINT_SIZE);
@@ -371,9 +383,9 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	Mesh->Draw(vpControl, GL_TRIANGLES);
-	Mesh1->Draw(vpControl, GL_TRIANGLES);
+	/*Mesh1->Draw(vpControl, GL_TRIANGLES);
 	Mesh2->Draw(vpControl, GL_TRIANGLES);
-	Mesh3->Draw(vpControl, GL_TRIANGLES);
+	Mesh3->Draw(vpControl, GL_TRIANGLES);*/
 
 	//MiniMapPointer->MiniMapDraw(Camera);
 	glEnable(GL_PROGRAM_POINT_SIZE);

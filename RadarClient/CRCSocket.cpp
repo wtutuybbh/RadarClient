@@ -374,8 +374,8 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				memcpy(s_rdrinit, (RDR_INITCL*)(void*)&sh[1], sizeof(RDR_INITCL));
 				if (PostDataLogEnabled)
 				{
-					CRCLogger::Info(requestID, context, (boost::format("MSG_INIT. ViewStep=%1%, MaxNumSectPt=%2%, Nazm=%3%, ") 
-						% s_rdrinit->ViewStep % s_rdrinit->MaxNumSectPt % s_rdrinit->Nazm).str());
+					CRCLogger::Info(requestID, context, (boost::format("MSG_INIT. ViewStep=%1%, MaxNumSectPt=%2%, Nazm=%3%, begAzm=%4%, dAzm=%5%") 
+						% s_rdrinit->ViewStep % s_rdrinit->MaxNumSectPt % s_rdrinit->Nazm % s_rdrinit->begAzm % s_rdrinit->dAzm).str());
 				}
 			}
 			break;

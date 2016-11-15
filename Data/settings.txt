@@ -1,6 +1,6 @@
 n54_e037_1arc_v3.dt2
-yandexmap.jpg
-yandexmap.dat
+near_msk_region_north.jpg.jpg
+near_msk_region_north.jpg.dat
 FloatZeroElevation=3
 ColorPointLowLevel=#7F4600FF
 ColorPointHighLevel=#FF8C00FF

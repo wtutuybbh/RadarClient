@@ -124,9 +124,9 @@ public:
 	void ClearSelection();
 
 	CMesh* Mesh{ nullptr };
-	CMesh* Mesh1{ nullptr };
+	/*CMesh* Mesh1{ nullptr };
 	CMesh* Mesh2{ nullptr };
-	CMesh* Mesh3{ nullptr };
+	CMesh* Mesh3{ nullptr };*/
 
 	CMiniMapPointer *mmPointer { nullptr };
 

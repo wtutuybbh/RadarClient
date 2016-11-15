@@ -256,8 +256,9 @@ void CRCAltitudeDataFile::ApplyIntersection(CRCDataFile& src)
 
 	asrc->size_set(src_x0, src_y0, src_x1, src_y1);
 
-	float dlon = (lon1 - lon0) / width;
-	float dlat = (lat1 - lat0) / height;
+	float dlon = DLon();
+	float dlat = DLat();
+
 	if (!src.Open())
 	{
 		LOG_ERROR(requestID, context, "src.Open() failed. RETURN.");
@@ -281,7 +282,7 @@ bool CRCAltitudeDataFile::Open()
 	std::string context = "CRCAltitudeDataFile::Open";
 	if (LOG_ENABLED && CRCAltitudeDataFile_Open_LOG)
 	{
-		CRCLogger::Info(requestID, context, "Start...");
+		LOG_INFO__("Start... (fileName=%s)", fileName);
 	}
 	if (!fileName.empty() && !data)
 	{		

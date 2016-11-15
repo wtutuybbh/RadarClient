@@ -95,9 +95,9 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 	CRCDataFileSet set;
 
-	//set.AddFiles("AltitudeData", Altitude, "");
-	set.AddAltitudeFile("AltitudeData/n55_e037_1arc_v3.bil");
-	set.AddAltitudeFile("AltitudeData/n56_e037_1arc_v3.bil");
+	set.AddFiles("AltitudeData", Altitude, "");
+	//set.AddAltitudeFile("AltitudeData/n55_e037_1arc_v3.bil");
+	//set.AddAltitudeFile("AltitudeData/n56_e037_1arc_v3.bil");
 
 	LOG_INFO("Test", "Test", "set contains %d files", set.Files().size());
 
@@ -153,9 +153,9 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	}
 	LOG_INFO("Test", "Test", "Finished, time=%f", float(clock() - begin_time) / CLOCKS_PER_SEC);
 
-	auto file = (CRCAltitudeDataFile *)set.GetFile(0);
+	/*auto file = (CRCAltitudeDataFile *)set.GetFile(0);
 
-	file->Open();
+	file->Open();*/
 
 	/*
 	for (auto y = file->Height()-1; y >= 0; y--)
@@ -170,7 +170,7 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 	//print resulting values to log file (only first row):
 	
-	for (auto x = 0; x < width; x++)
+	/*for (auto x = 0; x < width; x++)
 	{
 		ss.str(std::string());
 		for (auto y = 0; y < height; y++)
@@ -178,7 +178,7 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 			ss << myfile.ValueAt(x, y) << ";";
 		}
 		LOG_INFO("TestResult", "Test", ss.str().c_str());
-	}
+	}*/
 	return LRESULT();
 }
 

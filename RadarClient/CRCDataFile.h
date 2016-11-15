@@ -34,6 +34,12 @@ public:
 	void *Data() const;
 	int Width() const;
 	int Height() const;
+	double DLon() const;
+	double DLat() const;
+	double Lon0() const;
+	double Lat0() const;
+	double Lon1() const;
+	double Lat1() const;
 	void SetName(std::string fileName);
 	std::string GetName() const;
 	static std::string GetDataFileTypeName(DataFileType t);
