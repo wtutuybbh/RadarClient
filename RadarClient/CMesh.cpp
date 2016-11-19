@@ -148,7 +148,7 @@ bool CMesh::LoadHeightmap(int vpId)
 	if (!scn)
 	{
 		LOG_ERROR__("scn is nullptr");
-		return;
+		return false;
 	}
 	if (LOG_ENABLED && CMesh_LoadHeightmap_LOG)
 	{
