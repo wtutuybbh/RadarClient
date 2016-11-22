@@ -85,39 +85,6 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	rcutils::takeminmax(Mesh->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
 
 
-	/*Mesh = new CMesh(Main, this, true, 0.5, 0.5);
-	rcutils::takeminmax(Mesh->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(Mesh->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(Mesh->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-	rcutils::takeminmax(Mesh->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(Mesh->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(Mesh->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-	Mesh1 = new CMesh(Main, this, true, 0.5, -0.5);
-	rcutils::takeminmax(Mesh1->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(Mesh1->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(Mesh1->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-	rcutils::takeminmax(Mesh1->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(Mesh1->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(Mesh1->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-	Mesh2 = new CMesh(Main, this, true, -0.5, -0.5);
-	rcutils::takeminmax(Mesh2->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(Mesh2->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(Mesh2->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-	rcutils::takeminmax(Mesh2->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(Mesh2->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(Mesh2->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-	Mesh3 = new CMesh(Main, this, true, -0.5, 0.5);
-	rcutils::takeminmax(Mesh3->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(Mesh3->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(Mesh3->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-	rcutils::takeminmax(Mesh3->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(Mesh3->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(Mesh3->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-
-	CMesh::AverageHeight = (Mesh->LocalAverageHeight + Mesh1->LocalAverageHeight + Mesh2->LocalAverageHeight + Mesh3->LocalAverageHeight)/4;
-*/
-
-
 	MeshSize = m_Bounds[1] - m_Bounds[0];
 
 	Camera->MeshSize = Mesh->Size = /*Mesh1->Size = Mesh2->Size = Mesh3->Size =*/ MeshSize;
