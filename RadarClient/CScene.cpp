@@ -76,6 +76,7 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	m_Bounds = new glm::vec3[2];
 	m_Bounds[0].x = m_Bounds[0].y = m_Bounds[0].z = FLT_MAX;
 	m_Bounds[1].x = m_Bounds[1].y = m_Bounds[1].z = FLT_MIN;
+	
 	Mesh = new CMesh(Main, this, true, 0, 0);
 	rcutils::takeminmax(Mesh->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
 	rcutils::takeminmax(Mesh->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
@@ -84,26 +85,21 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	rcutils::takeminmax(Mesh->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
 	rcutils::takeminmax(Mesh->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
 
-
 	MeshSize = m_Bounds[1] - m_Bounds[0];
 
-	Camera->MeshSize = Mesh->Size = /*Mesh1->Size = Mesh2->Size = Mesh3->Size =*/ MeshSize;
+	Camera->MeshSize = Mesh->Size = MeshSize;
 
 	Mesh->Init(MiniMap);
-	//Mesh1->Init(MiniMap);
-	//Mesh2->Init(MiniMap);
-	//Mesh3->Init(MiniMap);
 
 	CMesh::Meshs = new CMesh*[1];
 	CMesh::Meshs[0] = Mesh;
-	/*CMesh::Meshs[1] = Mesh1;
-	CMesh::Meshs[2] = Mesh2;
-	CMesh::Meshs[3] = Mesh3;*/
 	CMesh::TotalMeshsCount = 1;
+
+	y0 = Mesh->CenterHeight / mppv;
 
 	mmPointer = new CMiniMapPointer(MiniMap, this);
 	//y0 = (Mesh->CenterHeight + Mesh1->CenterHeight + Mesh2->CenterHeight + Mesh3->CenterHeight) / 4 / mppv;
-	y0 = Mesh->CenterHeight / mppv;
+	
 
 
 	Markup = new CMarkup(glm::vec4(0, y0, 0, 1));	
@@ -240,10 +236,13 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	//Mesh->UseTexture = vpControl->DisplayMap;
 	glDisable(GL_LINE_SMOOTH);
 
-	Mesh->UseTexture = /*Mesh1->UseTexture = Mesh2->UseTexture = Mesh3->UseTexture =*/ vpControl->DisplayMap;
-	Mesh->UseAltitudeMap = /*Mesh1->UseAltitudeMap = Mesh2->UseAltitudeMap = Mesh3->UseAltitudeMap =*/ vpControl->DisplayLandscape;
-
-	Mesh->Draw(vpControl, GL_TRIANGLES);
+	if (Mesh)
+	{
+		Mesh->UseTexture = /*Mesh1->UseTexture = Mesh2->UseTexture = Mesh3->UseTexture =*/ vpControl->DisplayMap;
+		Mesh->UseAltitudeMap = /*Mesh1->UseAltitudeMap = Mesh2->UseAltitudeMap = Mesh3->UseAltitudeMap =*/ vpControl->DisplayLandscape;
+		Mesh->Draw(vpControl, GL_TRIANGLES);
+	}
+	
 	/*Mesh1->Draw(vpControl, GL_TRIANGLES);
 	Mesh2->Draw(vpControl, GL_TRIANGLES);
 	Mesh3->Draw(vpControl, GL_TRIANGLES);*/
@@ -815,16 +814,21 @@ CRCPointModel * CScene::GetCRCPointFromRDRTRACK(RDRTRACK * tp) const
 void CScene::SetCameraPositionFromMiniMapXY(float x, float y, float direction) const
 /* x and y from -1 to 1 */
 {
-	glm::vec3 *b = m_Bounds;
-	Camera->SetPositionXZ((b[0].x + b[1].x)/2 - x * (b[1].x - b[0].x)/2, (b[0].z + b[1].z) / 2 + y * (b[1].z - b[0].z) / 2);
+	if (m_Bounds) 
+	{
+		glm::vec3 *b = m_Bounds;
+		Camera->SetPositionXZ((b[0].x + b[1].x) / 2 - x * (b[1].x - b[0].x) / 2, (b[0].z + b[1].z) / 2 + y * (b[1].z - b[0].z) / 2);
+	}
 }
 C3DObjectModel * CScene::GetObjectAtMiniMapPosition(int vpId, glm::vec3 p0, glm::vec3 p1) const
 {
-	glm::vec3 orig = p0;
-	glm::vec3 dir = p1 - p0;
-	glm::vec3 pos;
-	if (mmPointer->IntersectLine(vpId, orig, dir, pos)) {
-		return mmPointer;
+	if (mmPointer) {
+		glm::vec3 orig = p0;
+		glm::vec3 dir = p1 - p0;
+		glm::vec3 pos;
+		if (mmPointer->IntersectLine(vpId, orig, dir, pos)) {
+			return mmPointer;
+		}
 	}
 	return nullptr;
 }
@@ -928,7 +932,7 @@ C3DObjectModel* CScene::GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const
 
 glm::vec2 CScene::CameraXYForMiniMap() const
 {
-	if (m_Bounds) {
+	if (m_Bounds && Camera) {
 		return glm::vec2(- 2 * (Camera->GetPosition().x - m_Bounds[0].x) / (m_Bounds[1].x - m_Bounds[0].x) + 1, -1 + 2 * (Camera->GetPosition().z - m_Bounds[0].z) / (m_Bounds[1].z - m_Bounds[0].z));
 	}
 	return glm::vec2(0);
@@ -1003,3 +1007,8 @@ glm::vec3 CScene::GetGeographicCoordinates(glm::vec3 glCoords)
 {
 	return glm::vec3(geocenter.x + glCoords.x * mpph / cnvrt::londg2m(1, geocenter.y), geocenter.y + glCoords.z * mpph / cnvrt::londg2m(1, geocenter.y), glCoords.y);
 }
+
+void CScene::LoadMesh(float lonc, float latc, float size, int imgSize, int altSize)
+{
+}
+

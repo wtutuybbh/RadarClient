@@ -124,9 +124,6 @@ public:
 	void ClearSelection();
 
 	CMesh* Mesh{ nullptr };
-	/*CMesh* Mesh1{ nullptr };
-	CMesh* Mesh2{ nullptr };
-	CMesh* Mesh3{ nullptr };*/
 
 	CMiniMapPointer *mmPointer { nullptr };
 
@@ -178,4 +175,6 @@ public:
 	void SetBegAzm(double begAzm);
 
 	glm::vec3 GetGeographicCoordinates(glm::vec3 glCoords);
+
+	void LoadMesh(float lonc, float latc, float size, int imgSize, int altSize);
 };

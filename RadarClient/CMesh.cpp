@@ -237,13 +237,7 @@ bool CMesh::LoadHeightmap(int vpId)
 
 	CRCDataFileSet set;
 
-	set.AddFiles("AltitudeData", Altitude, "");
-
-	
-	/*double lon0 = scn->geocenter.x - px * texsize / 2 - px * texsize * shiftX;
-	double lat0 = scn->geocenter.y - py * texsize / 2 + py * texsize * shiftZ;
-	double lon1 = scn->geocenter.x + px * texsize / 2 - px * texsize * shiftX;
-	double lat1 = scn->geocenter.y + py * texsize / 2 + py * texsize * shiftZ;*/
+	set.AddFiles("AltitudeData", Altitude, "");	
 
 	int width = 200;
 	int height = 200;

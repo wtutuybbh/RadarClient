@@ -590,14 +590,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	g_vpControl = new CViewPortControl("VP3D");
 	g_Minimap = new CMinimap("VPMiniMap");
 
-	//return Deinitialize();
-	//g_vpControl->Register();
-
-																	// Fill Out Application Data
+																	
 	application.className = "OpenGL";									// Application Class Name
 	application.hInstance = hInstance;									// Application Instance
 
-																		// Fill Out Window
+																		
 	ZeroMemory(&window, sizeof(GL_Window));							// Make Sure Memory Is Zeroed
 	window.keys = &keys;								// Window Key Structure
 	window.init.application = &application;							// Window Application
@@ -605,7 +602,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	window.init.width = 1366;									// Window Width
 	window.init.height = 768;									// Window Height
 	window.init.bitsPerPixel = 16;									// Bits Per Pixel
-	//window.init.isFullScreen = TRUE;									// Fullscreen? (Set To TRUE)
 
 	ZeroMemory(&keys, sizeof(Keys));									// Zero keys Structure
 
@@ -626,13 +622,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
 	free(myargv[0]);
-	// Setup GL States
-	//return 0;
-	
-
 
 	g_isProgramLooping = TRUE;											// Program Looping Is Set To TRUE
-	//g_createFullScreen = window.init.isFullScreen;						// g_createFullScreen Is Set To User Default
+
 	CRCLogger::Info(requestID, context, (boost::format("-=point before message loop=-")).str());
 	while (g_isProgramLooping)											// Loop Until WM_QUIT Is Received
 	{
@@ -647,8 +639,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					if (!g_Initialized && hasVBO && hasVAO) {
 						if (g_Socket && g_Socket->Initialized) 
 						{
-							Initialize();
-							
+							Initialize();							
 						}						
 					}
 					// Success Creating Window.  Check For Window Messages
