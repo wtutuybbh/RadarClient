@@ -155,6 +155,12 @@ void CSettings::Init()
 
 	floats.insert_or_assign(FloatMaxZeroElevation, 90);
 	stringmap.insert_or_assign("FloatMaxZeroElevation", FloatMaxZeroElevation);
+
+	floats.insert_or_assign(FloatPositionLon, 37.712919);
+	stringmap.insert_or_assign("FloatPositionLon", FloatPositionLon);
+
+	floats.insert_or_assign(FloatPositionLat, 55.994606);
+	stringmap.insert_or_assign("FloatPositionLat", FloatPositionLat);
 }
 
 glm::vec4 CSettings::GetColor(int key)

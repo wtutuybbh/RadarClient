@@ -51,7 +51,7 @@ void CScene::ClearSelection()
 	}
 }
 
-CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv) 
+CScene::CScene() 
 {
 	std::string context = "CScene::CScene";
 	CRCLogger::Info(requestID, context, "Start");

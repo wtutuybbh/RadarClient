@@ -50,7 +50,9 @@ enum Settings
 	FloatMinBegAzm,
 	FloatMaxBegAzm,
 	FloatMinZeroElevation,
-	FloatMaxZeroElevation
+	FloatMaxZeroElevation,
+	FloatPositionLon,
+	FloatPositionLat
 };
 
 
