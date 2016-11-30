@@ -13,195 +13,26 @@
 #include "CRCLogger.h"
 #include "CRCAltitudeDataFile.h"
 #include "CRCDataFileSet.h"
+#include "CRCTextureDataFile.h"
 
 #define LOG_ENABLED true
 #define CMesh_LoadHeightmap_LOG true
 
 float CMesh::Y0;
 
-//int CMesh::TotalVertexCount;
-
-bool CMesh::LoadHeightmap_old(int vpId)
-{
-	string context = "CMesh::LoadHeightmap_old(int vpId)";
-	CRCLogger::Info(requestID, context, "Start, vpId=" + vpId);
-
-	iMapH = GetImageMapHeader(scn->imgFile.data(), scn->datFile.data());
-	if (!iMapH)
-		return false;
-	aMapH = GetAltitudeMapHeader(scn->altFile.data(), iMapH->imgLon0, iMapH->imgLat0, iMapH->imgLon1, iMapH->imgLat1);
-
-	if (!aMapH)
-		return false;
-
-	int cx = iMapH->sizeX * (scn->geocenter.x - iMapH->imgLon0) / (iMapH->imgLon1 - iMapH->imgLon0);
-	int cy = iMapH->sizeY * (scn->geocenter.y - iMapH->imgLat0) / (iMapH->imgLat1 - iMapH->imgLat0);
-
-	int top = iMapH->sizeY - cy - texsize / 2 + 1 - texsize * shiftZ;
-	int left = cx - texsize / 2 + 1 - texsize * shiftX;
-	int bottom = top + texsize;
-	int right = left + texsize;
-
-	subimage = FreeImage_Copy((FIBITMAP*)bitmap, left, top, right, bottom);
-
-	double px = (iMapH->imgLon1 - iMapH->imgLon0) / iMapH->sizeX;
-	double py = (iMapH->imgLat1 - iMapH->imgLat0) / iMapH->sizeY;
-
-	aMap = GetAltitudeMap(scn->altFile.data(),
-		scn->geocenter.x - px * texsize / 2 - px * texsize * shiftX, 
-		scn->geocenter.y - py * texsize / 2 + py * texsize * shiftZ, 
-		scn->geocenter.x + px * texsize / 2 - px * texsize * shiftX, 
-		scn->geocenter.y + py * texsize / 2 + py * texsize * shiftZ);
-
-	if (!aMap)
-		return false;
-
-	std::vector<VBOData> * buffer = new std::vector<VBOData> ((aMap->sizeX - 1) * (aMap->sizeY - 1) * 6);
-
-
-	int nX, nZ, nTri, nIndex = 0;									// Create Variables
-	float flX, flZ;
-	short maxheight = 0, minheight = 10000;
-	for (int i = 0; i < aMap->sizeX * aMap->sizeY; i++) {
-		if (aMap->data[i] > maxheight) maxheight = aMap->data[i];
-		if (aMap->data[i] < minheight) minheight = aMap->data[i];
-	}
-	Bounds = new glm::vec3[2];
-	Bounds[0].x = Bounds[0].y = Bounds[0].z = FLT_MAX;
-	Bounds[1].x = Bounds[1].y = Bounds[1].z = FLT_MIN;
-
-	float lonStretch = aMapH->dlon * cnvrt::londg2m(1, aMapH->latSW + aMapH->dlat * aMapH->Nlat / 2.0) / scn->mpph;
-	float latStretch = aMapH->dlat * cnvrt::latdg2m(1, aMapH->latSW + aMapH->dlat * aMapH->Nlat / 2.0) / scn->mpph;
-
-	float absoluteShiftX = shiftX * lonStretch * (aMap->sizeX - 1);
-	float absoluteShiftZ = shiftZ * latStretch * (aMap->sizeY - 1);
-
-	LocalAverageHeight = 0;
-
-	VBOData tmp;
-	float minh = CSettings::GetFloat(FloatMinAltitude), maxh = CSettings::GetFloat(FloatMaxAltitude), h, level;
-	glm::vec4 mincolor = CSettings::GetColor(ColorAltitudeLowest), maxcolor = CSettings::GetColor(ColorAltitudeHighest);
-	for (nZ = 0; nZ < aMap->sizeY - 1; nZ++)
-	{
-		for (nX = 0; nX < aMap->sizeX - 1; nX++)
-		{			
-			for (nTri = 0; nTri < 6; nTri++)
-			{
-				// Using This Quick Hack, Figure The X,Z Position Of The Point
-				flX = (float)nX + ((nTri == 1 || nTri == 2 || nTri == 5) ? 1.0f : 0.0f);
-				flZ = (float)nZ + ((nTri == 2 || nTri == 4 || nTri == 5) ? 1.0f : 0.0f);
-
-				// Set The Data, Using PtHeight To Obtain The Y Value
-				h = PtHeight((int)flX, (int)flZ);
-				level = (h - minh) / (maxh - minh);
-				tmp = {
-					glm::vec4(
-						absoluteShiftX + lonStretch * (-flX + aMap->sizeX / 2.0),
-						h / scn->mppv,
-						absoluteShiftZ + latStretch * (flZ - aMap->sizeY / 2.0),
-						1),
-					glm::vec3(0, 1, 0),
-					mincolor * (1-level) + maxcolor * level,
-					glm::vec2(flX / aMap->sizeX, flZ / aMap->sizeY) };
-				
-				buffer->push_back(tmp);
-
-				rcutils::takeminmax(tmp.vert.x, &(Bounds[0].x), &(Bounds[1].x));
-				rcutils::takeminmax(tmp.vert.y, &(Bounds[0].y), &(Bounds[1].y));
-				rcutils::takeminmax(tmp.vert.z, &(Bounds[0].z), &(Bounds[1].z));
-
-				if (nTri == 0)
-					LocalAverageHeight += tmp.vert.y;
-				// Increment Our Index
-				nIndex++;
-
-
-			}
-		}
-	}
-	LocalAverageHeight /= aMap->sizeY * aMap->sizeX;
-
-	prog.insert_or_assign(vpId, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color"));
-
-	vbo.insert_or_assign(vpId, new C3DObjectVBO(clearAfter));
-	vbo.at(vpId)->SetBuffer(buffer, &(*buffer)[0], buffer->size());
-
-	if (FreeImage_GetBPP(subimage) != 32)
-	{
-		FIBITMAP* tempImage = subimage;
-		subimage = FreeImage_ConvertTo32Bits(tempImage);
-	}
-	tex.insert_or_assign(vpId, new C3DObjectTexture(subimage, "tex", true, false));
-
-
-	
-	CenterHeight = PtHeight(min(max(aMap->sizeX / 2 + aMap->sizeX * shiftX - 1, 0), aMap->sizeX - 1), min(max(aMap->sizeY / 2 - aMap->sizeY * shiftZ, 0), aMap->sizeY-1));
-	Y0 = CenterHeight / scn->mppv;
-
-
-	return true;
-}
-
 bool CMesh::LoadHeightmap(int vpId)
 {
 	string context = "CMesh::LoadHeightmap(int vpId)";
-	if (!scn)
-	{
-		LOG_ERROR__("scn is nullptr");
-		return false;
-	}
+
 	if (LOG_ENABLED && CMesh_LoadHeightmap_LOG)
 	{
 		CRCLogger::Info(requestID, context, "Start, vpId=" + vpId);
 	}
 
-	iMapH = GetImageMapHeader(scn->imgFile.data(), scn->datFile.data());
-	if (!iMapH)
-	{
-		LOG_ERROR__("GetImageMapHeader returned nullptr");
-		return false;
-	}
-	if (iMapH->sizeX == 0)
-	{
-		LOG_ERROR__("iMapH->sizeX == 0");
-		return false;
-	}
-	if (iMapH->sizeY == 0)
-	{
-		LOG_ERROR__("iMapH->sizeY == 0");
-		return false;
-	}
-	float pxlon = (iMapH->imgLon1 - iMapH->imgLon0) / iMapH->sizeX;
-	if (pxlon <= 0)
-	{
-		LOG_ERROR__("pxlon <= 0");
-		return false;
-	}
-	float pxlat = (iMapH->imgLon1 - iMapH->imgLon0) / iMapH->sizeX;
-	if (pxlat <= 0)
-	{
-		LOG_ERROR__("pxlat <= 0");
-		return false;
-	}
 
-
-
-	glm::vec2 radar_pos(scn->geocenter.x, scn->geocenter.y);
-
-	float max_range = CSettings::GetFloat(FloatMaxDistance);
-
-	if (LOG_ENABLED && CMesh_LoadHeightmap_LOG)
-	{
-		LOG_INFO__("geocenter=(%.6f, %.6f) max_range=%.6f",
-			scn->geocenter.x,
-			scn->geocenter.y,
-			max_range);
-	}
-
-
-	double lonm = cnvrt::londg2m(1, radar_pos.y);
-	double latm = cnvrt::latdg2m(1, radar_pos.x);
-	if (lonm == 0 || latm == 0)
+	double lonm = cnvrt::londg2m(1, position.y);
+	double latm = cnvrt::latdg2m(1, position.y);
+	if (lonm <= 0 || latm <= 0)
 	{
 		LOG_ERROR__("lonm=%f latm=%f", lonm, latm);
 	}
@@ -217,23 +48,21 @@ bool CMesh::LoadHeightmap(int vpId)
 	}
 	
 
-	double lon0 = radar_pos.x - max_range_lon;
-	double lat0 = radar_pos.y - max_range_lat;
-	double lon1 = radar_pos.x + max_range_lon;
-	double lat1 = radar_pos.y + max_range_lat;
+	double lon0 = position.x - max_range_lon;
+	double lat0 = position.y - max_range_lat;
+	double lon1 = position.x + max_range_lon;
+	double lat1 = position.y + max_range_lat;
 
-	int cx = iMapH->sizeX * (scn->geocenter.x - iMapH->imgLon0) / (iMapH->imgLon1 - iMapH->imgLon0);
-	int cy = iMapH->sizeY * (scn->geocenter.y - iMapH->imgLat0) / (iMapH->imgLat1 - iMapH->imgLat0);
+	//CRCTextureDataFile iMapH(lon0, lat0, lon1, lat1, texsize, texsize);
 
-	int top = iMapH->sizeY - cy - texsize / 2 + 1 - texsize * shiftZ;
-	int left = cx - texsize / 2 + 1 - texsize * shiftX;
-	int bottom = top + texsize;
-	int right = left + texsize;
+	//here we get pixels from our "database"
 
-	subimage = FreeImage_Copy((FIBITMAP*)bitmap, left, top, right, bottom);
 
-	double px = (iMapH->imgLon1 - iMapH->imgLon0) / iMapH->sizeX;
-	double py = (iMapH->imgLat1 - iMapH->imgLat0) / iMapH->sizeY;
+
+	//subimage = FreeImage_Copy((FIBITMAP*)bitmap, left, top, right, bottom);
+
+	double px = (lon1 - lon0) / texsize;
+	double py = (lat1 - lat0) / texsize;
 
 	CRCDataFileSet set;
 
@@ -271,11 +100,8 @@ bool CMesh::LoadHeightmap(int vpId)
 
 	double latSW = alt_.Lat0(); 
 
-	float lonStretch = dlon * cnvrt::londg2m(1, latSW + dlat * (alt_.Width() - 1) / 2.0) / scn->mpph;
-	float latStretch = dlat * cnvrt::latdg2m(1, latSW + dlat * (alt_.Width() - 1) / 2.0) / scn->mpph;
-
-	float absoluteShiftX = shiftX * lonStretch * (alt_.Width() - 1);
-	float absoluteShiftZ = shiftZ * latStretch * (alt_.Height() - 1);
+	float lonStretch = dlon * cnvrt::londg2m(1, latSW + dlat * (alt_.Width() - 1) / 2.0) / MPPh;
+	float latStretch = dlat * cnvrt::latdg2m(1, latSW + dlat * (alt_.Width() - 1) / 2.0) / MPPh;
 
 	LocalAverageHeight = 0;
 
@@ -297,9 +123,9 @@ bool CMesh::LoadHeightmap(int vpId)
 				level = (h - minh) / (maxh - minh);
 				tmp = {
 					glm::vec4(
-						absoluteShiftX + lonStretch * (-flX + alt_.Width() / 2.0),
-						h / scn->mppv,
-						absoluteShiftZ + latStretch * (flZ - alt_.Height() / 2.0),
+						lonStretch * (-flX + alt_.Width() / 2.0),
+						h / MPPv,
+						latStretch * (flZ - alt_.Height() / 2.0),
 						1),
 					glm::vec3(0, 1, 0),
 					mincolor * (1 - level) + maxcolor * level,
@@ -336,8 +162,8 @@ bool CMesh::LoadHeightmap(int vpId)
 
 
 
-	CenterHeight = alt_.ValueAt(min(max(alt_.Width() / 2 + alt_.Width() * shiftX - 1, 0), alt_.Width() - 1), min(max(alt_.Height() / 2 - alt_.Height() * shiftZ, 0), alt_.Height() - 1));
-	Y0 = CenterHeight / scn->mppv;
+	CenterHeight = alt_.ValueAt(min(max(alt_.Width() / 2 - 1, 0), alt_.Width() - 1), min(max(alt_.Height() / 2, 0), alt_.Height() - 1));
+	Y0 = CenterHeight / MPPv;
 
 
 	return true;
@@ -564,25 +390,29 @@ float CMesh::PtHeight(int nX, int nY) const
 	return (float)aMap->data[nPos];
 }
 
-CMesh::CMesh(int vpId, CScene* scn, bool clearAfter, float shiftX, float shiftZ) : C3DObjectModel(vpId, nullptr, nullptr, nullptr)
+CMesh::CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution) : C3DObjectModel(vpId, nullptr, nullptr, nullptr)
 {
 	std::string context = "CMesh::CMesh";
-	CRCLogger::Info(requestID, context, (boost::format("Start... vpId=%1%, scn=%2%, clearAfter=%3%, shiftX=%4%, shiftZ=%5%") 
+	CRCLogger::Info(requestID, context, (boost::format("Start... vpId=%1%, clearAfter=%3%, position=(%4%, %5%), max_range=%6%, texsize=%7%, resolution=%8%") 
 		% vpId 
-		% scn 
+		% 0 //scn 
 		% clearAfter 
-		% shiftX 
-		% shiftZ).str());
+		% position.x
+		% position.y
+		% max_range
+		% texsize
+		% resolution).str());
 
-	this->scn = scn;
+	max_range = CSettings::GetFloat(FloatMaxDistance);
+
 	aMap = nullptr;
 	Bounds = nullptr;
 	iMapH = nullptr;
 	aMapH = nullptr;
-	this->texsize = scn->texsize;
+	this->texsize = texsize;
+	this->resolution = resolution;
+	this->max_range = max_range;
 	this->clearAfter = clearAfter;
-	this->shiftX = shiftX;
-	this->shiftZ = shiftZ;
 	LoadHeightmap(vpId);
 	UseTexture = 1;
 }

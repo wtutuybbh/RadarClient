@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "CRCTextureDataFile.h"
+#include "Util.h"
 #include "CRCLogger.h"
 
 CRCTextureDataFile::CRCTextureDataFile(const std::string& imgFileName) :
@@ -177,12 +178,22 @@ glm::vec4 CRCTextureDataFile::ColorAt(float lon, float lat)
 	return glm::vec4(0);
 }
 
-void CRCTextureDataFile::ApplyIntersection(CRCDataFile& src)
+void CRCTextureDataFile::ApplyIntersection(CRCDataFile *src)
 {
 	std::string context = "CRCTextureDataFile::ApplyIntersection";
-	CRCLogger::Info(requestID, context, (boost::format("Start... this->filename=%1%, src.Filename=%2%") % fileName % src.GetName()).str());
 
-	if (!src.Open())
+	if (!src)
+	{
+		LOG_ERROR__("src is nullptr");
+		return;
+	}
+
+
+	CRCLogger::Info(requestID, context, (boost::format("Start... this->filename=%1%, src.Filename=%2%") % fileName % src->GetName()).str());
+
+	
+
+	if (!src->Open())
 	{
 		CRCLogger::Error(requestID, context, "src.Open() failed. RETURN.");
 		return;
@@ -195,7 +206,7 @@ void CRCTextureDataFile::ApplyIntersection(CRCDataFile& src)
 		return;
 	}
 
-	FIBITMAP *src_dib = (FIBITMAP *)src.Data();
+	FIBITMAP *src_dib = (FIBITMAP *)src->Data();
 	if (!src_dib)
 	{
 		CRCLogger::Error(requestID, context, "src.data not initialized. RETURN.");
@@ -205,7 +216,7 @@ void CRCTextureDataFile::ApplyIntersection(CRCDataFile& src)
 	//assume *this as a target
 	int this_x0, this_x1, this_y0, this_y1, src_x0, src_x1, src_y0, src_y1;
 
-	if (!GetIntersection(src, this_x0, this_y0, this_x1, this_y1) || !src.GetIntersection(*this, src_x0, src_y0, src_x1, src_y1)) 
+	if (!GetIntersection(src, this_x0, this_y0, this_x1, this_y1) || !src->GetIntersection(this, src_x0, src_y0, src_x1, src_y1))
 	{
 		CRCLogger::Warn(requestID, context, (boost::format("Intersection not found. this_x0=%1%, this_y0=%2%, this_x1=%3%, this_y1=%4%.")
 			% this_x0 % this_y0 % this_x1 % this_y1).str());
@@ -219,8 +230,8 @@ void CRCTextureDataFile::ApplyIntersection(CRCDataFile& src)
 	this_y0 = height - this_y1 - 1;
 	this_y1 = height - tmp - 1;
 	tmp = src_y0;
-	src_y0 = src.Height() - src_y1 - 1;
-	src_y1 = src.Height() - tmp - 1;
+	src_y0 = src->Height() - src_y1 - 1;
+	src_y1 = src->Height() - tmp - 1;
 
 	CRCLogger::Info(requestID, context, (boost::format("After 'magic swap'. this_x0=%1%, this_y0=%2%, this_x1=%3%, this_y1=%4%,    src_x0=%5%, src_y0=%6%, src_x1=%7%, src_y1=%8%.")
 		% this_x0 % this_y0 % this_x1 % this_y1 % src_x0 % src_y0 % src_x1 % src_y1).str());

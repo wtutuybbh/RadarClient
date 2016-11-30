@@ -129,6 +129,17 @@ void CRCDataFileSet::AddFiles(std::string dir, DataFileType typeFilter, std::str
 	CRCLogger::Info(requestID, context, "End. Ok.");	
 }
 
+void CRCDataFileSet::ApplyIntersection(CRCDataFile& target)
+{
+	for (auto it = begin(_files); it != end(_files); ++it)
+	{
+		if (*it != nullptr && (*it)->Type() == target.Type())
+		{
+			target.ApplyIntersection((*it));
+		}			
+	}
+}
+
 int CRCDataFileSet::CountFilesOfGivenType(DataFileType type)
 {
 	int size = 0;

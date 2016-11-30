@@ -16,7 +16,7 @@ public:
 	glm::vec4 ColorAt(int x, int y);
 	glm::vec4 ColorAt(float lon, float lat);
 
-	void ApplyIntersection(CRCDataFile &src) override;
+	void ApplyIntersection(CRCDataFile *src) override;
 
 	bool Open() override;
 	bool Close() override;

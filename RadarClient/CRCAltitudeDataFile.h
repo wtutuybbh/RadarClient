@@ -27,7 +27,7 @@ public:
 	short ValueAt(double lon, double lat);
 	void SetValue(int x, int y, short val/*, float resX, float resY*/) const;
 
-	void ApplyIntersection(CRCDataFile &src) override;
+	void ApplyIntersection(CRCDataFile *src) override;
 
 	bool Open() override;
 	bool Close() override;

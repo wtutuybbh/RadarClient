@@ -51,7 +51,7 @@ void CScene::ClearSelection()
 	}
 }
 
-CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv, int texsize) 
+CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, float lonc, float latc, float mpph, float mppv) 
 {
 	std::string context = "CScene::CScene";
 	CRCLogger::Info(requestID, context, "Start");
@@ -71,36 +71,9 @@ CScene::CScene(std::string altFile, std::string imgFile, std::string datFile, fl
 	this->imgFile = imgFile;
 	this->datFile = datFile;
 
-	this->texsize = texsize;
+	this->texsize = texsize;	
 
-	m_Bounds = new glm::vec3[2];
-	m_Bounds[0].x = m_Bounds[0].y = m_Bounds[0].z = FLT_MAX;
-	m_Bounds[1].x = m_Bounds[1].y = m_Bounds[1].z = FLT_MIN;
-	
-	Mesh = new CMesh(Main, this, true, 0, 0);
-	rcutils::takeminmax(Mesh->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(Mesh->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(Mesh->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-	rcutils::takeminmax(Mesh->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(Mesh->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(Mesh->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-
-	MeshSize = m_Bounds[1] - m_Bounds[0];
-
-	Camera->MeshSize = Mesh->Size = MeshSize;
-
-	Mesh->Init(MiniMap);
-
-	CMesh::Meshs = new CMesh*[1];
-	CMesh::Meshs[0] = Mesh;
-	CMesh::TotalMeshsCount = 1;
-
-	y0 = Mesh->CenterHeight / mppv;
-
-	mmPointer = new CMiniMapPointer(MiniMap, this);
-	//y0 = (Mesh->CenterHeight + Mesh1->CenterHeight + Mesh2->CenterHeight + Mesh3->CenterHeight) / 4 / mppv;
-	
-
+	mmPointer = new CMiniMapPointer(MiniMap, this);	
 
 	Markup = new CMarkup(glm::vec4(0, y0, 0, 1));	
 
@@ -1010,5 +983,28 @@ glm::vec3 CScene::GetGeographicCoordinates(glm::vec3 glCoords)
 
 void CScene::LoadMesh(float lonc, float latc, float size, int imgSize, int altSize)
 {
+	m_Bounds = new glm::vec3[2];
+	m_Bounds[0].x = m_Bounds[0].y = m_Bounds[0].z = FLT_MAX;
+	m_Bounds[1].x = m_Bounds[1].y = m_Bounds[1].z = FLT_MIN;
+
+	Mesh = new CMesh(Main, this, true, 0, 0);
+	rcutils::takeminmax(Mesh->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(Mesh->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(Mesh->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+	rcutils::takeminmax(Mesh->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(Mesh->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(Mesh->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+
+	MeshSize = m_Bounds[1] - m_Bounds[0];
+
+	Camera->MeshSize = Mesh->Size = MeshSize;
+
+	Mesh->Init(MiniMap);
+
+	CMesh::Meshs = new CMesh*[1];
+	CMesh::Meshs[0] = Mesh;
+	CMesh::TotalMeshsCount = 1;
+
+	y0 = Mesh->CenterHeight / mppv;
 }
 

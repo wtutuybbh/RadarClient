@@ -220,9 +220,15 @@ void CRCAltitudeDataFile::SetValue(int x, int y, short val) const
 	}
 }
 
-void CRCAltitudeDataFile::ApplyIntersection(CRCDataFile& src)
+void CRCAltitudeDataFile::ApplyIntersection(CRCDataFile *src)
 {
 	std::string context = "CRCAltitudeDataFile::ApplyIntersection";
+	if (!src)
+	{
+		LOG_ERROR__("src is nullptr");
+		return;
+	}
+
 	if(height==0)
 	{
 		LOG_ERROR__("height==0");
@@ -235,23 +241,23 @@ void CRCAltitudeDataFile::ApplyIntersection(CRCDataFile& src)
 	}
 	if (LOG_ENABLED && CRCAltitudeDataFile_ApplyIntersection_LOG)
 	{
-		LOG_INFO(requestID, context, (boost::format("Start... this->filename=%1%, src.Filename=%2%") % fileName % src.GetName()).str().c_str());
+		LOG_INFO(requestID, context, (boost::format("Start... this->filename=%1%, src.Filename=%2%") % fileName % src->GetName()).str().c_str());
 	}	
 	
 
 	int this_x0, this_x1, this_y0, this_y1, src_x0, src_x1, src_y0, src_y1;
-	CRCAltitudeDataFile *asrc = reinterpret_cast <CRCAltitudeDataFile *> (&src);
+	CRCAltitudeDataFile *asrc = static_cast<CRCAltitudeDataFile *>(src);
 	
-	if (!GetIntersection(src, this_x0, this_y0, this_x1, this_y1) || !src.GetIntersection(*this, src_x0, src_y0, src_x1, src_y1))
+	if (!GetIntersection(src, this_x0, this_y0, this_x1, this_y1) || !src->GetIntersection(this, src_x0, src_y0, src_x1, src_y1))
 	{
 		LOG_WARN(requestID, context, (boost::format("Intersection not found. src.Filename=%1%, this_x0=%2%, this_y0=%3%, this_x1=%4%, this_y1=%5%.") 
-			% src.GetName() % this_x0 % this_y0 % this_x1 % this_y1).str().c_str());
+			% src->GetName() % this_x0 % this_y0 % this_x1 % this_y1).str().c_str());
 		return;
 	}
 	if (LOG_ENABLED && CRCAltitudeDataFile_ApplyIntersection_LOG)
 	{
 		LOG_INFO(requestID, context, (boost::format("Intersection found. src.Filename=%1%, this_x0=%2%, this_y0=%3%, this_x1=%4%, this_y1=%5%,    src_x0=%6%, src_y0=%7%, src_x1=%8%, src_y1=%9%.")
-			% src.GetName() % this_x0 % this_y0 % this_x1 % this_y1 % src_x0 % src_y0 % src_x1 % src_y1).str().c_str());
+			% src->GetName() % this_x0 % this_y0 % this_x1 % this_y1 % src_x0 % src_y0 % src_x1 % src_y1).str().c_str());
 	}
 
 	asrc->size_set(src_x0, src_y0, src_x1, src_y1);
@@ -259,7 +265,7 @@ void CRCAltitudeDataFile::ApplyIntersection(CRCDataFile& src)
 	float dlon = DLon();
 	float dlat = DLat();
 
-	if (!src.Open())
+	if (!src->Open())
 	{
 		LOG_ERROR(requestID, context, "src.Open() failed. RETURN.");
 		return;

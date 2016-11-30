@@ -26,8 +26,8 @@ public:
 	virtual ~CRCDataFile();
 	DataFileType Type() const;
 	std::string  TypeName() const;
-	virtual void ApplyIntersection(CRCDataFile &src);
-	bool GetIntersection(CRCDataFile &src, int &x0, int &y0, int &x1, int &y1) const;
+	virtual void ApplyIntersection(CRCDataFile *src) = 0;
+	bool GetIntersection(CRCDataFile *src, int &x0, int &y0, int &x1, int &y1) const;
 	void FitSize(float resX, float resY); // set height, width and new boundaries
 	virtual bool Open() = 0;
 	virtual bool Close() = 0;

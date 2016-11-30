@@ -16,6 +16,7 @@ public:
 	void AddFile(CRCDataFile *file);
 	void AddFile(DataFileType type, std::string file);
 	void AddFiles(std::string dir, DataFileType typeFilter, std::string extFilter);
+	void ApplyIntersection(CRCDataFile &target);
 	int CountFilesOfGivenType(DataFileType type);
 	CRCDataFile *GetFile(int index);
 	~CRCDataFileSet();

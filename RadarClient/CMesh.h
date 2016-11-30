@@ -37,6 +37,7 @@ PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB = NULL;			// VBO Deletion Procedure
 //#include <vector>
 //#include "ShaderUtils.h"
 
+class CRCTextureDataFile;
 class CScene;
 
 typedef struct {
@@ -59,10 +60,7 @@ typedef int(_cdecl * GDPALTITUDEMAP)(const char *, double *, int *, short *);
 typedef int(_cdecl * GDPALTITUDEMAP_SIZES)(const char *, double *, int *);
 
 class CMesh : public C3DObjectModel
-{
-	CScene *scn{ nullptr };
-	
-	bool LoadHeightmap_old(int vpId);
+{	
 	bool LoadHeightmap(int vpId);
 	AltitudeMap* GetAltitudeMap(const char *fileName, double lon1, double lat1, double lon2, double lat2);
 	AltitudeMapHeader* GetAltitudeMapHeader(const char *fileName, double lon1, double lat1, double lon2, double lat2);
@@ -71,16 +69,20 @@ class CMesh : public C3DObjectModel
 	int texsize;
 	AltitudeMap* aMap{ nullptr };							// Heightmap Data
 	AltitudeMapHeader* aMapH{ nullptr };
-	ImageMapHeader* iMapH{ nullptr };
+
 	glm::vec3 * Bounds{ nullptr };
 	
 
 	void *bitmap{ nullptr };
-	FIBITMAP *subimage{ nullptr };
+	CRCTextureDataFile *subimage{ nullptr };
 
 	bool clearAfter;
 
-	float shiftX, shiftZ;
+	glm::vec2 position;
+	int resolution;
+	double max_range;
+
+	float MPPh, MPPv;
 public:
 	glm::vec3 Size;
 	static float Y0, AverageHeight;
@@ -89,7 +91,7 @@ public:
 	float LocalAverageHeight;
 	static int TotalVertexCount;
 	int UseTexture, UseAltitudeMap;
-	CMesh(int vpId, CScene *scn, bool clearAfter, float shiftX, float shiftZ);
+	CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution);
 	~CMesh() override;
 	float CenterHeight;
 	bool IntersectLine(int vpId, glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position) override;
