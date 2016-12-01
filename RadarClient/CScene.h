@@ -52,7 +52,9 @@ public:
 
 	float mpph; // meters per pixel vertical
 	float mppv; // meters per pixel horizontal
-	glm::vec2 geocenter; //geographic coordinates of center point (place of the radar)
+	glm::vec2 position; //geographic coordinates of center point (place of the radar)
+	double max_range ;
+	int resolution;
 	int msize; // area square's side length in meters
 	glm::vec3 *meshBounds{ nullptr };
 

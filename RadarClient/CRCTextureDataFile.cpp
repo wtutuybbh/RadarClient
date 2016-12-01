@@ -188,10 +188,7 @@ void CRCTextureDataFile::ApplyIntersection(CRCDataFile *src)
 		return;
 	}
 
-
-	CRCLogger::Info(requestID, context, (boost::format("Start... this->filename=%1%, src.Filename=%2%") % fileName % src->GetName()).str());
-
-	
+	CRCLogger::Info(requestID, context, (boost::format("Start... this->filename=%1%, src.Filename=%2%") % fileName % src->GetName()).str());	
 
 	if (!src->Open())
 	{

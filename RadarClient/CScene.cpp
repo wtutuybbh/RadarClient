@@ -54,15 +54,17 @@ void CScene::ClearSelection()
 CScene::CScene() 
 {
 	std::string context = "CScene::CScene";
-	CRCLogger::Info(requestID, context, "Start");
+	LOG_INFO(requestID, context, "Start");
 	rdrinit = nullptr;
 
 	SectorsCount = 0;
 
 	this->Camera = new CCamera();
 
-	geocenter.x = lonc;
-	geocenter.y = latc;
+	position.x = CSettings::GetFloat(FloatPositionLon);
+	position.y = CSettings::GetFloat(FloatPositionLat);
+
+	max_range = CSettings::GetFloat(FloatMaxDistance);
 
 	this->mppv = mppv;
 	this->mpph = mpph;
@@ -913,7 +915,7 @@ glm::vec2 CScene::CameraXYForMiniMap() const
 
 void CScene::DrawBitmaps() const
 {
-	BitmapString(0, y0, 0, "(" + cnvrt::float2str(geocenter.x) + "; " + cnvrt::float2str(geocenter.y) + ")");
+	BitmapString(0, y0, 0, "(" + cnvrt::float2str(position.x) + "; " + cnvrt::float2str(position.y) + ")");
 	glColor4f(1.0f, 1.0f, 0.0f, 0.7f);
 	BitmapString(-10 * markDistance / mpph, y0 + 1, 0, "1km");
 	BitmapString(10 * markDistance / mpph, y0 + 1, 0, "1km");
@@ -978,7 +980,7 @@ void CScene::SetBegAzm(double begAzm)
 
 glm::vec3 CScene::GetGeographicCoordinates(glm::vec3 glCoords)
 {
-	return glm::vec3(geocenter.x + glCoords.x * mpph / cnvrt::londg2m(1, geocenter.y), geocenter.y + glCoords.z * mpph / cnvrt::londg2m(1, geocenter.y), glCoords.y);
+	return glm::vec3(position.x + glCoords.x * mpph / cnvrt::londg2m(1, position.y), position.y + glCoords.z * mpph / cnvrt::londg2m(1, position.y), glCoords.y);
 }
 
 void CScene::LoadMesh(float lonc, float latc, float size, int imgSize, int altSize)
@@ -987,7 +989,7 @@ void CScene::LoadMesh(float lonc, float latc, float size, int imgSize, int altSi
 	m_Bounds[0].x = m_Bounds[0].y = m_Bounds[0].z = FLT_MAX;
 	m_Bounds[1].x = m_Bounds[1].y = m_Bounds[1].z = FLT_MIN;
 
-	Mesh = new CMesh(Main, this, true, 0, 0);
+	Mesh = new CMesh(Main, true, position, max_range, texsize, resolution);
 	rcutils::takeminmax(Mesh->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
 	rcutils::takeminmax(Mesh->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
 	rcutils::takeminmax(Mesh->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));

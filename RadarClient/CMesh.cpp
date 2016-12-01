@@ -401,9 +401,7 @@ CMesh::CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, in
 		% position.y
 		% max_range
 		% texsize
-		% resolution).str());
-
-	max_range = CSettings::GetFloat(FloatMaxDistance);
+		% resolution).str());	
 
 	aMap = nullptr;
 	Bounds = nullptr;
