@@ -76,7 +76,7 @@ bool CMesh::LoadHeightmap(int vpId)
 
 	for (auto i = 0; i < set.Files().size(); i++)
 	{
-		alt_.ApplyIntersection(*set.GetFile(i));
+		alt_.ApplyIntersection(set.GetFile(i));
 	}
 
 	std::vector<VBOData> * buffer = new std::vector<VBOData>((alt_.Width() - 1) * (alt_.Height() - 1) * 6);

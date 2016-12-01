@@ -53,7 +53,8 @@ enum Settings
 	FloatMaxZeroElevation,
 	FloatPositionLon,
 	FloatPositionLat,
-	IntResolution
+	IntResolution,
+	IntTexSize
 };
 
 

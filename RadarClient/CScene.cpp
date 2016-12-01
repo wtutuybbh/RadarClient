@@ -63,17 +63,11 @@ CScene::CScene()
 
 	position.x = CSettings::GetFloat(FloatPositionLon);
 	position.y = CSettings::GetFloat(FloatPositionLat);
-
 	max_range = CSettings::GetFloat(FloatMaxDistance);
-
-	this->mppv = mppv;
-	this->mpph = mpph;
-
-	this->altFile = altFile;
-	this->imgFile = imgFile;
-	this->datFile = datFile;
-
-	this->texsize = texsize;	
+	resolution = CSettings::GetInt(IntResolution);	
+	mppv = CSettings::GetFloat(FloatMPPv);
+	mpph = CSettings::GetFloat(FloatMPPh);
+	texsize = CSettings::GetInt(IntTexSize);
 
 	mmPointer = new CMiniMapPointer(MiniMap, this);	
 

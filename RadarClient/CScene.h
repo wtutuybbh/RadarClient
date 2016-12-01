@@ -57,8 +57,6 @@ public:
 	int resolution;
 	int msize; // area square's side length in meters
 	glm::vec3 *meshBounds{ nullptr };
-
-	std::string altFile, imgFile, datFile;
 	
 	int texsize;
 	

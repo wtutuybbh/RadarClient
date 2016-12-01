@@ -75,7 +75,7 @@ bool CRCDataFile::GetIntersection(CRCDataFile *src, int& x0, int& y0, int& x1, i
 	if (!src)
 	{
 		LOG_ERROR_("CRCDataFile::GetIntersection", "src is nullptr");
-		return;
+		return false;
 	}
 	//x0, y0, x1, y1 - coordinates of *this.
 	//if you need coordinates of src, just revert the call

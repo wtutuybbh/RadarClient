@@ -73,7 +73,9 @@ class CMesh : public C3DObjectModel
 	glm::vec3 * Bounds{ nullptr };
 	
 
-	void *bitmap{ nullptr };
+	//void *bitmap{ nullptr };
+
+	CRCTextureDataFile *bitmap{ nullptr };
 	CRCTextureDataFile *subimage{ nullptr };
 
 	bool clearAfter;
