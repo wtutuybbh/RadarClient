@@ -56,23 +56,27 @@ bool CMesh::LoadHeightmap(int vpId)
 	//CRCTextureDataFile iMapH(lon0, lat0, lon1, lat1, texsize, texsize);
 
 	//here we get pixels from our "database"
+	CRCDataFileSet set;
+	set.AddFiles("TextureData", Texture, "");
 
+	maptexture = new CRCTextureDataFile(lon0, lat0, lon1, lat1, texsize, texsize);
 
-
+	for (auto i = 0; i < set.Files().size(); i++)
+	{
+		maptexture->ApplyIntersection(set.GetFile(i));
+	}
+	
 	//subimage = FreeImage_Copy((FIBITMAP*)bitmap, left, top, right, bottom);
 
 	double px = (lon1 - lon0) / texsize;
 	double py = (lat1 - lat0) / texsize;
 
-	CRCDataFileSet set;
+	set.Clear();
 
 	set.AddFiles("AltitudeData", Altitude, "");	
 
-	int width = 200;
-	int height = 200;
 
-
-	CRCAltitudeDataFile alt_(lon0, lat0, lon1, lat1, width, height);
+	CRCAltitudeDataFile alt_(lon0, lat0, lon1, lat1, resolution, resolution);
 
 	for (auto i = 0; i < set.Files().size(); i++)
 	{
@@ -152,6 +156,8 @@ bool CMesh::LoadHeightmap(int vpId)
 
 	vbo.insert_or_assign(vpId, new C3DObjectVBO(clearAfter));
 	vbo.at(vpId)->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+
+	FIBITMAP* subimage = (FIBITMAP*)maptexture->Data();
 
 	if (FreeImage_GetBPP(subimage) != 32)
 	{
@@ -322,67 +328,6 @@ AltitudeMapHeader* CMesh::GetAltitudeMapHeader(const char* fileName, double lon1
 	return nullptr;
 }
 
-ImageMapHeader* CMesh::GetImageMapHeader(const char* imgFile, const char* datFile)
-{
-	try 
-	{
-		bitmap = FreeImage_Load(FreeImage_GetFileType(imgFile, 0), imgFile);
-	}
-	catch (...) 
-	{
-		return nullptr;
-	}
-	//access to data: ((FIBITMAP *)bitmap)->data
-
-	std::ifstream infile;
-
-	try 
-	{
-		infile.open(datFile, std::ifstream::in | std::ifstream::binary);
-	}
-	catch (...) 
-	{
-		return nullptr;
-	}
-
-	if (!infile) 
-	{
-		return nullptr;
-	}
-	char line[DATFILE_MAXLINELENGTH];
-	infile.getline(line, DATFILE_MAXLINELENGTH); //useless 1st line
-
-	double imgLon0 = 180, imgLat0 = 90, imgLon1 = -180, imgLat1 = -90, v;
-	char *pch;
-	while (infile.good()) {
-		infile.getline(line, DATFILE_MAXLINELENGTH);
-		if (strlen(line) > 0 && line[0] != '(') {
-			pch = strtok(line, ",");
-			v = atof(pch);
-			if (v < imgLon0)
-				imgLon0 = v;
-			if (v > imgLon1)
-				imgLon1 = v;
-			pch = strtok(nullptr, ",");
-			v = atof(pch);
-			if (v < imgLat0)
-				imgLat0 = v;
-			if (v > imgLat1)
-				imgLat1 = v;
-		}
-
-	}
-	iMapH = new ImageMapHeader;
-	iMapH->imgLon0 = imgLon0;
-	iMapH->imgLat0 = imgLat0;
-	iMapH->imgLon1 = imgLon1;
-	iMapH->imgLat1 = imgLat1;
-	iMapH->sizeX = FreeImage_GetWidth((FIBITMAP*)bitmap);
-	iMapH->sizeY = FreeImage_GetHeight((FIBITMAP*)bitmap);
-
-	return iMapH;
-}
-
 float CMesh::PtHeight(int nX, int nY) const
 {
 	// Calculate The Position In The Texture, Careful Not To Overflow
@@ -405,7 +350,6 @@ CMesh::CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, in
 
 	aMap = nullptr;
 	Bounds = nullptr;
-	iMapH = nullptr;
 	aMapH = nullptr;
 	this->texsize = texsize;
 	this->resolution = resolution;
@@ -435,8 +379,6 @@ CMesh::~CMesh()
 			delete[] aMapH->fileName;
 		delete aMapH;
 	}
-	if (iMapH)
-		delete iMapH;
 }
 
 bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)
@@ -598,12 +540,12 @@ glm::vec3 * CMesh::GetBounds()
 
 void CMesh::Init(int vpId)
 {
-	if (vpId == MiniMap)
+	if (Bounds && maptexture && vpId == MiniMap)
 	{
 		C3DObjectVBO *newvbo = new C3DObjectVBO(false);
 		
 		std::vector<VBOData> *buffer = new std::vector<VBOData>;
-		float y = 0;// (m_Bounds[0].y + m_Bounds[1].y) / 2;
+		float y = 0;
 		buffer->push_back({ glm::vec4(Bounds[0].x, y, Bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
 		buffer->push_back({ glm::vec4(Bounds[0].x, y, Bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
 		buffer->push_back({ glm::vec4(Bounds[1].x, y, Bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
@@ -614,8 +556,6 @@ void CMesh::Init(int vpId)
 
 		newvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 
-		//newvbo->InitStructure();
-
 		vbo.insert_or_assign(vpId, newvbo);
 
 		C3DObjectProgram *newprog = new C3DObjectProgram("Minimap.v.glsl", "Minimap.f.glsl", "vertex", "texcoor", nullptr, nullptr);
@@ -623,7 +563,7 @@ void CMesh::Init(int vpId)
 
 		int minimapTexSize = CSettings::GetInt(IntMinimapTextureSize);
 
-		FIBITMAP *mmimage = FreeImage_Rescale(subimage, minimapTexSize, minimapTexSize, FILTER_BSPLINE);
+		FIBITMAP *mmimage = FreeImage_Rescale((FIBITMAP *)maptexture, minimapTexSize, minimapTexSize, FILTER_BSPLINE);
 		C3DObjectTexture *newtex = new C3DObjectTexture(mmimage, "tex", false, false);
 		tex.insert_or_assign(vpId, newtex);
 

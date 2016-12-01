@@ -75,8 +75,7 @@ class CMesh : public C3DObjectModel
 
 	//void *bitmap{ nullptr };
 
-	CRCTextureDataFile *bitmap{ nullptr };
-	CRCTextureDataFile *subimage{ nullptr };
+	CRCTextureDataFile *maptexture { nullptr };
 
 	bool clearAfter;
 

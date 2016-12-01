@@ -21,5 +21,6 @@ public:
 	CRCDataFile *GetFile(int index);
 	~CRCDataFileSet();
 	std::vector<CRCDataFile *> &Files();
+	void Clear();
 };
 

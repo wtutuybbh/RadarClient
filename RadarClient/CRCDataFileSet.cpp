@@ -3,6 +3,7 @@
 #include "CRCTextureDataFile.h"
 #include "CRCAltitudeDataFile.h"
 #include "CRCLogger.h"
+#include "Util.h"
 
 using namespace boost::filesystem;
 using namespace std;
@@ -160,16 +161,23 @@ CRCDataFileSet::~CRCDataFileSet()
 {
 	std::string context = "CRCDataFileSet DESTRUCTOR";
 	CRCLogger::Info(requestID, context, (boost::format("Destroying CRCDataFileSet object, containing %1% files") % _files.size()).str());
+	Clear();
+	CRCLogger::Info(requestID, context, "End. Ok.");
+}
+
+std::vector<CRCDataFile*>& CRCDataFileSet::Files()
+{	
+	return _files;
+}
+
+void CRCDataFileSet::Clear()
+{
+	std::string context = "CRCDataFileSet::Clear";
+	LOG_INFO__("Deleting files...");
 	for (auto it = begin(_files); it != end(_files); ++it)
 	{
 		if (*it != nullptr)
 			delete *it;
 	}
 	_files.empty();
-	CRCLogger::Info(requestID, context, "End. Ok.");
-}
-
-std::vector<CRCDataFile*>& CRCDataFileSet::Files()
-{
-	return _files;
 }

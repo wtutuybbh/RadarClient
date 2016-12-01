@@ -317,6 +317,11 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	//old_Mesh->MiniMapDraw(Camera);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	if (Mesh)
+	{
+		
+	}
+
 	Mesh->Draw(vpControl, GL_TRIANGLES);
 	/*Mesh1->Draw(vpControl, GL_TRIANGLES);
 	Mesh2->Draw(vpControl, GL_TRIANGLES);
