@@ -175,166 +175,6 @@ bool CMesh::LoadHeightmap(int vpId)
 	return true;
 }
 
-AltitudeMap* CMesh::GetAltitudeMap(const char* fileName, double lon1, double lat1, double lon2, double lat2)
-{
-	string context = "CMesh::GetAltitudeMap";
-	CRCLogger::Info(requestID, context, (boost::format("Start... fileName=%1%, lon1=%2%, lat1=%3%, lon2=%4%, lat2=%5%")
-		% fileName
-		% lon1
-		% lat1
-		% lon2
-		% lat2).str());
-
-	HINSTANCE hDLL;               // Handle to DLL
-	GDPALTITUDEMAP gdpAltitudeMap;    // Function pointer
-	GDPALTITUDEMAP_SIZES gdpAltitudeMap_Sizes;    // Function pointer
-	double LL[10];
-	int size[8], result;
-
-
-
-	hDLL = LoadLibrary("GeoDataProvider.dll");
-	if (hDLL != nullptr)
-	{
-		gdpAltitudeMap = (GDPALTITUDEMAP)GetProcAddress(hDLL, "gdpAltitudeMap");
-		gdpAltitudeMap_Sizes = (GDPALTITUDEMAP_SIZES)GetProcAddress(hDLL, "gdpAltitudeMap_Sizes");
-		if (!gdpAltitudeMap)
-		{
-			FreeLibrary(hDLL);
-			return nullptr;
-		}
-		LL[0] = lon1;
-		LL[1] = lat1;
-		LL[2] = lon2;
-		LL[3] = lat2;
-		result = gdpAltitudeMap_Sizes(fileName, LL, size);
-		if (result == 0) {
-			if (!aMapH) {
-				aMapH = new AltitudeMapHeader;
-				aMapH->fileName = nullptr;
-			}
-			if (aMapH->fileName)
-				delete[] aMapH->fileName;
-			aMapH->fileName = new char[strlen(fileName) + 1];
-			strncpy(aMapH->fileName, fileName, strlen(fileName));
-			aMapH->fileName[strlen(fileName)] = 0;
-			aMapH->sizeX = size[0];
-			aMapH->sizeY = size[1];
-			aMapH->iLonStart = size[2];
-			aMapH->iLatStart = size[3];
-			aMapH->iLonEnd = size[4];
-			aMapH->iLatEnd = size[5];
-			aMapH->Nlon = size[6];
-			aMapH->Nlat = size[7];
-			aMapH->lon0 = LL[4];
-			aMapH->lat0 = LL[5];
-			aMapH->dlon = LL[6];
-			aMapH->dlat = LL[7];
-			aMapH->lonSW = LL[8];
-			aMapH->latSW = LL[9];
-
-			CRCLogger::Info(requestID, context, (boost::format("aMapH overwrite? sizeX=%1%, sizeY=%2%, iLonStart=%3%, iLatStart=%4%, iLonEnd=%5%, iLatEnd=%6%, Nlon=%7%, Nlat=%8%, lon0=%9%, lat0=%10%, dlon=%11%, dlat=%12%, lonSW=%13%, latSW=%14%")
-				% aMapH->sizeX % aMapH->sizeY % aMapH->iLonStart % aMapH->iLatStart % aMapH->iLonEnd % aMapH->iLatEnd % aMapH->Nlon % aMapH->Nlat % aMapH->lon0	% aMapH->lat0 % aMapH->dlon	% aMapH->dlat % aMapH->lonSW % aMapH->latSW).str());
-
-			short *data;
-			data = new short[size[0] * size[1]];
-			
-			if (data) {
-				CRCLogger::Info(requestID, context, (boost::format("size of data is %1% (%2% * %3%)")
-					% (size[0] * size[1]) % size[0] % size[1]).str());
-				result = gdpAltitudeMap(fileName, LL, size, data);
-				if (result == 0) {
-					aMap = new AltitudeMap;
-					aMap->sizeX = size[0];
-					aMap->sizeY = size[1];
-					aMap->data = data;
-					FreeLibrary(hDLL);
-					CRCLogger::Info(requestID, context, "Return, success.");
-					return aMap;
-				}
-			}
-			CRCLogger::Error(requestID, context, (boost::format("new short[size[0] * size[1]] failed. (size[0] * size[1] = %1%)")
-				% (size[0] * size[1])).str());
-		}
-		FreeLibrary(hDLL);
-	}
-	CRCLogger::Error(requestID, context, "LoadLibrary failed.");
-	return nullptr;
-}
-
-AltitudeMapHeader* CMesh::GetAltitudeMapHeader(const char* fileName, double lon1, double lat1, double lon2, double lat2)
-{
-	string context = "CMesh::GetAltitudeMapHeader";
-	CRCLogger::Info(requestID, context, (boost::format("Start... fileName=%1%, lon1=%2%, lat1=%3%, lon2=%4%, lat2=%5%")
-		% fileName
-		% lon1
-		% lat1
-		% lon2
-		% lat2).str());
-
-	HINSTANCE hDLL;               // Handle to DLL
-	GDPALTITUDEMAP_SIZES gdpAltitudeMap_Sizes;    // Function pointer
-	double LL[10];
-	int size[8], result;
-
-	hDLL = LoadLibrary("GeoDataProvider.dll");
-	if (hDLL != nullptr)
-	{
-		gdpAltitudeMap_Sizes = (GDPALTITUDEMAP_SIZES)GetProcAddress(hDLL, "gdpAltitudeMap_Sizes");
-		if (!gdpAltitudeMap_Sizes)
-		{
-			FreeLibrary(hDLL);
-			return nullptr;
-		}
-		LL[0] = lon1;
-		LL[1] = lat1;
-		LL[2] = lon2;
-		LL[3] = lat2;
-		result = gdpAltitudeMap_Sizes(fileName, LL, size);
-		if (result == 0) {
-			if (!aMapH) {
-				aMapH = new AltitudeMapHeader;
-				aMapH->fileName = nullptr;
-			}
-			if (aMapH->fileName)
-				delete[] aMapH->fileName;
-			aMapH->fileName = new char[strlen(fileName) + 1];
-			strncpy(aMapH->fileName, fileName, strlen(fileName));
-			aMapH->fileName[strlen(fileName)] = 0;
-			aMapH->sizeX = size[0];
-			aMapH->sizeY = size[1];
-			aMapH->iLonStart = size[2];
-			aMapH->iLatStart = size[3];
-			aMapH->iLonEnd = size[4];
-			aMapH->iLatEnd = size[5];
-			aMapH->Nlon = size[6];
-			aMapH->Nlat = size[7];
-			aMapH->lon0 = LL[4];
-			aMapH->lat0 = LL[5];
-			aMapH->dlon = LL[6];
-			aMapH->dlat = LL[7];
-			aMapH->lonSW = LL[8];
-			aMapH->latSW = LL[9];
-
-			CRCLogger::Info(requestID, context, (boost::format("Return: sizeX=%1%, sizeY=%2%, iLonStart=%3%, iLatStart=%4%, iLonEnd=%5%, iLatEnd=%6%, Nlon=%7%, Nlat=%8%, lon0=%9%, lat0=%10%, dlon=%11%, dlat=%12%, lonSW=%13%, latSW=%14%")
-				% aMapH->sizeX % aMapH->sizeY % aMapH->iLonStart % aMapH->iLatStart % aMapH->iLonEnd % aMapH->iLatEnd % aMapH->Nlon % aMapH->Nlat % aMapH->lon0 % aMapH->lat0 % aMapH->dlon % aMapH->dlat % aMapH->lonSW % aMapH->latSW).str());
-
-			return aMapH;
-		}
-		CRCLogger::Error(requestID, context, "gdpAltitudeMap_Sizes returned 0.");
-		FreeLibrary(hDLL);
-	}
-	CRCLogger::Error(requestID, context, "LoadLibrary failed.");
-	return nullptr;
-}
-
-float CMesh::PtHeight(int nX, int nY) const
-{
-	// Calculate The Position In The Texture, Careful Not To Overflow
-	int nPos = ((nX % aMap->sizeX) * aMap->sizeY + ((nY % aMap->sizeY)));
-	return (float)aMap->data[nPos];
-}
-
 CMesh::CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution) : C3DObjectModel(vpId, nullptr, nullptr, nullptr)
 {
 	std::string context = "CMesh::CMesh";
@@ -348,9 +188,7 @@ CMesh::CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, in
 		% texsize
 		% resolution).str());	
 
-	aMap = nullptr;
 	Bounds = nullptr;
-	aMapH = nullptr;
 	this->texsize = texsize;
 	this->resolution = resolution;
 	this->max_range = max_range;
@@ -368,17 +206,6 @@ CMesh::~CMesh()
 	}
 	if (Bounds)
 		delete[] Bounds;
-	if (aMap) {
-		if (aMap->data)
-			delete[] aMap->data;		
-		delete aMap;
-	}
-	if (aMapH)
-	{
-		if (aMapH->fileName)
-			delete[] aMapH->fileName;
-		delete aMapH;
-	}
 }
 
 bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)
@@ -402,10 +229,10 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 	bool planeResult = glm::intersectRayPlane(orig, dir, planeOrig, planeNormal, distance);
 	glm::vec4 approxPoint = orig + distance * dir;
 	CMesh *m;
-	glm::vec3 *b;
+	glm::vec3 *b; 
 	for (int i = 0; i < CMesh::TotalMeshsCount; i++) {
 		m = CMesh::Meshs[i];
-		b = m->Bounds;
+		b = m->Bounds; // now b is a shortcut for m->Bounds
 		//find appropriate part of surface by testing bounds:
 		if (approxPoint.x > b[0].x && approxPoint.z > b[0].z && approxPoint.x <= b[1].x && approxPoint.z <= b[1].z) {			
 			break;
@@ -414,17 +241,17 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 	
 	//now work with pointer m:
 	//grid coordinates:
-	int ix0 = -aMap->sizeX * (approxPoint.x - b[1].x) / (b[1].x - b[0].x);
-	int iy0 = aMap->sizeY * (approxPoint.z - b[0].z) / (b[1].z - b[0].z);
-	if (ix0 < 0 || ix0 >= aMap->sizeX || iy0 < 0 || iy0 >= aMap->sizeY) {
-		ix0 = aMap->sizeX / 2;
-		iy0 = aMap->sizeY / 2;
+	int ix0 = -resolution * (approxPoint.x - b[1].x) / (b[1].x - b[0].x);
+	int iy0 = resolution * (approxPoint.z - b[0].z) / (b[1].z - b[0].z);
+	if (ix0 < 0 || ix0 >= resolution || iy0 < 0 || iy0 >= resolution) {
+		ix0 = resolution / 2;
+		iy0 = resolution / 2;
 	}
 	// 2. test triangles around approximate intersection point
 
 	vector<VBOData> *buffer = (vector<VBOData> *)m->GetC3DObjectVBO(Main)->GetBuffer();
 
-	int X = aMap->sizeX - 1, Y = aMap->sizeY - 1;
+	int X = resolution - 1, Y = resolution - 1;
 	/*
 	if (glm::intersectLineTriangle(orig, dir, buffer->at(6 * (iy0 * X + ix0)).vert, buffer->at(6 * (iy0 * X + ix0) + 1).vert, buffer->at(6 * (iy0 * X + ix0) + 2).vert, position))
 		return true;

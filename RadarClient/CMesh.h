@@ -32,6 +32,7 @@ PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB = NULL;			// VBO Deletion Procedure
 */
 
 #include "C3DObjectModel.h"
+#include "CRCAltitudeDataFile.h"
 //#include "CScene.h"
 //#include "FreeImage.h"
 //#include <vector>
@@ -62,13 +63,10 @@ typedef int(_cdecl * GDPALTITUDEMAP_SIZES)(const char *, double *, int *);
 class CMesh : public C3DObjectModel
 {	
 	bool LoadHeightmap(int vpId);
-	AltitudeMap* GetAltitudeMap(const char *fileName, double lon1, double lat1, double lon2, double lat2);
 	AltitudeMapHeader* GetAltitudeMapHeader(const char *fileName, double lon1, double lat1, double lon2, double lat2);
 	ImageMapHeader* GetImageMapHeader(const char *imgFile, const char *datFile);
 	float PtHeight(int nX, int nY) const;
 	int texsize;
-	AltitudeMap* aMap{ nullptr };							// Heightmap Data
-	AltitudeMapHeader* aMapH{ nullptr };
 
 	glm::vec3 * Bounds{ nullptr };
 	
@@ -76,6 +74,7 @@ class CMesh : public C3DObjectModel
 	//void *bitmap{ nullptr };
 
 	CRCTextureDataFile *maptexture { nullptr };
+	CRCAltitudeDataFile *altitude{ nullptr };
 
 	bool clearAfter;
 
