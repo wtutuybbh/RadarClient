@@ -8,6 +8,8 @@ struct RDRTRACK;
 
 class CTrack :	public CSector
 {
+protected:
+	static const std::string requestID;
 public:
 	int ID {-1};
 	bool Found;

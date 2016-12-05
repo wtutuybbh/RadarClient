@@ -68,10 +68,7 @@ class CMesh : public C3DObjectModel
 	float PtHeight(int nX, int nY) const;
 	int texsize;
 
-	glm::vec3 * Bounds{ nullptr };
-	
-
-	//void *bitmap{ nullptr };
+	glm::vec3 * Bounds{ nullptr };	
 
 	CRCTextureDataFile *maptexture { nullptr };
 	CRCAltitudeDataFile *altitude{ nullptr };
@@ -91,7 +88,7 @@ public:
 	float LocalAverageHeight;
 	static int TotalVertexCount;
 	int UseTexture, UseAltitudeMap;
-	CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution);
+	CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv);
 	~CMesh() override;
 	float CenterHeight;
 	bool IntersectLine(int vpId, glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position) override;

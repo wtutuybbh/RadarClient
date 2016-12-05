@@ -50,8 +50,8 @@ public:
 
 	float maxAmp = 0;
 
-	float mpph; // meters per pixel vertical
-	float mppv; // meters per pixel horizontal
+	float MPPh; // meters per pixel vertical
+	float MPPv; // meters per pixel horizontal
 	glm::vec2 position; //geographic coordinates of center point (place of the radar)
 	double max_range ;
 	int resolution;
@@ -176,5 +176,5 @@ public:
 
 	glm::vec3 GetGeographicCoordinates(glm::vec3 glCoords);
 
-	void LoadMesh(float lonc, float latc, float size, int imgSize, int altSize);
+	void LoadMesh();
 };

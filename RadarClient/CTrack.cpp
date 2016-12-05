@@ -7,8 +7,9 @@
 #include "C3DObjectVBO.h"
 #include "CRCLogger.h"
 
+const std::string CTrack::requestID = "CTrack";
 
-CTrack::CTrack(int id, bool selected)
+CTrack::CTrack(int id, bool selected): CSector(id)
 {
 	Selected = selected;
 	ID = id;

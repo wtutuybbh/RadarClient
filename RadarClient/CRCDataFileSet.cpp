@@ -179,5 +179,5 @@ void CRCDataFileSet::Clear()
 		if (*it != nullptr)
 			delete *it;
 	}
-	_files.empty();
+	_files.clear();
 }

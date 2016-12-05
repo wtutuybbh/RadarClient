@@ -175,7 +175,7 @@ bool CMesh::LoadHeightmap(int vpId)
 	return true;
 }
 
-CMesh::CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution) : C3DObjectModel(vpId, nullptr, nullptr, nullptr)
+CMesh::CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv) : C3DObjectModel(vpId, nullptr, nullptr, nullptr)
 {
 	std::string context = "CMesh::CMesh";
 	CRCLogger::Info(requestID, context, (boost::format("Start... vpId=%1%, clearAfter=%3%, position=(%4%, %5%), max_range=%6%, texsize=%7%, resolution=%8%") 
@@ -189,12 +189,17 @@ CMesh::CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, in
 		% resolution).str());	
 
 	Bounds = nullptr;
+	this->position = position;
 	this->texsize = texsize;
 	this->resolution = resolution;
 	this->max_range = max_range;
 	this->clearAfter = clearAfter;
+	this->MPPh = MPPh;
+	this->MPPv = MPPv;
 	LoadHeightmap(vpId);
 	UseTexture = 1;
+
+	
 }
 
 CMesh::~CMesh()

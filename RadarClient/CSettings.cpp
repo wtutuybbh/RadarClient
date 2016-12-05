@@ -162,11 +162,17 @@ void CSettings::Init()
 	floats.insert_or_assign(FloatPositionLat, 55.994606);
 	stringmap.insert_or_assign("FloatPositionLat", FloatPositionLat);
 	
-	ints.insert_or_assign(IntResolution, 200);
+	ints.insert_or_assign(IntResolution, 100);
 	stringmap.insert_or_assign("IntResolution", IntResolution);
 	
 	ints.insert_or_assign(IntTexSize, 800);
 	stringmap.insert_or_assign("IntResolution", IntTexSize);
+
+	floats.insert_or_assign(FloatMPPh, 5.0);
+	stringmap.insert_or_assign("FloatMPPh", FloatMPPh);
+
+	floats.insert_or_assign(FloatMPPv, 5.0);
+	stringmap.insert_or_assign("FloatMPPv", FloatMPPv);
 }
 
 glm::vec4 CSettings::GetColor(int key)

@@ -11,7 +11,7 @@ class CRCDataFile
 {
 protected:
 	static const std::string requestID;
-	std::string fileName{ std::string() };
+	std::string fileName{ std::string("") };
 	double lon0{ 0.0 }, lat0{ 0.0 }, lon1{ 180.0 }, lat1{ 90.0 };
 	int width{ 0 }, height{ 0 };
 	
