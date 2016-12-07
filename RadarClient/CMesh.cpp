@@ -395,7 +395,7 @@ void CMesh::Init(int vpId)
 
 		int minimapTexSize = CSettings::GetInt(IntMinimapTextureSize);
 
-		FIBITMAP *mmimage = FreeImage_Rescale((FIBITMAP *)maptexture, minimapTexSize, minimapTexSize, FILTER_BSPLINE);
+		FIBITMAP *mmimage = FreeImage_Rescale((FIBITMAP *)maptexture->Data(), minimapTexSize, minimapTexSize, FILTER_BSPLINE);
 		C3DObjectTexture *newtex = new C3DObjectTexture(mmimage, "tex", false, false);
 		tex.insert_or_assign(vpId, newtex);
 

@@ -614,7 +614,7 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 		Sectors[currentSector] = new CSector(currentSector);
 	}
 
-	LOG_INFO_("CScene::RefreshSector", "currentSector=%d", currentSector);
+	//LOG_INFO_("CScene::RefreshSector", "currentSector=%d", currentSector);
 
 	Sectors[currentSector]->Refresh(glm::vec4(0, y0, 0, 1), MPPh, MPPv, info_p, pts, init);	
 	

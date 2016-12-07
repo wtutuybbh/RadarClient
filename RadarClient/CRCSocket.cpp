@@ -88,7 +88,7 @@ void CRCSocket::Init()
 		LOG_ERROR__(ErrorText.c_str());
 		WSACleanup();
 	}
-	int nResult = WSAAsyncSelect(Socket, hWnd, WM_SOCKET, (FD_CLOSE | FD_READ));
+	int nResult = WSAAsyncSelect(Socket, hWnd, WM_SOCKET, (FD_CLOSE | FD_READ | FD_CONNECT));
 	if (nResult)
 	{
 		LOG_ERROR__("WSAAsyncSelect failed");

@@ -371,7 +371,14 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				g_Socket->Close();
 			}
 			break;
+		case FD_CONNECT:
+			if (g_Socket)
+			{
+				LOG_INFO__("CONNECT OK");
+			}
+			break;
 		}
+
 	}
 		break;
 	case CM_POSTDATA: {
