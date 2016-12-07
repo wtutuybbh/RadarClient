@@ -75,7 +75,7 @@ void CRCSocket::Init()
 	if (WSAStartup(MAKEWORD(2, 2), &WsaDat) != 0)
 	{
 		ErrorText = "Winsock error - Winsock initialization failed!";
-		CRCLogger::Error(requestID, context, ErrorText);
+		LOG_ERROR__(ErrorText.c_str());
 		WSACleanup();
 	}
 
@@ -85,13 +85,13 @@ void CRCSocket::Init()
 	if (Socket == INVALID_SOCKET)
 	{
 		ErrorText = "Winsock error - Socket creation Failed!";
-		CRCLogger::Error(requestID, context, ErrorText);
+		LOG_ERROR__(ErrorText.c_str());
 		WSACleanup();
 	}
 	int nResult = WSAAsyncSelect(Socket, hWnd, WM_SOCKET, (FD_CLOSE | FD_READ));
 	if (nResult)
 	{
-		CRCLogger::Error(requestID, context, "WSAAsyncSelect failed");
+		LOG_ERROR__("WSAAsyncSelect failed");
 		MessageBox(hWnd, "WSAAsyncSelect failed", "Critical Error", MB_ICONERROR);		
 		SendMessage(hWnd, WM_DESTROY, NULL, NULL);
 	}
@@ -99,7 +99,7 @@ void CRCSocket::Init()
 	if ((host = gethostbyname(CSettings::GetString(StringHostName).c_str())) == nullptr)
 	{
 		ErrorText = "Failed to resolve hostname!";
-		CRCLogger::Error(requestID, context, ErrorText);
+		LOG_ERROR__(ErrorText.c_str());
 		WSACleanup();
 	}
 
@@ -149,7 +149,7 @@ int CRCSocket::Connect()
 
 		string str(ws.begin(), ws.end());
 		str = str.substr(0, str.length() - 1);
-		CRCLogger::Error(requestID, context, (boost::format("cResult == SOCKET_ERROR: WSAGetLastError returned %1%, %2%") % error % str).str());
+		LOG_ERROR__("cResult == SOCKET_ERROR: WSAGetLastError returned %d, %s", error, str);
 	}
 	//int errorCode = WSAGetLastError();
 	CRCLogger::Info(requestID, context, (boost::format("End: return %1%") % cResult).str());
@@ -168,12 +168,12 @@ int CRCSocket::Read()
 	}
 	if (!IsConnected)
 	{
-		CRCLogger::Error(requestID, context, "Not connected.");
+		LOG_ERROR__("Not connected.");
 		return 0;
 	}	
 	if (!client->buff)
 	{
-		CRCLogger::Error(requestID, context, "client->buff is nullptr.");
+		LOG_ERROR__("client->buff is nullptr.");
 		return 0;
 	}			
 
@@ -251,6 +251,11 @@ int CRCSocket::Close()
 		delete[] client->buff;
 		client->buff = nullptr;
 	}
+	if (s_rdrinit)
+	{
+		delete s_rdrinit;
+		s_rdrinit = nullptr;
+	}
 	PostMessage(hWnd, CM_CONNECT, IsConnected, NULL);
 	return 0;
 }
@@ -284,7 +289,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				}
 				else
 				{
-					CRCLogger::Error(requestID, context, "MSG_RPOINTS: readBufLength - sizeof(_sh) - sizeof(RPOINTS) - info_p->N*sizeof(RPOINT) != 0");
+					LOG_ERROR__("MSG_RPOINTS: readBufLength - sizeof(_sh) - sizeof(RPOINTS) - info_p->N*sizeof(RPOINT) != 0");
 					return -1;
 				}
 
@@ -321,7 +326,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				}
 				else
 				{
-					CRCLogger::Error(requestID, context, "MSG_RIMAGE: readBufLength - sizeof(_sh) - sizeof(RIMAGE) - imginfo->N * imginfo->NR * 4 != 0");
+					LOG_ERROR__("MSG_RIMAGE: readBufLength - sizeof(_sh) - sizeof(RIMAGE) - imginfo->N * imginfo->NR * 4 != 0");
 					return -1;
 				}
 				info_i = (RIMAGE*)PTR_D;
@@ -369,13 +374,62 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			case MSG_INIT: 
 			{
 				if (!s_rdrinit)
+				{
 					s_rdrinit = new RDR_INITCL;
-
+				}
+					
 				memcpy(s_rdrinit, (RDR_INITCL*)(void*)&sh[1], sizeof(RDR_INITCL));
+
 				if (PostDataLogEnabled)
 				{
-					CRCLogger::Info(requestID, context, (boost::format("MSG_INIT. ViewStep=%1%, MaxNumSectPt=%2%, Nazm=%3%, begAzm=%4%, dAzm=%5%") 
-						% s_rdrinit->ViewStep % s_rdrinit->MaxNumSectPt % s_rdrinit->Nazm % s_rdrinit->begAzm % s_rdrinit->dAzm).str());
+					LOG_INFO__("MSG_INIT. Nazm=%d, Nelv=%d, dAzm=%f, dElv=%f, begAzm=%f, begElv=%f,	dR=%f, NR=%d, minR=%f, maxR=%f, ViewStep=%d, Proto[0]=%d, Proto[1]=%d, ScanMode=%d, srvTime=%d, MaxNumSectPt=%d, MaxNumSectImg=%d, blankR1=%d, blankR2=%d",
+						s_rdrinit->Nazm, s_rdrinit->Nelv, 
+						s_rdrinit->dAzm, s_rdrinit->dElv, 
+						s_rdrinit->begAzm, s_rdrinit->begElv, 
+						s_rdrinit->dR, 
+						s_rdrinit->NR, 
+						s_rdrinit->minR, s_rdrinit->maxR, 
+						s_rdrinit->ViewStep, 
+						s_rdrinit->Proto[0], s_rdrinit->Proto[1],
+						s_rdrinit->ScanMode, 
+						s_rdrinit->srvTime, 
+						s_rdrinit->MaxNumSectPt, 
+						s_rdrinit->MaxNumSectImg, 
+						s_rdrinit->blankR1, s_rdrinit->blankR2);
+					try
+					{
+						s_rdrinit->Nazm = CSettings::GetInt(IntNazm);
+						LOG_INFO__("Using settings value Nazm=%d", s_rdrinit->Nazm);
+					}
+					catch (const std::out_of_range& oor)
+					{
+						LOG_INFO__("Using server value Nazm=%d", s_rdrinit->Nazm);
+					}
+					/*
+					struct RDR_INITCL
+					{
+					int           Nazm;         // offs 0    число дискретов по азимуту
+					int           Nelv;         // offs 4
+					double        dAzm;         // offs 8
+					double        dElv;         // offs 16
+					double        begAzm;       // offs 24
+					double        begElv;       // offs 32
+					double        dR;           // offs 40
+					int           NR;           // offs 44
+					double        minR;         // offs 52
+					double        maxR;         // offs 60
+					char          resv1[32];    // offs 68
+					int           ViewStep;     // offs 100
+					short         Proto[2];     // offs 104
+					unsigned int  ScanMode;     // offs 108
+					UTCtime       srvTime;
+					int           MaxNumSectPt;
+					int           MaxNumSectImg;
+					int           blankR1;
+					int           blankR2;
+					char          resv2[1024 - 104 - 16 - 4 - 4 - 4 - 4];
+					};
+					*/
 				}
 			}
 			break;

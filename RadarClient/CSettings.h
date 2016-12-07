@@ -54,7 +54,8 @@ enum Settings
 	FloatPositionLon,
 	FloatPositionLat,
 	IntResolution,
-	IntTexSize
+	IntTexSize,
+	IntNazm 
 };
 
 

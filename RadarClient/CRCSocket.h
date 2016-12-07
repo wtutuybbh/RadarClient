@@ -450,7 +450,6 @@ public:
 
 	//used when processing data:
 	RDR_INITCL* s_rdrinit{ nullptr };
-	RDR_INITCL rdrinit;
 	RPOINTS* info_p{ nullptr };
 	RPOINT* pts{ nullptr };
 	RDRCURRPOS *CurrentPosition { nullptr };

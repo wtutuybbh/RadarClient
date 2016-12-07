@@ -44,3 +44,4 @@ FloatMinZeroElevation=0
 FloatMaxZeroElevation=90
 FloatPositionLon=37.712919
 FloatPositionLat=55.994606
+IntNazm=8192

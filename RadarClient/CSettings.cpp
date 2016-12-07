@@ -173,6 +173,8 @@ void CSettings::Init()
 
 	floats.insert_or_assign(FloatMPPv, 5.0);
 	stringmap.insert_or_assign("FloatMPPv", FloatMPPv);
+
+	stringmap.insert_or_assign("IntNazm", IntNazm);
 }
 
 glm::vec4 CSettings::GetColor(int key)
