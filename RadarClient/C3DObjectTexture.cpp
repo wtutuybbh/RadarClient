@@ -32,7 +32,7 @@ void C3DObjectTexture::LoadToGPU()
 			delete[] bits;
 			bits = nullptr;
 		}
-		if (clearAfter) {
+		if (clearAfter && image) {
 			FreeImage_Unload(image);
 			image = nullptr;
 		}
@@ -90,6 +90,7 @@ C3DObjectTexture::C3DObjectTexture(const char* imgFile, const char *textureUnifo
 
 C3DObjectTexture::C3DObjectTexture(FIBITMAP* image, const char* textureUniformName, bool clearAfter, bool useBits)
 {
+	this->clearAfter = clearAfter;
 	this->useBits = useBits;
 	this->image = image;
 	sizeX = FreeImage_GetWidth((FIBITMAP*)image);
