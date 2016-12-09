@@ -324,9 +324,12 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 		Mesh->Draw(vpControl, GL_TRIANGLES);
 	}
 
-	/*glEnable(GL_PROGRAM_POINT_SIZE);
-	if (UI->GetCheckboxState_Points()) {
-		for (int i = 0; i < Sectors.size(); i++) {
+	glEnable(GL_PROGRAM_POINT_SIZE);
+
+	if (UI->GetCheckboxState_Points()) 
+	{
+		for (int i = 0; i < Sectors.size(); i++) 
+		{
 			if (Sectors[i] != nullptr)
 				Sectors[i]->Draw(vpControl, GL_POINTS);
 		}
@@ -340,15 +343,25 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	if (UI->GetCheckboxState_Images())
 	{
 		if (ImageSet)
+		{
 			ImageSet->Draw(vpControl, GL_POINTS);
+		}
 	}
 	glDisable(GL_PROGRAM_POINT_SIZE);
 	glDisable(GL_DEPTH_BUFFER);
-	//Markup->Draw(vpControl, 0);
-	if (begAzmLine) {
-		//begAzmLine->Draw(vpControl, GL_LINES);
-	}*/
-	mmPointer->Draw(vpControl, GL_TRIANGLES);
+	if (Markup)
+	{
+		Markup->Draw(vpControl, 0);
+	}
+	if (begAzmLine) 
+	{
+		begAzmLine->Draw(vpControl, GL_LINES);
+	}
+	if (mmPointer)
+	{
+		mmPointer->Draw(vpControl, GL_TRIANGLES);
+	}
+	
 	return true;
 }
 
