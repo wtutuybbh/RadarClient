@@ -22,6 +22,12 @@ void C3DObjectTexture::LoadToGPU()
 		glGenTextures(1, &textureId);
 		glBindTexture(GL_TEXTURE_2D, textureId);
 		
+		if (!useBits && image && FreeImage_GetBPP(image) != 32)
+		{
+			FIBITMAP* tempImage = image;
+			image = FreeImage_ConvertTo32Bits(tempImage);
+		}
+
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sizeX, sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, useBits ? bits : (void*)FreeImage_GetBits(image));
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

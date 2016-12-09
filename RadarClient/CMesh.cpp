@@ -396,8 +396,13 @@ void CMesh::Init(int vpId)
 		int minimapTexSize = CSettings::GetInt(IntMinimapTextureSize);
 
 		FIBITMAP *mmimage = FreeImage_Rescale((FIBITMAP *)maptexture->Data(), minimapTexSize, minimapTexSize, FILTER_BSPLINE);
+		if (FreeImage_GetBPP(mmimage) != 32)
+		{
+			FIBITMAP* tempImage = mmimage;
+			mmimage = FreeImage_ConvertTo32Bits(tempImage);
+		}
 		//FreeImage_Save(FIF_JPEG, mmimage, "minimap.jpg", 0);
-		C3DObjectTexture *newtex = new C3DObjectTexture("video.png", "tex");// new C3DObjectTexture(mmimage, "tex", false, false);
+		C3DObjectTexture *newtex = new C3DObjectTexture(mmimage, "tex", false, false); //new C3DObjectTexture("video.png", "tex");// 
 
 		tex.insert_or_assign(vpId, newtex);
 
