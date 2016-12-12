@@ -13,6 +13,10 @@
 #include <GL/glut.h>
 #include "CRCLogger.h"
 
+#include "resource.h"
+#include "resource1.h"
+#include <CommCtrl.h>
+
 #define VIEW_PORT_CONTROL_ID     100
 
 #define PANEL_WIDTH 450
@@ -20,6 +24,12 @@
 
 
 #define WM_TOGGLEFULLSCREEN (WM_USER+1)									// Application Define Message For Toggling
+
+#pragma comment(linker,"\"/manifestdependency:type='win32' \
+name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
+#pragma comment(lib, "ComCtl32.lib")
 
 static BOOL g_isProgramLooping;											// Window Creation Loop, For FullScreen/Windowed Toggle																		// Between Fullscreen / Windowed Mode
 static BOOL g_createFullScreen;											// If TRUE, Then Create Fullscreen
@@ -469,6 +479,26 @@ public:
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {	
+	HWND hDlg;
+	MSG msg;
+	BOOL ret;
+
+	InitCommonControlsEx();
+	hDlg = CreateDialogParam(hInstance, MAKEINTRESOURCE(IDD_FORMVIEW), 0, (DLGPROC)WindowProc, 0);
+	ShowWindow(hDlg, nCmdShow);
+
+	while ((ret = GetMessage(&msg, 0, 0, 0)) != 0) {
+		if (ret == -1)
+			return -1;
+
+		if (!IsDialogMessage(hDlg, &msg)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+
+	return 0;
+
 	AllocConsole();
 	HWND console = GetConsoleWindow();
 	SetWindowPos(console, HWND_TOPMOST, 0, 0, 0, 0, SWP_DRAWFRAME | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
@@ -492,7 +522,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	GL_Window			window;											// Window Structure
 	Keys				keys;											// Key Structure
 	BOOL				isMessagePumpActive;							// Message Pump Active?
-	MSG					msg;											// Window Message Structure
 	DWORD				tickCount;										// Used For The Tick Counter
 #ifdef _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);

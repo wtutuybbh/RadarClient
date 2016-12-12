@@ -74,7 +74,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSdk_71A_IncludePath);c:\Program Files (x86)\Visual Leak Detector\include\</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSdk_71A_IncludePath);c:\Program Files (x86)\Visual Leak Detector\include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSdk_71A_LibraryPath_x86);c:\Program Files (x86)\Visual Leak Detector\lib\Win32\</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -267,6 +267,7 @@ xcopy "$(SolutionDir)FreeImage\*.dll" "$(OutDir)" /s /d</Command>
     <ClInclude Include="CMesh.h" />
     <ClInclude Include="CScene.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="resource1.h" />
     <ClInclude Include="ShaderUtils.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Util.h" />
@@ -297,6 +298,9 @@ xcopy "$(SolutionDir)FreeImage\*.dll" "$(OutDir)" /s /d</Command>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Data\settings.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RadarClient1.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
