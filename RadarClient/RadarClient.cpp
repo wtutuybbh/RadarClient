@@ -71,7 +71,11 @@ bool hasVAO = true;
 
 void TerminateApplication(GL_Window* window)							// Terminate The Application
 {
-	PostMessage(window->hWnd, WM_QUIT, 0, 0);							// Send A WM_QUIT Message
+	if (window)
+	{
+		PostMessage(window->hWnd, WM_QUIT, 0, 0);// Send A WM_QUIT Message
+	}
+							
 	g_isProgramLooping = FALSE;											// Stop Looping Of The Program
 
 	if (g_Socket)
@@ -178,6 +182,10 @@ BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL
 }
 
 // Process Window Message Callbacks
+LRESULT CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	string context = "WindowProc";
@@ -260,6 +268,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		g_Minimap->Add(hWnd, 0, 0, g_UI->MinimapSize, g_UI->MinimapSize);
 		g_Minimap->Id = MiniMap;
 		g_Minimap->InitGL();
+
+		HRSRC       hrsrc;
+		HGLOBAL     hglobal;
+		HINSTANCE hInstance = (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE);
+		hrsrc = FindResource(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), RT_DIALOG);
+
+		hglobal = ::LoadResource(hInstance, hrsrc);
+
+		HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)hglobal, hWnd, (DLGPROC)DlgProc);
+		SetWindowPos(hwnd1, HWND_TOP, 0, 720, 0, 0, SWP_NOSIZE);
 
 #ifdef _DEBUG
 		g_Minimap->dwi = &g_dwi;
@@ -479,12 +497,30 @@ public:
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {	
-	HWND hDlg;
 	MSG msg;
-	BOOL ret;
 
-	InitCommonControlsEx();
+	AllocConsole();
+	HWND console = GetConsoleWindow();
+	SetWindowPos(console, HWND_TOPMOST, 0, 0, 0, 0, SWP_DRAWFRAME | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+	ShowWindow(console, SW_NORMAL);
+
+	freopen("CONOUT$", "w", stdout);
+
+	string context = "WinMain";
+	
+	/*
+	HWND hDlg;	
+	BOOL ret;
+	InitCommonControls();
 	hDlg = CreateDialogParam(hInstance, MAKEINTRESOURCE(IDD_FORMVIEW), 0, (DLGPROC)WindowProc, 0);
+
+	if (!hDlg)
+	{
+		string err = GetLastErrorAsString();
+		LOG_ERROR__(err.c_str());
+		return -1;
+	}
+
 	ShowWindow(hDlg, nCmdShow);
 
 	while ((ret = GetMessage(&msg, 0, 0, 0)) != 0) {
@@ -497,16 +533,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 	}
 
-	return 0;
+	return 0; 
+	
+	*/
 
-	AllocConsole();
-	HWND console = GetConsoleWindow();
-	SetWindowPos(console, HWND_TOPMOST, 0, 0, 0, 0, SWP_DRAWFRAME | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
-	ShowWindow(console, SW_NORMAL);
-
-	freopen("CONOUT$", "w", stdout);
-
-	string context = "WinMain";
+	
 
 	LOG_INFO__("RadarClient started.");
 

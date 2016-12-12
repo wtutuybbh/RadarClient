@@ -164,3 +164,6 @@ std::string format(const char *fmt, ...);
 std::string vformat(const char *fmt, va_list ap);
 //for copy-paste:
 //CRCLogger::Info(requestID, context, (boost::format("%1%") % 1).str());
+
+
+std::string GetLastErrorAsString();
