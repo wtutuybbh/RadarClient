@@ -277,7 +277,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		hglobal = ::LoadResource(hInstance, hrsrc);
 
 		HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)hglobal, hWnd, (DLGPROC)DlgProc);
-		SetWindowPos(hwnd1, HWND_TOP, 0, 720, 0, 0, SWP_NOSIZE);
+		SetWindowPos(hwnd1, HWND_TOP, 0, 720, 170, 80, SWP_NOSIZE);
 
 #ifdef _DEBUG
 		g_Minimap->dwi = &g_dwi;
