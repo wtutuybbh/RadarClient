@@ -16,6 +16,7 @@
 #include "resource.h"
 #include "resource1.h"
 #include <CommCtrl.h>
+#include "CRImage.h"
 
 #define VIEW_PORT_CONTROL_ID     100
 
@@ -572,7 +573,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	std::ifstream settings_txt("settings.txt");
 	
 	if (!settings_txt) {
-		MessageBox(HWND_DESKTOP, "settings.txt not found.", MB_OK, MB_ICONERROR);
+		LOG_ERROR__("settings.txt not found.");
 		return 0;
 	}
 	std::getline(settings_txt, g_altFile);
@@ -635,6 +636,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	settings_txt.close();
 	CRCLogger::Info(requestID, context, "Settings loaded.");
+
+	if (!CRImage::InitPalette("rimagecolor.png"))
+	{
+		LOG_ERROR__("CRImage palette not initialized.");
+		return 0;
+	}
 
 	if (strcmp(lpCmdLine, "") == 0) {
 		CRCLogger::Info(requestID, context, "No parameters provided, using defaults. Usage: RadarClient lon lat 5 5 1300.");

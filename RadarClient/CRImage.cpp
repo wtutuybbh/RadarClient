@@ -5,8 +5,10 @@
 #include "C3DObjectVBO.h"
 #include "C3DObjectProgram.h"
 #include "CViewPortControl.h"
+#include "CRCLogger.h"
 
-float CRImage::maxAmp = 1000;
+float CRImage::maxAmp = 256;
+float CRImage::minAmp = 0;
 CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels) : 
 	C3DObjectModel(
 		new C3DObjectVBO(true), 
@@ -30,13 +32,26 @@ CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_IN
 		vector<VBOData> *vbuffer =  new vector<VBOData>;
 
 		float e = glm::radians(CSettings::GetFloat(FloatZeroElevation));
+		int paletteIndex;
+		RGBQUAD pixelcolor;
 		for (int i = 0; i < info->N; i++) //i - номер массива сканов по дальности
 		{
 			float a = rdrinit->begAzm + rdrinit->dAzm *(info->d1 + i * (info->d2 - info->d1) / info->N);
 			for (int j = 1; j < info->NR; j++) //j - номер отсчёта по дальности
 			{
 				/*if (px[i * info->NR + j] > maxAmp)
-					maxAmp = px[i * info->NR + j];	*/				
+				{
+					maxAmp = px[i * info->NR + j];
+				}
+				if (px[i * info->NR + j] < minAmp)
+				{
+					minAmp = px[i * info->NR + j];
+				}*/
+				/*if (px[i * info->NR + j] > maxAmp)
+					maxAmp = px[i * info->NR + j];	*/	
+				paletteIndex = (int) ((px[i * info->NR + j] - minAmp) / (maxAmp - minAmp));
+
+				FreeImage_GetPixelColor(palette, paletteIndex, 0, &pixelcolor);
 				
 				float r = (rdrinit->minR + j*(rdrinit->maxR - rdrinit->minR)/info->NR) * rdrinit->dR;
 #if defined(CRCPOINT_CONSTRUCTOR_USES_RADIANS)
@@ -64,8 +79,18 @@ CRImage::~CRImage()
 		delete buffer;
 	}
 }
-
-void CRImage::InitPalette(std::string fileName)
+FIBITMAP * CRImage::palette = nullptr;
+int CRImage::paletteWidth = 0;
+bool CRImage::InitPalette(std::string fileName)
 {
+	std::string context = "CRImage::InitPalette";
+	palette = FreeImage_Load(FreeImage_GetFileType(fileName.c_str(), 0), fileName.c_str());
+	if (!palette)
+	{
+		LOG_ERROR__("Unable to open CRImage palette file %s", fileName.c_str());
+		return false;
+	}	
+	paletteWidth = FreeImage_GetWidth(palette);
+	return true;
 }
 
