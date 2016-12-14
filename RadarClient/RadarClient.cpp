@@ -69,6 +69,8 @@ std::string requestID = "RadarClient";
 bool hasVBO = true;
 bool hasVAO = true;
 
+int g_nCmdShow;
+
 void TerminateApplication(GL_Window* window)							// Terminate The Application
 {
 	if (window)
@@ -277,6 +279,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		hglobal = ::LoadResource(hInstance, hrsrc);
 
 		HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)hglobal, hWnd, (DLGPROC)DlgProc);
+
+		ShowWindow(hwnd1, g_nCmdShow);
+
 		SetWindowPos(hwnd1, HWND_TOP, 0, 720, 0, 0, SWP_NOSIZE);
 
 #ifdef _DEBUG
@@ -497,6 +502,7 @@ public:
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {	
+	g_nCmdShow = nCmdShow;
 	MSG msg;
 
 	AllocConsole();
