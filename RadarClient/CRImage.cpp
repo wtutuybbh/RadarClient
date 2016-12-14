@@ -65,4 +65,7 @@ CRImage::~CRImage()
 	}
 }
 
+void CRImage::InitPalette(std::string fileName)
+{
+}
 
