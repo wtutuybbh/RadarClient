@@ -7,7 +7,7 @@
 #include "CViewPortControl.h"
 #include "CRCLogger.h"
 
-float CRImage::maxAmp = 256;
+float CRImage::maxAmp = 70;
 float CRImage::minAmp = 0;
 CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels) : 
 	C3DObjectModel(
@@ -34,6 +34,7 @@ CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_IN
 		float e = glm::radians(CSettings::GetFloat(FloatZeroElevation));
 		int paletteIndex;
 		RGBQUAD pixelcolor;
+		glm::vec4 color;
 		for (int i = 0; i < info->N; i++) //i - номер массива сканов по дальности
 		{
 			float a = rdrinit->begAzm + rdrinit->dAzm *(info->d1 + i * (info->d2 - info->d1) / info->N);
@@ -49,15 +50,18 @@ CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_IN
 				}*/
 				/*if (px[i * info->NR + j] > maxAmp)
 					maxAmp = px[i * info->NR + j];	*/	
-				paletteIndex = (int) ((px[i * info->NR + j] - minAmp) / (maxAmp - minAmp));
+				//LOG_INFO("RImageAmps", "CRImage::CRImage", "amp=%f", px[i * info->NR + j]);
+				paletteIndex = (int) (paletteWidth * ((px[i * info->NR + j] - minAmp) / (maxAmp - minAmp)));
 
 				FreeImage_GetPixelColor(palette, paletteIndex, 0, &pixelcolor);
-				
+				color.x = pixelcolor.rgbRed / 255.0;
+				color.y = pixelcolor.rgbGreen / 255.0;
+				color.z = pixelcolor.rgbBlue / 255.0;
 				float r = (rdrinit->minR + j*(rdrinit->maxR - rdrinit->minR)/info->NR) * rdrinit->dR;
 #if defined(CRCPOINT_CONSTRUCTOR_USES_RADIANS)
 
 				cartesianCoords = glm::vec3(origin) + glm::vec3(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph); //we always add y0 (height of the radar relative to sea level) to all cartesian coordinates 
-				vbuffer->push_back({ glm::vec4(cartesianCoords, 1), glm::vec3(0, 0, 0), mincolor + px[i * info->NR + j] / maxAmp * (maxcolor - mincolor), glm::vec2(0, 0) });
+				vbuffer->push_back({ glm::vec4(cartesianCoords, 1), glm::vec3(0, 0, 0), color, glm::vec2(0, 0) });
 #else
 				float re = glm::radians(e);
 				float ra = glm::radians(a);

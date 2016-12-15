@@ -183,10 +183,36 @@ BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL
 	CRCLogger::Info(requestID, context, "End => return true");
 	return TRUE;														// Return True
 }
-
+void CallUI(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if (uMsg == WM_COMMAND)
+	{
+		if (g_UI)
+		{
+			g_UI->Wnd_Proc(hWnd, uMsg, wParam, lParam);
+		}
+	}
+	if (uMsg == WM_HSCROLL || uMsg == WM_VSCROLL)
+	{
+		if (g_UI) {
+			g_UI->Wnd_Proc2(hWnd, uMsg, wParam, lParam);
+		}
+	}
+}
 // Process Window Message Callbacks
 LRESULT CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	CallUI(hWnd, uMsg, wParam, lParam);
+	switch (uMsg)
+	{
+	case WM_LBUTTONDOWN:
+		POINT p;
+		if (GetCursorPos(&p))
+		{
+			//cursor position now in p.x and p.y
+		}
+		break;
+	}
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -197,13 +223,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	// Get The Window Context
 	GL_Window* window = (GL_Window*)(GetWindowLong(hWnd, GWL_USERDATA));
 
-	if (uMsg == WM_COMMAND) {
-		if (g_UI) {
+	if (uMsg == WM_COMMAND) 
+	{
+		if (g_UI) 
+		{
 			g_UI->Wnd_Proc(hWnd, uMsg, wParam, lParam);
 		}
 	}
-	if (uMsg == WM_HSCROLL ||
-		uMsg == WM_VSCROLL) {
+	if (uMsg == WM_HSCROLL || uMsg == WM_VSCROLL) 
+	{
 		if (g_UI) {
 			g_UI->Wnd_Proc2(hWnd, uMsg, wParam, lParam);
 		}
@@ -420,7 +448,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (g_Socket)
 			msg = g_Socket->PostData(wParam, lParam);
 		//g_vpControl->MakeCurrent();
+		
 		if (g_vpControl && g_vpControl->Scene) {
+			if (g_vpControl->Scene && !g_vpControl->Scene->Initialized && g_Socket->s_rdrinit)
+			{
+				g_vpControl->Scene->Init(g_Socket->s_rdrinit);
+			}
 			switch (msg) 
 			{
 				case MSG_RPOINTS: 
@@ -440,7 +473,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				break;
 				case MSG_INIT:
 				{
-					g_vpControl->Scene->Init(g_Socket->s_rdrinit);
+					
 				}
 				break;
 				default:
@@ -717,10 +750,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				while (isMessagePumpActive == TRUE)						// While The Message Pump Is Active
 				{
 					if (!g_Initialized && hasVBO && hasVAO) {
-						if (g_Socket && g_Socket->Initialized) 
-						{
-							Initialize();							
-						}						
+						Initialize();					
 					}
 					// Success Creating Window.  Check For Window Messages
 					if (PeekMessage(&msg, window.hWnd, 0, 0, PM_REMOVE) != 0)
