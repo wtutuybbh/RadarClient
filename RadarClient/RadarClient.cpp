@@ -311,7 +311,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		ShowWindow(hwnd1, g_nCmdShow);
 
-		SetWindowPos(hwnd1, HWND_TOP, 0, 720, 0, 0, SWP_NOSIZE);
+		SetWindowPos(hwnd1, HWND_TOP, 0, 820, 0, 0, SWP_NOSIZE);
 
 #ifdef _DEBUG
 		g_Minimap->dwi = &g_dwi;
@@ -738,7 +738,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	g_isProgramLooping = TRUE;											// Program Looping Is Set To TRUE
 
-	CRCLogger::Info(requestID, context, (boost::format("-=point before message loop=-")).str());
+	//CRCLogger::Info(requestID, context, (boost::format("-=point before message loop=-")).str());
 	while (g_isProgramLooping)											// Loop Until WM_QUIT Is Received
 	{
 		if (CreateMainWindow(&window) == TRUE)							// Was Window Creation Successful?

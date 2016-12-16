@@ -19,6 +19,7 @@
 #include "CRCGridCell.h"
 #include "CRCDataFileSet.h"
 #include "CRCAltitudeDataFile.h"
+#include "resource1.h"
 
 const std::string CUserInterface::requestID = "CUserInterface";
 
@@ -47,6 +48,7 @@ LRESULT CUserInterface::Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	if (!ui)
 		return NULL;
 	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
+		auto ctrlID = GetDlgCtrlID((HWND)lParam);
 		if (GetDlgCtrlID((HWND)lParam) == it->second->ID) {
 			if (it->second->Action)
 				CALL_MEMBER_FN(*ui, it->second->Action)(hwnd, uMsg, wParam, lParam);
@@ -108,6 +110,11 @@ LRESULT CUserInterface::ColorGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 }
 
 LRESULT CUserInterface::InfoGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	return LRESULT();
+}
+
+LRESULT CUserInterface::IDD_DIALOG1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	return LRESULT();
 }
@@ -462,6 +469,8 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 			GetModuleHandle(nullptr),
 			this);
 	}
+
+	Elements.insert({ IDD_DIALOG1, new InterfaceElement{ IDD_DIALOG1, NULL, _T("IDD_DIALOG1"), _T("IDD_DIALOG1"), DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::IDD_DIALOG1_Proc } });
 
 	SetChecked(ObjOptions_ID[0], 0);
 	SetChecked(ObjOptions_ID[1], 1);

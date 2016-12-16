@@ -52,6 +52,8 @@ private:
 	int BegAzmValue_ID;
 	int ZeroElevationValue_ID;
 
+	int IDD_DIALOG1_ID;
+
 	//group elements
 	int ObjOptions_ID[3], MapOptions_ID[2], MarkupOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2], MapType_ID[2];
 
@@ -95,6 +97,8 @@ private:
 	virtual LRESULT Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT ColorGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT InfoGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	virtual LRESULT IDD_DIALOG1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 public:
 	int MinimapSize;
