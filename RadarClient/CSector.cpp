@@ -10,6 +10,9 @@
 
 const std::string CSector::requestID = "CSector";
 
+float CSector::maxAmp = 70;
+float CSector::minAmp = 0;
+
 CSector::CSector(int index) : C3DObjectModel(Main, new C3DObjectVBO(false), nullptr, new C3DObjectProgram("CSector.v.glsl", "CSector.f.glsl", "vertex", nullptr, nullptr, "color"))
 {
 	this->index = index;
@@ -53,7 +56,6 @@ CSector::~CSector()
 	}	
 }
 
-float CSector::maxAmp = 0;
 void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init)
 {
 	std::string context = "CSector::Refresh";
@@ -242,20 +244,33 @@ void CSector::UnselectAll(int vpId)
 
 glm::vec4 CSector::GetColor(float level)
 {
-	if (level < CSettings::GetInt(IntPointColorThreshold_00))
+	RGBQUAD pixelcolor;
+	glm::vec4 color;
+
+	int paletteIndex = min((int)(paletteWidth * ((level - minAmp) / (maxAmp - minAmp))), paletteWidth-1);
+
+	FreeImage_GetPixelColor(palette, paletteIndex, 0, &pixelcolor);
+	color.x = pixelcolor.rgbRed / 255.0;
+	color.y = pixelcolor.rgbGreen / 255.0;
+	color.z = pixelcolor.rgbBlue / 255.0;
+	color.w = 1;
+
+	return color;
+}
+
+FIBITMAP * CSector::palette = nullptr;
+int CSector::paletteWidth = 0;
+bool CSector::InitPalette(std::string fileName)
+{
+	std::string context = "CSector::InitPalette";
+	palette = FreeImage_Load(FreeImage_GetFileType(fileName.c_str(), 0), fileName.c_str());
+	if (!palette)
 	{
-		return CSettings::GetColor(ColorPointColor_00);
+		LOG_ERROR__("Unable to open CSector palette file %s", fileName.c_str());
+		return false;
 	}
-	else if (level < CSettings::GetInt(IntPointColorThreshold_01))
-	{
-		return CSettings::GetColor(ColorPointColor_01);
-	}
-	else if (level < CSettings::GetInt(IntPointColorThreshold_02))
-	{
-		return CSettings::GetColor(ColorPointColor_02);
-	}
-	else
-	{
-		return CSettings::GetColor(ColorPointColor_03);
-	}
+	paletteWidth = FreeImage_GetWidth(palette);
+	minAmp = CSettings::GetFloat(FloatCSectorMinAmp);
+	maxAmp = CSettings::GetFloat(FloatCSectorMaxAmp);
+	return true;
 }

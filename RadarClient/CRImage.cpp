@@ -20,8 +20,8 @@ CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_IN
 
 	short currentDirection = sgn(info->d2 - info->d1);
 
-	glm::vec4 mincolor = CSettings::GetColor(ColorPointLowLevel);
-	glm::vec4 maxcolor = CSettings::GetColor(ColorPointHighLevel);
+	//glm::vec4 mincolor = CSettings::GetColor(ColorPointLowLevel);
+	//glm::vec4 maxcolor = CSettings::GetColor(ColorPointHighLevel);
 
 	if (rdrinit->ScanMode == 3) // 3D
 	{
@@ -40,12 +40,13 @@ CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_IN
 			float a = rdrinit->begAzm + rdrinit->dAzm *(info->d1 + i * (info->d2 - info->d1) / info->N);
 			for (int j = 1; j < info->NR; j++) //j - номер отсчёта по дальности
 			{				
-				paletteIndex = (int) (paletteWidth * ((px[i * info->NR + j] - minAmp) / (maxAmp - minAmp)));
+				paletteIndex = min( (int) (paletteWidth * ((px[i * info->NR + j] - minAmp) / (maxAmp - minAmp))), paletteWidth-1);
 
 				FreeImage_GetPixelColor(palette, paletteIndex, 0, &pixelcolor);
 				color.x = pixelcolor.rgbRed / 255.0;
 				color.y = pixelcolor.rgbGreen / 255.0;
 				color.z = pixelcolor.rgbBlue / 255.0;
+				color.w = 1;
 				float r = (rdrinit->minR + j*(rdrinit->maxR - rdrinit->minR)/info->NR) * rdrinit->dR;
 #if defined(CRCPOINT_CONSTRUCTOR_USES_RADIANS)
 
@@ -72,7 +73,20 @@ CRImage::~CRImage()
 		delete buffer;
 	}
 }
+
 FIBITMAP * CRImage::palette = nullptr;
 int CRImage::paletteWidth = 0;
-
-
+bool CRImage::InitPalette(std::string fileName)
+{
+	std::string context = "CRImage::InitPalette";
+	palette = FreeImage_Load(FreeImage_GetFileType(fileName.c_str(), 0), fileName.c_str());
+	if (!palette)
+	{
+		LOG_ERROR__("Unable to open CRImage palette file %s", fileName.c_str());
+		return false;
+	}
+	paletteWidth = FreeImage_GetWidth(palette);
+	minAmp = CSettings::GetFloat(FloatCRImageMinAmp);
+	maxAmp = CSettings::GetFloat(FloatCRImageMaxAmp);
+	return true;
+}

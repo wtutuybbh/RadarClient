@@ -5,11 +5,15 @@ struct RPOINT;
 struct RDR_INITCL;
 
 class CViewPortControl;
+
 class CSector :
 	public C3DObjectModel
 {
-	static float maxAmp;	
+	static float maxAmp;
+	static float minAmp;
 	int index {-1};
+	static FIBITMAP *palette;
+	static int paletteWidth;
 protected:
 	static const std::string requestID;
 public:
@@ -23,6 +27,7 @@ public:
 	glm::vec3 GetPointCoords(CViewPortControl *vpControl, int index);
 	void SelectPoint(int vpId, int pointIndex);
 	void UnselectAll(int vpId);
-	glm::vec4 GetColor(float level);
+	static glm::vec4 GetColor(float level);
+	static bool InitPalette(std::string fileName);
 };
 

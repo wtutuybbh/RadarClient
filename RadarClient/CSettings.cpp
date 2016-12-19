@@ -1,6 +1,10 @@
 #include "stdafx.h"
 
 #include "CSettings.h"
+#include "CRCLogger.h"
+#include "CRImage.h"
+#include "CSector.h"
+#include "Util.h"
 
 
 CSettings::CSettings()
@@ -176,22 +180,32 @@ bool CSettings::Init()
 
 	stringmap.insert_or_assign("IntNazm", IntNazm);
 
-	strings.insert_or_assign(StringRPointPaletteFileName, "rimagecolor.png");
-	stringmap.insert_or_assign("StringRPointPaletteFileName", StringRPointPaletteFileName);
+	strings.insert_or_assign(StringCSectorPaletteFileName, "rimagecolor.png");
+	stringmap.insert_or_assign("StringCSectorPaletteFileName", StringCSectorPaletteFileName);
 
-	strings.insert_or_assign(StringRImagePaletteFileName, "rpointcolor.png");
-	stringmap.insert_or_assign("StringRImagePaletteFileName", StringRImagePaletteFileName);
+	strings.insert_or_assign(StringCRImagePaletteFileName, "rpointcolor.png");
+	stringmap.insert_or_assign("StringCRImagePaletteFileName", StringCRImagePaletteFileName);
 
+		
+	floats.insert_or_assign(FloatCRImageMinAmp, 0.0);
+	stringmap.insert_or_assign("FloatCRImageMinAmp", FloatCRImageMinAmp);
+		
+	floats.insert_or_assign(FloatCRImageMaxAmp, 255.0);
+	stringmap.insert_or_assign("FloatCRImageMaxAmp", FloatCRImageMaxAmp);
 
+	floats.insert_or_assign(FloatCSectorMinAmp, 0.0);
+	stringmap.insert_or_assign("FloatCSectorMinAmp", FloatCSectorMinAmp);
 
-	RImagePalette = FreeImage_Load(FreeImage_GetFileType(fileName.c_str(), 0), fileName.c_str());
-	if (!palette)
-	{
-		LOG_ERROR__("Unable to open CRImage palette file %s", fileName.c_str());
-		return false;
-	}
-	paletteWidth = FreeImage_GetWidth(palette);
+	floats.insert_or_assign(FloatCSectorMaxAmp, 255.0);
+	stringmap.insert_or_assign("FloatCSectorMaxAmp", FloatCSectorMaxAmp);
+
 	return true;
+	
+}
+
+bool CSettings::InitPalette()
+{
+	return CSector::InitPalette(GetString(StringCSectorPaletteFileName)) && CRImage::InitPalette(GetString(StringCRImagePaletteFileName));
 }
 
 glm::vec4 CSettings::GetColor(int key)

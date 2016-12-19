@@ -571,7 +571,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	LOG_INFO__("sizeof(RDR_INITCL) = %d", sizeof(RDR_INITCL));
 		
-	CSettings::Init();
+	if (!CSettings::Init())
+	{
+		LOG_ERROR__("Settings error, program terminated");
+		return -2;
+	}
 	C3DObjectModel::_id = 0;
 	C3DObjectModel::_testid = 0;
 
@@ -658,10 +662,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	settings_txt.close();
 	CRCLogger::Info(requestID, context, "Settings loaded.");
 
-	if (!CRImage::InitPalette("rimagecolor.png"))
+	if (!CSettings::InitPalette())
 	{
-		LOG_ERROR__("CRImage palette not initialized.");
-		return 0;
+		LOG_ERROR__("Settings error, program terminated");
+		return -2;
 	}
 
 	if (strcmp(lpCmdLine, "") == 0) {
@@ -724,7 +728,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	free(myargv[0]);
 
-	g_isProgramLooping = TRUE;											// Program Looping Is Set To TRUE
+	g_isProgramLooping = TRUE;											// Program Looping Is Set To TRUE	
 
 	//CRCLogger::Info(requestID, context, (boost::format("-=point before message loop=-")).str());
 	while (g_isProgramLooping)											// Loop Until WM_QUIT Is Received

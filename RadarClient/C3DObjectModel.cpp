@@ -268,6 +268,11 @@ glm::vec3* C3DObjectModel::GetBounds()
 	return nullptr;
 }
 
+std::string C3DObjectModel::GetTypeName()
+{
+	return c3DObjectModel_TypeName;
+}
+
 void C3DObjectModel::SetColor(glm::vec4 color)
 {
 	Color = color;

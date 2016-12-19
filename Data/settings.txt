@@ -45,3 +45,7 @@ FloatMaxZeroElevation=90
 FloatPositionLon=37.712919
 FloatPositionLat=55.994606
 IntNazm=8192
+FloatCRImageMinAmp=0.0
+FloatCRImageMaxAmp=2500.0
+FloatCSectorMinAmp=0.0
+FloatCSectorMaxAmp=2500.0

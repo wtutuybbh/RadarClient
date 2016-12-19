@@ -56,8 +56,12 @@ enum Settings
 	IntResolution,
 	IntTexSize,
 	IntNazm,
-	StringRPointPaletteFileName,
-	StringRImagePaletteFileName,
+	StringCSectorPaletteFileName,
+	StringCRImagePaletteFileName,
+	FloatCRImageMinAmp,
+	FloatCRImageMaxAmp,
+	FloatCSectorMinAmp,
+	FloatCSectorMaxAmp
 };
 
 
@@ -77,6 +81,7 @@ public:
 	CSettings();
 	~CSettings();
 	static bool Init();
+	static bool InitPalette();
 	static glm::vec4 GetColor(int key);
 	static float GetFloat(int key);
 	static int GetInt(int key);
