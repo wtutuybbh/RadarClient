@@ -55,7 +55,9 @@ enum Settings
 	FloatPositionLat,
 	IntResolution,
 	IntTexSize,
-	IntNazm 
+	IntNazm,
+	StringRPointPaletteFileName,
+	StringRImagePaletteFileName,
 };
 
 
@@ -66,10 +68,15 @@ class CSettings
 	static std::unordered_map<int, int> ints;
 	static std::unordered_map<int, std::string> strings;
 	static std::map<std::string, Settings> stringmap;
+
+	static FIBITMAP *RPointPalette;
+	static FIBITMAP *RImagePalette;
+	static int RPointPaletteWidth;
+	static int RImagePaletteWidth;
 public:
 	CSettings();
 	~CSettings();
-	static void Init();
+	static bool Init();
 	static glm::vec4 GetColor(int key);
 	static float GetFloat(int key);
 	static int GetInt(int key);

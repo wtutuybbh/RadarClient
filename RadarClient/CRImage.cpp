@@ -39,18 +39,7 @@ CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_IN
 		{
 			float a = rdrinit->begAzm + rdrinit->dAzm *(info->d1 + i * (info->d2 - info->d1) / info->N);
 			for (int j = 1; j < info->NR; j++) //j - номер отсчёта по дальности
-			{
-				/*if (px[i * info->NR + j] > maxAmp)
-				{
-					maxAmp = px[i * info->NR + j];
-				}
-				if (px[i * info->NR + j] < minAmp)
-				{
-					minAmp = px[i * info->NR + j];
-				}*/
-				/*if (px[i * info->NR + j] > maxAmp)
-					maxAmp = px[i * info->NR + j];	*/	
-				//LOG_INFO("RImageAmps", "CRImage::CRImage", "amp=%f", px[i * info->NR + j]);
+			{				
 				paletteIndex = (int) (paletteWidth * ((px[i * info->NR + j] - minAmp) / (maxAmp - minAmp)));
 
 				FreeImage_GetPixelColor(palette, paletteIndex, 0, &pixelcolor);
@@ -85,16 +74,5 @@ CRImage::~CRImage()
 }
 FIBITMAP * CRImage::palette = nullptr;
 int CRImage::paletteWidth = 0;
-bool CRImage::InitPalette(std::string fileName)
-{
-	std::string context = "CRImage::InitPalette";
-	palette = FreeImage_Load(FreeImage_GetFileType(fileName.c_str(), 0), fileName.c_str());
-	if (!palette)
-	{
-		LOG_ERROR__("Unable to open CRImage palette file %s", fileName.c_str());
-		return false;
-	}	
-	paletteWidth = FreeImage_GetWidth(palette);
-	return true;
-}
+
 

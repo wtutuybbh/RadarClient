@@ -223,19 +223,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	// Get The Window Context
 	GL_Window* window = (GL_Window*)(GetWindowLong(hWnd, GWL_USERDATA));
 
-	if (uMsg == WM_COMMAND) 
-	{
-		if (g_UI) 
-		{
-			g_UI->Wnd_Proc(hWnd, uMsg, wParam, lParam);
-		}
-	}
-	if (uMsg == WM_HSCROLL || uMsg == WM_VSCROLL) 
-	{
-		if (g_UI) {
-			g_UI->Wnd_Proc2(hWnd, uMsg, wParam, lParam);
-		}
-	}
+	CallUI(hWnd, uMsg, wParam, lParam);
 
 	switch (uMsg)														// Evaluate Window Message
 	{		

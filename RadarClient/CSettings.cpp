@@ -17,11 +17,11 @@ std::unordered_map<int, float> CSettings::floats;
 std::unordered_map<int, int> CSettings::ints;
 std::unordered_map<int, std::string> CSettings::strings;
 std::map<std::string, Settings> CSettings::stringmap;
-void CSettings::Init()
+
+bool CSettings::Init()
 {
 	colors.insert_or_assign(ColorBackgroud, glm::vec4(0, 0, 0, 1));
-	stringmap.insert_or_assign("ColorBackgroud", ColorBackgroud);
-	
+	stringmap.insert_or_assign("ColorBackgroud", ColorBackgroud);	
 
 	colors.insert_or_assign(ColorAxis, glm::vec4(0.7, 0.7, 0.7, 1));
 	stringmap.insert_or_assign("ColorAxis", ColorAxis);
@@ -175,6 +175,23 @@ void CSettings::Init()
 	stringmap.insert_or_assign("FloatMPPv", FloatMPPv);
 
 	stringmap.insert_or_assign("IntNazm", IntNazm);
+
+	strings.insert_or_assign(StringRPointPaletteFileName, "rimagecolor.png");
+	stringmap.insert_or_assign("StringRPointPaletteFileName", StringRPointPaletteFileName);
+
+	strings.insert_or_assign(StringRImagePaletteFileName, "rpointcolor.png");
+	stringmap.insert_or_assign("StringRImagePaletteFileName", StringRImagePaletteFileName);
+
+
+
+	RImagePalette = FreeImage_Load(FreeImage_GetFileType(fileName.c_str(), 0), fileName.c_str());
+	if (!palette)
+	{
+		LOG_ERROR__("Unable to open CRImage palette file %s", fileName.c_str());
+		return false;
+	}
+	paletteWidth = FreeImage_GetWidth(palette);
+	return true;
 }
 
 glm::vec4 CSettings::GetColor(int key)

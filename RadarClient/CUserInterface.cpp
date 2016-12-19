@@ -32,11 +32,18 @@ LRESULT CUserInterface::Wnd_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 {
 	CUserInterface *ui = this;
 	if (!ui) 
+	{
 		return NULL;
-	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
-		if (LOWORD(wParam) == it->second->ID) {
-			if (it->second->Action)
+	}
+	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) 
+	{
+		auto ctrlID = LOWORD(wParam);
+		if (ctrlID == it->second->ID) 
+		{
+			if (it->second->Action) 
+			{
 				CALL_MEMBER_FN(*ui, it->second->Action)(hwnd, uMsg, wParam, lParam);
+			}
 		}
 	}
 	return LRESULT();
@@ -46,14 +53,26 @@ LRESULT CUserInterface::Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 {
 	CUserInterface *ui = this;
 	if (!ui)
+	{
 		return NULL;
-	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
-		auto ctrlID = GetDlgCtrlID((HWND)lParam);
-		if (GetDlgCtrlID((HWND)lParam) == it->second->ID) {
-			if (it->second->Action)
-				CALL_MEMBER_FN(*ui, it->second->Action)(hwnd, uMsg, wParam, lParam);
-		}
 	}
+
+	auto ctrlID = GetDlgCtrlID((HWND)lParam);
+
+	try
+	{
+		auto iel = Elements.at(ctrlID);
+		if (iel && iel->Action)
+		{
+			return CALL_MEMBER_FN(*ui, iel->Action)(hwnd, uMsg, wParam, lParam);
+		}		
+	} 
+	catch (const std::out_of_range& oor)
+	{
+		LOG_ERROR("CUserInterface", "Wnd_Proc2", "Interface element with ID=%d not found, exception's what=%s", ctrlID, oor.what());
+		return NULL;
+	}
+
 	return LRESULT();
 }
 
@@ -471,6 +490,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	}
 
 	Elements.insert({ IDD_DIALOG1, new InterfaceElement{ IDD_DIALOG1, NULL, _T("IDD_DIALOG1"), _T("IDD_DIALOG1"), DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::IDD_DIALOG1_Proc } });
+	Elements.insert({ IDC_SLIDER1, new InterfaceElement{ IDC_SLIDER1, NULL, _T("IDC_SLIDER1"), _T("IDC_SLIDER1"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::IDD_DIALOG1_Proc } });
 
 	SetChecked(ObjOptions_ID[0], 0);
 	SetChecked(ObjOptions_ID[1], 1);
