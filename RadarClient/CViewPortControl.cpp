@@ -215,8 +215,8 @@ C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 	C3DObjectModel *t = Scene->GetFirstTrackBetweenPoints(this, glm::vec2(x, y), index);
 	if (t)
 	{
-		std::string typeName = o->GetTypeName();
-		LOG_INFO__("Scene->GetFirstTrackBetweenPoints: (x=%.4f, y=%.4f) => (t: %s)", x, y, t->GetTypeName().c_str());
+		std::string typeName = t->GetTypeName();
+		LOG_INFO__("Scene->GetFirstTrackBetweenPoints: (x=%.4f, y=%.4f) => (t: %s)", x, y, typeName.c_str());
 	}
 	if (o && !t) {
 		o->SetColor(glm::vec4(0, 1, 0, 1));
@@ -323,6 +323,7 @@ void CViewPortControl::Init()
 	DisplayRLIs = 0;
 	DisplayMap = 1;
 	DisplayLandscape = 1;
+	DisplayBlindZones = 0;
 }
 
 void CViewPortControl::Unregister(void)

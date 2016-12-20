@@ -359,7 +359,7 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 		int usey0_loc = prog.at(vpControl->Id)->GetUniformLocation("useY0");
 
 		glUniform1i(useTexture_loc, UseTexture);
-		glUniform1i(usey0_loc, UseAltitudeMap);
+		glUniform1i(usey0_loc, UseY0Loc);
 		glUniform1f(y0_loc, Y0);
 		
 	}

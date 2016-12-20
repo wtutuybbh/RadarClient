@@ -210,7 +210,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	if (Mesh)
 	{
 		Mesh->UseTexture = /*Mesh1->UseTexture = Mesh2->UseTexture = Mesh3->UseTexture =*/ vpControl->DisplayMap;
-		Mesh->UseAltitudeMap = /*Mesh1->UseAltitudeMap = Mesh2->UseAltitudeMap = Mesh3->UseAltitudeMap =*/ vpControl->DisplayLandscape;
+		Mesh->UseY0Loc = /*Mesh1->UseY0Loc = Mesh2->UseY0Loc = Mesh3->UseY0Loc =*/ !vpControl->DisplayLandscape;
 		Mesh->Draw(vpControl, GL_TRIANGLES);
 	}
 	
@@ -245,11 +245,11 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		if (ImageSet)
 			ImageSet->Draw(vpControl, GL_POINTS);
 	}
-
+	glDisable(GL_PROGRAM_POINT_SIZE);
 	glEnable(GL_LINE_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-	glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_DEPTH_TEST);
 	if (UI->GetCheckboxState_MarkupLines())
 	{
 		Markup->Draw(vpControl, 0);
@@ -265,7 +265,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		DrawBitmaps();
 	}
 
-	glEnable(GL_LINE_SMOOTH);
+	//glEnable(GL_LINE_SMOOTH);
 	
 	/*glDisable(GL_DEPTH_TEST);									// Disable Depth Testing
 
@@ -290,12 +290,13 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glMatrixMode(GL_MODELVIEW);
 	
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glLineWidth(2.0);
 	if (RayObj)
 	{
-		RayObj->Draw(vpControl, GL_LINE_LOOP);
+		//RayObj->Draw(vpControl, GL_LINE_LOOP);
+		RayObj->Draw(vpControl, GL_TRIANGLES);
 	}
 	/*
 	if (Ray_VBOName == 0 && Ray_VBOName_c == 0) {
@@ -320,8 +321,8 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	glLineWidth(1.0);
 	glLoadIdentity();
 	
-	glDisableClientState(GL_VERTEX_ARRAY);						// Enable Vertex Arrays
-	glDisableClientState(GL_COLOR_ARRAY);
+	//glDisableClientState(GL_VERTEX_ARRAY);						// Enable Vertex Arrays
+	//glDisableClientState(GL_COLOR_ARRAY);
 	
 	mainDrawCount++;
 	return true;

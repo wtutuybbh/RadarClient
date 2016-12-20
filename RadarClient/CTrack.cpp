@@ -58,7 +58,26 @@ void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK*>
 	for (int i = 0; i < trackPoints->size(); i++)
 	{
 		r = sqrt((*trackPoints)[i]->X * (*trackPoints)[i]->X + (*trackPoints)[i]->Y * (*trackPoints)[i]->Y + (*trackPoints)[i]->Z * (*trackPoints)[i]->Z);
-		a = atan((*trackPoints)[i]->X / (*trackPoints)[i]->Y);
+		if ((*trackPoints)[i]->X > 0)
+		{
+			a = M_PI/2 - atan((*trackPoints)[i]->Y / (*trackPoints)[i]->X);
+		}
+		if ((*trackPoints)[i]->X < 0)
+		{
+			a = -M_PI+M_PI/2 - atan((*trackPoints)[i]->Y / (*trackPoints)[i]->X);
+		}
+		if ((*trackPoints)[i]->X == 0)
+		{
+			if ((*trackPoints)[i]->Y > 0)
+			{
+				a = 0;
+			}
+			if ((*trackPoints)[i]->Y < 0)
+			{
+				a = M_PI;
+			}
+		}
+		
 		e = atan((*trackPoints)[i]->Z / sqrt((*trackPoints)[i]->X * (*trackPoints)[i]->X + (*trackPoints)[i]->Y * (*trackPoints)[i]->Y));
 
 		(*vbuffer)[i].vert = origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0);

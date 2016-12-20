@@ -50,4 +50,4 @@ FloatCRImageMaxAmp=255.0
 FloatCSectorMinAmp=0.0
 FloatCSectorMaxAmp=255.0
 FloatMPPh=5.0
-FloatMPPv=1.0
+FloatMPPv=5.0

@@ -87,7 +87,7 @@ public:
 	static int TotalMeshsCount;
 	float LocalAverageHeight;
 	static int TotalVertexCount;
-	int UseTexture, UseAltitudeMap;
+	int UseTexture, UseY0Loc;
 	CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv);
 	~CMesh() override;
 	float CenterHeight;

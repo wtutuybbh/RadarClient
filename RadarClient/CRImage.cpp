@@ -42,6 +42,14 @@ CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_IN
 			{				
 				paletteIndex = min( (int) (paletteWidth * ((px[i * info->NR + j] - minAmp) / (maxAmp - minAmp))), paletteWidth-1);
 
+				if (px[i * info->NR + j] > maxAmp)
+				{
+					maxAmp = px[i * info->NR + j];
+				}
+				if (px[i * info->NR + j] < minAmp)
+				{
+					minAmp = px[i * info->NR + j];
+				}
 				FreeImage_GetPixelColor(palette, paletteIndex, 0, &pixelcolor);
 				color.x = pixelcolor.rgbRed / 255.0;
 				color.y = pixelcolor.rgbGreen / 255.0;

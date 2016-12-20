@@ -159,6 +159,7 @@ char *GetTrack(int numTrack, int N);
 char *GetPoints(short d1, short d2, int N, unsigned int R);
 int SendData(SOCKET s, char *buf, int size, int flags);
 float GetAmp(unsigned int R, short B);
+float GetAmp(float x, float y);
 
 RDR_INITCL init;
 
@@ -278,7 +279,7 @@ int __cdecl main(void)
 	SendData(ClientSocket, track, __sh->dlina, 0);
 	delete[] track;
 
-	track = GetTrack(1, 7);
+	track = GetTrack(1, 8);
 	__sh = (_sh*)track;
 	SendData(ClientSocket, track, __sh->dlina, 0);
 	delete[] track;
@@ -417,317 +418,35 @@ char* GetTrack(int numTrack, int N)
 	RDRTRACK *ts = new RDRTRACK[N];
 
 	if (numTrack == 0) {				
-		if (N > 0)
-		{
-			ts[0].numTrack = 0;
-			ts[0].Amp = 255;
-			ts[0].X = -1920;
-			ts[0].Y = 960;
-			ts[0].Z = 112.4998627;
-			ts[0].vX = 0;
-			ts[0].vY = 0;
-			ts[0].vZ = 0;
-			ts[0].time = 0;
-			ts[0].countTrue = 15;
-			ts[0].countFalse = 0;
-		}
-		if (N > 1)
-		{
-			ts[1].numTrack = 0;
-			ts[1].Amp = 255;
-			ts[1].X = -1824;
-			ts[1].Y = 1248;
-			ts[1].Z = 115.8256978;
-			ts[1].vX = 0;
-			ts[1].vY = 0;
-			ts[1].vZ = 0;
-			ts[1].time = 0;
-			ts[1].countTrue = 14;
-			ts[1].countFalse = 0;
-		}
-		if (N > 2)
-		{
-			ts[2].numTrack = 0;
-			ts[2].Amp = 255;
-			ts[2].X = -1632;
-			ts[2].Y = 1536;
-			ts[2].Z = 117.4533049;
-			ts[2].vX = 0;
-			ts[2].vY = 0;
-			ts[2].vZ = 0;
-			ts[2].time = 0;
-			ts[2].countTrue = 13;
-			ts[2].countFalse = 0;
-		}
-		if (N > 3)
-		{
-			ts[3].numTrack = 0;
-			ts[3].Amp = 255;
-			ts[3].X = -1344;
-			ts[3].Y = 1728;
-			ts[3].Z = 114.7277991;
-			ts[3].vX = 0;
-			ts[3].vY = 0;
-			ts[3].vZ = 0;
-			ts[3].time = 0;
-			ts[3].countTrue = 12;
-			ts[3].countFalse = 0;
-		}
-		if (N > 4)
-		{
-			ts[4].numTrack = 0;
-			ts[4].Amp = 255;
-			ts[4].X = -1056;
-			ts[4].Y = 1824;
-			ts[4].Z = 110.4563046;
-			ts[4].vX = 0;
-			ts[4].vY = 0;
-			ts[4].vZ = 0;
-			ts[4].time = 0;
-			ts[4].countTrue = 11;
-			ts[4].countFalse = 0;
-		}
-		if (N > 5)
-		{
-			ts[5].numTrack = 0;
-			ts[5].Amp = 255;
-			ts[5].X = -768;
-			ts[5].Y = 1824;
-			ts[5].Z = 103.7197486;
-			ts[5].vX = 0;
-			ts[5].vY = 0;
-			ts[5].vZ = 0;
-			ts[5].time = 0;
-			ts[5].countTrue = 10;
-			ts[5].countFalse = 0;
-		}
-		if (N > 6)
-		{
-			ts[6].numTrack = 0;
-			ts[6].Amp = 255;
-			ts[6].X = -480;
-			ts[6].Y = 1728;
-			ts[6].Z = 93.98957891;
-			ts[6].vX = 0;
-			ts[6].vY = 0;
-			ts[6].vZ = 0;
-			ts[6].time = 0;
-			ts[6].countTrue = 9;
-			ts[6].countFalse = 0;
-		}
-		if (N > 7)
-		{
-			ts[7].numTrack = 0;
-			ts[7].Amp = 255;
-			ts[7].X = -192;
-			ts[7].Y = 1536;
-			ts[7].Z = 81.12480472;
-			ts[7].vX = 0;
-			ts[7].vY = 0;
-			ts[7].vZ = 0;
-			ts[7].time = 0;
-			ts[7].countTrue = 8;
-			ts[7].countFalse = 0;
-		}
-		if (N > 8)
-		{
-			ts[8].numTrack = 0;
-			ts[8].Amp = 255;
-			ts[8].X = 192;
-			ts[8].Y = 1440;
-			ts[8].Z = 76.13506653;
-			ts[8].vX = 0;
-			ts[8].vY = 0;
-			ts[8].vZ = 0;
-			ts[8].time = 0;
-			ts[8].countTrue = 7;
-			ts[8].countFalse = 0;
-		}
-		if (N > 9)
-		{
-			ts[9].numTrack = 0;
-			ts[9].Amp = 255;
-			ts[9].X = 576;
-			ts[9].Y = 1536;
-			ts[9].Z = 85.9722744;
-			ts[9].vX = 0;
-			ts[9].vY = 0;
-			ts[9].vZ = 0;
-			ts[9].time = 0;
-			ts[9].countTrue = 6;
-			ts[9].countFalse = 0;
-		}
-		if (N > 10)
-		{
-			ts[10].numTrack = 0;
-			ts[10].Amp = 255;
-			ts[10].X = 864;
-			ts[10].Y = 1632;
-			ts[10].Z = 96.77604118;
-			ts[10].vX = 0;
-			ts[10].vY = 0;
-			ts[10].vZ = 0;
-			ts[10].time = 0;
-			ts[10].countTrue = 5;
-			ts[10].countFalse = 0;
-		}
-		if (N > 11)
-		{
-			ts[11].numTrack = 0;
-			ts[11].Amp = 255;
-			ts[11].X = 1248;
-			ts[11].Y = 1632;
-			ts[11].Z = 107.6712437;
-			ts[11].vX = 0;
-			ts[11].vY = 0;
-			ts[11].vZ = 0;
-			ts[11].time = 0;
-			ts[11].countTrue = 4;
-			ts[11].countFalse = 0;
-		}
-		if (N > 12)
-		{
-			ts[12].numTrack = 0;
-			ts[12].Amp = 255;
-			ts[12].X = 1536;
-			ts[12].Y = 1440;
-			ts[12].Z = 110.3416639;
-			ts[12].vX = 0;
-			ts[12].vY = 0;
-			ts[12].vZ = 0;
-			ts[12].time = 0;
-			ts[12].countTrue = 3;
-			ts[12].countFalse = 0;
-		}
-		if (N > 13)
-		{
-			ts[13].numTrack = 0;
-			ts[13].Amp = 255;
-			ts[13].X = 1920;
-			ts[13].Y = 1344;
-			ts[13].Z = 122.8259467;
-			ts[13].vX = 0;
-			ts[13].vY = 0;
-			ts[13].vZ = 0;
-			ts[13].time = 0;
-			ts[13].countTrue = 2;
-			ts[13].countFalse = 0;
-		}
-		if (N > 14)
-		{
-			ts[14].numTrack = 0;
-			ts[14].Amp = 255;
-			ts[14].X = 2400;
-			ts[14].Y = 1248;
-			ts[14].Z = 141.7676831;
-			ts[14].vX = 0;
-			ts[14].vY = 0;
-			ts[14].vZ = 0;
-			ts[14].time = 0;
-			ts[14].countTrue = 1;
-			ts[14].countFalse = 0;
-		}		
+		if (N > 0) { ts[0] = { 0, GetAmp((float)-3840, (float)864), -3840, 864, 1054.6480214089, 0, 0, 0, 0, 15, 0 }; }
+		if (N > 1) { ts[1] = { 0, GetAmp((float)-3648, (float)960), -3648, 960, 1010.75834005054, 0, 0, 0, 0, 14, 0 }; }
+		if (N > 2) { ts[2] = { 0, GetAmp((float)-3456, (float)1056), -3456, 1056, 968.297054214018, 0, 0, 0, 0, 13, 0 }; }
+		if (N > 3) { ts[3] = { 0, GetAmp((float)-3264, (float)1056), -3264, 1056, 919.219299748552, 0, 0, 0, 0, 12, 0 }; }
+		if (N > 4) { ts[4] = { 0, GetAmp((float)-2976, (float)1152), -2976, 1152, 855.076211754194, 0, 0, 0, 0, 11, 0 }; }
+		if (N > 5) { ts[5] = { 0, GetAmp((float)-2688, (float)1344), -2688, 1344, 805.261106216666, 0, 0, 0, 0, 10, 0 }; }
+		if (N > 6) { ts[6] = { 0, GetAmp((float)-2400, (float)1536), -2400, 1536, 763.504567921489, 0, 0, 0, 0, 9, 0 }; }
+		if (N > 7) { ts[7] = { 0, GetAmp((float)-2016, (float)1632), -2016, 1632, 695.000497654543, 0, 0, 0, 0, 8, 0 }; }
+		if (N > 8) { ts[8] = { 0, GetAmp((float)-1632, (float)1632), -1632, 1632, 618.425807363636, 0, 0, 0, 0, 7, 0 }; }
+		if (N > 9) { ts[9] = { 0, GetAmp((float)-1248, (float)1632), -1248, 1632, 550.498860706955, 0, 0, 0, 0, 6, 0 }; }
+		if (N > 10) { ts[10] = { 0, GetAmp((float)-864, (float)1728), -864, 1728, 517.667853996428, 0, 0, 0, 0, 5, 0 }; }
+		if (N > 11) { ts[11] = { 0, GetAmp((float)-480, (float)1728), -480, 1728, 480.547584941946, 0, 0, 0, 0, 4, 0 }; }
+		if (N > 12) { ts[12] = { 0, GetAmp((float)-96, (float)1728), -96, 1728, 463.730185214199, 0, 0, 0, 0, 3, 0 }; }
+		if (N > 13) { ts[13] = { 0, GetAmp((float)288, (float)1632), 288, 1632, 444.049941869955, 0, 0, 0, 0, 2, 0 }; }
+		if (N > 14) { ts[14] = { 0, GetAmp((float)672, (float)1536), 672, 1536, 449.235020989211, 0, 0, 0, 0, 1, 0 }; }
+
+
 	}
 	if (numTrack==1)
 	{
-		if (N>0)
-		{
-			ts[0].numTrack = 1;
-			ts[0].Amp = 255;
-			ts[0].X = 1728;
-			ts[0].Y = 3840;
-			ts[0].Z = 220.6833278;
-			ts[0].vX = 0;
-			ts[0].vY = 0;
-			ts[0].vZ = 0;
-			ts[0].time = 0;
-			ts[0].countTrue = 15;
-			ts[0].countFalse = 0;
-		}
-		if (N>1)
-		{
-			ts[1].numTrack = 1;
-			ts[1].Amp = 255;
-			ts[1].X = 1824;
-			ts[1].Y = 3648;
-			ts[1].Z = 213.7497392;
-			ts[1].vX = 0;
-			ts[1].vY = 0;
-			ts[1].vZ = 0;
-			ts[1].time = 0;
-			ts[1].countTrue = 14;
-			ts[1].countFalse = 0;
-		}
-		if (N>2)
-		{
-			ts[2].numTrack = 1;
-			ts[2].Amp = 255;
-			ts[2].X = 1920;
-			ts[2].Y = 3456;
-			ts[2].Z = 207.195307;
-			ts[2].vX = 0;
-			ts[2].vY = 0;
-			ts[2].vZ = 0;
-			ts[2].time = 0;
-			ts[2].countTrue = 13;
-			ts[2].countFalse = 0;
-		}
-		if (N>3)
-		{
-			ts[3].numTrack = 1;
-			ts[3].Amp = 255;
-			ts[3].X = 2112;
-			ts[3].Y = 3360;
-			ts[3].Z = 207.9878769;
-			ts[3].vX = 0;
-			ts[3].vY = 0;
-			ts[3].vZ = 0;
-			ts[3].time = 0;
-			ts[3].countTrue = 12;
-			ts[3].countFalse = 0;
-		}
-		if (N>4)
-		{
-			ts[4].numTrack = 1;
-			ts[4].Amp = 255;
-			ts[4].X = 2400;
-			ts[4].Y = 3264;
-			ts[4].Z = 212.3239329;
-			ts[4].vX = 0;
-			ts[4].vY = 0;
-			ts[4].vZ = 0;
-			ts[4].time = 0;
-			ts[4].countTrue = 11;
-			ts[4].countFalse = 0;
-		}
-		if (N>5)
-		{
-			ts[5].numTrack = 1;
-			ts[5].Amp = 255;
-			ts[5].X = 2880;
-			ts[5].Y = 3168;
-			ts[5].Z = 224.3801231;
-			ts[5].vX = 0;
-			ts[5].vY = 0;
-			ts[5].vZ = 0;
-			ts[5].time = 0;
-			ts[5].countTrue = 10;
-			ts[5].countFalse = 0;
-		}
-		if (N>6)
-		{
-			ts[6].numTrack = 1;
-			ts[6].Amp = 255;
-			ts[6].X = 3648;
-			ts[6].Y = 3072;
-			ts[6].Z = 249.9421884;
-			ts[6].vX = 0;
-			ts[6].vY = 0;
-			ts[6].vZ = 0;
-			ts[6].time = 0;
-			ts[6].countTrue = 9;
-			ts[6].countFalse = 0;
-		}
+		if (N > 0) { ts[0] = { 1, GetAmp((float)480, (float)3456), 480, 3456, 934.921386182057, 0, 0, 0, 0, 0, 0 }; }
+		if (N > 1) { ts[1] = { 1, GetAmp((float)864, (float)3360), 864, 3360, 929.59819970451, 0, 0, 0, 0, -1, 0 }; }
+		if (N > 2) { ts[2] = { 1, GetAmp((float)1152, (float)2976), 1152, 2976, 855.076211754194, 0, 0, 0, 0, -2, 0 }; }
+		if (N > 3) { ts[3] = { 1, GetAmp((float)1248, (float)2400), 1248, 2400, 724.826289290089, 0, 0, 0, 0, -3, 0 }; }
+		if (N > 4) { ts[4] = { 1, GetAmp((float)1344, (float)1632), 1344, 1632, 566.493009174641, 0, 0, 0, 0, -4, 0 }; }
+		if (N > 5) { ts[5] = { 1, GetAmp((float)1440, (float)576), 1440, 576, 415.569761619896, 0, 0, 0, 0, -5, 0 }; }
+		if (N > 6) { ts[6] = { 1, GetAmp((float)1056, (float)-384), 1056, -384, 301.081429317692, 0, 0, 0, 0, -6, 0 }; }
+		if (N > 7) { ts[7] = { 1, GetAmp((float)576, (float)-1056), 576, -1056, 322.309800774972, 0, 0, 0, 0, -7, 0 }; }
+
 	}
 	char *ret = new char[sizeof(_sh) + sizeof(RDRTRACKS) + N * sizeof(RDRTRACK)];
 
@@ -748,9 +467,7 @@ char* GetPoints(short d1, short d2, int N, unsigned int R)
 	}
 
 	_sh shapka = GetSh(MSG_RPOINTS, sizeof(RPOINTS) + N * sizeof(RPOINT));
-
 	
-
 	RPOINTS p;
 
 	p.N = N;
@@ -763,9 +480,7 @@ char* GetPoints(short d1, short d2, int N, unsigned int R)
 	RPOINT * ps = new RPOINT[N];
 
 	for (int i=0; i<N; i++)
-	{		 
-
-		
+	{		 		
 		ps[i].B = d1 + 0 + (rand() % (int)(255 - 0 + 1));
 
 		float a = 2 * M_PI * ps[i].B / init.Nazm;
@@ -799,7 +514,22 @@ int SendData(SOCKET s, char* buf, int size, int flags)
 	}
 	return iSendResult;
 }
+float GetAmp(float x, float y)
+{
+	int _x = mockAmpWidth / 2 + (mockAmpWidth / 2) * (x / (init.maxR * init.dR));
+	int _y = mockAmpHeight / 2 + (mockAmpHeight / 2) * (y / (init.maxR * init.dR));
 
+	RGBQUAD pixelcolor;
+
+	FreeImage_GetPixelColor(mockAmp, _x, _y, &pixelcolor);
+	//0.21 R + 0.72 G + 0.07 B
+	float amp = 0.21 * pixelcolor.rgbRed + 0.72 * pixelcolor.rgbGreen + 0.07 * pixelcolor.rgbBlue;
+	if (amp > maxAmp)
+	{
+		maxAmp = amp;
+	}
+	return amp;
+}
 float GetAmp(unsigned int R, short B)
 {
 	float a = 2 * M_PI * B / init.Nazm;
@@ -807,7 +537,6 @@ float GetAmp(unsigned int R, short B)
 	int y = mockAmpHeight / 2 + (mockAmpHeight / 2) * (R * cos(a) / init.maxR);
 	
 	RGBQUAD pixelcolor;
-
 
 	FreeImage_GetPixelColor(mockAmp, x, y, &pixelcolor);
 	//0.21 R + 0.72 G + 0.07 B

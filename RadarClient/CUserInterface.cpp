@@ -213,15 +213,10 @@ LRESULT CUserInterface::Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam,
 	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
 
 	if (ButtonID == MapOptions_ID[0]) { // points
-		if (VPControl) {
-			VPControl->DisplayMap = Checked;
-			VPControl->DisplayLandscape = !Checked;
-		}
-	}
-	if (ButtonID == MapOptions_ID[1]) { // series
-		if (VPControl)
+		if (VPControl) {			
 			VPControl->DisplayLandscape = Checked;
-	}
+		}
+	}	
 	return LRESULT();
 }
 
@@ -275,21 +270,34 @@ LRESULT CUserInterface::RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM w
 	return LRESULT();
 }
 
-LRESULT CUserInterface::RadioGroup_MapType(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CUserInterface::Checkbox_MapType(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int ButtonID = LOWORD(wParam);
 	HWND hWnd = GetDlgItem(hwnd, ButtonID);
+	int Checked = !Button_GetCheck(hWnd);
+	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
 	if (VPControl && VPControl->Camera)
 	{
 		if (ButtonID == MapType_ID[0]) { // Map
-			VPControl->DisplayMap = true;
-			VPControl->DisplayBlindZones = false;
-		}
-		if (ButtonID == MapType_ID[1]) { // Blind zones
-			VPControl->DisplayMap = false;
-			VPControl->DisplayBlindZones = true;
+			VPControl->DisplayMap = Checked;
 		}
 	}
+	return LRESULT();
+}
+
+LRESULT CUserInterface::Checkbox_BlindZones(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	int ButtonID = LOWORD(wParam);
+	HWND hWnd = GetDlgItem(hwnd, ButtonID);
+	int Checked = !Button_GetCheck(hWnd);
+	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
+	if (VPControl && VPControl->Camera)
+	{
+		if (ButtonID == MapType_ID[0]) { // Map
+			VPControl->DisplayMap = Checked;
+		}
+	}
+	return LRESULT();
 	return LRESULT();
 }
 
@@ -431,7 +439,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	ObjOptions_ID[1] = InsertElement(NULL, _T("BUTTON"), _T("Траектории"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_ObjOptions);
 
 	// Карта
-	MapType_ID[0] = InsertElement(NULL, _T("BUTTON"), _T("Карта"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_GROUP, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_MapType);
+	MapType_ID[0] = InsertElement(NULL, _T("BUTTON"), _T("Карта"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX | WS_GROUP, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MapType);
 
 
 	MarkupOptions_ID[1] = InsertElement(NULL, _T("BUTTON"), _T("Числа"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column3X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MarkupOptions);
@@ -439,7 +447,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	ObjOptions_ID[2] = InsertElement(NULL, _T("BUTTON"), _T("RLI-изображения"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_ObjOptions);
 	
 	// Слепые зоны
-	MapType_ID[1] = InsertElement(NULL, _T("BUTTON"), _T("Слепые зоны"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_MapType);
+	MapType_ID[1] = InsertElement(NULL, _T("BUTTON"), _T("Слепые зоны"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_BlindZones);
 
 	CurrentY += VStepGrp;
 
@@ -497,8 +505,9 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	SetChecked(ObjOptions_ID[0], 0);
 	SetChecked(ObjOptions_ID[1], 1);
 	SetChecked(ObjOptions_ID[2], 1);
-	SetChecked(MapOptions_ID[0], 1);
-	SetChecked(MapOptions_ID[1], 1);
+	SetChecked(MapOptions_ID[0], vpControl->DisplayLandscape);
+	SetChecked(MapType_ID[0], vpControl->DisplayMap);
+	SetChecked(MapType_ID[1], vpControl->DisplayBlindZones);
 	SetChecked(MarkupOptions_ID[0], 1);
 	SetChecked(MarkupOptions_ID[1], 1);
 
