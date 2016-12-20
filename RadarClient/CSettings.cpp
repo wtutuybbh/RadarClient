@@ -27,7 +27,7 @@ bool CSettings::Init()
 	colors.insert_or_assign(ColorBackgroud, glm::vec4(0, 0, 0, 1));
 	stringmap.insert_or_assign("ColorBackgroud", ColorBackgroud);	
 
-	colors.insert_or_assign(ColorAxis, glm::vec4(0.7, 0.7, 0.7, 1));
+	colors.insert_or_assign(ColorAxis, glm::vec4(0.5, 0.5, 0.5, 0.5));
 	stringmap.insert_or_assign("ColorAxis", ColorAxis);
 
 	colors.insert_or_assign(ColorNumbers, glm::vec4(0.7, 0.7, 0.7, 1));

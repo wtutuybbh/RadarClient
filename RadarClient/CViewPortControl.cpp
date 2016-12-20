@@ -209,11 +209,13 @@ C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 	C3DObjectModel *o = Scene->GetSectorPoint(this, glm::vec2(x, y), index);
 	if (o)
 	{
-		LOG_INFO__("Scene->GetSectorPoint: (x=%.4f, y=%.4f) => (o: %s)", x, y, o->GetTypeName().c_str());
+		std::string typeName = o->GetTypeName();
+		LOG_INFO__("Scene->GetSectorPoint: (x=%.4f, y=%.4f) => (o: %s)", x, y, typeName.c_str());
 	}
 	C3DObjectModel *t = Scene->GetFirstTrackBetweenPoints(this, glm::vec2(x, y), index);
 	if (t)
 	{
+		std::string typeName = o->GetTypeName();
 		LOG_INFO__("Scene->GetFirstTrackBetweenPoints: (x=%.4f, y=%.4f) => (t: %s)", x, y, t->GetTypeName().c_str());
 	}
 	if (o && !t) {

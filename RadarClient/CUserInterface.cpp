@@ -213,8 +213,10 @@ LRESULT CUserInterface::Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam,
 	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
 
 	if (ButtonID == MapOptions_ID[0]) { // points
-		if (VPControl)
+		if (VPControl) {
 			VPControl->DisplayMap = Checked;
+			VPControl->DisplayLandscape = !Checked;
+		}
 	}
 	if (ButtonID == MapOptions_ID[1]) { // series
 		if (VPControl)

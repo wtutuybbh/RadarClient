@@ -524,6 +524,11 @@ public:
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {	
+	
+
+
+
+
 	g_nCmdShow = nCmdShow;
 	MSG msg;
 
@@ -668,6 +673,52 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return -2;
 	}
 
+	/* SOME TESTS !!! */
+
+	RDR_INITCL TI; /* TI = Test Init */
+
+	TI.Nazm = 8092;
+	TI.Nelv = 1;
+	TI.dAzm = 2 * M_PI / TI.Nazm;
+	TI.dElv = 0;
+	TI.begAzm = 0;
+	TI.begElv = CSettings::GetFloat(FloatZeroElevation);
+	TI.dR = 0.9375;
+	TI.NR = 8192;
+	TI.minR = 60;
+	TI.maxR = TI.dR*TI.NR;
+	std::fill(TI.resv1, TI.resv1 + 32, 0);
+	TI.ViewStep = 256;
+	TI.Proto[0] = 8;
+	TI.Proto[1] = 0;
+	TI.ScanMode = 0;
+
+
+	TI.srvTime.ta[0]=0;
+	TI.srvTime.ta[1] = 0;
+	TI.srvTime.ta[2] = 0;
+	TI.srvTime.ta[3] = 0;
+	TI.srvTime.ta[4] = 0;
+	TI.srvTime.ta[5] = 0;
+	TI.srvTime.ta[6] = 0;
+	TI.srvTime.ta[7] = 0;
+	GetSystemTime(&(TI.srvTime.st));
+
+
+	TI.MaxNumSectPt = 0;
+	TI.MaxNumSectImg = 0;
+	TI.blankR1 = 0;
+	TI.blankR2 = 0;
+	std::fill(TI.resv2, TI.resv2 + 888, 0);
+
+	LOG_INFO__("sizeof RDR_INITCL=%d", sizeof(RDR_INITCL));
+
+	char charinit[sizeof(RDR_INITCL)];
+
+	memcpy(charinit, &TI, sizeof(RDR_INITCL));
+	
+		/* SOME TESTS !!! */
+
 	if (strcmp(lpCmdLine, "") == 0) {
 		CRCLogger::Info(requestID, context, "No parameters provided, using defaults. Usage: RadarClient lon lat 5 5 1300.");
 		g_lon = 37.631424;
@@ -689,8 +740,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		CRCLogger::Info(requestID, context, (boost::format("Parameters set from command line: lon=%1%, lat=%2%, mpph=%3%, mppv=%4%, texsize=%5%") % g_lon % g_lat % g_mpph % g_mppv % g_texsize).str());
 	}
 	
-	CSettings::SetFloat(FloatMPPh, g_mpph);
-	CSettings::SetFloat(FloatMPPv, g_mppv);
+	//CSettings::SetFloat(FloatMPPh, g_mpph);
+	//CSettings::SetFloat(FloatMPPv, g_mppv);
 
 	g_vpControl = new CViewPortControl("VP3D");
 	g_Minimap = new CMinimap("VPMiniMap");

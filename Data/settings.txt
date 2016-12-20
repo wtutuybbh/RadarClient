@@ -1,7 +1,7 @@
 n54_e037_1arc_v3.dt2
-near_msk_region_north.jpg.jpg
-near_msk_region_north.jpg.dat
-FloatZeroElevation=3
+near_msk_region_north.jpg
+near_msk_region_north.jpg
+FloatZeroElevation=15.0
 ColorPointLowLevel=#7F4600FF
 ColorPointHighLevel=#FF8C00FF
 ColorPointSelected=#00FF00FF
@@ -23,8 +23,8 @@ IntMarkupNumCircles=7
 IntMarkupMarkDistance=100
 IntMarkupMarkSize=10
 IntMarkupHorizontalAxisCount=18
-FloatCTrackRefresh_Kr=0.75
-FloatCTrackRefresh_a0=-120
+FloatCTrackRefresh_Kr=1.0
+FloatCTrackRefresh_a0=0.0
 FloatCTrackRefresh_scale1=0.02
 FloatCTrackRefresh_scale2=1000
 FloatCTrackRefresh_e0=3
@@ -42,10 +42,10 @@ FloatMinBegAzm=0
 FloatMaxBegAzm=360
 FloatMinZeroElevation=0
 FloatMaxZeroElevation=90
-FloatPositionLon=37.712919
-FloatPositionLat=55.994606
+FloatPositionLon=37.631424 
+FloatPositionLat=54.792393
 IntNazm=8192
 FloatCRImageMinAmp=0.0
-FloatCRImageMaxAmp=2500.0
+FloatCRImageMaxAmp=255.0
 FloatCSectorMinAmp=0.0
-FloatCSectorMaxAmp=2500.0
+FloatCSectorMaxAmp=255.0

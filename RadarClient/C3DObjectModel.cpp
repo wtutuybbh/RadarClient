@@ -273,6 +273,11 @@ std::string C3DObjectModel::GetTypeName()
 	return c3DObjectModel_TypeName;
 }
 
+void C3DObjectModel::SetVBO(int vpId, C3DObjectVBO* _vbo)
+{
+	vbo.insert_or_assign(vpId, _vbo);
+}
+
 void C3DObjectModel::SetColor(glm::vec4 color)
 {
 	Color = color;

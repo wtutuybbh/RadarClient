@@ -18,9 +18,10 @@ protected:
 	std::unordered_map<int, C3DObjectProgram*> prog;
 	std::unordered_map<int, glm::mat4> scaleMatrix, rotateMatrix, translateMatrix, modelMatrix;
 	glm::vec3 cartesianCoords, sphericalCoords, geoCoords;
-	void *GetBufferAt(int index);
+	
 	std::string c3DObjectModel_TypeName {"C3DObjectModel"};
 public:
+	void *GetBufferAt(int index);
 	static int _id, _testid;
 	int id;
 	void SetCartesianCoordinates(glm::vec4 c);
@@ -57,4 +58,5 @@ public:
 	virtual glm::vec3 * GetBounds();
 
 	std::string GetTypeName();
+	void SetVBO(int vpId, C3DObjectVBO *_vbo);
 };

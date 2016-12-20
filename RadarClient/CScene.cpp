@@ -192,7 +192,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	if (!VBOisBuilt) {
 		PrepareVBOs();
 		VBOisBuilt = BuildVBOs();
-		Camera->Move(glm::vec3(292, y0 + 235, 310), false);
+		Camera->Move(glm::vec3(0, y0 + 235, -310), false);
 		Camera->RadarPosition = glm::vec3(0, y0, 0);
 	}
 	//Mesh->Draw(vpControl, GL_TRIANGLES);
@@ -231,6 +231,13 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
 		{
 			it->second->Draw(vpControl, GL_POINTS);
+			it->second->Draw(vpControl, GL_LINE_STRIP);
+			glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
+			vector<VBOData> *buffer = (vector<VBOData> *)it->second->GetBufferAt(vpControl->Id);
+			if (buffer)
+			{
+				BitmapString(buffer->at(0).vert.x, buffer->at(0).vert.y + 10, buffer->at(0).vert.z, num2str(it->second->ID, 0));
+			}							
 		}
 	}
 	if (UI->GetCheckboxState_Images())
@@ -260,7 +267,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 
 	glEnable(GL_LINE_SMOOTH);
 	
-	glDisable(GL_DEPTH_TEST);									// Disable Depth Testing
+	/*glDisable(GL_DEPTH_TEST);									// Disable Depth Testing
 
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
@@ -271,7 +278,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 
 	glEnableClientState(GL_COLOR_ARRAY);
 	glBindBuffer(GL_ARRAY_BUFFER, AxisGrid_VBOName_c);
-	glColorPointer(4, GL_FLOAT, 0, nullptr);
+	glColorPointer(4, GL_FLOAT, 0, nullptr);*/
 
 
 
@@ -285,11 +292,17 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	glLineWidth(3.0);
-
+	glLineWidth(2.0);
+	if (RayObj)
+	{
+		RayObj->Draw(vpControl, GL_LINE_LOOP);
+	}
+	/*
 	if (Ray_VBOName == 0 && Ray_VBOName_c == 0) {
-		PrepareRayVBO();
-		BuildRayVBO();
+		if (PrepareRayVBO())
+		{
+			BuildRayVBO();
+		}		
 	}
 	if (Ray_VBOName > 0 && Ray_VBOName_c > 0 && Socket->IsConnected) {
 		glRotatef(-viewAngle, 0.0f, 1.0f, 0.0f);
@@ -303,7 +316,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		glColorPointer(4, GL_FLOAT, 0, nullptr);
 
 		glDrawElements(GL_LINE_LOOP, rayArraySize, GL_UNSIGNED_SHORT, ray);
-	}
+	}*/
 	glLineWidth(1.0);
 	glLoadIdentity();
 	
@@ -338,6 +351,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 		for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
 		{
 			it->second->Draw(vpControl, GL_POINTS);
+			it->second->Draw(vpControl, GL_LINE_STRIP);
 		}
 	}
 	if (UI->GetCheckboxState_Images())
@@ -361,7 +375,10 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	{
 		mmPointer->Draw(vpControl, GL_TRIANGLES);
 	}
-	
+	if (RayObj)
+	{
+		RayObj->Draw(vpControl, GL_LINE_LOOP);
+	}
 	return true;
 }
 
@@ -519,37 +536,55 @@ bool CScene::PrepareRayVBO()
 {
 	/*if (!Initialized)
 		return false;*/
+	if (rdrinit) {
+		maxDist = rdrinit->dR * rdrinit->maxR;
 
-	Ray = new glm::vec3[vertexCount_Ray]; //ray vertex array
-	Ray[0].x = 0;
-	Ray[0].y = y0;
-	Ray[0].z = 0;
+		Ray = new glm::vec3[vertexCount_Ray]; //ray vertex array
+		Ray[0].x = 0;
+		Ray[0].y = y0;
+		Ray[0].z = 0;
 
-	Ray[1].x = maxDist * sin(-rayWidth / 2) / MPPh;
-	Ray[1].y = y0;
-	Ray[1].z = maxDist * cos(-rayWidth / 2) / MPPh;
+		Ray[1].x = maxDist * sin(-rayWidth / 2) / MPPh;
+		Ray[1].y = y0;
+		Ray[1].z = maxDist * cos(-rayWidth / 2) / MPPh;
 
-	Ray[2].x = maxDist * sin(rayWidth / 2) / MPPh;
-	Ray[2].y = y0;
-	Ray[2].z = maxDist * cos(rayWidth / 2) / MPPh;
+		Ray[2].x = maxDist * sin(rayWidth / 2) / MPPh;
+		Ray[2].y = y0;
+		Ray[2].z = maxDist * cos(rayWidth / 2) / MPPh;
 
-	rayArraySize = 3;
-	ray = new unsigned short[rayArraySize]; //ray index array
-	ray[0] = 0;
-	ray[1] = 1;
-	ray[2] = 2;
+		rayArraySize = 3;
+		ray = new unsigned short[rayArraySize]; //ray index array
+		ray[0] = 0;
+		ray[1] = 1;
+		ray[2] = 2;
 
-	if (!RayObj)
-	{
-		//RayObj = new C3DObjectModel()
-		RayObj = new C3DObjectModel(Main,
-			new C3DObjectVBO(false),
-			nullptr,
-			new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
-		
+		if (!RayObj)
+		{
+			//RayObj = new C3DObjectModel()
+			RayObj = new C3DObjectModel(new C3DObjectVBO(false),
+				nullptr,
+				new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
+
+			std::vector<VBOData> *buffer = new std::vector<VBOData>;
+			buffer->push_back({ glm::vec4(0, y0, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 1), glm::vec2(1, 0) });
+			buffer->push_back({ glm::vec4(maxDist * sin(-rayWidth / 2) / MPPh, y0, maxDist * cos(-rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 1), glm::vec2(1, 1) });
+			buffer->push_back({ glm::vec4(maxDist * sin(rayWidth / 2) / MPPh, y0, maxDist * cos(rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 1), glm::vec2(0, 1) });
+
+			auto vbo = RayObj->GetC3DObjectVBO(Main);
+
+			if (vbo) {
+				vbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+			}
+
+			/*C3DObjectVBO *mmvbo = new C3DObjectVBO(false);
+			mmvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+
+			RayObj->SetVBO(MiniMap, mmvbo);*/
+		}
+
+		return true;
 	}
-
-	return true;
+	return false;
 }
 
 bool CScene::MiniMapPrepareAndBuildVBO()
@@ -769,6 +804,7 @@ void CScene::Init(RDR_INITCL* init)
 		minE = maxE = CSettings::GetFloat(FloatZeroElevation);
 	}
 	rayWidth = init->dAzm * init->ViewStep;
+	maxDist = init->dR * init->maxR;
 	SectorsCount = init->Nazm / init->ViewStep;
 	Sectors.resize(SectorsCount);
 	for (int i = 0; i < Sectors.size(); i++)
@@ -780,7 +816,29 @@ void CScene::Init(RDR_INITCL* init)
 	{
 		ImageSet = new CRImageSet();
 	}
+	if (!RayObj)
+	{
+		//RayObj = new C3DObjectModel()
+		RayObj = new C3DObjectModel(new C3DObjectVBO(false),
+			nullptr,
+			new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
 
+		std::vector<VBOData> *buffer = new std::vector<VBOData>;
+		buffer->push_back({ glm::vec4(0, y0, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.5), glm::vec2(1, 0) });
+		buffer->push_back({ glm::vec4(maxDist * sin(-rayWidth / 2) / MPPh, y0, maxDist * cos(-rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.5), glm::vec2(1, 1) });
+		buffer->push_back({ glm::vec4(maxDist * sin(rayWidth / 2) / MPPh, y0, maxDist * cos(rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.5), glm::vec2(0, 1) });
+
+		auto vbo = RayObj->GetC3DObjectVBO(Main);
+
+		if (vbo) {
+			vbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+		}
+
+		/*C3DObjectVBO *mmvbo = new C3DObjectVBO(false);
+		mmvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+
+		RayObj->SetVBO(MiniMap, mmvbo);*/
+	}
 	Initialized = true;	
 }
 
