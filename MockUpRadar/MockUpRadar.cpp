@@ -167,47 +167,20 @@ std::default_random_engine generator;
 std::normal_distribution<double> distribution(0, R_DEVIATION);
 
 
-#include <cmath>
-double phi(double x);
-double phi(double x)
-{
-	// constants
-	double a1 = 0.254829592;
-	double a2 = -0.284496736;
-	double a3 = 1.421413741;
-	double a4 = -1.453152027;
-	double a5 = 1.061405429;
-	double p = 0.3275911;
-
-	// Save the sign of x
-	int sign = 1;
-	if (x < 0)
-		sign = -1;
-	x = fabs(x) / sqrt(2.0);
-
-	// A&S formula 7.1.26
-	double t = 1.0 / (1.0 + p*x);
-	double y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*exp(-x*x);
-
-	return 0.5*(1.0 + sign*y);
-}
-
 int __cdecl main(void)
 {
-	double x;
-	x = -3.0;  printf("ph(%f)=%f\n", x, phi(x));
-	x = -2.0;  printf("ph(%f)=%f\n", x, phi(x));
-	x = -1.0;  printf("ph(%f)=%f\n", x, phi(x));
-	x = -0.5;  printf("ph(%f)=%f\n", x, phi(x));
-	x = -0.25;  printf("ph(%f)=%f\n", x, phi(x));
-	x = -0.125;  printf("ph(%f)=%f\n", x, phi(x));
-	x = 0.0;  printf("ph(%f)=%f\n", x, phi(x));
-	x = 0.125;  printf("ph(%f)=%f\n", x, phi(x));
-	x = 0.25;  printf("ph(%f)=%f\n", x, phi(x));
-	x = 0.5;  printf("ph(%f)=%f\n", x, phi(x));
-	x = 1.0;  printf("ph(%f)=%f\n", x, phi(x));
-	x = 2.0;  printf("ph(%f)=%f\n", x, phi(x));
-	x = 3.0;  printf("ph(%f)=%f\n", x, phi(x));
+	std::random_device rd;
+	std::mt19937 gen(rd());
+
+	// values near the mean are the most likely
+	// standard deviation affects the dispersion of generated values from the mean
+	std::normal_distribution<> d(5, 2);
+
+	printf("%f\n", d(gen));
+	printf("%f\n", d(gen));
+	printf("%f\n", d(gen));
+	printf("%f\n", d(gen));
+	printf("%f\n", d(gen));
 
 
 	WSADATA wsaData;
