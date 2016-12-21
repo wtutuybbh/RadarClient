@@ -286,13 +286,13 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 
 	
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glMatrixMode(GL_MODELVIEW);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glMatrixMode(GL_MODELVIEW);
 	
 	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	glLineWidth(2.0);
+	//glLineWidth(2.0);
 	if (RayObj)
 	{
 		//RayObj->Draw(vpControl, GL_LINE_LOOP);
@@ -318,8 +318,8 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 
 		glDrawElements(GL_LINE_LOOP, rayArraySize, GL_UNSIGNED_SHORT, ray);
 	}*/
-	glLineWidth(1.0);
-	glLoadIdentity();
+	//glLineWidth(1.0);
+	//glLoadIdentity();
 	
 	//glDisableClientState(GL_VERTEX_ARRAY);						// Enable Vertex Arrays
 	//glDisableClientState(GL_COLOR_ARRAY);
@@ -825,9 +825,9 @@ void CScene::Init(RDR_INITCL* init)
 			new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
 
 		std::vector<VBOData> *buffer = new std::vector<VBOData>;
-		buffer->push_back({ glm::vec4(0, y0, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.5), glm::vec2(1, 0) });
-		buffer->push_back({ glm::vec4(maxDist * sin(-rayWidth / 2) / MPPh, y0, maxDist * cos(-rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.5), glm::vec2(1, 1) });
-		buffer->push_back({ glm::vec4(maxDist * sin(rayWidth / 2) / MPPh, y0, maxDist * cos(rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.5), glm::vec2(0, 1) });
+		buffer->push_back({ glm::vec4(0, y0, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.1), glm::vec2(1, 0) });
+		buffer->push_back({ glm::vec4(maxDist * sin(-rayWidth / 2) / MPPh, y0, maxDist * cos(-rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.1), glm::vec2(1, 1) });
+		buffer->push_back({ glm::vec4(maxDist * sin(rayWidth / 2) / MPPh, y0, maxDist * cos(rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.1), glm::vec2(0, 1) });
 
 		auto vbo = RayObj->GetC3DObjectVBO(Main);
 
