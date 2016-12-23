@@ -165,24 +165,41 @@ CScene::~CScene() {
 	}
 
 	if (info)
+	{
 		delete[] info;
+	}
 
 	for (auto it = begin(Sectors); it != end(Sectors); ++it)
-		delete *it;	
+	{
+		delete *it;
+	}
 	Sectors.clear();
 
 	for (auto it = begin(Tracks); it != end(Tracks); ++it)
+	{
 		delete it->second; //TODO: here it fails
+	}
 	Tracks.clear();
 
 	if (begAzmLine)
+	{
 		delete begAzmLine;
+	}
 
 	if (ImageSet)
+	{
 		delete ImageSet;
+	}
 
 	if (m_Bounds)
+	{
 		delete[] m_Bounds;
+	}
+
+	if (RayObj)
+	{
+		delete RayObj;
+	}
 }
 
 bool CScene::DrawScene(CViewPortControl * vpControl)
@@ -247,6 +264,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 			ImageSet->Draw(vpControl, GL_POINTS);
 	}
 	glDisable(GL_PROGRAM_POINT_SIZE);
+
 	glEnable(GL_LINE_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
@@ -821,7 +839,7 @@ void CScene::Init(RDR_INITCL* init)
 	if (!RayObj)
 	{
 		//RayObj = new C3DObjectModel()
-		RayObj = new C3DObjectModel(new C3DObjectVBO(false),
+		RayObj = new C3DObjectModel(new C3DObjectVBO(true),
 			nullptr,
 			new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
 
