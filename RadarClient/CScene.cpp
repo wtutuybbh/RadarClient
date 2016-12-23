@@ -197,15 +197,16 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	}
 	//Mesh->Draw(vpControl, GL_TRIANGLES);
 	//return true;
-	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	
 	//goto shader_debug;
-	glDisable(GL_LIGHTING);
+	//glDisable(GL_LIGHTING);
 	//glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 
 	//Mesh->UseTexture = vpControl->DisplayMap;
-	glDisable(GL_LINE_SMOOTH);
+	//glDisable(GL_LINE_SMOOTH);
 
 	if (Mesh)
 	{
