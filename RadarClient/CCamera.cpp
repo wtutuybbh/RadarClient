@@ -8,7 +8,7 @@ const std::string CCamera::requestID = "CCamera";
 CCamera::CCamera() //empty constructor. camera depends on scene, scene depends on camera... oh shit!
 {
 	std::string context = "CCamera::CCamera";
-	CRCLogger::Info(requestID, context, "Start");
+	LOG_INFO(requestID, context, "Start");
 
 	flag0 = 1;
 

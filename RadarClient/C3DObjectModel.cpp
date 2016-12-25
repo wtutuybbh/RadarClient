@@ -278,6 +278,20 @@ void C3DObjectModel::SetVBO(int vpId, C3DObjectVBO* _vbo)
 	vbo.insert_or_assign(vpId, _vbo);
 }
 
+void C3DObjectModel::SetRotateMatrix(int vpId, glm::mat4 rotate)
+{
+	rotateMatrix.insert_or_assign(vpId, rotate);
+}
+
+void C3DObjectModel::SetRotateMatrix(glm::mat4 rotate)
+{
+	for (auto iter = rotateMatrix.begin(); iter != rotateMatrix.end(); ++iter)
+	{
+		auto vpId = iter->first;
+		SetRotateMatrix(vpId, rotate);
+	}
+}
+
 void C3DObjectModel::SetColor(glm::vec4 color)
 {
 	Color = color;

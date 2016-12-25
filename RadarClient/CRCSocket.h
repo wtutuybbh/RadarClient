@@ -393,7 +393,9 @@ struct RDR_INITCL
 	int           MaxNumSectImg;
 	int           blankR1;
 	int           blankR2;
-	char          resv2[888];
+	int			MaxNAzm;
+	int			MaxNElv;
+	char          resv2[888 - 2 * sizeof(int)];
 };
 
 

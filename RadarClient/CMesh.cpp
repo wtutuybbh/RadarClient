@@ -26,7 +26,7 @@ bool CMesh::LoadHeightmap(int vpId)
 
 	if (LOG_ENABLED && CMesh_LoadHeightmap_LOG)
 	{
-		CRCLogger::Info(requestID, context, "Start, vpId=" + vpId);
+		LOG_INFO(requestID, context, "Start, vpId=" + vpId);
 	}
 
 
@@ -178,7 +178,7 @@ bool CMesh::LoadHeightmap(int vpId)
 CMesh::CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv) : C3DObjectModel(vpId, nullptr, nullptr, nullptr)
 {
 	std::string context = "CMesh::CMesh";
-	CRCLogger::Info(requestID, context, (boost::format("Start... vpId=%1%, clearAfter=%3%, position=(%4%, %5%), max_range=%6%, texsize=%7%, resolution=%8%") 
+	LOG_INFO(requestID, context, (boost::format("Start... vpId=%1%, clearAfter=%3%, position=(%4%, %5%), max_range=%6%, texsize=%7%, resolution=%8%") 
 		% vpId 
 		% 0 //scn 
 		% clearAfter 
@@ -216,7 +216,7 @@ CMesh::~CMesh()
 bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)
 {
 	string context = "CMesh::IntersectLine";
-	CRCLogger::Info(requestID, context, (boost::format("Start... vpId=%1%, orig_=(%2%, %3%, %4%), dir_=(%5%, %6%, %7%")
+	LOG_INFO(requestID, context, (boost::format("Start... vpId=%1%, orig_=(%2%, %3%, %4%), dir_=(%5%, %6%, %7%")
 		% vpId
 		% orig_.x
 		% orig_.y

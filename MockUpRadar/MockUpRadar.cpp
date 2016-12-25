@@ -7,6 +7,8 @@
 #define BEG_ELV 0.0
 
 #define R_DEVIATION 500
+#define NPOINTS_MEAN 50
+#define NPOINTS_DEVIATION 25
 
 #undef UNICODE
 
@@ -23,6 +25,8 @@
 #include <iostream>
 #include <random>
 #include <FreeImage.h>
+#include <chrono>
+#include <thread>
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -107,7 +111,9 @@ struct RDR_INITCL
 	int           MaxNumSectImg;
 	int           blankR1;
 	int           blankR2;
-	char          resv2[888];
+	int			MaxNAzm;
+	int			MaxNElv;
+	char          resv2[888 - 2 * sizeof(int)];
 };
 
 struct RDRTRACKS
@@ -165,22 +171,28 @@ RDR_INITCL init;
 
 std::default_random_engine generator;
 std::normal_distribution<double> distribution(0, R_DEVIATION);
+std::random_device rd;
+std::mt19937 gen(rd());
+std::normal_distribution<> d(0, R_DEVIATION);
+std::normal_distribution<> d_npoints(NPOINTS_MEAN, NPOINTS_DEVIATION);
+
+using namespace std::this_thread; // sleep_for, sleep_until
+using namespace std::chrono; // nanoseconds, system_clock, seconds
 
 
 int __cdecl main(void)
 {
-	std::random_device rd;
-	std::mt19937 gen(rd());
+	
 
 	// values near the mean are the most likely
 	// standard deviation affects the dispersion of generated values from the mean
-	std::normal_distribution<> d(5, 2);
+	
 
+	/*printf("%f\n", d(gen));
 	printf("%f\n", d(gen));
 	printf("%f\n", d(gen));
 	printf("%f\n", d(gen));
-	printf("%f\n", d(gen));
-	printf("%f\n", d(gen));
+	printf("%f\n", d(gen));*/
 
 
 	WSADATA wsaData;
@@ -301,7 +313,29 @@ int __cdecl main(void)
 
 	char *points;
 
-	points = GetPoints(0, 255, 59, 2500);	__sh = (_sh*)points;	SendData(ClientSocket, points, __sh->dlina, 0);	delete[] points;
+	int nspause = 3000000000 / (init.MaxNAzm / init.ViewStep);
+	int d1 = 0;
+	int avgR = 2500;
+
+	while (true)
+	{
+		int npoints = d_npoints(gen);
+		if (npoints <= 0)
+		{
+			npoints = 1;
+		}
+		points = GetPoints(d1, d1 + 255, npoints, avgR);
+		__sh = (_sh*)points;	
+		SendData(ClientSocket, points, __sh->dlina, 0);	
+		delete[] points; 
+		sleep_for(nanoseconds(nspause));
+		d1 = d1 + init.ViewStep;
+		if (d1 >= init.MaxNAzm)
+		{
+			d1 = 0;
+		}
+	}
+
 	points = GetPoints(256, 511, 79, 2500);	__sh = (_sh*)points;	SendData(ClientSocket, points, __sh->dlina, 0);	delete[] points;
 	points = GetPoints(512, 767, 30, 2500);	__sh = (_sh*)points;	SendData(ClientSocket, points, __sh->dlina, 0);	delete[] points;
 	points = GetPoints(768, 1023, 39, 2500);	__sh = (_sh*)points;	SendData(ClientSocket, points, __sh->dlina, 0);	delete[] points;
@@ -385,9 +419,9 @@ RDR_INITCL GetInit() {
 
 	RDR_INITCL TI; /* TI = Test Init */
 
-	TI.Nazm = 8092;
+	TI.Nazm = 256;
 	TI.Nelv = 1;
-	TI.dAzm = 2 * M_PI / TI.Nazm;
+	
 	TI.dElv = 0;
 	TI.begAzm = BEG_AZM;
 	TI.begElv = BEG_ELV;
@@ -417,7 +451,10 @@ RDR_INITCL GetInit() {
 	TI.MaxNumSectImg = 0;
 	TI.blankR1 = 0;
 	TI.blankR2 = 0;
-	std::fill(TI.resv2, TI.resv2 + 888, 0);
+	TI.MaxNAzm = 8192;
+	TI.MaxNElv = 1;
+	TI.dAzm = 2 * M_PI / TI.MaxNAzm;
+	std::fill(TI.resv2, TI.resv2 + 888 - 2 * sizeof(int), 0);
 
 	return TI;
 }
@@ -501,7 +538,7 @@ char* GetPoints(short d1, short d2, int N, unsigned int R)
 		float a = 2 * M_PI * ps[i].B / init.Nazm;
 
 		ps[i].E = BEG_ELV;
-		ps[i].R = R * (2 + cos(4 * a) / 4 + 0.1*sin(5 * a)) + distribution(generator);
+		ps[i].R = R * (2 + cos(4 * a) / 4 + 0.1*sin(5 * a)) + d(gen);
 		ps[i].T = 0;
 		ps[i].Amp = GetAmp(ps[i].R, ps[i].B);
 	}

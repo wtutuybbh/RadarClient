@@ -23,7 +23,7 @@ CTrack::~CTrack()
 #define CTrack_DESTRUCTOR_LogInfo false
 	if (CTrack_DESTRUCTOR_LogInfo)
 	{
-		CRCLogger::Info(requestID, "CTrack DESTRUCTOR", (boost::format("ID = %1%") % ID).str());
+		LOG_INFO(requestID, "CTrack DESTRUCTOR", (boost::format("ID = %1%") % ID).str());
 	}	
 }
 
@@ -36,13 +36,13 @@ void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK*>
 		_vbo = vbo.at(Main);
 		if (!_vbo)
 		{
-			CRCLogger::Error(requestID, "CTrack::Refresh", "vbo.at(Main) is null. RETURN.");
+			LOG_ERROR(requestID, "CTrack::Refresh", "vbo.at(Main) is null. RETURN.");
 			return;
 		}
 	}
 	catch (std::out_of_range ex)
 	{
-		CRCLogger::Error(requestID, "CTrack::Refresh", "no vbo at index Main. RETURN.");
+		LOG_ERROR(requestID, "CTrack::Refresh", "no vbo at index Main. RETURN.");
 		return;
 	}
 	void *_vbuffer = _vbo->GetBuffer();

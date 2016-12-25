@@ -59,4 +59,7 @@ public:
 
 	std::string GetTypeName();
 	void SetVBO(int vpId, C3DObjectVBO *_vbo);
+
+	void SetRotateMatrix(int vpId, glm::mat4 rotate);
+	void SetRotateMatrix(glm::mat4 rotate);
 };

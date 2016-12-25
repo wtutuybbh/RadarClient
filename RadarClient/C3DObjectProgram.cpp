@@ -66,7 +66,7 @@ void C3DObjectProgram::Bind()
 		}
 		if (colorAttribName.length()>0) {
 			GLint color_attr_loc = glGetAttribLocation(this->ProgramId, colorAttribName.c_str());
-			glVertexAttribPointer(color_attr_loc, 3, GL_FLOAT, GL_FALSE, elementSize, (void*)(sizeof(float) * colorPlace));
+			glVertexAttribPointer(color_attr_loc, 4, GL_FLOAT, GL_TRUE, elementSize, (void*)(sizeof(float) * colorPlace));
 			glEnableVertexAttribArray(color_attr_loc);
 		}
 	}

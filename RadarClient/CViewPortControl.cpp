@@ -105,7 +105,7 @@ LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wPara
 		break;
 	case WM_LBUTTONDOWN:
 		/*std::string context = "CViewPortControl::ViewPortControlProc:WM_LBUTTONDOWN";
-		CRCLogger::Info(requestID, context, (boost::format("Start... hwnd=%1%, uMsg=%2%, wParam=%3%, lParam=%4%; x=LOWORD(lParam)=%5%, y=HIWORD(lParam)=%6%") 
+		LOG_INFO(requestID, context, (boost::format("Start... hwnd=%1%, uMsg=%2%, wParam=%3%, lParam=%4%; x=LOWORD(lParam)=%5%, y=HIWORD(lParam)=%6%") 
 			% hwnd % uMsg % wParam % lParam % LOWORD(lParam) % HIWORD(lParam)).str());*/
 		SetFocus(hwnd);
 		if (Camera) {
@@ -170,7 +170,7 @@ glm::mat4 CViewPortControl::GetViewMatrix() const
 CViewPortControl::CViewPortControl(LPCSTR className)
 {
 	std::string context = "CViewPortControl::CViewPortControl";
-	CRCLogger::Info(requestID, context, (boost::format("Start... className=%1%") % className).str());
+	LOG_INFO(requestID, context, (boost::format("Start... className=%1%") % className).str());
 
 	ClassName = className;
 
@@ -193,7 +193,7 @@ CViewPortControl::~CViewPortControl()
 C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 {
 	std::string context = "CViewPortControl::Get3DObject";
-	CRCLogger::Info(requestID, context, (boost::format("Start... x=%1%, y=%2%") % x % y).str());
+	LOG_INFO(requestID, context, (boost::format("Start... x=%1%, y=%2%") % x % y).str());
 
 	glm::vec4 viewport = glm::vec4(0, 0, Width, Height);
 
@@ -202,7 +202,7 @@ C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 
 	if(UI->MeasureDistance())
 	{
-		CRCLogger::Info(requestID, context, "Measure distance option is on, calling Scene->GetPointOnSurface(p0, p1)...");
+		LOG_INFO(requestID, context, "Measure distance option is on, calling Scene->GetPointOnSurface(p0, p1)...");
 		Scene->GetPointOnSurface(p0, p1);
 	}
 	int index;
@@ -210,13 +210,13 @@ C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 	if (o)
 	{
 		std::string typeName = o->GetTypeName();
-		LOG_INFO__("Scene->GetSectorPoint: (x=%.4f, y=%.4f) => (o: %s)", x, y, typeName.c_str());
+		LOG_INFO__("Scene->GetSectorPoint: (x=%d, y=%d) => (o: %s)", x, y, typeName);
 	}
 	C3DObjectModel *t = Scene->GetFirstTrackBetweenPoints(this, glm::vec2(x, y), index);
 	if (t)
 	{
 		std::string typeName = t->GetTypeName();
-		LOG_INFO__("Scene->GetFirstTrackBetweenPoints: (x=%.4f, y=%.4f) => (t: %s)", x, y, typeName.c_str());
+		LOG_INFO__("Scene->GetFirstTrackBetweenPoints: (x=%d, y=%d) => (t: %s)", x, y, typeName);
 	}
 	if (o && !t) {
 		o->SetColor(glm::vec4(0, 1, 0, 1));
@@ -284,7 +284,7 @@ LRESULT CALLBACK CViewPortControl::stWinMsgHandler(HWND hwnd, UINT uMsg, WPARAM 
 			return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 	catch (...) {
-		CRCLogger::Info(requestID, "CViewPortControl::stWinMsgHandler", "Exception");
+		LOG_INFO(requestID, "CViewPortControl::stWinMsgHandler", "Exception");
 	}
 }
 
@@ -310,7 +310,7 @@ bool CViewPortControl::Register(void)
 	{
 		// NOTE: Failure, Should Never Happen
 		MessageBox(HWND_DESKTOP, "CViewPortControl: RegisterClassEx Failed!", "Error", MB_OK | MB_ICONEXCLAMATION);
-		CRCLogger::Error(requestID, context, "RegisterClassEx Failed");
+		LOG_ERROR(requestID, context, "RegisterClassEx Failed");
 		return FALSE;													// Return False (Failure)
 	}
 	return TRUE;
@@ -334,7 +334,7 @@ void CViewPortControl::Unregister(void)
 bool CViewPortControl::InitGL()
 {
 	std::string context = "CViewPortControl::InitGL";
-	CRCLogger::Info(requestID, context, "Start...");
+	LOG_INFO(requestID, context, "Start...");
 
 	DWORD windowStyle = WS_OVERLAPPEDWINDOW;							// Define Our Window Style
 	DWORD windowExtendedStyle = WS_EX_APPWINDOW;						// Define The Window's Extended Style
@@ -375,7 +375,7 @@ bool CViewPortControl::InitGL()
 		// Failed
 		DestroyWindow(hWnd);									// Destroy The Window
 		hWnd = nullptr;												// Zero The Window Handle
-		CRCLogger::Error(requestID, context, "hDC == 0, return false");
+		LOG_ERROR(requestID, context, "hDC == 0, return false");
 		return FALSE;													// Return False
 	}
 
@@ -388,7 +388,7 @@ bool CViewPortControl::InitGL()
 		hDC = nullptr;												// Zero The Device Context
 		DestroyWindow(hWnd);									// Destroy The Window
 		hWnd = nullptr;												// Zero The Window Handle
-		CRCLogger::Error(requestID, context, "PixelFormat == 0, return false");
+		LOG_ERROR(requestID, context, "PixelFormat == 0, return false");
 		return FALSE;													// Return False
 	}
 
@@ -399,7 +399,7 @@ bool CViewPortControl::InitGL()
 		hDC = nullptr;												// Zero The Device Context
 		DestroyWindow(hWnd);									// Destroy The Window
 		hWnd = nullptr;												// Zero The Window Handle
-		CRCLogger::Error(requestID, context, (boost::format("SetPixelFormat(hDC=%1%, PixelFormat=%2%, &pfd=%3%) == FALSE, return false") % hDC % PixelFormat % (int)(&pfd)).str());
+		LOG_ERROR(requestID, context, (boost::format("SetPixelFormat(hDC=%1%, PixelFormat=%2%, &pfd=%3%) == FALSE, return false") % hDC % PixelFormat % (int)(&pfd)).str());
 		return FALSE;													// Return False
 	}
 
@@ -411,14 +411,14 @@ bool CViewPortControl::InitGL()
 		hDC = nullptr;												// Zero The Device Context
 		DestroyWindow(hWnd);									// Destroy The Window
 		hWnd = nullptr;												// Zero The Window Handle
-		CRCLogger::Error(requestID, context, "hRC == 0, return false");
+		LOG_ERROR(requestID, context, "hRC == 0, return false");
 		return FALSE;													// Return False
 	}
 
 	// Make The Rendering Context Our Current Rendering Context
 	if (!MakeCurrent())
 	{
-		CRCLogger::Error(requestID, context, "MakeCurrent() == false, return false");
+		LOG_ERROR(requestID, context, "MakeCurrent() == false, return false");
 		return false;
 	}
 
@@ -429,7 +429,7 @@ bool CViewPortControl::InitGL()
 		GLenum en = glGetError();
 		const GLubyte *s = glewGetErrorString(err);
 		/* Problem: glewInit failed, something is seriously wrong. */
-		CRCLogger::Error(requestID, "CViewPortControl::InitGL", "Problem: glewInit failed, something is seriously wrong.");
+		LOG_ERROR(requestID, "CViewPortControl::InitGL", "Problem: glewInit failed, something is seriously wrong.");
 	}
 
 	const GLubyte* version = glGetString(GL_VERSION);
@@ -443,7 +443,7 @@ bool CViewPortControl::InitGL()
 	glShadeModel(GL_SMOOTH);									// Select Smooth Shading
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);			// Set Perspective Calculations To Most Accurate
 
-	CRCLogger::Info(requestID, context, "Success, return true.");
+	LOG_INFO(requestID, context, "Success, return true.");
 	return true;
 }
 

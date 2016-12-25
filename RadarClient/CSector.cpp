@@ -42,17 +42,17 @@ CSector::~CSector()
 			}
 			else
 			{
-				CRCLogger::Warn(requestID, "CSector DESTRUCTOR", "buffer is nullptr");
+				LOG_WARN(requestID, "CSector DESTRUCTOR", "buffer is nullptr");
 			}
 		}
 		else
 		{
-			CRCLogger::Warn(requestID, "CSector DESTRUCTOR", "vbo at Main is nullptr");
+			LOG_WARN(requestID, "CSector DESTRUCTOR", "vbo at Main is nullptr");
 		}
 	}
 	catch (std::out_of_range ex)
 	{
-		CRCLogger::Warn(requestID, "CSector DESTRUCTOR", "no vbo at Main");
+		LOG_WARN(requestID, "CSector DESTRUCTOR", "no vbo at Main");
 	}	
 }
 
@@ -75,9 +75,9 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 		LOG_ERROR__("init is nullptr");
 		return;
 	}
-	if (init->Nazm <= 0)
+	if (init->MaxNAzm <= 0)
 	{
-		LOG_ERROR__("init->Nazm = %d", init->Nazm);
+		LOG_ERROR__("init->MaxNAzm = %d", init->MaxNAzm);
 		return;
 	}
 	if (info_p->N <= 0)
@@ -151,12 +151,12 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 
 	if (!vpControl)
 	{
-		CRCLogger::Error(requestID, context, (boost::format("vpControl is nullptr, screenPoint=(%1%, %2%)") % screenPoint.x % screenPoint.y).str());
+		LOG_ERROR(requestID, context, (boost::format("vpControl is nullptr, screenPoint=(%1%, %2%)") % screenPoint.x % screenPoint.y).str().c_str());
 		return -1;
 	}
 
 	if (CSector_GetPoint_LogInfo) 
-		CRCLogger::Info(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
+		LOG_INFO(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str().c_str());
 
 	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
 
@@ -167,11 +167,11 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 	{
 		if (!buffer)
 		{
-			CRCLogger::Error(requestID, context, "buffer is nullptr, RETURN -1");
+			LOG_ERROR(requestID, context, "buffer is nullptr, RETURN -1");
 		}
 		if (buffer->size() == 0)
 		{
-			CRCLogger::Error(requestID, context, "buffer->size() == 0, RETURN -1");
+			LOG_ERROR(requestID, context, "buffer->size() == 0, RETURN -1");
 		}
 		return -1;
 	}
@@ -179,10 +179,10 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 
 	if (CSector_GetPoint_LogInfo)
 	{
-		CRCLogger::Info(requestID, context, (boost::format("mv[0]=(%1%)") % mat4row2str(mv, 0, 3)).str());
-		CRCLogger::Info(requestID, context, (boost::format("mv[1]=(%1%)") % mat4row2str(mv, 1, 3)).str());
-		CRCLogger::Info(requestID, context, (boost::format("mv[2]=(%1%)") % mat4row2str(mv, 2, 3)).str());
-		CRCLogger::Info(requestID, context, (boost::format("mv[3]=(%1%)") % mat4row2str(mv, 3, 3)).str());
+		LOG_INFO(requestID, context, (boost::format("mv[0]=(%1%)") % mat4row2str(mv, 0, 3)).str().c_str());
+		LOG_INFO(requestID, context, (boost::format("mv[1]=(%1%)") % mat4row2str(mv, 1, 3)).str().c_str());
+		LOG_INFO(requestID, context, (boost::format("mv[2]=(%1%)") % mat4row2str(mv, 2, 3)).str().c_str());
+		LOG_INFO(requestID, context, (boost::format("mv[3]=(%1%)") % mat4row2str(mv, 3, 3)).str().c_str());
 	}
 
 	glm::mat4 proj = vpControl->GetProjMatrix();

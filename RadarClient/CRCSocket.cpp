@@ -14,7 +14,7 @@ const std::string CRCSocket::requestID = "CRCSocket";
 CRCSocket::CRCSocket(HWND hWnd)
 {
 	string context = "CRCSocket::CRCSocket";
-	CRCLogger::Info(requestID, context, (boost::format("Start... hWnd=%1%") % hWnd).str());
+	LOG_INFO(requestID, context, (boost::format("Start... hWnd=%1%") % hWnd).str());
 
 	this->hWnd = hWnd;
 	OnceClosed = false;
@@ -70,7 +70,7 @@ CRCSocket::~CRCSocket()
 void CRCSocket::Init()
 {
 	string context = "CRCSocket::Init()";
-	CRCLogger::Info(requestID, context, "Start");
+	LOG_INFO(requestID, context, "Start");
 
 	if (WSAStartup(MAKEWORD(2, 2), &WsaDat) != 0)
 	{
@@ -121,16 +121,16 @@ void CRCSocket::Init()
 
 	IsConnected = false;
 
-	CRCLogger::Info(requestID, context, "End");
+	LOG_INFO(requestID, context, "End");
 }
 
 int CRCSocket::Connect()
 {
 	string context = "CRCSocket::Connect()";
-	CRCLogger::Info(requestID, context, "Start");
+	LOG_INFO(requestID, context, "Start");
 	// Attempt to connect to server
 	if (OnceClosed) {
-		CRCLogger::Info(requestID, context, "Socket was once closed, need to run Init()...");
+		LOG_INFO(requestID, context, "Socket was once closed, need to run Init()...");
 		Init();
 		OnceClosed = false;
 	}
@@ -152,17 +152,17 @@ int CRCSocket::Connect()
 		LOG_ERROR__("cResult == SOCKET_ERROR: WSAGetLastError returned %d, %s", error, str);
 	}
 	//int errorCode = WSAGetLastError();
-	CRCLogger::Info(requestID, context, (boost::format("End: return %1%") % cResult).str());
+	LOG_INFO(requestID, context, (boost::format("End: return %1%") % cResult).str());
 	return cResult;
 }
 
 int CRCSocket::Read()
 {	
 	string context = "CRCSocket::Read()";
-	if (ReadLogEnabled) CRCLogger::Info(requestID, context, "Start");
+	if (ReadLogEnabled) LOG_INFO(requestID, context, "Start");
 	if (!IsConnected && !OnceClosed)
 	{
-		CRCLogger::Info(requestID, context, "First read, setting state to 'Connected'");
+		LOG_INFO(requestID, context, "First read, setting state to 'Connected'");
 		IsConnected = true;
 		PostMessage(hWnd, CM_CONNECT, IsConnected, NULL);
 	}
@@ -188,7 +188,7 @@ int CRCSocket::Read()
 		ZeroMemory(szIncoming, sizeof(szIncoming));
 		recev = recv(Socket, client->buff + client->offset, TXRXBUFSIZE, 0);
 
-		if (ReadLogEnabled) CRCLogger::Info(requestID, context, (boost::format("recv returned %1% bytes of data") % recev).str());
+		if (ReadLogEnabled) LOG_INFO(requestID, context, (boost::format("recv returned %1% bytes of data") % recev).str());
 
 		offset = recev + client->offset;
 		if (offset < sizeof(_sh)) //приняли меньше шапки
@@ -301,16 +301,16 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				{
 					if (info_p && pts)
 					{
-						CRCLogger::Info(requestID, context, (boost::format("MSG_RPOINTS. D=%1%, N=%2%, d1=%3%, d2=%4%, pts[0].B=%5%") % info_p->D % info_p->N % info_p->d1 % info_p->d2 % pts[0].B).str());
+						LOG_INFO(requestID, context, (boost::format("MSG_RPOINTS. D=%1%, N=%2%, d1=%3%, d2=%4%, pts[0].B=%5%") % info_p->D % info_p->N % info_p->d1 % info_p->d2 % pts[0].B).str());
 						//TODO: pts may be empty...
 					}
 					if (!info_p)
 					{
-						CRCLogger::Warn(requestID, context, "info_p is nullptr");
+						LOG_WARN(requestID, context, "info_p is nullptr");
 					}
 					if (!pts)
 					{
-						CRCLogger::Warn(requestID, context, "pts is nullptr");
+						LOG_WARN(requestID, context, "pts is nullptr");
 					}		
 				}
 			}
@@ -335,11 +335,11 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				{
 					if (info_i)
 					{
-						CRCLogger::Info(requestID, context, (boost::format("MSG_RIMAGE. D=%1%, N=%2%, d1=%3%, d2=%4%, NR=%5%") % info_i->D % info_i->N % info_i->d1 % info_i->d2 % info_i->NR).str());
+						LOG_INFO(requestID, context, (boost::format("MSG_RIMAGE. D=%1%, N=%2%, d1=%3%, d2=%4%, NR=%5%") % info_i->D % info_i->N % info_i->d1 % info_i->d2 % info_i->NR).str());
 					}
 					if (!info_i)
 					{
-						CRCLogger::Warn(requestID, context, "info_i is nullptr");
+						LOG_WARN(requestID, context, "info_i is nullptr");
 					}
 				}
 			}
@@ -349,7 +349,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			{
 				if (PostDataLogEnabled)
 				{
-					CRCLogger::Info(requestID, context, "MSG_PTSTRK");
+					LOG_INFO(requestID, context, "MSG_PTSTRK");
 				}
 			}
 			break;
@@ -361,11 +361,11 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				{
 					if (pTK)
 					{
-						CRCLogger::Info(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, numTrack=%2%") % N % pTK->numTrack).str());
+						LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, numTrack=%2%") % N % pTK->numTrack).str());
 					}
 					if (!pTK)
 					{
-						CRCLogger::Warn(requestID, context, "pTK is nullptr");
+						LOG_WARN(requestID, context, "pTK is nullptr");
 					}
 				}
 				OnSrvMsg_RDRTRACK(pTK, N);			
@@ -382,7 +382,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 
 				if (PostDataLogEnabled)
 				{
-					LOG_INFO__("MSG_INIT. Nazm=%d, Nelv=%d, dAzm=%f, dElv=%f, begAzm=%f, begElv=%f,	dR=%f, NR=%d, minR=%f, maxR=%f, ViewStep=%d, Proto[0]=%d, Proto[1]=%d, ScanMode=%d, srvTime=%d, MaxNumSectPt=%d, MaxNumSectImg=%d, blankR1=%d, blankR2=%d",
+					LOG_INFO__("MSG_INIT. Nazm=%d, Nelv=%d, dAzm=%f, dElv=%f, begAzm=%f, begElv=%f,	dR=%f, NR=%d, minR=%f, maxR=%f, ViewStep=%d, Proto[0]=%d, Proto[1]=%d, ScanMode=%d, srvTime=%d, MaxNumSectPt=%d, MaxNumSectImg=%d, blankR1=%d, blankR2=%d, MaxNAzm=%d, MaxNElv=%d",
 						s_rdrinit->Nazm, s_rdrinit->Nelv, 
 						s_rdrinit->dAzm, s_rdrinit->dElv, 
 						s_rdrinit->begAzm, s_rdrinit->begElv, 
@@ -395,15 +395,18 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 						s_rdrinit->srvTime, 
 						s_rdrinit->MaxNumSectPt, 
 						s_rdrinit->MaxNumSectImg, 
-						s_rdrinit->blankR1, s_rdrinit->blankR2);
+						s_rdrinit->blankR1, 
+						s_rdrinit->blankR2,
+						s_rdrinit->MaxNAzm,
+						s_rdrinit->MaxNElv);
 					try
 					{
-						s_rdrinit->Nazm = CSettings::GetInt(IntNazm);
-						LOG_INFO__("Using settings value Nazm=%d", s_rdrinit->Nazm);
+						s_rdrinit->MaxNAzm = CSettings::GetInt(IntNazm);
+						LOG_INFO__("Using settings value MaxNAzm=%d", s_rdrinit->MaxNAzm);
 					}
 					catch (const std::out_of_range& oor)
 					{
-						LOG_INFO__("Using server value Nazm=%d", s_rdrinit->Nazm);
+						LOG_INFO__("Using server value MaxNAzm=%d", s_rdrinit->MaxNAzm);
 					}
 					/*
 					struct RDR_INITCL
@@ -438,7 +441,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				RDRCURRPOS* igpsp = (RDRCURRPOS*)(void*)((char*)PTR_D);
 				if (PostDataLogEnabled)
 				{
-					CRCLogger::Info(requestID, context, (boost::format("MSG_LOCATION. lon=%1%, lat=%2%") % igpsp->lon % igpsp->lat).str());
+					LOG_INFO(requestID, context, (boost::format("MSG_LOCATION. lon=%1%, lat=%2%") % igpsp->lon % igpsp->lat).str());
 				}
 				OnSrvMsg_LOCATION(igpsp);
 			}
@@ -467,7 +470,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		int Idx = FindTrack(info[i].numTrack);
 		if (-1 == Idx)
 		{
-			if (PostDataLogEnabled) CRCLogger::Info(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track not found, creating new") % N).str());
+			if (PostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track not found, creating new") % N).str());
 			//создаём трек
 			TRK* t1 = new TRK(info[i].numTrack);
 			Tracks.push_back(t1);
@@ -477,7 +480,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		// уже есть
 		else if (Idx >= 0 && Idx < Tracks.size())
 		{
-			if (PostDataLogEnabled) CRCLogger::Info(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track found") % N).str());
+			if (PostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track found") % N).str());
 			Tracks[Idx]->InsertPoints(info + i, 1);
 		}
 	}
@@ -629,7 +632,7 @@ TRK::TRK(int _id)
 }
 TRK::~TRK()
 {
-	CRCLogger::Info(CRCSocket::requestID, "TRK DESTRUCTOR", (boost::format("id=%1%") % this->id).str());
+	LOG_INFO(CRCSocket::requestID, "TRK DESTRUCTOR", (boost::format("id=%1%") % this->id).str());
 	for (int i = 0; i < P.size(); i++)
 	{
 		if (P.at(i))

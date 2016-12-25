@@ -6,6 +6,27 @@
 
 #include "stdafx.h"
 
+#ifndef _DEBUG
+
+#define LOG(severity, requestID, context, text, ...)
+
+#define LOG_INFO(requestID, context, text, ...)
+#define LOG_INFO_(context, text, ...)
+#define LOG_INFO__(text, ...)
+
+#define LOG_WARN(requestID, context, text, ...)
+#define LOG_WARN_(context, text, ...)
+#define LOG_WARN__(text, ...)
+
+#define LOG_ERROR(requestID, context, text, ...)
+#define LOG_ERROR_(context, text, ...)
+#define LOG_ERROR__(text, ...)
+
+#endif
+
+
+#ifdef _DEBUG
+
 #define Info_ Info
 #define Warn_ Warn
 #define Error_ Error
@@ -33,6 +54,7 @@
 //declares a global logger with a custom initialization
 BOOST_LOG_GLOBAL_LOGGER(my_logger, logger_t)
 
+
 namespace logging = boost::log;
 namespace src = boost::log::sources;
 namespace sinks = boost::log::sinks;
@@ -49,3 +71,4 @@ public:
 	static void Warn(std::string requestID, std::string context, std::string msg);	
 	static void Error(std::string requestID, std::string context, std::string msg);	
 };
+#endif

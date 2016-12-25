@@ -1,6 +1,8 @@
 ﻿#include "stdafx.h"
 #include "CRCLogger.h"
 
+#ifdef _DEBUG
+
 void CRCLogger::GetDateTimeString(std::string& out)
 {
 
@@ -110,3 +112,5 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, logger_t)
 
 	return lg;
 }
+
+#endif

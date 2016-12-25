@@ -9,11 +9,11 @@ CRCTextureDataFile::CRCTextureDataFile(const std::string& imgFileName) :
 	std::string context = "CRCTextureDataFile::CRCTextureDataFile";
 	if (imgFileName.empty())
 	{
-		CRCLogger::Error(requestID, context, "imgFileName is empty. Will throw exception().");
+		LOG_ERROR(requestID, context, "imgFileName is empty. Will throw exception().");
 		throw std::exception("imgFileName is empty");
 	}
-	CRCLogger::Info(requestID, context, (boost::format("Start... imgFileName=%1%")
-		% imgFileName).str());
+	LOG_INFO(requestID, context, (boost::format("Start... imgFileName=%1%")
+		% imgFileName).str().c_str());
 
 	fileName = imgFileName;
 
@@ -25,7 +25,7 @@ CRCTextureDataFile::CRCTextureDataFile(const std::string& imgFileName) :
 	std::string datFileName = imgFileName.substr(0, imgFileName.length() - 3).append("dat");
 	std::string dimFileName = imgFileName.substr(0, imgFileName.length() - 3).append("dim");
 
-	CRCLogger::Info(requestID, context, (boost::format("%1% => datFileName=%2%, dimFileName=%3%") % fileName % datFileName % dimFileName).str());
+	LOG_INFO(requestID, context, (boost::format("%1% => datFileName=%2%, dimFileName=%3%") % fileName % datFileName % dimFileName).str().c_str());
 
 	//try to read dimension data from dimension file:
 	try 
@@ -35,16 +35,16 @@ CRCTextureDataFile::CRCTextureDataFile(const std::string& imgFileName) :
 	catch (...) 
 	{		
 		std::string error_string = (boost::format("infile.open() throwed exeption, dimFileName=%1%") % dimFileName).str();
-		CRCLogger::Error(requestID, context, error_string);
+		LOG_ERROR(requestID, context, error_string.c_str());
 		throw std::exception(error_string.c_str());
 	}
 	if (!infile) {
-		CRCLogger::Warn(requestID, context, "No *.dim file, will create new");
+		LOG_WARN(requestID, context, "No *.dim file, will create new");
 		data = FreeImage_Load(FreeImage_GetFileType(imgFileName.c_str(), 0), imgFileName.c_str());
 		if (!data) 
 		{
 			std::string error_string = (boost::format("FreeImage_Load failed. imgFileName=%1%") % imgFileName).str();
-			CRCLogger::Error(requestID, context, error_string + ". Will throw exception().");
+			LOG_ERROR(requestID, context, (error_string + ". Will throw exception().").c_str());
 			throw std::exception(error_string.c_str());
 		}
 		width = FreeImage_GetWidth((FIBITMAP*)data);
@@ -67,7 +67,7 @@ CRCTextureDataFile::CRCTextureDataFile(const std::string& imgFileName) :
 		FreeImage_Unload((FIBITMAP*)data);
 		data = nullptr;
 		
-		CRCLogger::Info(requestID, context, (boost::format("*.dim file %1% created, width=%2%, height=%3%") % dimFileName % width % height).str());
+		LOG_INFO(requestID, context, (boost::format("*.dim file %1% created, width=%2%, height=%3%") % dimFileName % width % height).str().c_str());
 	} 
 	else
 	{
@@ -80,7 +80,7 @@ CRCTextureDataFile::CRCTextureDataFile(const std::string& imgFileName) :
 			height = atof(pch);			
 		}
 		infile.close();
-		CRCLogger::Info(requestID, context, (boost::format("*.dim file %1% processed, width=%2%, height=%3%") % dimFileName % width % height).str());
+		LOG_INFO(requestID, context, (boost::format("*.dim file %1% processed, width=%2%, height=%3%") % dimFileName % width % height).str().c_str());
 	}
 
 
@@ -92,13 +92,13 @@ CRCTextureDataFile::CRCTextureDataFile(const std::string& imgFileName) :
 	catch (...) 
 	{
 		std::string error_string = (boost::format("infile.open() throwed exeption, datFileName=%1%") % datFileName).str();
-		CRCLogger::Error(requestID, context, error_string);
+		LOG_ERROR(requestID, context, error_string.c_str());
 		throw std::exception(error_string.c_str());
 	}
 	if (!infile) 
 	{
 		std::string error_string = (boost::format("infile is nullptr, datFileName=%1%") % datFileName).str();
-		CRCLogger::Error(requestID, context, error_string);
+		LOG_ERROR(requestID, context, error_string.c_str());
 		throw std::exception(error_string.c_str());
 	}
 
@@ -123,8 +123,8 @@ CRCTextureDataFile::CRCTextureDataFile(const std::string& imgFileName) :
 				lat1 = v;
 		}
 	}
-	CRCLogger::Info(requestID, context, (boost::format("Object created from file %1%, (lon0=%2%, lat0=%3%), (lon1=%4%, lat1=%5%), (width=%6%, height=%7%)") 
-		% fileName % lon0 % lat0 % lon1 % lat1 % width % height).str());
+	LOG_INFO(requestID, context, (boost::format("Object created from file %1%, (lon0=%2%, lat0=%3%), (lon1=%4%, lat1=%5%), (width=%6%, height=%7%)") 
+		% fileName % lon0 % lat0 % lon1 % lat1 % width % height).str().c_str());
 	infile.close();
 }
 
@@ -132,14 +132,14 @@ CRCTextureDataFile::CRCTextureDataFile(double lon0, double lat0, double lon1, do
 	CRCDataFile(Texture, lon0, lat0, lon1, lat1, width, height)
 {
 	std::string context = "CRCTextureDataFile::CRCTextureDataFile";
-	CRCLogger::Info(requestID, context, (boost::format("Start... lon0=%1%, lat0=%2%, lon1=%3%, lat1=%4%, width=%5%, height=%6%")
-		% lon0 % lat0 % lon1 % lat1 % width % height).str());
+	LOG_INFO(requestID, context, (boost::format("Start... lon0=%1%, lat0=%2%, lon1=%3%, lat1=%4%, width=%5%, height=%6%")
+		% lon0 % lat0 % lon1 % lat1 % width % height).str().c_str());
 
 	data = FreeImage_Allocate(width, height, bytespp);
 	if (!data)
 	{
 		std::string error_string = (boost::format("FreeImage_Allocate failed. Size was ( (w*h) = (%1% * %2%) = %3% ). %4% bytes per pixel.") % width % height % (width * height) % bytespp).str();
-		CRCLogger::Error(requestID, context, error_string + ". RETURN FALSE.");
+		LOG_ERROR(requestID, context, (error_string + ". RETURN FALSE.").c_str());
 		throw std::exception(error_string.c_str());
 	}
 }
@@ -188,25 +188,25 @@ void CRCTextureDataFile::ApplyIntersection(CRCDataFile *src)
 		return;
 	}
 
-	CRCLogger::Info(requestID, context, (boost::format("Start... this->filename=%1%, src.Filename=%2%") % fileName % src->GetName()).str());	
+	LOG_INFO(requestID, context, (boost::format("Start... this->filename=%1%, src.Filename=%2%") % fileName % src->GetName()).str().c_str());
 
 	if (!src->Open())
 	{
-		CRCLogger::Error(requestID, context, "src.Open() failed. RETURN.");
+		LOG_ERROR(requestID, context, "src.Open() failed. RETURN.");
 		return;
 	}
 	
 	FIBITMAP *dib = (FIBITMAP *)data;
 	if (!dib)
 	{
-		CRCLogger::Error(requestID, context, "this->data not initialized. Call Open() first. RETURN.");
+		LOG_ERROR(requestID, context, "this->data not initialized. Call Open() first. RETURN.");
 		return;
 	}
 
 	FIBITMAP *src_dib = (FIBITMAP *)src->Data();
 	if (!src_dib)
 	{
-		CRCLogger::Error(requestID, context, "src.data not initialized. RETURN.");
+		LOG_ERROR(requestID, context, "src.data not initialized. RETURN.");
 		return;
 	}
 
@@ -215,12 +215,12 @@ void CRCTextureDataFile::ApplyIntersection(CRCDataFile *src)
 
 	if (!GetIntersection(src, this_x0, this_y0, this_x1, this_y1) || !src->GetIntersection(this, src_x0, src_y0, src_x1, src_y1))
 	{
-		CRCLogger::Warn(requestID, context, (boost::format("Intersection not found. this_x0=%1%, this_y0=%2%, this_x1=%3%, this_y1=%4%.")
-			% this_x0 % this_y0 % this_x1 % this_y1).str());
+		LOG_WARN(requestID, context, (boost::format("Intersection not found. this_x0=%1%, this_y0=%2%, this_x1=%3%, this_y1=%4%.")
+			% this_x0 % this_y0 % this_x1 % this_y1).str().c_str());
 		return;
 	}
-	CRCLogger::Info(requestID, context, (boost::format("Intersection found. this_x0=%1%, this_y0=%2%, this_x1=%3%, this_y1=%4%,    src_x0=%5%, src_y0=%6%, src_x1=%7%, src_y1=%8%.")
-		% this_x0 % this_y0 % this_x1 % this_y1 % src_x0 % src_y0 % src_x1 % src_y1).str());
+	LOG_INFO(requestID, context, (boost::format("Intersection found. this_x0=%1%, this_y0=%2%, this_x1=%3%, this_y1=%4%,    src_x0=%5%, src_y0=%6%, src_x1=%7%, src_y1=%8%.")
+		% this_x0 % this_y0 % this_x1 % this_y1 % src_x0 % src_y0 % src_x1 % src_y1).str().c_str());
 
 	//magic swap (because image origin is top-left):
 	int tmp = this_y0;
@@ -230,32 +230,32 @@ void CRCTextureDataFile::ApplyIntersection(CRCDataFile *src)
 	src_y0 = src->Height() - src_y1 - 1;
 	src_y1 = src->Height() - tmp - 1;
 
-	CRCLogger::Info(requestID, context, (boost::format("After 'magic swap'. this_x0=%1%, this_y0=%2%, this_x1=%3%, this_y1=%4%,    src_x0=%5%, src_y0=%6%, src_x1=%7%, src_y1=%8%.")
-		% this_x0 % this_y0 % this_x1 % this_y1 % src_x0 % src_y0 % src_x1 % src_y1).str());
+	LOG_INFO(requestID, context, (boost::format("After 'magic swap'. this_x0=%1%, this_y0=%2%, this_x1=%3%, this_y1=%4%,    src_x0=%5%, src_y0=%6%, src_x1=%7%, src_y1=%8%.")
+		% this_x0 % this_y0 % this_x1 % this_y1 % src_x0 % src_y0 % src_x1 % src_y1).str().c_str());
 
 	FIBITMAP *copied = FreeImage_Copy(src_dib, src_x0, src_y0, src_x1, src_y1);
 	if (!copied)
 	{
-		CRCLogger::Error(requestID, context, "FreeImage_Copy failed. RETURN.");
+		LOG_ERROR(requestID, context, "FreeImage_Copy failed. RETURN.");
 		return;
 	}
 	FIBITMAP *resized = FreeImage_Rescale(copied, this_x1 - this_x0 + 1, this_y1 - this_y0 + 1);
 	if (!resized)
 	{
-		CRCLogger::Error(requestID, context, "FreeImage_Rescale failed. RETURN.");
+		LOG_ERROR(requestID, context, "FreeImage_Rescale failed. RETURN.");
 		FreeImage_Unload(copied);
 		return;
 	}
 	FreeImage_Unload(copied);
 	if (!FreeImage_Paste(dib, resized, this_x0, this_y0, alpha))
 	{
-		CRCLogger::Error(requestID, context, "FreeImage_Paste failed. RETURN.");
+		LOG_ERROR(requestID, context, "FreeImage_Paste failed. RETURN.");
 		FreeImage_Unload(resized);
 		return;
 	}	
 	FreeImage_Unload(resized);
 
-	CRCLogger::Info(requestID, context, "End. Success.");
+	LOG_INFO(requestID, context, "End. Success.");
 }
 
 bool CRCTextureDataFile::Open()

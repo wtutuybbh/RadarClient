@@ -187,39 +187,43 @@ CScene::~CScene() {
 
 bool CScene::DrawScene(CViewPortControl * vpControl)
 {
-	//auto glstr = glGetString(GL_EXTENSIONS);
-
 	if (!VBOisBuilt) {
 		PrepareVBOs();
 		VBOisBuilt = BuildVBOs();
 		Camera->Move(glm::vec3(0, y0 + 235, -310), false);
 		Camera->RadarPosition = glm::vec3(0, y0, 0);
 	}
-	//Mesh->Draw(vpControl, GL_TRIANGLES);
-	//return true;
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_BLEND);
-	
-	//goto shader_debug;
-	//glDisable(GL_LIGHTING);
-	//glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
-
-	//Mesh->UseTexture = vpControl->DisplayMap;
-	//glDisable(GL_LINE_SMOOTH);
-
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		
 	if (Mesh)
 	{
-		Mesh->UseTexture = /*Mesh1->UseTexture = Mesh2->UseTexture = Mesh3->UseTexture =*/ vpControl->DisplayMap;
-		Mesh->UseY0Loc = /*Mesh1->UseY0Loc = Mesh2->UseY0Loc = Mesh3->UseY0Loc =*/ !vpControl->DisplayLandscape;
+		Mesh->UseTexture = vpControl->DisplayMap;
+		Mesh->UseY0Loc = !vpControl->DisplayLandscape;
 		Mesh->Draw(vpControl, GL_TRIANGLES);
 	}
-	
-	/*Mesh1->Draw(vpControl, GL_TRIANGLES);
-	Mesh2->Draw(vpControl, GL_TRIANGLES);
-	Mesh3->Draw(vpControl, GL_TRIANGLES);*/
+	glDisable(GL_DEPTH_TEST);
+	if (UI->GetCheckboxState_MarkupLines())
+	{
+		Markup->Draw(vpControl, 0);
+	}
 
-	//return false;
+	if (begAzmLine) {
+		begAzmLine->Draw(vpControl, GL_LINES);
+	}
+
+
+	if (UI->GetCheckboxState_MarkupLabels())
+	{
+		DrawBitmaps();
+	}
+
+	if (RayObj)
+	{
+		RayObj->Draw(vpControl, GL_TRIANGLES);
+	}
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	if (UI->GetCheckboxState_Points()) {
 		for (int i = 0; i < Sectors.size(); i++) {
@@ -227,7 +231,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 				Sectors[i]->Draw(vpControl, GL_POINTS);
 		}
 	}
-	//tracks:
+
 	if (UI->GetCheckboxState_Tracks()) {
 		for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
 		{
@@ -250,80 +254,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	glEnable(GL_LINE_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-	//glDisable(GL_DEPTH_TEST);
-	if (UI->GetCheckboxState_MarkupLines())
-	{
-		Markup->Draw(vpControl, 0);
-	}
-
-	if (begAzmLine) {
-		begAzmLine->Draw(vpControl, GL_LINES);
-	}
-
-
-	if (UI->GetCheckboxState_MarkupLabels()) 
-	{
-		DrawBitmaps();
-	}
-
-	//glEnable(GL_LINE_SMOOTH);
 	
-	/*glDisable(GL_DEPTH_TEST);									// Disable Depth Testing
-
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glBindBuffer(GL_ARRAY_BUFFER, AxisGrid_VBOName);
-	glVertexPointer(3, GL_FLOAT, 0, nullptr);
-
-	glEnableClientState(GL_COLOR_ARRAY);
-	glBindBuffer(GL_ARRAY_BUFFER, AxisGrid_VBOName_c);
-	glColorPointer(4, GL_FLOAT, 0, nullptr);*/
-
-
-
-	//glEnable(GL_DEPTH_TEST);
-
-	
-
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glMatrixMode(GL_MODELVIEW);
-	
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	//glLineWidth(2.0);
-	if (RayObj)
-	{
-		//RayObj->Draw(vpControl, GL_LINE_LOOP);
-		RayObj->Draw(vpControl, GL_TRIANGLES);
-	}
-	/*
-	if (Ray_VBOName == 0 && Ray_VBOName_c == 0) {
-		if (PrepareRayVBO())
-		{
-			BuildRayVBO();
-		}		
-	}
-	if (Ray_VBOName > 0 && Ray_VBOName_c > 0 && Socket->IsConnected) {
-		glRotatef(-viewAngle, 0.0f, 1.0f, 0.0f);
-
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glBindBuffer(GL_ARRAY_BUFFER, Ray_VBOName);
-		glVertexPointer(3, GL_FLOAT, 0, nullptr);
-
-		glEnableClientState(GL_COLOR_ARRAY);
-		glBindBuffer(GL_ARRAY_BUFFER, Ray_VBOName_c);
-		glColorPointer(4, GL_FLOAT, 0, nullptr);
-
-		glDrawElements(GL_LINE_LOOP, rayArraySize, GL_UNSIGNED_SHORT, ray);
-	}*/
-	//glLineWidth(1.0);
-	//glLoadIdentity();
-	
-	//glDisableClientState(GL_VERTEX_ARRAY);						// Enable Vertex Arrays
-	//glDisableClientState(GL_COLOR_ARRAY);
 	
 	mainDrawCount++;
 	return true;
@@ -379,7 +310,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	}
 	if (RayObj)
 	{
-		RayObj->Draw(vpControl, GL_LINE_LOOP);
+		RayObj->Draw(vpControl, GL_TRIANGLES);
 	}
 	return true;
 }
@@ -636,7 +567,7 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 {
 	if (!info_p || !pts || !init)
 		return; //do nothing if no RPOINTS structure provided
-	if (init->Nazm <= 0 || info_p->N<=0) //TODO: full defence against bad data need to be there
+	if (init->MaxNAzm <= 0 || info_p->N<=0) //TODO: full defence against bad data need to be there
 		return;
 
 	//Init = init;
@@ -653,13 +584,13 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 	if (min_ < 0)
 		return;
 
-	if (std::fmax(info_p->d1, info_p->d2) > init->Nazm)
+	if (std::fmax(info_p->d1, info_p->d2) > init->MaxNAzm)
 		return;
 
 	if (SectorsCount <= 0)
 		return;
 	
-	int currentSector = SectorsCount * (min_ / init->Nazm);
+	int currentSector = SectorsCount * (min_ / init->MaxNAzm);
 
 	if (Sectors[currentSector] == nullptr)
 	{
@@ -667,6 +598,10 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 	}
 
 	//LOG_INFO_("CScene::RefreshSector", "currentSector=%d", currentSector);
+	if (RayObj) 
+	{
+		RayObj->SetRotateMatrix(glm::rotate((float)(- 2.0f * M_PI * (currentSector + 0.5) / SectorsCount), glm::vec3(0, 1, 0)));
+	}
 
 	Sectors[currentSector]->Refresh(glm::vec4(0, y0, 0, 1), MPPh, MPPv, info_p, pts, init);	
 	
@@ -741,7 +676,7 @@ void CScene::RefreshTracks(vector<TRK*>* tracks)
 	{
 		if (!it->second->Found) 
 		{
-			CRCLogger::Info(requestID, "CScene::RefreshTracks", (boost::format("going to delete track with id=%1%") % it->second->ID).str());
+			LOG_INFO(requestID, "CScene::RefreshTracks", (boost::format("going to delete track with id=%1%") % it->second->ID).str());
 			delete it->second;
 			it = Tracks.erase(it);
 		}
@@ -770,7 +705,7 @@ void CScene::Init(RDR_INITCL* init)
 		LOG_ERROR__("parameter init is nullptr");
 		return;
 	}
-	LOG_INFO__("Start... init=%#010x{begAzm=%.4f, dAzm=%.4f, Nazm=%d, begElv=%.4f, dElv=%.4f, Nelv=%d, ViewStep=%d}", init, init->begAzm, init->dAzm, init->Nazm, init->begElv, init->dElv, init->Nelv, init->ViewStep);
+	LOG_INFO__("Start... init=%#010x{begAzm=%.4f, dAzm=%.4f, MaxNAzm=%d, begElv=%.4f, dElv=%.4f, Nelv=%d, ViewStep=%d}", init, init->begAzm, init->dAzm, init->MaxNAzm, init->begElv, init->dElv, init->Nelv, init->ViewStep);
 	
 	if (init->ViewStep == 0)
 	{
@@ -807,7 +742,7 @@ void CScene::Init(RDR_INITCL* init)
 	}
 	rayWidth = init->dAzm * init->ViewStep;
 	maxDist = init->dR * init->maxR;
-	SectorsCount = init->Nazm / init->ViewStep;
+	SectorsCount = init->MaxNAzm / init->ViewStep;
 	Sectors.resize(SectorsCount);
 	for (int i = 0; i < Sectors.size(); i++)
 	{
@@ -826,7 +761,7 @@ void CScene::Init(RDR_INITCL* init)
 			new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
 
 		std::vector<VBOData> *buffer = new std::vector<VBOData>;
-		buffer->push_back({ glm::vec4(0, y0, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.1), glm::vec2(1, 0) });
+		buffer->push_back({ glm::vec4(0, y0, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.5), glm::vec2(1, 0) });
 		buffer->push_back({ glm::vec4(maxDist * sin(-rayWidth / 2) / MPPh, y0, maxDist * cos(-rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.1), glm::vec2(1, 1) });
 		buffer->push_back({ glm::vec4(maxDist * sin(rayWidth / 2) / MPPh, y0, maxDist * cos(rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.1), glm::vec2(0, 1) });
 
@@ -836,10 +771,10 @@ void CScene::Init(RDR_INITCL* init)
 			vbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 		}
 
-		/*C3DObjectVBO *mmvbo = new C3DObjectVBO(false);
+		C3DObjectVBO *mmvbo = new C3DObjectVBO(false);
 		mmvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 
-		RayObj->SetVBO(MiniMap, mmvbo);*/
+		RayObj->SetVBO(MiniMap, mmvbo);
 	}
 	Initialized = true;	
 }
@@ -885,13 +820,13 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 
 	if (!vpControl)
 	{
-		CRCLogger::Error(requestID, context, (boost::format("vpControl is nullptr, screenPoint=(%1%, %2%)") % screenPoint.x % screenPoint.y).str());
+		LOG_ERROR(requestID, context, (boost::format("vpControl is nullptr, screenPoint=(%1%, %2%)") % screenPoint.x % screenPoint.y).str().c_str());
 		return nullptr;
 	}
 
 	if (CScene_GetSectorPoint_LogInfo)
 	{
-		CRCLogger::Info(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
+		LOG_INFO(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
 	}
 
 	for (int i = 0; i < Sectors.size(); i++)
@@ -906,7 +841,7 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 				CRCPointModel *point = new CRCPointModel(vpControl->Id, this->y0, this->MPPh, this->MPPv, 0, 0, 0);
 				auto coords = Sectors[i]->GetPointCoords(vpControl, index);
 				point->SetCartesianCoordinates(coords);
-				CRCLogger::Info(requestID, context, (boost::format("(vpControl.Id=%1%, screenPoint=(%2%, %3%)) -> (Sector %4%, index=%5%, RETURN point=(%6%, %7%, %8%))") 
+				LOG_INFO(requestID, context, (boost::format("(vpControl.Id=%1%, screenPoint=(%2%, %3%)) -> (Sector %4%, index=%5%, RETURN point=(%6%, %7%, %8%))") 
 					% vpControl->Id % screenPoint.x % screenPoint.y % i % index % coords.x % coords.y % coords.z).str());
 				return point;
 			}
@@ -914,7 +849,7 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 	}
 	if (CScene_GetSectorPoint_LogInfo) 
 	{
-		CRCLogger::Info(requestID, context, "Point not found");
+		LOG_INFO(requestID, context, "Point not found");
 	}
 	return nullptr;
 }
@@ -927,13 +862,13 @@ C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, 
 
 	if (!vpControl)
 	{
-		CRCLogger::Error(requestID, context, (boost::format("vpControl is nullptr, screenPoint=(%1%, %2%)") % screenPoint.x % screenPoint.y).str());
+		LOG_ERROR(requestID, context, (boost::format("vpControl is nullptr, screenPoint=(%1%, %2%)") % screenPoint.x % screenPoint.y).str());
 		return nullptr;
 	}
 
 	if (CScene_GetFirstTrackBetweenPoints_LogInfo)
 	{
-		CRCLogger::Info(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
+		LOG_INFO(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
 	}
 
 	for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
@@ -949,14 +884,14 @@ C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, 
 				it->second->SelectTrack(Main, true);
 				it->second->SelectTrack(MiniMap, true);
 				
-				CRCLogger::Info(requestID, context, (boost::format("(vpControl.Id=%1%, screenPoint=(%2%, %3%)) -> (Track ID=%4%, index=%5%)") % vpControl->Id % screenPoint.x % screenPoint.y % it->second->ID % index).str());
+				LOG_INFO(requestID, context, (boost::format("(vpControl.Id=%1%, screenPoint=(%2%, %3%)) -> (Track ID=%4%, index=%5%)") % vpControl->Id % screenPoint.x % screenPoint.y % it->second->ID % index).str());
 				return it->second;
 			}
 		}
 	}
 	if (CScene_GetFirstTrackBetweenPoints_LogInfo)
 	{
-		CRCLogger::Info(requestID, context, "Track not found");
+		LOG_INFO(requestID, context, "Track not found");
 	}
 	return nullptr;
 }
@@ -964,13 +899,13 @@ C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, 
 C3DObjectModel* CScene::GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const
 {
 	std::string context = "CScene::GetPointOnSurface";
-	CRCLogger::Info(requestID, context, (boost::format("Start... p0=(%1%, %2%, %3%), p1=(%4%, %5%, %6%)")
+	LOG_INFO(requestID, context, (boost::format("Start... p0=(%1%, %2%, %3%), p1=(%4%, %5%, %6%)")
 		% p0.x % p0.y % p0.z % p1.x % p1.y % p1.z).str());
 	glm::vec3 dir = p1 - p0, position;
 	if (CMesh::Meshs && CMesh::Meshs[0]) {
 		CMesh::Meshs[0]->IntersectLine(Main, p0, dir, position);
 	}
-	CRCLogger::Error(requestID, context, "Not implemented!");
+	LOG_ERROR(requestID, context, "Not implemented!");
 	return nullptr;
 }
 

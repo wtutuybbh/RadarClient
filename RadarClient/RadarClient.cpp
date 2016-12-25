@@ -98,7 +98,7 @@ void ToggleFullscreen(GL_Window* window)								// Toggle Fullscreen/Windowed
 BOOL ChangeScreenResolution(int width, int height, int bitsPerPixel)	// Change The Screen Resolution
 {
 	string context = "ChangeScreenResolution";
-	CRCLogger::Info(requestID, context, "Start");
+	LOG_INFO(requestID, context, "Start");
 	DEVMODE dmScreenSettings;											// Device Mode
 	ZeroMemory(&dmScreenSettings, sizeof(DEVMODE));					// Make Sure Memory Is Cleared
 	dmScreenSettings.dmSize = sizeof(DEVMODE);				// Size Of The Devmode Structure
@@ -108,17 +108,17 @@ BOOL ChangeScreenResolution(int width, int height, int bitsPerPixel)	// Change T
 	dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 	if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
 	{
-		CRCLogger::Error(requestID, context, "ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL => return false");
+		LOG_ERROR(requestID, context, "ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL => return false");
 		return FALSE;													// Display Change Failed, Return False
 	}
-	CRCLogger::Info(requestID, context, "End => return true");
+	LOG_INFO(requestID, context, "End => return true");
 	return TRUE;														// Display Change Was Successful, Return True
 }
 
 BOOL CreateMainWindow(GL_Window* window)									// This Code Creates Window
 {
 	string context = "CreateMainWindow";
-	CRCLogger::Info(requestID, context, "Start");
+	LOG_INFO(requestID, context, "Start");
 
 	DWORD windowStyle = WS_OVERLAPPEDWINDOW;							// Define Our Window Style
 	DWORD windowExtendedStyle = WS_EX_APPWINDOW;						// Define The Window's Extended Style
@@ -142,7 +142,7 @@ BOOL CreateMainWindow(GL_Window* window)									// This Code Creates Window
 
 	if (window->hWnd == nullptr)												// Was Window Creation A Success?
 	{
-		CRCLogger::Error(requestID, context, "window->hWnd == 0 => return false");
+		LOG_ERROR(requestID, context, "window->hWnd == 0 => return false");
 		return FALSE;													// If Not Return False
 	}
 
@@ -157,7 +157,7 @@ BOOL CreateMainWindow(GL_Window* window)									// This Code Creates Window
 
 	window->lastTickCount = GetTickCount();							// Get Tick Count
 
-	CRCLogger::Info(requestID, context, "End => return true");
+	LOG_INFO(requestID, context, "End => return true");
 	return TRUE;														// Window Creating Was A Success
 																		// Initialization Will Be Done In WM_CREATE
 }
@@ -165,7 +165,7 @@ BOOL CreateMainWindow(GL_Window* window)									// This Code Creates Window
 BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL Window & Release Resources
 {
 	string context = "DestroyWindowGL";
-	CRCLogger::Info(requestID, context, (boost::format("Start... hwnd=%1%, hDC=%2%, hRC=%3%") % hWnd % hDC % hRC).str());
+	LOG_INFO(requestID, context, (boost::format("Start... hwnd=%1%, hDC=%2%, hRC=%3%") % hWnd % hDC % hRC).str());
 
 	if (hWnd != nullptr)												// Does The Window Have A Handle?
 	{
@@ -180,7 +180,7 @@ BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL
 		}
 		DestroyWindow(hWnd);									// Destroy The Window
 	}
-	CRCLogger::Info(requestID, context, "End => return true");
+	LOG_INFO(requestID, context, "End => return true");
 	return TRUE;														// Return True
 }
 void CallUI(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -247,7 +247,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_CREATE:													// Window Creation
 	{
-		CRCLogger::Info(requestID, context, "WM_CREATE");
+		LOG_INFO(requestID, context, "WM_CREATE");
 		CREATESTRUCT* creation = (CREATESTRUCT*)(lParam);			// Store Window Structure Pointer
 		window = (GL_Window*)(creation->lpCreateParams);
 		SetWindowLong(hWnd, GWL_USERDATA, (LONG)(window));
@@ -262,11 +262,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SendMessage(GetWindow(hWnd, GW_OWNER), WM_SETICON, ICON_SMALL, (LPARAM)g_hIcon);
 			SendMessage(GetWindow(hWnd, GW_OWNER), WM_SETICON, ICON_BIG, (LPARAM)g_hIcon);
 
-			CRCLogger::Info(requestID, context, "Icon loaded successfully");
+			LOG_INFO(requestID, context, "Icon loaded successfully");
 		}
 		else
 		{
-			CRCLogger::Warn(requestID, context, "Icon not loaded");
+			LOG_WARN(requestID, context, "Icon not loaded");
 		}
 		
 		RECT clientRect;
@@ -306,7 +306,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		g_UI->dwi = &g_dwi;
 		g_Socket->dwi = &g_dwi;
 #endif // _DEBUG
-		CRCLogger::Info(requestID, context, "WM_CREATE: End");
+		LOG_INFO(requestID, context, "WM_CREATE: End");
 	}
 	return 0;														// Return
 
@@ -350,7 +350,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			Initialize();
 		}
-		CRCLogger::Info(requestID, context, (boost::format("WM_KEYDOWN: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
+		LOG_INFO(requestID, context, (boost::format("WM_KEYDOWN: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
 	}
 					 break;															// Break
 
@@ -360,7 +360,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			window->keys->keyDown[wParam] = FALSE;					// Set The Selected Key (wParam) To False
 			//return 0;												// Return
 		}
-		CRCLogger::Info(requestID, context, (boost::format("WM_KEYUP: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
+		LOG_INFO(requestID, context, (boost::format("WM_KEYUP: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
 	}
 				   break;															// Break
 	case WM_SYSKEYDOWN:
@@ -369,7 +369,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			g_AltPressed = true;
 		}
-		CRCLogger::Info(requestID, context, (boost::format("WM_SYSKEYDOWN: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
+		LOG_INFO(requestID, context, (boost::format("WM_SYSKEYDOWN: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
 		return 0;
 	}
 	break;
@@ -379,7 +379,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			g_AltPressed = false;
 		}
-		CRCLogger::Info(requestID, context, (boost::format("WM_SYSKEYUP: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
+		LOG_INFO(requestID, context, (boost::format("WM_SYSKEYUP: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
 		return 0;
 	}
 	break;
@@ -665,7 +665,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	settings_txt.close();
-	CRCLogger::Info(requestID, context, "Settings loaded.");
+	LOG_INFO(requestID, context, "Settings loaded.");
 
 	if (!CSettings::InitPalette())
 	{
@@ -673,54 +673,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return -2;
 	}
 
-	/* SOME TESTS !!! */
-
-	RDR_INITCL TI; /* TI = Test Init */
-
-	TI.Nazm = 8092;
-	TI.Nelv = 1;
-	TI.dAzm = 2 * M_PI / TI.Nazm;
-	TI.dElv = 0;
-	TI.begAzm = 0;
-	TI.begElv = CSettings::GetFloat(FloatZeroElevation);
-	TI.dR = 0.9375;
-	TI.NR = 8192;
-	TI.minR = 60;
-	TI.maxR = TI.dR*TI.NR;
-	std::fill(TI.resv1, TI.resv1 + 32, 0);
-	TI.ViewStep = 256;
-	TI.Proto[0] = 8;
-	TI.Proto[1] = 0;
-	TI.ScanMode = 0;
-
-
-	TI.srvTime.ta[0]=0;
-	TI.srvTime.ta[1] = 0;
-	TI.srvTime.ta[2] = 0;
-	TI.srvTime.ta[3] = 0;
-	TI.srvTime.ta[4] = 0;
-	TI.srvTime.ta[5] = 0;
-	TI.srvTime.ta[6] = 0;
-	TI.srvTime.ta[7] = 0;
-	GetSystemTime(&(TI.srvTime.st));
-
-
-	TI.MaxNumSectPt = 0;
-	TI.MaxNumSectImg = 0;
-	TI.blankR1 = 0;
-	TI.blankR2 = 0;
-	std::fill(TI.resv2, TI.resv2 + 888, 0);
-
-	LOG_INFO__("sizeof RDR_INITCL=%d", sizeof(RDR_INITCL));
-
-	char charinit[sizeof(RDR_INITCL)];
-
-	memcpy(charinit, &TI, sizeof(RDR_INITCL));
-	
-		/* SOME TESTS !!! */
-
 	if (strcmp(lpCmdLine, "") == 0) {
-		CRCLogger::Info(requestID, context, "No parameters provided, using defaults. Usage: RadarClient lon lat 5 5 1300.");
+		LOG_INFO(requestID, context, "No parameters provided, using defaults. Usage: RadarClient lon lat 5 5 1300.");
 		g_lon = 37.631424;
 		g_lat = 54.792393;
 		g_mpph = 5.0f;
@@ -737,7 +691,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		g_mppv = std::stof(v[3]);
 		g_texsize = std::stoi(v[4]);
 		
-		CRCLogger::Info(requestID, context, (boost::format("Parameters set from command line: lon=%1%, lat=%2%, mpph=%3%, mppv=%4%, texsize=%5%") % g_lon % g_lat % g_mpph % g_mppv % g_texsize).str());
+		LOG_INFO(requestID, context, (boost::format("Parameters set from command line: lon=%1%, lat=%2%, mpph=%3%, mppv=%4%, texsize=%5%") % g_lon % g_lat % g_mpph % g_mppv % g_texsize).str());
 	}
 	
 	//CSettings::SetFloat(FloatMPPh, g_mpph);
@@ -781,7 +735,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	g_isProgramLooping = TRUE;											// Program Looping Is Set To TRUE	
 
-	//CRCLogger::Info(requestID, context, (boost::format("-=point before message loop=-")).str());
+	//LOG_INFO(requestID, context, (boost::format("-=point before message loop=-")).str());
 	while (g_isProgramLooping)											// Loop Until WM_QUIT Is Received
 	{
 		if (CreateMainWindow(&window) == TRUE)							// Was Window Creation Successful?
@@ -863,7 +817,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 BOOL Initialize()					// Any GL Init Code & User Initialiazation Goes Here
 {
 	string context = "Initialize";
-	CRCLogger::Info(requestID, context, "Start");
+	LOG_INFO(requestID, context, "Start");
 
 	hasVBO = GLEW_ARB_vertex_buffer_object == TRUE;
 	hasVAO = GLEW_ARB_vertex_array_object == TRUE;
@@ -872,11 +826,11 @@ BOOL Initialize()					// Any GL Init Code & User Initialiazation Goes Here
 	{
 		if (!hasVBO)
 		{
-			CRCLogger::Error(requestID, context, "GLEW_ARB_vertex_buffer_object = FALSE. End (returned false). Perhaps you are launching this program via RDP?");
+			LOG_ERROR(requestID, context, "GLEW_ARB_vertex_buffer_object = FALSE. End (returned false). Perhaps you are launching this program via RDP?");
 		}
 		if (!hasVAO)
 		{
-			CRCLogger::Error(requestID, context, "GLEW_ARB_vertex_array_object = FALSE. End (returned false). Perhaps you are launching this program via RDP?");
+			LOG_ERROR(requestID, context, "GLEW_ARB_vertex_array_object = FALSE. End (returned false). Perhaps you are launching this program via RDP?");
 		}
 		return false;
 	}
@@ -899,14 +853,14 @@ BOOL Initialize()					// Any GL Init Code & User Initialiazation Goes Here
 
 	g_Initialized = true;
 
-	CRCLogger::Info(requestID, context, "End (returned true).");
+	LOG_INFO(requestID, context, "End (returned true).");
 	return TRUE;												// Return TRUE (Initialization Successful)
 }
 
 int Deinitialize(void)										// Any User DeInitialization Goes Here
 {
 	string context = "Deinitialize";
-	CRCLogger::Info(requestID, context, "Start");
+	LOG_INFO(requestID, context, "Start");
 	if (g_vpControl) {
 		if (g_vpControl->Scene)
 			delete g_vpControl->Scene;
@@ -920,7 +874,7 @@ int Deinitialize(void)										// Any User DeInitialization Goes Here
 	if (g_hIcon)
 		DestroyIcon((HICON)g_hIcon);	
 
-	CRCLogger::Info(requestID, context, "End - return 0");
+	LOG_INFO(requestID, context, "End - return 0");
 	return 0;
 }
 

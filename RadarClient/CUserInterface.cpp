@@ -82,7 +82,7 @@ LRESULT CUserInterface::Button_Colors(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 	
 	if (GetMainTableMode()==0)
 	{
-		CRCLogger::Info(requestID, context, "Switched to color setup.");
+		LOG_INFO(requestID, context, "Switched to color setup.");
 		ShowWindow(Elements[Grid_ID]->hWnd, SW_HIDE);
 		ShowWindow(Elements[ColorGrid_ID]->hWnd, SW_SHOWNOACTIVATE);
 		SetMainTableMode(1);
@@ -90,7 +90,7 @@ LRESULT CUserInterface::Button_Colors(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 	}
 	if (GetMainTableMode() == 1)
 	{
-		CRCLogger::Info(requestID, context, "Switched back to info.");
+		LOG_INFO(requestID, context, "Switched back to info.");
 		ShowWindow(Elements[Grid_ID]->hWnd, SW_SHOWNOACTIVATE);
 		ShowWindow(Elements[ColorGrid_ID]->hWnd, SW_HIDE);
 		SetMainTableMode(0);
@@ -376,7 +376,7 @@ void CUserInterface::Trackbar_ZeroElevation_SetText(int labelID)
 CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
 {
 	string context = "CUserInterface::CUserInterface";
-	CRCLogger::Info(requestID, context, (boost::format("Start... parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%...") % parentHWND % vpControl % socket % panelWidth).str());
+	LOG_INFO(requestID, context, (boost::format("Start... parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%...") % parentHWND % vpControl % socket % panelWidth).str().c_str());
 
 	this->ParentHWND = parentHWND;
 	this->VPControl = vpControl;
@@ -396,7 +396,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	if (!hgridmod)
 	{
 		std::string error_string = "Unable to load ZeeGrid.DLL";
-		CRCLogger::Error(requestID, context, error_string);
+		LOG_ERROR(requestID, context, error_string.c_str());
 		throw std::exception(error_string.c_str());
 	}
 

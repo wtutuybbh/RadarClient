@@ -15,7 +15,7 @@ const std::string CRCDataFileSet::requestID = "CRCDataFileSet";
 void CRCDataFileSet::AddTextureFile(std::string imgFile)
 {
 	std::string context = "CRCDataFileSet::AddTextureFile";
-	CRCLogger::Info(requestID, context, (boost::format("Start... imgFile=%1%") % imgFile).str());
+	LOG_INFO(requestID, context, (boost::format("Start... imgFile=%1%") % imgFile).str().c_str());
 
 	CRCTextureDataFile * file;
 	try 
@@ -24,22 +24,22 @@ void CRCDataFileSet::AddTextureFile(std::string imgFile)
 	}
 	catch (const std::exception& ex)
 	{
-		CRCLogger::Error(requestID, context, "CRCTextureDataFile constructor throwed exception: " + std::string(ex.what()));
+		LOG_ERROR(requestID, context, ("CRCTextureDataFile constructor throwed exception: " + std::string(ex.what())).c_str());
 		return;
 	}
 	if (!file)
 	{
-		CRCLogger::Error(requestID, context, "file is nullptr for some reason.");
+		LOG_ERROR(requestID, context, "file is nullptr for some reason.");
 		return;
 	}
 	_files.push_back(file);
-	CRCLogger::Info(requestID, context, (boost::format("End. Ok. _files collection now contains %1% elements.") % _files.size()).str());
+	LOG_INFO(requestID, context, (boost::format("End. Ok. _files collection now contains %1% elements.") % _files.size()).str().c_str());
 }
 
 void CRCDataFileSet::AddAltitudeFile(std::string altFile)
 {
 	std::string context = "CRCDataFileSet::AddAltitudeFile";
-	CRCLogger::Info(requestID, context, (boost::format("Start... altFile=%1%") % altFile).str());
+	LOG_INFO(requestID, context, (boost::format("Start... altFile=%1%") % altFile).str().c_str());
 
 	CRCAltitudeDataFile * file;
 	try
@@ -48,16 +48,16 @@ void CRCDataFileSet::AddAltitudeFile(std::string altFile)
 	}
 	catch (const std::exception& ex)
 	{
-		CRCLogger::Error(requestID, context, "CRCAltitudeDataFile constructor throwed exception: " + std::string(ex.what()));
+		LOG_ERROR(requestID, context, ("CRCAltitudeDataFile constructor throwed exception: " + std::string(ex.what())).c_str());
 		return;
 	}
 	if (!file)
 	{
-		CRCLogger::Error(requestID, context, "file is nullptr for some reason.");
+		LOG_ERROR(requestID, context, "file is nullptr for some reason.");
 		return;
 	}
 	_files.push_back(file);
-	CRCLogger::Info(requestID, context, (boost::format("End. Ok. _files collection now contains %1% elements.") % _files.size()).str());
+	LOG_INFO(requestID, context, (boost::format("End. Ok. _files collection now contains %1% elements.") % _files.size()).str().c_str());
 }
 
 void CRCDataFileSet::AddFile(CRCDataFile* file)
@@ -66,12 +66,12 @@ void CRCDataFileSet::AddFile(CRCDataFile* file)
 	
 	if (!file)
 	{
-		CRCLogger::Error(requestID, context, "file is nullptr.");
+		LOG_ERROR(requestID, context, "file is nullptr.");
 		return;
 	}
-	CRCLogger::Info(requestID, context, (boost::format("Start... file->fileName=%1%...") % file->GetName()).str());
+	LOG_INFO(requestID, context, (boost::format("Start... file->fileName=%1%...") % file->GetName()).str().c_str());
 	_files.push_back(file);
-	CRCLogger::Info(requestID, context, (boost::format("End. Ok. _files collection now contains %1% elements.") % _files.size()).str());
+	LOG_INFO(requestID, context, (boost::format("End. Ok. _files collection now contains %1% elements.") % _files.size()).str().c_str());
 }
 
 void CRCDataFileSet::AddFile(DataFileType type, std::string file)
@@ -79,16 +79,16 @@ void CRCDataFileSet::AddFile(DataFileType type, std::string file)
 	std::string context = "CRCDataFileSet::AddFile";
 	if (file.empty())
 	{
-		CRCLogger::Error(requestID, context, "file is empty.");
+		LOG_ERROR(requestID, context, "file is empty.");
 		return;
 	}
 	if (type == Undefined)
 	{
-		CRCLogger::Error(requestID, context, "Undefined type is not allowed.");
+		LOG_ERROR(requestID, context, "Undefined type is not allowed.");
 		return;
 	}
 	
-	CRCLogger::Info(requestID, context, (boost::format("Start... type=%1%, file=%2%") % type % file).str());
+	LOG_INFO(requestID, context, (boost::format("Start... type=%1%, file=%2%") % type % file).str().c_str());
 
 	switch (type)
 	{
@@ -99,21 +99,21 @@ void CRCDataFileSet::AddFile(DataFileType type, std::string file)
 		AddAltitudeFile(file);		
 		break;
 	default:
-		CRCLogger::Error(requestID, context, "Unknown type detected, need code refactoring.");
+		LOG_ERROR(requestID, context, "Unknown type detected, need code refactoring.");
 		break;
 	}
-	CRCLogger::Info(requestID, context, "End. Ok.");
+	LOG_INFO(requestID, context, "End. Ok.");
 }
 
 void CRCDataFileSet::AddFiles(std::string dir, DataFileType typeFilter, std::string extFilter)
 {
 	std::string context = "CRCDataFileSet::AddFiles";
-	CRCLogger::Info(requestID, context, (boost::format("Start... dir=%1%, typeFilter=%2%, extFilter=%3%") % dir % typeFilter % extFilter).str());
+	LOG_INFO(requestID, context, (boost::format("Start... dir=%1%, typeFilter=%2%, extFilter=%3%") % dir % typeFilter % extFilter).str().c_str());
 
 	boost::filesystem::path p(dir);
 
 	if (!is_directory(p)) {
-		CRCLogger::Error(requestID, context, (boost::format("dir=%1% is not a directory") % dir).str());
+		LOG_ERROR(requestID, context, (boost::format("dir=%1% is not a directory") % dir).str().c_str());
 		return;
 	}
 	for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {})) {
@@ -123,11 +123,11 @@ void CRCDataFileSet::AddFiles(std::string dir, DataFileType typeFilter, std::str
 		if ((extFilter == "" || ext == extFilter) && (type!=Undefined && typeFilter == type))
 		{			
 			string file = entry.path().generic_string();
-			CRCLogger::Info(requestID, context, (boost::format("Will add file=%1%") % file).str());
+			LOG_INFO(requestID, context, (boost::format("Will add file=%1%") % file).str().c_str());
 			AddFile(type, file);
 		}
 	}
-	CRCLogger::Info(requestID, context, "End. Ok.");	
+	LOG_INFO(requestID, context, "End. Ok.");	
 }
 
 void CRCDataFileSet::ApplyIntersection(CRCDataFile& target)
@@ -160,9 +160,9 @@ CRCDataFile* CRCDataFileSet::GetFile(int index)
 CRCDataFileSet::~CRCDataFileSet()
 {
 	std::string context = "CRCDataFileSet DESTRUCTOR";
-	CRCLogger::Info(requestID, context, (boost::format("Destroying CRCDataFileSet object, containing %1% files") % _files.size()).str());
+	LOG_INFO(requestID, context, (boost::format("Destroying CRCDataFileSet object, containing %1% files") % _files.size()).str().c_str());
 	Clear();
-	CRCLogger::Info(requestID, context, "End. Ok.");
+	LOG_INFO(requestID, context, "End. Ok.");
 }
 
 std::vector<CRCDataFile*>& CRCDataFileSet::Files()
