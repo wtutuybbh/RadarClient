@@ -29,7 +29,7 @@ void CRCAltitudeDataFile::size_set_max()
 	if (LOG_ENABLED && CRCAltitudeDataFile_size_set_max_LOG) 
 	{
 		LOG_INFO(requestID, "CRCAltitudeDataFile::size_set_max", (boost::format("fileName=%1%, size=((w, h)=(%2%, %3%), from=(%4%, %5%), to=(%6%, %7%), (w, h)=(%8%, %9%))")
-			% fileName % size[0] % size[1] % size[2] % size[3] % size[4] % size[5] % size[6] % size[7]).str());
+			% fileName % size[0] % size[1] % size[2] % size[3] % size[4] % size[5] % size[6] % size[7]).str().c_str());
 	}
 }
 
@@ -45,7 +45,7 @@ void CRCAltitudeDataFile::size_set(int x0, int y0, int x1, int y1)
 	if (LOG_ENABLED && CRCAltitudeDataFile_size_set_LOG)
 	{
 		LOG_INFO(requestID, "CRCAltitudeDataFile::size_set", (boost::format("fileName=%1%, size=((w, h)=(%2%, %3%), from=(%4%, %5%), to=(%6%, %7%))")
-			% fileName % size[0] % size[1] % size[2] % size[3] % size[4] % size[5]).str());
+			% fileName % size[0] % size[1] % size[2] % size[3] % size[4] % size[5]).str().c_str());
 	}
 }
 
@@ -60,7 +60,7 @@ CRCAltitudeDataFile::CRCAltitudeDataFile(const std::string& dt2FileName):
 	}
 	if (LOG_ENABLED && CRCAltitudeDataFile_v1_LOG)
 	{
-		LOG_INFO(requestID, context, (boost::format("Start... dt2FileName=%1%") % dt2FileName).str());
+		LOG_INFO(requestID, context, (boost::format("Start... dt2FileName=%1%") % dt2FileName).str().c_str());
 	}
 
 	fileName = dt2FileName;
@@ -76,7 +76,7 @@ CRCAltitudeDataFile::CRCAltitudeDataFile(const std::string& dt2FileName):
 		LOG_INFO(requestID, context, (boost::format("before GetAltitudeMapSizes... fileName=%1%, LL={%2%, %3%, %4%, %5%}, size={%6%, %7%, %8%, %9%, %10%, %11%, %12%, %13%}")
 			% fileName
 			% LL[0] % LL[1] % LL[2] % LL[3]
-			% size[0] % size[1] % size[2] % size[3] % size[4] % size[5] % size[6] % size[7]).str());
+			% size[0] % size[1] % size[2] % size[3] % size[4] % size[5] % size[6] % size[7]).str().c_str());
 	}
 
 	result = GDP::CRCGeoDataProvider::GetAltitudeMapSizes(fileName.c_str(), LL, size);
@@ -109,7 +109,7 @@ CRCAltitudeDataFile::CRCAltitudeDataFile(const std::string& dt2FileName):
 	if (LOG_ENABLED && CRCAltitudeDataFile_v1_LOG)
 	{
 		LOG_INFO(requestID, context, (boost::format("Object created from file %1%, (lon0=%2%, lat0=%3%), (lon1=%4%, lat1=%5%), (width=%6%, height=%7%)")
-			% fileName % lon0 % lat0 % lon1 % lat1 % width % height).str());
+			% fileName % lon0 % lat0 % lon1 % lat1 % width % height).str().c_str());
 	}
 }
 
@@ -120,7 +120,7 @@ CRCAltitudeDataFile::CRCAltitudeDataFile(double lon0, double lat0, double lon1, 
 	if (LOG_ENABLED && CRCAltitudeDataFile_v2_LOG)
 	{
 		LOG_INFO(requestID, context, (boost::format("Start... lon0=%1%, lat0=%2%, lon1=%3%, lat1=%4%, width=%5%, height=%6%")
-			% lon0 % lat0 % lon1 % lat1 % width % height).str());
+			% lon0 % lat0 % lon1 % lat1 % width % height).str().c_str());
 	}
 	size_set_max();
 	try
@@ -133,7 +133,7 @@ CRCAltitudeDataFile::CRCAltitudeDataFile(double lon0, double lat0, double lon1, 
 		if (LOG_ENABLED && CRCAltitudeDataFile_v2_LOG)
 		{
 			LOG_INFO(requestID, context, (boost::format("allocated %1% bytes for data (sizeof(short)=%2%, width=%3%, height=%4%, total %5% elements)")
-				% (sizeof(short) * width * height) % sizeof(short) % width % height % (width * height)).str());
+				% (sizeof(short) * width * height) % sizeof(short) % width % height % (width * height)).str().c_str());
 		}
 	}
 	catch (std::bad_alloc e)
@@ -310,7 +310,7 @@ bool CRCAltitudeDataFile::Open()
 			if (LOG_ENABLED && CRCAltitudeDataFile_Open_LOG)
 			{
 				LOG_INFO(requestID, context, (boost::format("allocated %1% bytes for data (sizeof(short)=%2%, width=%3%, height=%4%, total %5% elements)")
-					% (sizeof(short) * width * height) % sizeof(short) % width % height % (width * height)).str());
+					% (sizeof(short) * width * height) % sizeof(short) % width % height % (width * height)).str().c_str());
 			}
 		}
 		catch (std::bad_alloc e)
@@ -324,7 +324,7 @@ bool CRCAltitudeDataFile::Open()
 			LOG_INFO(requestID, context, (boost::format("CRCGeoDataProvider::GetAltitudeMap... fileName=%1%, LL={%2%, %3%, %4%, %5%}, size={%6%, %7%, %8%, %9%, %10%, %11%, %12%, %13%}")
 				% fileName
 				% LL[0] % LL[1] % LL[2] % LL[3]
-				% size[0] % size[1] % size[2] % size[3] % size[4] % size[5] % size[6] % size[7]).str());
+				% size[0] % size[1] % size[2] % size[3] % size[4] % size[5] % size[6] % size[7]).str().c_str());
 		}
 		result = GDP::CRCGeoDataProvider::GetAltitudeMap(fileName.c_str(), LL, size, sdata);
 
@@ -362,13 +362,13 @@ bool CRCAltitudeDataFile::Close()
 		delete data;
 		if (LOG_ENABLED && CRCAltitudeDataFile_Close_LOG)
 		{
-			LOG_INFO(requestID, "CRCAltitudeDataFile::Close", (boost::format("data deleted, fileName=%1%") % fileName).str());
+			LOG_INFO(requestID, "CRCAltitudeDataFile::Close", (boost::format("data deleted, fileName=%1%") % fileName).str().c_str());
 		}
 		return true;
 	}
 	if (LOG_ENABLED && CRCAltitudeDataFile_Close_LOG)
 	{
-		LOG_INFO(requestID, "CRCAltitudeDataFile::Close", (boost::format("data was nullptr, fileName=%1%") % fileName).str());
+		LOG_INFO(requestID, "CRCAltitudeDataFile::Close", (boost::format("data was nullptr, fileName=%1%") % fileName).str().c_str());
 	}
 	return false;
 }

@@ -170,7 +170,7 @@ glm::mat4 CViewPortControl::GetViewMatrix() const
 CViewPortControl::CViewPortControl(LPCSTR className)
 {
 	std::string context = "CViewPortControl::CViewPortControl";
-	LOG_INFO(requestID, context, (boost::format("Start... className=%1%") % className).str());
+	LOG_INFO(requestID, context, (boost::format("Start... className=%1%") % className).str().c_str());
 
 	ClassName = className;
 
@@ -193,7 +193,7 @@ CViewPortControl::~CViewPortControl()
 C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 {
 	std::string context = "CViewPortControl::Get3DObject";
-	LOG_INFO(requestID, context, (boost::format("Start... x=%1%, y=%2%") % x % y).str());
+	LOG_INFO(requestID, context, (boost::format("Start... x=%1%, y=%2%") % x % y).str().c_str());
 
 	glm::vec4 viewport = glm::vec4(0, 0, Width, Height);
 
@@ -399,7 +399,7 @@ bool CViewPortControl::InitGL()
 		hDC = nullptr;												// Zero The Device Context
 		DestroyWindow(hWnd);									// Destroy The Window
 		hWnd = nullptr;												// Zero The Window Handle
-		LOG_ERROR(requestID, context, (boost::format("SetPixelFormat(hDC=%1%, PixelFormat=%2%, &pfd=%3%) == FALSE, return false") % hDC % PixelFormat % (int)(&pfd)).str());
+		LOG_ERROR(requestID, context, (boost::format("SetPixelFormat(hDC=%1%, PixelFormat=%2%, &pfd=%3%) == FALSE, return false") % hDC % PixelFormat % (int)(&pfd)).str().c_str());
 		return FALSE;													// Return False
 	}
 

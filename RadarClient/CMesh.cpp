@@ -183,7 +183,7 @@ CMesh::CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, in
 		% position.y
 		% max_range
 		% texsize
-		% resolution).str());	
+		% resolution).str().c_str());
 
 	Bounds = nullptr;
 	this->position = position;
@@ -220,7 +220,7 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 		% orig_.z
 		% dir_.x
 		% dir_.y
-		% dir_.z).str());
+		% dir_.z).str().c_str());
 
 	glm::vec4 planeOrig(0, AverageHeight, 0, 1), planeNormal(0, 1, 0, 0);
 	float distance;

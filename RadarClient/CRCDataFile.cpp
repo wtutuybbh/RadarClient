@@ -7,7 +7,7 @@ const std::string CRCDataFile::requestID = "CRCDataFile";
 
 CRCDataFile::CRCDataFile(DataFileType type) : type(type)
 {
-	LOG_INFO(requestID, "CRCDataFile::CRCDataFile", (boost::format("Start... type=%1%... End. Ok.") % type).str());
+	LOG_INFO(requestID, "CRCDataFile::CRCDataFile", (boost::format("Start... type=%1%... End. Ok.") % type).str().c_str());
 }
 CRCDataFile::CRCDataFile(DataFileType type, double lon0, double lat0, double lon1, double lat1, int width, int height) : lon0(lon0), lat0(lat0),
 lon1(lon1),
@@ -23,7 +23,7 @@ type(type)
 		% lon1
 		% lat1
 		% width
-		% height).str());
+		% height).str().c_str());
 }
 CRCDataFile::CRCDataFile(DataFileType type, const std::string& fileName, double lon0, double lat0, double lon1, double lat1, int width, int height)
 	: fileName(fileName),
@@ -43,7 +43,7 @@ CRCDataFile::CRCDataFile(DataFileType type, const std::string& fileName, double 
 		% lon1
 		% lat1
 		% width
-		% height).str());
+		% height).str().c_str());
 }
 
 DataFileType CRCDataFile::GetTypeByExt(std::string ext)
@@ -57,7 +57,7 @@ DataFileType CRCDataFile::GetTypeByExt(std::string ext)
 
 CRCDataFile::~CRCDataFile()
 {
-	LOG_INFO(requestID, "CRCDataFile DESTRUCTOR", (boost::format("Destroying CRCDataFile object, fileName=%1%, data=%2%, type=%3%") % fileName % data % type).str());
+	LOG_INFO(requestID, "CRCDataFile DESTRUCTOR", (boost::format("Destroying CRCDataFile object, fileName=%1%, data=%2%, type=%3%") % fileName % data % type).str().c_str());
 }
 
 DataFileType CRCDataFile::Type() const

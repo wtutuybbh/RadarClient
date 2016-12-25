@@ -165,7 +165,7 @@ BOOL CreateMainWindow(GL_Window* window)									// This Code Creates Window
 BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL Window & Release Resources
 {
 	string context = "DestroyWindowGL";
-	LOG_INFO(requestID, context, (boost::format("Start... hwnd=%1%, hDC=%2%, hRC=%3%") % hWnd % hDC % hRC).str());
+	LOG_INFO(requestID, context, (boost::format("Start... hwnd=%1%, hDC=%2%, hRC=%3%") % hWnd % hDC % hRC).str().c_str());
 
 	if (hWnd != nullptr)												// Does The Window Have A Handle?
 	{
@@ -350,7 +350,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			Initialize();
 		}
-		LOG_INFO(requestID, context, (boost::format("WM_KEYDOWN: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
+		LOG_INFO(requestID, context, (boost::format("WM_KEYDOWN: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str().c_str());
 	}
 					 break;															// Break
 
@@ -360,7 +360,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			window->keys->keyDown[wParam] = FALSE;					// Set The Selected Key (wParam) To False
 			//return 0;												// Return
 		}
-		LOG_INFO(requestID, context, (boost::format("WM_KEYUP: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
+		LOG_INFO(requestID, context, (boost::format("WM_KEYUP: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str().c_str());
 	}
 				   break;															// Break
 	case WM_SYSKEYDOWN:
@@ -369,7 +369,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			g_AltPressed = true;
 		}
-		LOG_INFO(requestID, context, (boost::format("WM_SYSKEYDOWN: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
+		LOG_INFO(requestID, context, (boost::format("WM_SYSKEYDOWN: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str().c_str());
 		return 0;
 	}
 	break;
@@ -379,7 +379,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			g_AltPressed = false;
 		}
-		LOG_INFO(requestID, context, (boost::format("WM_SYSKEYUP: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str());
+		LOG_INFO(requestID, context, (boost::format("WM_SYSKEYUP: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str().c_str());
 		return 0;
 	}
 	break;
@@ -691,7 +691,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		g_mppv = std::stof(v[3]);
 		g_texsize = std::stoi(v[4]);
 		
-		LOG_INFO(requestID, context, (boost::format("Parameters set from command line: lon=%1%, lat=%2%, mpph=%3%, mppv=%4%, texsize=%5%") % g_lon % g_lat % g_mpph % g_mppv % g_texsize).str());
+		LOG_INFO(requestID, context, (boost::format("Parameters set from command line: lon=%1%, lat=%2%, mpph=%3%, mppv=%4%, texsize=%5%") % g_lon % g_lat % g_mpph % g_mppv % g_texsize).str().c_str());
 	}
 	
 	//CSettings::SetFloat(FloatMPPh, g_mpph);

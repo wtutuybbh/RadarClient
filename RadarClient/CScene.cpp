@@ -694,7 +694,7 @@ void CScene::RefreshTracks(vector<TRK*>* tracks)
 	{
 		if (!it->second->Found) 
 		{
-			LOG_INFO(requestID, "CScene::RefreshTracks", (boost::format("going to delete track with id=%1%") % it->second->ID).str());
+			LOG_INFO(requestID, "CScene::RefreshTracks", (boost::format("going to delete track with id=%1%") % it->second->ID).str().c_str());
 			delete it->second;
 			it = Tracks.erase(it);
 		}
@@ -844,7 +844,7 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 
 	if (CScene_GetSectorPoint_LogInfo)
 	{
-		LOG_INFO(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
+		LOG_INFO(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str().c_str());
 	}
 
 	for (int i = 0; i < Sectors.size(); i++)
@@ -860,7 +860,7 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 				auto coords = Sectors[i]->GetPointCoords(vpControl, index);
 				point->SetCartesianCoordinates(coords);
 				LOG_INFO(requestID, context, (boost::format("(vpControl.Id=%1%, screenPoint=(%2%, %3%)) -> (Sector %4%, index=%5%, RETURN point=(%6%, %7%, %8%))") 
-					% vpControl->Id % screenPoint.x % screenPoint.y % i % index % coords.x % coords.y % coords.z).str());
+					% vpControl->Id % screenPoint.x % screenPoint.y % i % index % coords.x % coords.y % coords.z).str().c_str());
 				return point;
 			}
 		}
@@ -880,13 +880,13 @@ C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, 
 
 	if (!vpControl)
 	{
-		LOG_ERROR(requestID, context, (boost::format("vpControl is nullptr, screenPoint=(%1%, %2%)") % screenPoint.x % screenPoint.y).str());
+		LOG_ERROR(requestID, context, (boost::format("vpControl is nullptr, screenPoint=(%1%, %2%)") % screenPoint.x % screenPoint.y).str().c_str());
 		return nullptr;
 	}
 
 	if (CScene_GetFirstTrackBetweenPoints_LogInfo)
 	{
-		LOG_INFO(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str());
+		LOG_INFO(requestID, context, (boost::format("Start... vpControl.Id=%1%, screenPoint=(%2%, %3%)") % vpControl->Id % screenPoint.x % screenPoint.y).str().c_str());
 	}
 
 	for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
@@ -902,7 +902,7 @@ C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, 
 				it->second->SelectTrack(Main, true);
 				it->second->SelectTrack(MiniMap, true);
 				
-				LOG_INFO(requestID, context, (boost::format("(vpControl.Id=%1%, screenPoint=(%2%, %3%)) -> (Track ID=%4%, index=%5%)") % vpControl->Id % screenPoint.x % screenPoint.y % it->second->ID % index).str());
+				LOG_INFO(requestID, context, (boost::format("(vpControl.Id=%1%, screenPoint=(%2%, %3%)) -> (Track ID=%4%, index=%5%)") % vpControl->Id % screenPoint.x % screenPoint.y % it->second->ID % index).str().c_str());
 				return it->second;
 			}
 		}
@@ -918,7 +918,7 @@ C3DObjectModel* CScene::GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const
 {
 	std::string context = "CScene::GetPointOnSurface";
 	LOG_INFO(requestID, context, (boost::format("Start... p0=(%1%, %2%, %3%), p1=(%4%, %5%, %6%)")
-		% p0.x % p0.y % p0.z % p1.x % p1.y % p1.z).str());
+		% p0.x % p0.y % p0.z % p1.x % p1.y % p1.z).str().c_str());
 	glm::vec3 dir = p1 - p0, position;
 	if (CMesh::Meshs && CMesh::Meshs[0]) {
 		CMesh::Meshs[0]->IntersectLine(Main, p0, dir, position);

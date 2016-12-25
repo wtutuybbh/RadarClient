@@ -23,7 +23,7 @@ CTrack::~CTrack()
 #define CTrack_DESTRUCTOR_LogInfo false
 	if (CTrack_DESTRUCTOR_LogInfo)
 	{
-		LOG_INFO(requestID, "CTrack DESTRUCTOR", (boost::format("ID = %1%") % ID).str());
+		LOG_INFO(requestID, "CTrack DESTRUCTOR", (boost::format("ID = %1%") % ID).str().c_str());
 	}	
 }
 

@@ -14,7 +14,7 @@ const std::string CRCSocket::requestID = "CRCSocket";
 CRCSocket::CRCSocket(HWND hWnd)
 {
 	string context = "CRCSocket::CRCSocket";
-	LOG_INFO(requestID, context, (boost::format("Start... hWnd=%1%") % hWnd).str());
+	LOG_INFO(requestID, context, (boost::format("Start... hWnd=%1%") % hWnd).str().c_str());
 
 	this->hWnd = hWnd;
 	OnceClosed = false;
@@ -152,7 +152,7 @@ int CRCSocket::Connect()
 		LOG_ERROR__("cResult == SOCKET_ERROR: WSAGetLastError returned %d, %s", error, str);
 	}
 	//int errorCode = WSAGetLastError();
-	LOG_INFO(requestID, context, (boost::format("End: return %1%") % cResult).str());
+	LOG_INFO(requestID, context, (boost::format("End: return %1%") % cResult).str().c_str());
 	return cResult;
 }
 
@@ -188,7 +188,7 @@ int CRCSocket::Read()
 		ZeroMemory(szIncoming, sizeof(szIncoming));
 		recev = recv(Socket, client->buff + client->offset, TXRXBUFSIZE, 0);
 
-		if (ReadLogEnabled) LOG_INFO(requestID, context, (boost::format("recv returned %1% bytes of data") % recev).str());
+		if (ReadLogEnabled) LOG_INFO(requestID, context, (boost::format("recv returned %1% bytes of data") % recev).str().c_str());
 
 		offset = recev + client->offset;
 		if (offset < sizeof(_sh)) //приняли меньше шапки
@@ -301,7 +301,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				{
 					if (info_p && pts)
 					{
-						LOG_INFO(requestID, context, (boost::format("MSG_RPOINTS. D=%1%, N=%2%, d1=%3%, d2=%4%, pts[0].B=%5%") % info_p->D % info_p->N % info_p->d1 % info_p->d2 % pts[0].B).str());
+						LOG_INFO(requestID, context, (boost::format("MSG_RPOINTS. D=%1%, N=%2%, d1=%3%, d2=%4%, pts[0].B=%5%") % info_p->D % info_p->N % info_p->d1 % info_p->d2 % pts[0].B).str().c_str());
 						//TODO: pts may be empty...
 					}
 					if (!info_p)
@@ -335,7 +335,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				{
 					if (info_i)
 					{
-						LOG_INFO(requestID, context, (boost::format("MSG_RIMAGE. D=%1%, N=%2%, d1=%3%, d2=%4%, NR=%5%") % info_i->D % info_i->N % info_i->d1 % info_i->d2 % info_i->NR).str());
+						LOG_INFO(requestID, context, (boost::format("MSG_RIMAGE. D=%1%, N=%2%, d1=%3%, d2=%4%, NR=%5%") % info_i->D % info_i->N % info_i->d1 % info_i->d2 % info_i->NR).str().c_str());
 					}
 					if (!info_i)
 					{
@@ -361,7 +361,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				{
 					if (pTK)
 					{
-						LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, numTrack=%2%") % N % pTK->numTrack).str());
+						LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, numTrack=%2%") % N % pTK->numTrack).str().c_str());
 					}
 					if (!pTK)
 					{
@@ -441,7 +441,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				RDRCURRPOS* igpsp = (RDRCURRPOS*)(void*)((char*)PTR_D);
 				if (PostDataLogEnabled)
 				{
-					LOG_INFO(requestID, context, (boost::format("MSG_LOCATION. lon=%1%, lat=%2%") % igpsp->lon % igpsp->lat).str());
+					LOG_INFO(requestID, context, (boost::format("MSG_LOCATION. lon=%1%, lat=%2%") % igpsp->lon % igpsp->lat).str().c_str());
 				}
 				OnSrvMsg_LOCATION(igpsp);
 			}
@@ -470,7 +470,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		int Idx = FindTrack(info[i].numTrack);
 		if (-1 == Idx)
 		{
-			if (PostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track not found, creating new") % N).str());
+			if (PostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track not found, creating new") % N).str().c_str());
 			//создаём трек
 			TRK* t1 = new TRK(info[i].numTrack);
 			Tracks.push_back(t1);
@@ -480,7 +480,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		// уже есть
 		else if (Idx >= 0 && Idx < Tracks.size())
 		{
-			if (PostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track found") % N).str());
+			if (PostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track found") % N).str().c_str());
 			Tracks[Idx]->InsertPoints(info + i, 1);
 		}
 	}
@@ -632,7 +632,7 @@ TRK::TRK(int _id)
 }
 TRK::~TRK()
 {
-	LOG_INFO(CRCSocket::requestID, "TRK DESTRUCTOR", (boost::format("id=%1%") % this->id).str());
+	LOG_INFO(CRCSocket::requestID, "TRK DESTRUCTOR", (boost::format("id=%1%") % this->id).str().c_str());
 	for (int i = 0; i < P.size(); i++)
 	{
 		if (P.at(i))
