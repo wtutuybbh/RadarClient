@@ -145,8 +145,6 @@ bool CMesh::LoadHeightmap(int vpId)
 					LocalAverageHeight += tmp.vert.y;
 				// Increment Our Index
 				nIndex++;
-
-
 			}
 		}
 	}
@@ -157,6 +155,7 @@ bool CMesh::LoadHeightmap(int vpId)
 	vbo.insert_or_assign(vpId, new C3DObjectVBO(clearAfter));
 	vbo.at(vpId)->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 
+
 	FIBITMAP* subimage = (FIBITMAP*)maptexture->Data();
 
 	if (FreeImage_GetBPP(subimage) != 32)
@@ -164,9 +163,7 @@ bool CMesh::LoadHeightmap(int vpId)
 		FIBITMAP* tempImage = subimage;
 		subimage = FreeImage_ConvertTo32Bits(tempImage);
 	}
-	tex.insert_or_assign(vpId, new C3DObjectTexture(subimage, "tex", true, false));
-
-
+	tex.insert_or_assign(vpId, new C3DObjectTexture(subimage, "tex", false, false));	
 
 	CenterHeight = alt_.ValueAt(min(max(alt_.Width() / 2 - 1, 0), alt_.Width() - 1), min(max(alt_.Height() / 2, 0), alt_.Height() - 1));
 	Y0 = CenterHeight / MPPv;
@@ -409,5 +406,8 @@ void CMesh::Init(int vpId)
 		scaleMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
 		rotateMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
 		translateMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
+
+		delete maptexture;
+		maptexture = nullptr;
 	}
 }
