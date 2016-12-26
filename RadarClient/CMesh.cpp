@@ -354,11 +354,21 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 		int useTexture_loc = prog.at(vpControl->Id)->GetUniformLocation("useTexture");
 		int y0_loc = prog.at(vpControl->Id)->GetUniformLocation("y0");
 		int usey0_loc = prog.at(vpControl->Id)->GetUniformLocation("useY0");
+		int tracks_loc = prog.at(vpControl->Id)->GetUniformLocation("tracks");
 
 		glUniform1i(useTexture_loc, UseTexture);
 		glUniform1i(usey0_loc, UseY0Loc);
 		glUniform1f(y0_loc, Y0);
 		
+		glm::vec4 tracks[32];
+		tracks[0].x = tracks[0].y = tracks[0].z = 0;
+		tracks[0].w = 1;
+		tracks[1].x = tracks[1].y = tracks[1].z = 10000;
+		tracks[1].w = 1;
+		tracks[2].x = tracks[2].y = tracks[2].z = 0;
+		tracks[2].w = 0;
+
+		glUniform4fv(tracks_loc, 32, tracks->data);
 	}
 }
 
