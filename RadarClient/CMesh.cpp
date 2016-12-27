@@ -112,9 +112,10 @@ bool CMesh::LoadHeightmap(int vpId)
 	VBOData tmp;
 	float minh = CSettings::GetFloat(FloatMinAltitude), maxh = CSettings::GetFloat(FloatMaxAltitude), h, level;
 	glm::vec4 mincolor = CSettings::GetColor(ColorAltitudeLowest), maxcolor = CSettings::GetColor(ColorAltitudeHighest);
+	int sign = 1;
 	for (nZ = 0; nZ < alt_.Height() - 1; nZ++)
 	{
-		for (nX = 0; nX < alt_.Width() - 1; nX++)
+		for (nX = (sign==1?0: (alt_.Width() - 1)); nX < alt_.Width() - 1; nX = nX + sign)
 		{
 			for (nTri = 0; nTri < 6; nTri++)
 			{
@@ -147,6 +148,7 @@ bool CMesh::LoadHeightmap(int vpId)
 				nIndex++;
 			}
 		}
+		sign = sign == 1 ? -1 : 1;
 	}
 	LocalAverageHeight /= alt_.Height() * alt_.Width();
 
@@ -354,21 +356,11 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 		int useTexture_loc = prog.at(vpControl->Id)->GetUniformLocation("useTexture");
 		int y0_loc = prog.at(vpControl->Id)->GetUniformLocation("y0");
 		int usey0_loc = prog.at(vpControl->Id)->GetUniformLocation("useY0");
-		int tracks_loc = prog.at(vpControl->Id)->GetUniformLocation("tracks");
 
 		glUniform1i(useTexture_loc, UseTexture);
 		glUniform1i(usey0_loc, UseY0Loc);
 		glUniform1f(y0_loc, Y0);
 		
-		glm::vec4 tracks[32];
-		tracks[0].x = tracks[0].y = tracks[0].z = 0;
-		tracks[0].w = 1;
-		tracks[1].x = tracks[1].y = tracks[1].z = 10000;
-		tracks[1].w = 1;
-		tracks[2].x = tracks[2].y = tracks[2].z = 0;
-		tracks[2].w = 0;
-
-		glUniform4fv(tracks_loc, 32, tracks->data);
 	}
 }
 

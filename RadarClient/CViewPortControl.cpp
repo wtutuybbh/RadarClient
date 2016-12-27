@@ -27,6 +27,7 @@ void CViewPortControl::Paint()
 
 void CViewPortControl::Draw()
 {
+	CalcPV();
 	//g_vpControl->MakeCurrent();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// Clear Screen And Depth Buffer
@@ -165,6 +166,23 @@ glm::mat4 CViewPortControl::GetViewMatrix() const
 	if (Camera)
 		return Camera->GetView();
 	return glm::mat4(1.0f);
+}
+
+void CViewPortControl::CalcPV()
+{
+	if (Camera)
+	{
+		pv = Camera->GetProjection() * Camera->GetView();
+	}
+	else
+	{
+		pv = glm::mat4(1.0f);
+	}
+}
+
+glm::mat4 CViewPortControl::GetPV() const
+{
+	return pv;
 }
 
 CViewPortControl::CViewPortControl(LPCSTR className)

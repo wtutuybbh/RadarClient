@@ -27,6 +27,7 @@ class CViewPortControl {
 	bool Register(void);
 	void Init();
 	static const std::string requestID;
+	glm::mat4 pv;
 public:
 	CScene *Scene{ nullptr };
 	CCamera *Camera{ nullptr };
@@ -56,6 +57,8 @@ public:
 	void SetPosition(int x, int y, int w, int h);
 	virtual glm::mat4 GetProjMatrix() const;
 	virtual glm::mat4 GetViewMatrix() const;
+	virtual void CalcPV();
+	glm::mat4 GetPV() const;
 	int DisplayPoints, DisplaySeries, DisplayRLIs, DisplayMap, DisplayLandscape, DisplayBlindZones;
 
 	C3DObjectModel* Get3DObject(int x, int y);
