@@ -22,7 +22,6 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <algorithm>
-#include <iostream>
 #include <random>
 #include <FreeImage.h>
 #include <chrono>
