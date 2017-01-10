@@ -112,7 +112,39 @@ bool CMesh::LoadHeightmap(int vpId)
 	VBOData tmp;
 	float minh = CSettings::GetFloat(FloatMinAltitude), maxh = CSettings::GetFloat(FloatMaxAltitude), h, level;
 	glm::vec4 mincolor = CSettings::GetColor(ColorAltitudeLowest), maxcolor = CSettings::GetColor(ColorAltitudeHighest);
-	int sign = 1;
+
+	int H = alt_.Height();
+	int W = alt_.Width();
+	int N = ((W - 3) * 2 + 6 + 1)*(H - 1) - 1;
+	int sign=-1, loop_length = (W - 2) * 2, step_length = 1, next_step = 0, change_mode = 1, mode_id = 0, special_mode_id = 4, next_big_length = loop_length, x = 0, x_prev = 0, dXtone = 1, X = 0;
+
+	// SEE GL_LINE_STRIP.xlsx for details
+	for (int i=0; i<N; i++)
+	{
+		change_mode = (int)(next_step == i);
+
+		next_big_length = (step_length == loop_length && next_big_length == loop_length ? 3 : (step_length == 3 && next_big_length == 3 ? loop_length : next_big_length));
+
+		special_mode_id = (mode_id == 4 && special_mode_id == 4 ? 5 : (mode_id == 5 && special_mode_id == 5 ? 4 : special_mode_id));
+
+		mode_id = (i == 0 ? 0 : (i==N-1?6:(i==1?(mode_id<=2?mode_id+1:(mode_id==3?special_mode_id:1)):mode_id))); // еякх(C60 = $AO$55 - 1; 6; еякх(T60 = 1; еякх(V59 <= 2; V59 + 1; еякх(V59 = 3; W60; 1)); V59)))
+
+		step_length = (i < 2 || i == N - 1 ? 1 : (i==1?(step_length>1?1: next_big_length):step_length));
+
+		next_step = next_step + step_length * change_mode;
+
+		sign = mode_id == -1 ? -1 * sign : sign;
+
+		x = (mode_id==1 ? x : (mode_id==2?(x == x_prev ? x + sign : x):(mode_id==3?x+sign:x))); //=еякх(V60=1;Y59;еякх(V60=2;еякх(Y59=Y58;Y59+P60;Y59);еякх(V60=3;Y59+P60;Y59)))
+
+		X = (mode_id==4?x+dXtone-1:(mode_id==5?x+dXtone:x));
+
+		printf("%d\n", X);
+
+		dXtone ^= 1;
+	}
+
+
 	for (nZ = 0; nZ < alt_.Height() - 1; nZ++)
 	{
 		for (nX = (sign==1?0: (alt_.Width() - 1)); nX < alt_.Width() - 1; nX = nX + sign)
