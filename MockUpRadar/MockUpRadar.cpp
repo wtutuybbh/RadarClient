@@ -184,12 +184,14 @@ int __cdecl main(void)
 {
 	std::ofstream outfile;
 	outfile.open("GL_LINE_STRIP.csv");
-	outfile << "i;change_mode;next_big_length;special_mode_id;mode_id;step_length;next_step;sign;x;dXtone;X" << std::endl;
+	//outfile << "i;change_mode;next_big_length;special_mode_id;mode_id;step_length;next_step;sign;x;dXtone;X" << std::endl;
+	outfile << "i;dYCounter;dYtone;next_step_Ybase_change;Ybase;Y" << std::endl;
 
 	int H = 5;
 	int W = 4;
 	int N = ((W - 3) * 2 + 6 + 1)*(H - 1) - 1;
 	int sign = -1, loop_length = (W - 2) * 2, step_length = 1, next_step = 0, change_mode = 1, mode_id = 0, special_mode_id = 4, next_big_length = loop_length, x = 0, x_prev = 0, dXtone = 1, X = 0;
+	int dYCounter = 0, dYtone = 0, next_step_Ybase_change = 0, next_step_Ybase_change_prev=  0, Ybase = 0, Y = 0;
 	int x_before_change;
 	// SEE GL_LINE_STRIP.xlsx for details
 	for (int i = 0; i<N; i++)
@@ -216,7 +218,23 @@ int __cdecl main(void)
 
 		X = (mode_id == 4 ? x + dXtone - 1 : (mode_id == 5 ? x + dXtone : x));
 
-		outfile << i << ";" << change_mode << ";" << next_big_length << ";" << special_mode_id << ";" << mode_id << ";" << step_length << ";" << next_step << ";" << sign << ";" << x << ";" << dXtone << ";" << X << std::endl;
+		
+
+
+		next_step_Ybase_change_prev = next_step_Ybase_change;
+		next_step_Ybase_change = mode_id == special_mode_id ? 1 : 0;
+
+		Ybase += next_step_Ybase_change_prev;
+
+		dYCounter = next_step_Ybase_change_prev == 0 && (dYCounter == 0 || dYCounter == 3) ? 0 : dYCounter + 1;
+
+		dYtone = dYCounter == 3 ? dYtone^1 : dYtone;
+
+		Y = Ybase + (next_step_Ybase_change_prev == 0 ? !(dXtone^dYtone) : 0);
+
+		//outfile << i << ";" << change_mode << ";" << next_big_length << ";" << special_mode_id << ";" << mode_id << ";" << step_length << ";" << next_step << ";" << sign << ";" << x << ";" << dXtone << ";" << X << std::endl;
+		outfile << i << ";" << dYCounter << ";" << dYtone << ";" << next_step_Ybase_change << ";" << Ybase << ";" << Y << std::endl;
+
 
 		dXtone ^= 1;
 	}
