@@ -83,7 +83,7 @@ bool CMesh::LoadHeightmap(int vpId)
 		alt_.ApplyIntersection(set.GetFile(i));
 	}
 
-	std::vector<VBOData> * buffer = new std::vector<VBOData>((alt_.Width() - 1) * (alt_.Height() - 1) * 6);
+	
 
 	short *data = (short *)alt_.Data();
 
@@ -116,9 +116,34 @@ bool CMesh::LoadHeightmap(int vpId)
 	int H = alt_.Height();
 	int W = alt_.Width();
 	int N = ((W - 3) * 2 + 6 + 1)*(H - 1) - 1;
+
+	//std::vector<VBOData> * buffer = new std::vector<VBOData>((alt_.Width() - 1) * (alt_.Height() - 1) * 6);
+	std::vector<VBOData> * buffer = new std::vector<VBOData>(H*W);
+
 	int sign = -1, loop_length = (W - 2) * 2, step_length = 1, next_step = 0, change_mode = 1, mode_id = 0, special_mode_id = 4, next_big_length = loop_length, x = 0, x_prev = 0, dXtone = 1, X = 0;
 	int dYCounter = 0, dYtone = 0, next_step_Ybase_change = 0, next_step_Ybase_change_prev = 0, Ybase = 0, Y = 0;
 	int x_before_change;
+
+	for (auto i=0; i<H*W; i++)
+	{
+		Y = (int) i / W;
+		X = i % W;
+
+		h = alt_.ValueAt(X, Y);
+		level = (h - minh) / (maxh - minh);
+
+		*(buffer[i].data()) = {
+			glm::vec4(
+				lonStretch * (-X + alt_.Width() / 2.0),
+				h / MPPv,
+				latStretch * (Y - alt_.Height() / 2.0),
+				1),
+			glm::vec3(0, 1, 0),
+			mincolor * (1 - level) + maxcolor * level,
+			glm::vec2(X / alt_.Width(), Y / alt_.Height()) };
+	}
+	unsigned short *idxArray;
+	idxArray = new unsigned short[N];
 	// SEE GL_LINE_STRIP.xlsx for details
 	for (int i = 0; i<N; i++)
 	{
@@ -142,49 +167,16 @@ bool CMesh::LoadHeightmap(int vpId)
 
 		//outfile << i << ";" << change_mode << ";" << next_big_length << ";" << special_mode_id << ";" << mode_id << ";" << step_length << ";" << next_step << ";" << sign << ";" << x << ";" << dXtone << ";" << X << std::endl;
 		//outfile << i << ";" << dYCounter << ";" << dYtone << ";" << next_step_Ybase_change << ";" << Ybase << ";" << Y << std::endl;
+		
+		idxArray[i] = Y * W + X;
 
+		
 
 		dXtone ^= 1;
 	}
 
 
-	for (nZ = 0; nZ < alt_.Height() - 1; nZ++)
-	{
-		for (nX = (sign==1?0: (alt_.Width() - 1)); nX < alt_.Width() - 1; nX = nX + sign)
-		{
-			for (nTri = 0; nTri < 6; nTri++)
-			{
-				// Using This Quick Hack, Figure The X,Z Position Of The Point
-				flX = (float)nX + ((nTri == 1 || nTri == 2 || nTri == 5) ? 1.0f : 0.0f);
-				flZ = (float)nZ + ((nTri == 2 || nTri == 4 || nTri == 5) ? 1.0f : 0.0f);
-
-				// Set The Data, Using PtHeight To Obtain The Y Value
-				h = alt_.ValueAt((int)flX, (int)flZ);
-				level = (h - minh) / (maxh - minh);
-				tmp = {
-					glm::vec4(
-						lonStretch * (-flX + alt_.Width() / 2.0),
-						h / MPPv,
-						latStretch * (flZ - alt_.Height() / 2.0),
-						1),
-					glm::vec3(0, 1, 0),
-					mincolor * (1 - level) + maxcolor * level,
-					glm::vec2(flX / alt_.Width(), flZ / alt_.Height()) };
-
-				buffer->push_back(tmp);
-
-				rcutils::takeminmax(tmp.vert.x, &(Bounds[0].x), &(Bounds[1].x));
-				rcutils::takeminmax(tmp.vert.y, &(Bounds[0].y), &(Bounds[1].y));
-				rcutils::takeminmax(tmp.vert.z, &(Bounds[0].z), &(Bounds[1].z));
-
-				if (nTri == 0)
-					LocalAverageHeight += tmp.vert.y;
-				// Increment Our Index
-				nIndex++;
-			}
-		}
-		sign = sign == 1 ? -1 : 1;
-	}
+	
 	LocalAverageHeight /= alt_.Height() * alt_.Width();
 
 	prog.insert_or_assign(vpId, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color"));
