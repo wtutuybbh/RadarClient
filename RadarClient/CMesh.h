@@ -80,6 +80,8 @@ class CMesh : public C3DObjectModel
 	double max_range;
 
 	float MPPh, MPPv;
+
+	unsigned short *idxArray{ nullptr };
 public:
 	glm::vec3 Size;
 	static float Y0, AverageHeight;

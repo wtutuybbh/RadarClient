@@ -123,16 +123,18 @@ bool CMesh::LoadHeightmap(int vpId)
 	int sign = -1, loop_length = (W - 2) * 2, step_length = 1, next_step = 0, change_mode = 1, mode_id = 0, special_mode_id = 4, next_big_length = loop_length, x = 0, x_prev = 0, dXtone = 1, X = 0;
 	int dYCounter = 0, dYtone = 0, next_step_Ybase_change = 0, next_step_Ybase_change_prev = 0, Ybase = 0, Y = 0;
 	int x_before_change;
-
+	LocalAverageHeight = 0;
 	for (auto i=0; i<H*W; i++)
 	{
 		Y = (int) i / W;
 		X = i % W;
 
 		h = alt_.ValueAt(X, Y);
+		LocalAverageHeight += h;
+
 		level = (h - minh) / (maxh - minh);
 
-		*(buffer[i].data()) = {
+		(*buffer)[i] = {
 			glm::vec4(
 				lonStretch * (-X + alt_.Width() / 2.0),
 				h / MPPv,
@@ -140,9 +142,13 @@ bool CMesh::LoadHeightmap(int vpId)
 				1),
 			glm::vec3(0, 1, 0),
 			mincolor * (1 - level) + maxcolor * level,
-			glm::vec2(X / alt_.Width(), Y / alt_.Height()) };
+			glm::vec2(((float)X) / W, ((float)Y) / H) };
+
+		rcutils::takeminmax((*buffer)[i].vert.x, &(Bounds[0].x), &(Bounds[1].x));
+		rcutils::takeminmax((*buffer)[i].vert.y, &(Bounds[0].y), &(Bounds[1].y));
+		rcutils::takeminmax((*buffer)[i].vert.z, &(Bounds[0].z), &(Bounds[1].z));
 	}
-	unsigned short *idxArray;
+	LocalAverageHeight /= H * W;
 	idxArray = new unsigned short[N];
 	// SEE GL_LINE_STRIP.xlsx for details
 	for (int i = 0; i<N; i++)
@@ -170,20 +176,18 @@ bool CMesh::LoadHeightmap(int vpId)
 		
 		idxArray[i] = Y * W + X;
 
-		
-
 		dXtone ^= 1;
 	}
 
-
 	
-	LocalAverageHeight /= alt_.Height() * alt_.Width();
+	
+	
 
 	prog.insert_or_assign(vpId, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color"));
 
 	vbo.insert_or_assign(vpId, new C3DObjectVBO(clearAfter));
 	vbo.at(vpId)->SetBuffer(buffer, &(*buffer)[0], buffer->size());
-
+	vbo.at(vpId)->AddIndexArray(idxArray, N, GL_TRIANGLE_STRIP);
 
 	FIBITMAP* subimage = (FIBITMAP*)maptexture->Data();
 
