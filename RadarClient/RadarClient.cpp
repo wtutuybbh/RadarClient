@@ -13,10 +13,7 @@
 #include <GL/glut.h>
 #include "CRCLogger.h"
 
-#include "resource.h"
 #include "resource1.h"
-#include <CommCtrl.h>
-#include "CRImage.h"
 
 #define VIEW_PORT_CONTROL_ID     100
 
