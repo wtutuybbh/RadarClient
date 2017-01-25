@@ -4,11 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RadarClient", "RadarClient\RadarClient.vcxproj", "{ABAC0EAF-7E53-4ABA-BFB1-0246986035C0}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9B576C33-5AA0-46F7-B2A0-C19B5DC6311F} = {9B576C33-5AA0-46F7-B2A0-C19B5DC6311F}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GeoDataProvider", "GeoDataProvider\GeoDataProvider.vcxproj", "{9B576C33-5AA0-46F7-B2A0-C19B5DC6311F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{87B84233-65A1-439E-AFAD-9D2BB1AE9807}"
 	ProjectSection(SolutionItems) = preProject
@@ -30,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MockUpRadar", "MockUpRadar\MockUpRadar.vcxproj", "{2C460772-D2DA-4918-8C1D-63718DB72070}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_boost_asio_tcp_client", "test_boost_asio_tcp_client\test_boost_asio_tcp_client.vcxproj", "{C8BF9674-C784-450E-A9F6-FD7714CFEB68}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -46,14 +43,6 @@ Global
 		{ABAC0EAF-7E53-4ABA-BFB1-0246986035C0}.Release|x64.Build.0 = Release|x64
 		{ABAC0EAF-7E53-4ABA-BFB1-0246986035C0}.Release|x86.ActiveCfg = Release|Win32
 		{ABAC0EAF-7E53-4ABA-BFB1-0246986035C0}.Release|x86.Build.0 = Release|Win32
-		{9B576C33-5AA0-46F7-B2A0-C19B5DC6311F}.Debug|x64.ActiveCfg = Debug|x64
-		{9B576C33-5AA0-46F7-B2A0-C19B5DC6311F}.Debug|x64.Build.0 = Debug|x64
-		{9B576C33-5AA0-46F7-B2A0-C19B5DC6311F}.Debug|x86.ActiveCfg = Debug|Win32
-		{9B576C33-5AA0-46F7-B2A0-C19B5DC6311F}.Debug|x86.Build.0 = Debug|Win32
-		{9B576C33-5AA0-46F7-B2A0-C19B5DC6311F}.Release|x64.ActiveCfg = Release|x64
-		{9B576C33-5AA0-46F7-B2A0-C19B5DC6311F}.Release|x64.Build.0 = Release|x64
-		{9B576C33-5AA0-46F7-B2A0-C19B5DC6311F}.Release|x86.ActiveCfg = Release|Win32
-		{9B576C33-5AA0-46F7-B2A0-C19B5DC6311F}.Release|x86.Build.0 = Release|Win32
 		{2C460772-D2DA-4918-8C1D-63718DB72070}.Debug|x64.ActiveCfg = Debug|x64
 		{2C460772-D2DA-4918-8C1D-63718DB72070}.Debug|x64.Build.0 = Debug|x64
 		{2C460772-D2DA-4918-8C1D-63718DB72070}.Debug|x86.ActiveCfg = Debug|Win32
@@ -62,6 +51,14 @@ Global
 		{2C460772-D2DA-4918-8C1D-63718DB72070}.Release|x64.Build.0 = Release|x64
 		{2C460772-D2DA-4918-8C1D-63718DB72070}.Release|x86.ActiveCfg = Release|Win32
 		{2C460772-D2DA-4918-8C1D-63718DB72070}.Release|x86.Build.0 = Release|Win32
+		{C8BF9674-C784-450E-A9F6-FD7714CFEB68}.Debug|x64.ActiveCfg = Debug|x64
+		{C8BF9674-C784-450E-A9F6-FD7714CFEB68}.Debug|x64.Build.0 = Debug|x64
+		{C8BF9674-C784-450E-A9F6-FD7714CFEB68}.Debug|x86.ActiveCfg = Debug|Win32
+		{C8BF9674-C784-450E-A9F6-FD7714CFEB68}.Debug|x86.Build.0 = Debug|Win32
+		{C8BF9674-C784-450E-A9F6-FD7714CFEB68}.Release|x64.ActiveCfg = Release|x64
+		{C8BF9674-C784-450E-A9F6-FD7714CFEB68}.Release|x64.Build.0 = Release|x64
+		{C8BF9674-C784-450E-A9F6-FD7714CFEB68}.Release|x86.ActiveCfg = Release|Win32
+		{C8BF9674-C784-450E-A9F6-FD7714CFEB68}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
