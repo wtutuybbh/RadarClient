@@ -11,7 +11,11 @@
 
 const std::string CRCSocket::requestID = "CRCSocket";
 
-CRCSocket::CRCSocket(HWND hWnd)
+CRCSocket::CRCSocket(HWND hWnd) : 
+	resolver(io_service), 
+	query(CSettings::GetString(StringHostName), num2str(CSettings::GetInt(IntPort), 0)),
+	//iterator(resolver.resolve(query)), // calls iterator constructor
+	socket_(io_service)                      // calls socket constructor
 {
 	string context = "CRCSocket::CRCSocket";
 	LOG_INFO(requestID, context, (boost::format("Start... hWnd=%1%") % hWnd).str().c_str());
@@ -35,7 +39,9 @@ CRCSocket::CRCSocket(HWND hWnd)
 
 	PointOK = TrackOK = ImageOK = false;
 
-	Init();
+	
+	
+	//Init();
 }
 
 
@@ -124,10 +130,98 @@ void CRCSocket::Init()
 	LOG_INFO(requestID, context, "End");
 }
 
+void CRCSocket::handle_resolve(const boost::system::error_code& err,
+	tcp::resolver::iterator endpoint_iterator)
+{
+	if (!err)
+	{
+		std::cout << "handle_resolve...\n";
+		// Attempt a connection to each endpoint in the list until we
+		// successfully establish a connection.
+		boost::asio::async_connect(socket_, endpoint_iterator,
+			boost::bind(&CRCSocket::handle_connect, this,
+				boost::asio::placeholders::error));
+	}
+	else
+	{
+		std::cout << "Error: " << err.message() << "\n";
+	}
+}
+
+void CRCSocket::handle_connect(const boost::system::error_code& err)
+{
+	if (!err)
+	{
+		std::cout << "handle_connect...\n";
+		// The connection was successful. Send the request.
+		boost::asio::async_write(socket_, request_,
+			boost::bind(&CRCSocket::handle_write_request, this,
+				boost::asio::placeholders::error));
+	}
+	else
+	{
+		std::cout << "Error: " << err.message() << "\n";
+	}
+}
+
+void CRCSocket::handle_write_request(const boost::system::error_code& err)
+{
+	if (!err)
+	{
+		std::cout << "handle_write_request:\n";
+		// Read the response status line. The response_ streambuf will
+		// automatically grow to accommodate the entire line. The growth may be
+		// limited by passing a maximum size to the streambuf constructor.
+		/*boost::asio::async_read_until(socket_, response_, "\r\n",
+		boost::bind(&client::handle_read_status_line, this,
+		boost::asio::placeholders::error));*/
+
+		boost::asio::async_read(socket_, response_,
+			boost::asio::transfer_at_least(1),
+			boost::bind(&CRCSocket::handle_read_response, this,
+				boost::asio::placeholders::error));
+	}
+	else
+	{
+		std::cout << "Error: " << err.message() << "\n";
+	}
+}
+
+void CRCSocket::handle_read_response(const boost::system::error_code& err)
+{
+	if (!err)
+	{
+		std::cout << "handle_read_response:\n";
+		// Write all of the data that has been read so far.
+		std::cout << &response_;
+
+		// Continue reading remaining data until EOF.
+		boost::asio::async_read(socket_, response_,
+			boost::asio::transfer_at_least(1),
+			boost::bind(&CRCSocket::handle_read_response, this,
+				boost::asio::placeholders::error));
+	}
+	else if (err != boost::asio::error::eof)
+	{
+		std::cout << "Error: " << err << "\n";
+	}
+}
+
 int CRCSocket::Connect()
 {
 	string context = "CRCSocket::Connect()";
 	LOG_INFO(requestID, context, "Start");
+
+	resolver.async_resolve(query,
+		boost::bind(&CRCSocket::handle_resolve, this,
+			boost::asio::placeholders::error,
+			boost::asio::placeholders::iterator));
+
+	boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(io_service));
+	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
+	t.detach();
+
+	return;
 	// Attempt to connect to server
 	if (OnceClosed) {
 		LOG_INFO(requestID, context, "Socket was once closed, need to run Init()...");
@@ -244,6 +338,7 @@ int CRCSocket::Read()
 
 int CRCSocket::Close()
 {	
+	
 	closesocket(Socket);
 	IsConnected = false;
 	OnceClosed = true;

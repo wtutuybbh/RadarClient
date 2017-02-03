@@ -18,6 +18,7 @@
 #include "Util.h"
 
 using namespace std;
+using boost::asio::ip::tcp;
 
 #define CM_POSTDATA (WM_USER + 2)
 #define CM_SRVDATA (WM_USER + 3)
@@ -432,6 +433,22 @@ class CRCSocket
 	char *hole{ nullptr };
 	int LENDATAOTOBR {1};
 
+
+	boost::asio::io_service io_service;
+	tcp::resolver resolver;
+	tcp::resolver::query query;
+	tcp::resolver::iterator iterator;
+	
+	tcp::socket socket_;
+	boost::asio::streambuf request_;
+	boost::asio::streambuf response_;
+
+	boost::thread *receiver_thread; //thread for data receiving
+
+	void CRCSocket::handle_resolve(const boost::system::error_code& err, tcp::resolver::iterator endpoint_iterator);
+	void CRCSocket::handle_connect(const boost::system::error_code& err);
+	void CRCSocket::handle_write_request(const boost::system::error_code& err);
+	void CRCSocket::handle_read_response(const boost::system::error_code& err);
 public:
 	static const std::string requestID;
 

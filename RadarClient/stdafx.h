@@ -34,6 +34,11 @@
 #include <boost/preprocessor/repetition/enum_params.hpp>
 #include <boost/log/sinks/text_multifile_backend.hpp>
 #include <boost/log/attributes/scoped_attribute.hpp>
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
 //Narrow-char thread-safe logger.
 typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_level> logger_t;
 
