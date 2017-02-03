@@ -221,7 +221,7 @@ int CRCSocket::Connect()
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 	t.detach();
 
-	return;
+	return 0;
 	// Attempt to connect to server
 	if (OnceClosed) {
 		LOG_INFO(requestID, context, "Socket was once closed, need to run Init()...");

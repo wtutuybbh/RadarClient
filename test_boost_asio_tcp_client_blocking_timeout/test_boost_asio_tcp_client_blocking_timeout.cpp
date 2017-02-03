@@ -103,7 +103,7 @@ public:
 	{
 		*out_ec = ec;
 	}
-	std::string read(boost::posix_time::time_duration timeout)
+	const char * read(boost::posix_time::time_duration timeout)
 	{
 		// Set a deadline for the asynchronous operation. Since this function uses
 		// a composed operation (async_read_until), the deadline applies to the
@@ -130,10 +130,7 @@ public:
 		if (ec)
 			throw boost::system::system_error(ec);
 
-		std::string line;
-		std::istream is(&input_buffer_);
-		std::getline(is, line);
-		return line;
+		return boost::asio::buffer_cast<const char*>(input_buffer_.data());
 	}
 	void handle_read(
 		const boost::system::error_code& ec, std::size_t length,
@@ -225,8 +222,8 @@ int main(int argc, char* argv[])
 		char command = 0;
 		for (;;)
 		{
-			std::string line = c.read(boost::posix_time::seconds(10));
-			std::cout << std::endl << "enter command:";
+			std::cout << c.read(boost::posix_time::seconds(10)) << std::endl;
+			std::cout << "enter command:";
 			std::cin >> command;
 			// Keep going until ...
 			if (command == 'e')
