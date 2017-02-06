@@ -51,3 +51,4 @@ FloatCSectorMinAmp=0.0
 FloatCSectorMaxAmp=255.0
 FloatMPPh=5.0
 FloatMPPv=5.0
+IntConnectionTimeout=10

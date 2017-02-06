@@ -434,22 +434,23 @@ class CRCSocket
 	int LENDATAOTOBR {1};
 
 
-	boost::asio::io_service io_service;
-	tcp::resolver resolver;
-	tcp::resolver::query query;
-	tcp::resolver::iterator iterator;
-	
+	boost::asio::io_service io_service_;
 	tcp::socket socket_;
-	boost::asio::streambuf request_;
-	boost::asio::streambuf response_;
+	boost::asio::deadline_timer deadline_;
+	boost::asio::streambuf input_buffer_;
 
 	boost::thread *receiver_thread; //thread for data receiving
 
-	void CRCSocket::handle_resolve(const boost::system::error_code& err, tcp::resolver::iterator endpoint_iterator);
-	void CRCSocket::handle_connect(const boost::system::error_code& err);
-	void CRCSocket::handle_write_request(const boost::system::error_code& err);
-	void CRCSocket::handle_read_response(const boost::system::error_code& err);
+
+	void check_deadline();
+
+	int connectionTimeout{ 10 };
+	void handle_read(const boost::system::error_code& ec, std::size_t length, boost::system::error_code* out_ec, std::size_t* out_length);
+	void handle_connect(const boost::system::error_code& ec, boost::system::error_code* out_ec);
 public:
+	void connect(const std::string& host, const std::string& service, boost::posix_time::time_duration timeout);	
+	void read(boost::posix_time::time_duration timeout);	
+
 	static const std::string requestID;
 
 	bool Initialized {false};
@@ -500,7 +501,7 @@ public:
 	bool PostDataLogEnabled{ true };
 	int Read();
 
-	int Close();
+	void Close();
 	unsigned int PostData(WPARAM wParam, LPARAM lParam);
 	void OnSrvMsg_RDRTRACK(RDRTRACK* info, int N);
 	void OnSrvMsg_LOCATION(RDRCURRPOS* d);

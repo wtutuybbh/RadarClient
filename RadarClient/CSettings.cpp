@@ -199,6 +199,10 @@ bool CSettings::Init()
 	floats.insert_or_assign(FloatCSectorMaxAmp, 255.0);
 	stringmap.insert_or_assign("FloatCSectorMaxAmp", FloatCSectorMaxAmp);
 
+	ints.insert_or_assign(IntConnectionTimeout, 10);
+	stringmap.insert_or_assign("IntConnectionTimeout", IntConnectionTimeout);
+
+
 	return true;
 	
 }

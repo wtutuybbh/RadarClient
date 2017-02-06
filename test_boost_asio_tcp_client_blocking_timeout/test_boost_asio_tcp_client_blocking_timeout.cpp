@@ -3,6 +3,12 @@
 
 #include "stdafx.h"
 
+std::string make_string(boost::asio::streambuf& streambuf)
+{
+	return{ buffers_begin(streambuf.data()),
+		buffers_end(streambuf.data()) };
+}
+
 //
 // blocking_tcp_client.cpp
 // ~~~~~~~~~~~~~~~~~~~~~~~
@@ -136,38 +142,10 @@ public:
 		const boost::system::error_code& ec, std::size_t length,
 		boost::system::error_code* out_ec, std::size_t* out_length)
 	{
+		std::cout << make_string(input_buffer_) << '\n';
 		*out_ec = ec;
 		*out_length = length;
-	}
-	//void write_line(const std::string& line,
-	//	boost::posix_time::time_duration timeout)
-	//{
-	//	std::string data = line + "\n";
-
-	//	// Set a deadline for the asynchronous operation. Since this function uses
-	//	// a composed operation (async_write), the deadline applies to the entire
-	//	// operation, rather than individual writes to the socket.
-	//	deadline_.expires_from_now(timeout);
-
-	//	// Set up the variable that receives the result of the asynchronous
-	//	// operation. The error code is set to would_block to signal that the
-	//	// operation is incomplete. Asio guarantees that its asynchronous
-	//	// operations will never fail with would_block, so any other value in
-	//	// ec indicates completion.
-	//	boost::system::error_code ec = boost::asio::error::would_block;
-
-	//	// Start the asynchronous operation itself. The boost::lambda function
-	//	// object is used as a callback and will update the ec variable when the
-	//	// operation completes. The blocking_udp_client.cpp example shows how you
-	//	// can use boost::bind rather than boost::lambda.
-	//	boost::asio::async_write(socket_, boost::asio::buffer(data), var(ec) = _1);
-
-	//	// Block until the asynchronous operation has completed.
-	//	do io_service_.run_one(); while (ec == boost::asio::error::would_block);
-
-	//	if (ec)
-	//		throw boost::system::system_error(ec);
-	//}
+	}	
 
 private:
 	void check_deadline()

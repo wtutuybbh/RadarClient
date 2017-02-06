@@ -1,5 +1,11 @@
 ﻿#include "stdafx.h"
 
+std::string make_string(boost::asio::streambuf& streambuf)
+{
+	return{ buffers_begin(streambuf.data()),
+		buffers_end(streambuf.data()) };
+}
+
 #include "CRCSocket.h"
 #include "Util.h"
 #include "CSettings.h"
@@ -11,11 +17,13 @@
 
 const std::string CRCSocket::requestID = "CRCSocket";
 
+using boost::asio::deadline_timer;
+using boost::asio::ip::tcp;
+
 CRCSocket::CRCSocket(HWND hWnd) : 
-	resolver(io_service), 
-	query(CSettings::GetString(StringHostName), num2str(CSettings::GetInt(IntPort), 0)),
-	//iterator(resolver.resolve(query)), // calls iterator constructor
-	socket_(io_service)                      // calls socket constructor
+	socket_(io_service_),
+	deadline_(io_service_),
+	connectionTimeout(CSettings::GetInt(IntConnectionTimeout))
 {
 	string context = "CRCSocket::CRCSocket";
 	LOG_INFO(requestID, context, (boost::format("Start... hWnd=%1%") % hWnd).str().c_str());
@@ -130,121 +138,112 @@ void CRCSocket::Init()
 	LOG_INFO(requestID, context, "End");
 }
 
-void CRCSocket::handle_resolve(const boost::system::error_code& err,
-	tcp::resolver::iterator endpoint_iterator)
+void CRCSocket::connect(const std::string& host, const std::string& service, boost::posix_time::time_duration timeout)
 {
-	if (!err)
-	{
-		std::cout << "handle_resolve...\n";
-		// Attempt a connection to each endpoint in the list until we
-		// successfully establish a connection.
-		boost::asio::async_connect(socket_, endpoint_iterator,
-			boost::bind(&CRCSocket::handle_connect, this,
-				boost::asio::placeholders::error));
-	}
-	else
-	{
-		std::cout << "Error: " << err.message() << "\n";
-	}
-}
+	// Resolve the host name and service to a list of endpoints.
+	tcp::resolver::query query(host, service);
+	tcp::resolver::iterator iter = tcp::resolver(io_service_).resolve(query);
 
-void CRCSocket::handle_connect(const boost::system::error_code& err)
+	// Set a deadline for the asynchronous operation. As a host name may
+	// resolve to multiple endpoints, this function uses the composed operation
+	// async_connect. The deadline applies to the entire operation, rather than
+	// individual connection attempts.
+	deadline_.expires_from_now(timeout);
+
+	// Set up the variable that receives the result of the asynchronous
+	// operation. The error code is set to would_block to signal that the
+	// operation is incomplete. Asio guarantees that its asynchronous
+	// operations will never fail with would_block, so any other value in
+	// ec indicates completion.
+	boost::system::error_code ec = boost::asio::error::would_block;
+
+	// Start the asynchronous operation itself. The boost::lambda function
+	// object is used as a callback and will update the ec variable when the
+	// operation completes. The blocking_udp_client.cpp example shows how you
+	// can use boost::bind rather than boost::lambda.
+	boost::asio::async_connect(socket_, iter, boost::bind(&CRCSocket::handle_connect, this, _1, &ec));
+
+	// Block until the asynchronous operation has completed.
+	do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+
+	// Determine whether a connection was successfully established. The
+	// deadline actor may have had a chance to run and close our socket, even
+	// though the connect operation notionally succeeded. Therefore we must
+	// check whether the socket is still open before deciding if we succeeded
+	// or failed.
+	if (ec || !socket_.is_open())
+		throw boost::system::system_error(
+			ec ? ec : boost::asio::error::operation_aborted);
+}
+void CRCSocket::handle_connect(
+	const boost::system::error_code& ec,
+	boost::system::error_code* out_ec)
 {
-	if (!err)
-	{
-		std::cout << "handle_connect...\n";
-		// The connection was successful. Send the request.
-		boost::asio::async_write(socket_, request_,
-			boost::bind(&CRCSocket::handle_write_request, this,
-				boost::asio::placeholders::error));
-	}
-	else
-	{
-		std::cout << "Error: " << err.message() << "\n";
-	}
+	*out_ec = ec;
 }
-
-void CRCSocket::handle_write_request(const boost::system::error_code& err)
+void CRCSocket::read(boost::posix_time::time_duration timeout)
 {
-	if (!err)
-	{
-		std::cout << "handle_write_request:\n";
-		// Read the response status line. The response_ streambuf will
-		// automatically grow to accommodate the entire line. The growth may be
-		// limited by passing a maximum size to the streambuf constructor.
-		/*boost::asio::async_read_until(socket_, response_, "\r\n",
-		boost::bind(&client::handle_read_status_line, this,
-		boost::asio::placeholders::error));*/
+	// Set a deadline for the asynchronous operation. Since this function uses
+	// a composed operation (async_read_until), the deadline applies to the
+	// entire operation, rather than individual reads from the socket.
+	deadline_.expires_from_now(timeout);
 
-		boost::asio::async_read(socket_, response_,
-			boost::asio::transfer_at_least(1),
-			boost::bind(&CRCSocket::handle_read_response, this,
-				boost::asio::placeholders::error));
-	}
-	else
-	{
-		std::cout << "Error: " << err.message() << "\n";
-	}
+	// Set up the variable that receives the result of the asynchronous
+	// operation. The error code is set to would_block to signal that the
+	// operation is incomplete. Asio guarantees that its asynchronous
+	// operations will never fail with would_block, so any other value in
+	// ec indicates completion.
+	boost::system::error_code ec = boost::asio::error::would_block;
+	std::size_t length = 0;
+
+	// Start the asynchronous operation itself. The boost::lambda function
+	// object is used as a callback and will update the ec variable when the
+	// operation completes. The blocking_udp_client.cpp example shows how you
+	// can use boost::bind rather than boost::lambda.
+	boost::asio::async_read(socket_, input_buffer_, boost::asio::transfer_at_least(1), boost::bind(&CRCSocket::handle_read, this, _1, _2, &ec, &length));
+
+	// Block until the asynchronous operation has completed.
+	do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+
+	if (ec)
+		throw boost::system::system_error(ec);
 }
-
-void CRCSocket::handle_read_response(const boost::system::error_code& err)
+void CRCSocket::handle_read(
+	const boost::system::error_code& ec, std::size_t length,
+	boost::system::error_code* out_ec, std::size_t* out_length)
 {
-	if (!err)
-	{
-		std::cout << "handle_read_response:\n";
-		// Write all of the data that has been read so far.
-		std::cout << &response_;
-
-		// Continue reading remaining data until EOF.
-		boost::asio::async_read(socket_, response_,
-			boost::asio::transfer_at_least(1),
-			boost::bind(&CRCSocket::handle_read_response, this,
-				boost::asio::placeholders::error));
-	}
-	else if (err != boost::asio::error::eof)
-	{
-		std::cout << "Error: " << err << "\n";
-	}
+	//std::cout << make_string(input_buffer_) << '\n';
+	*out_ec = ec;
+	*out_length = length;
 }
+void CRCSocket::check_deadline()
+	{
+		// Check whether the deadline has passed. We compare the deadline against
+		// the current time since a new asynchronous operation may have moved the
+		// deadline before this actor had a chance to run.
+		if (deadline_.expires_at() <= deadline_timer::traits_type::now())
+		{
+			// The deadline has passed. The socket is closed so that any outstanding
+			// asynchronous operations are cancelled. This allows the blocked
+			// connect(), read_line() or write_line() functions to return.
+			boost::system::error_code ignored_ec;
+			socket_.close(ignored_ec);
 
+			// There is no longer an active deadline. The expiry is set to positive
+			// infinity so that the actor takes no action until a new deadline is set.
+			deadline_.expires_at(boost::posix_time::pos_infin);
+		}
+		//int count;
+		// Put the actor back to sleep.
+		deadline_.async_wait(boost::bind(&CRCSocket::check_deadline, this));
+	}
 int CRCSocket::Connect()
 {
 	string context = "CRCSocket::Connect()";
 	LOG_INFO(requestID, context, "Start");
+	
+	connect(CSettings::GetString(StringHostName), num2str(CSettings::GetInt(IntPort), 0), boost::posix_time::seconds(connectionTimeout));
 
-	resolver.async_resolve(query,
-		boost::bind(&CRCSocket::handle_resolve, this,
-			boost::asio::placeholders::error,
-			boost::asio::placeholders::iterator));
-
-	boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(io_service));
-	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
-	t.detach();
-
-	return 0;
-	// Attempt to connect to server
-	if (OnceClosed) {
-		LOG_INFO(requestID, context, "Socket was once closed, need to run Init()...");
-		Init();
-		OnceClosed = false;
-	}
-
-	int cResult = connect(Socket, (SOCKADDR*)(&SockAddr), sizeof(SockAddr));
-	if (cResult == SOCKET_ERROR)
-	{
-		int error = WSAGetLastError();
-
-		wchar_t *s = nullptr;
-		FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			nullptr, error,
-			MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
-			(LPWSTR)&s, 0, nullptr);
-		wstring ws(s);
-
-		string str(ws.begin(), ws.end());
-		str = str.substr(0, str.length() - 1);
-		LOG_ERROR__("cResult == SOCKET_ERROR: WSAGetLastError returned %d, %s", error, str);
-	}
 	//int errorCode = WSAGetLastError();
 	LOG_INFO(requestID, context, (boost::format("End: return %1%") % cResult).str().c_str());
 	return cResult;
@@ -277,10 +276,16 @@ int CRCSocket::Read()
 	unsigned int offset, length;
 	char * OutBuff = nullptr;
 
+	const char * asiobuf = nullptr;
+
 	try {
 		szIncoming = new char[TXRXBUFSIZE];
 		ZeroMemory(szIncoming, sizeof(szIncoming));
-		recev = recv(Socket, client->buff + client->offset, TXRXBUFSIZE, 0);
+
+		read(boost::posix_time::seconds(connectionTimeout));
+
+		recev = input_buffer_.size();
+		client->buff = boost::asio::buffer_cast<char*>(input_buffer_.data());
 
 		if (ReadLogEnabled) LOG_INFO(requestID, context, (boost::format("recv returned %1% bytes of data") % recev).str().c_str());
 
@@ -338,21 +343,9 @@ int CRCSocket::Read()
 
 int CRCSocket::Close()
 {	
-	
-	closesocket(Socket);
-	IsConnected = false;
-	OnceClosed = true;
-	if (client && client->buff) {
-		delete[] client->buff;
-		client->buff = nullptr;
-	}
-	if (s_rdrinit)
-	{
-		delete s_rdrinit;
-		s_rdrinit = nullptr;
-	}
-	PostMessage(hWnd, CM_CONNECT, IsConnected, NULL);
-	return 0;
+	boost::system::error_code ignored_ec;
+	socket_.close(ignored_ec);
+	deadline_.expires_at(boost::posix_time::pos_infin);
 }
 
 unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)

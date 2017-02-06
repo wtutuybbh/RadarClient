@@ -3,6 +3,12 @@
 
 #include "stdafx.h"
 
+std::string make_string(boost::asio::streambuf& streambuf)
+{
+	return{ buffers_begin(streambuf.data()),
+		buffers_end(streambuf.data()) };
+}
+
 using boost::asio::ip::tcp;
 
 class client
