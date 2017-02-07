@@ -252,7 +252,21 @@ int CRCSocket::Read()
 
 		memcpy(client->buff, input_buffer, recev);
 
-		
+		sh = (struct _sh*)client->buff;
+		if (sh->word1 != 2863311530/* 0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку
+		{
+			if (client->buff)
+			{
+				delete[] client->buff;
+				client->buff = nullptr;
+			}
+			if (ReadLogEnabled) LOG_WARN(requestID, context, "wrong sh! sh->word1 = %d, sh->word2 = %d", sh->word1, sh->word2);
+			return recev;
+		}
+		else
+		{
+			client->offset = 0;
+		}
 		//return (int)s.length();
 
 		offset = recev + client->offset;
@@ -266,24 +280,25 @@ int CRCSocket::Read()
 			}
 			return recev;
 		}
-		sh = (struct _sh*)client->buff;
-		if (sh->word1 != 2863311530/* 0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку
-		{
-			if (client->buff)
-			{
-				delete[] client->buff;
-				client->buff = nullptr;
-			}
-			return recev;
-		}
+		
+		
 		length = sh->dlina;
 		if (ReadLogEnabled) {
 			LOG_INFO(requestID, context, "0 | recev=%d, length = sh->dlina = %d, offset = %d, client->offset = %d", recev, length, offset, client->offset);
 		}
-		while (length <= offset)  // приняли больше или ровно 1 порцию
+		while (length < offset)  // приняли больше или ровно 1 порцию
 		{
 			try // защита на выделение памяти
 			{
+				if (length <= 0) {
+					if (client->buff)
+					{
+						delete[] client->buff;
+						client->buff = nullptr;
+					}
+					
+					return recev;
+				}
 				OutBuff = new char[length];              // Выделим память под принятую порцию // operator delete[] in method FreeMemory()
 				memcpy(OutBuff, client->buff, length); // Скопируем принятые данные
 
@@ -295,7 +310,7 @@ int CRCSocket::Read()
 				offset -= length;
 				length = sh->dlina;
 				if (ReadLogEnabled) {
-					LOG_INFO(requestID, context, "2 | recev=%d, length = sh->dlina = %d, offset = %d, client->offset = %d", recev, length, offset, client->offset);
+					LOG_INFO(requestID, context, "2 | recev=%d, length = sh->dlina = %d, offset = %d, client->offset = %d, sh->word1 = %d, sh->word2 = %d", recev, length, offset, client->offset, sh->word1, sh->word2);
 				}
 				if (sh->word1 != 2863311530 /*0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку 
 				{
