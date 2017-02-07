@@ -498,9 +498,8 @@ public:
 	void Connect();
 
 	bool ReadLogEnabled{ true };
-	bool PostDataLogEnabled{ true };
+	bool PostDataLogEnabled{ false };
 	int Read();
-	void ReadLoop();
 
 	void Close();
 	unsigned int PostData(WPARAM wParam, LPARAM lParam);

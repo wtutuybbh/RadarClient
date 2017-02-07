@@ -88,6 +88,7 @@ CRCSocket::~CRCSocket()
 
 void CRCSocket::connect(const std::string& host, const std::string& service, boost::posix_time::time_duration timeout)
 {
+	if (IsConnected) return;
 	// Resolve the host name and service to a list of endpoints.
 	tcp::resolver::query query(host, service);
 	tcp::resolver::iterator iter = tcp::resolver(io_service_).resolve(query);
@@ -121,17 +122,18 @@ void CRCSocket::connect(const std::string& host, const std::string& service, boo
 	// or failed.
 	if (ec || !socket_.is_open())
 		throw boost::system::system_error(
-			ec ? ec : boost::asio::error::operation_aborted);
+			ec ? ec : boost::asio::error::operation_aborted);	
 }
 void CRCSocket::handle_connect(
 	const boost::system::error_code& ec,
 	boost::system::error_code* out_ec)
 {	
 	*out_ec = ec;	
+	IsConnected = true;
 }
 void CRCSocket::read(boost::posix_time::time_duration timeout)
 {
-	LOG_INFO(requestID, "read", "read_count=%d", read_count);
+	if (!IsConnected) return;
 	// Set a deadline for the asynchronous operation. Since this function uses
 	// a composed operation (async_read_until), the deadline applies to the
 	// entire operation, rather than individual reads from the socket.
@@ -152,7 +154,15 @@ void CRCSocket::read(boost::posix_time::time_duration timeout)
 	boost::asio::async_read(socket_, input_buffer_, boost::asio::transfer_at_least(1), boost::bind(&CRCSocket::handle_read, this, _1, _2, &ec, &length, read_count));
 
 	// Block until the asynchronous operation has completed.
-	do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+	int do_count = 0;
+	do 
+	{
+		do_count++;
+		io_service_.run_one();
+	}
+	while (ec == boost::asio::error::would_block);
+
+	LOG_INFO(requestID, "read", "read_count=%d, do_count=%d", read_count, do_count);
 
 	if (ec)
 		throw boost::system::system_error(ec);
@@ -163,11 +173,18 @@ void CRCSocket::handle_read(
 	const boost::system::error_code& ec, std::size_t length,
 	boost::system::error_code* out_ec, std::size_t* out_length, long read_count)
 {
-	//std::cout << make_string(input_buffer_) << '\n';
-	LOG_INFO(requestID, "handle_read", "read_count=%d, handle_read_count=%d", read_count, handle_read_count);
 	*out_ec = ec;
 	*out_length = length;
-	handle_read_count++;
+
+	Read();
+	
+	if (stopReadLoop) {
+		IsConnected = false;
+		stopReadLoop = false;
+		return;
+	}
+
+	read(boost::posix_time::seconds(connectionTimeout));
 }
 void CRCSocket::check_deadline()
 	{
@@ -205,31 +222,22 @@ void CRCSocket::Connect()
 
 		LOG_INFO(requestID, context, "Connected successfully");
 
-		boost::thread t(boost::bind(&CRCSocket::ReadLoop, this));
+		boost::thread t(boost::bind(&CRCSocket::read, this, boost::posix_time::seconds(connectionTimeout)));
 
 		t.detach();
 	}
 	catch (std::exception& e)
 	{
 		LOG_ERROR(requestID, context, "Error during connection. e.what()=%s", e.what());
+
 	}
 }
 
 int CRCSocket::Read()
 {	
+	const char * input_buffer = boost::asio::buffer_cast<const char*>(input_buffer_.data());
 	string context = "CRCSocket::Read()";
-	if (ReadLogEnabled) LOG_INFO(requestID, context, "Start");
-	if (!IsConnected && !OnceClosed)
-	{
-		LOG_WARN(requestID, context, "First read, setting state to 'Connected'");
-		IsConnected = true;
-		PostMessage(hWnd, CM_CONNECT, IsConnected, NULL);
-	}
-	if (!IsConnected)
-	{
-		LOG_ERROR__("Not connected.");
-		return 0;
-	}				
+	//if (ReadLogEnabled) LOG_INFO(requestID, context, "Start");				
 
 	char *szIncoming = nullptr;
 	_sh *sh;
@@ -238,35 +246,40 @@ int CRCSocket::Read()
 	char * OutBuff = nullptr;
 
 	try {
-		szIncoming = new char[TXRXBUFSIZE];
-		ZeroMemory(szIncoming, sizeof(szIncoming));
-
-		read(boost::posix_time::seconds(connectionTimeout));
-
-		std::string s((std::istreambuf_iterator<char>(&input_buffer_)), std::istreambuf_iterator<char>());
-
-		std::vector<char> cstr(s.c_str(), s.c_str() + s.size() + 1);
-
-		client->buff = (char *)cstr.data();
-
 		recev = input_buffer_.size();
 
-		if (ReadLogEnabled) {
-			LOG_INFO("received", context, "recv returned %d bytes of data", recev);
-			LOG_INFO("received", context, "string is: [%s]", s);
-		}
-		return (int)s.length();
+		client->buff = new char[recev];
+
+		memcpy(client->buff, input_buffer, recev);
+
+		
+		//return (int)s.length();
 
 		offset = recev + client->offset;
 		if (offset < sizeof(_sh)) //приняли меньше шапки
 		{
 			client->offset = offset; //Запомнили что что-то приняли
+			if (client->buff)
+			{
+				delete[] client->buff;
+				client->buff = nullptr;
+			}
 			return recev;
 		}
 		sh = (struct _sh*)client->buff;
 		if (sh->word1 != 2863311530/* 0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку
+		{
+			if (client->buff)
+			{
+				delete[] client->buff;
+				client->buff = nullptr;
+			}
 			return recev;
+		}
 		length = sh->dlina;
+		if (ReadLogEnabled) {
+			LOG_INFO(requestID, context, "0 | recev=%d, length = sh->dlina = %d, offset = %d, client->offset = %d", recev, length, offset, client->offset);
+		}
 		while (length <= offset)  // приняли больше или ровно 1 порцию
 		{
 			try // защита на выделение памяти
@@ -276,14 +289,25 @@ int CRCSocket::Read()
 
 				PostMessage(hWnd, CM_POSTDATA, (WPARAM)OutBuff, length); //Отошлем в очередь на обработку
 				memcpy(client->buff, &client->buff[length], offset - length);// Перепишем остаток в начало
-
+				if (ReadLogEnabled) {
+					LOG_INFO(requestID, context, "1 | recev=%d, length = sh->dlina = %d, offset = %d, client->offset = %d", recev, length, offset, client->offset);
+				}
 				offset -= length;
 				length = sh->dlina;
+				if (ReadLogEnabled) {
+					LOG_INFO(requestID, context, "2 | recev=%d, length = sh->dlina = %d, offset = %d, client->offset = %d", recev, length, offset, client->offset);
+				}
 				if (sh->word1 != 2863311530 /*0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку 
 				{
 					client->offset = 0;
-					if (szIncoming)
-						delete[] szIncoming;
+					if (ReadLogEnabled) {
+						LOG_INFO(requestID, context, "3 | recev=%d, length = sh->dlina = %d, offset = %d, client->offset = %d", recev, length, offset, client->offset);
+					}
+					if (client->buff)
+					{
+						delete[] client->buff;
+						client->buff = nullptr;
+					}
 					return recev;
 				}
 
@@ -291,8 +315,11 @@ int CRCSocket::Read()
 			catch (std::bad_alloc)
 			{  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
 			   // YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
-				if (szIncoming)
-					delete[] szIncoming;
+				if (client->buff) 
+				{
+					delete[] client->buff;
+					client->buff = nullptr;
+				}					
 				return recev;
 			}
 		}
@@ -300,23 +327,24 @@ int CRCSocket::Read()
 	catch (std::bad_alloc)
 	{  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
 	   // YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
+		if (client->buff)
+		{
+			delete[] client->buff;
+			client->buff = nullptr;
+		}
 		return 0;
 	}
 	//приняли меньше чем 1 порция
 	client->offset = offset; //Запомним что что-то приняли
-	if (szIncoming)
-		delete[] szIncoming;
-	return recev;
-}
-
-void CRCSocket::ReadLoop()
-{
-	for (;;)
-	{
-		if (stopReadLoop)
-			break;
-		Read();	
+	if (ReadLogEnabled) {
+		LOG_INFO(requestID, context, "4 | recev=%d, length = sh->dlina = %d, offset = %d, client->offset = %d", recev, length, offset, client->offset);
 	}
+	if (client->buff)
+	{
+		delete[] client->buff;
+		client->buff = nullptr;
+	}
+	return recev;
 }
 
 void CRCSocket::Close()
@@ -324,7 +352,7 @@ void CRCSocket::Close()
 	boost::system::error_code ignored_ec;
 	socket_.close(ignored_ec);
 	deadline_.expires_at(boost::posix_time::pos_infin);
-	IsConnected = false;
+	
 	stopReadLoop = true;
 }
 
