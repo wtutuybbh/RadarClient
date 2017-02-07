@@ -450,9 +450,3 @@ std::string GetLastErrorAsString()
 
 	return message;
 }
-
-std::string make_string(boost::asio::streambuf& streambuf)
-{
-	return{ buffers_begin(streambuf.data()),
-		buffers_end(streambuf.data()) };
-}

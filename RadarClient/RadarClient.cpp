@@ -521,11 +521,6 @@ public:
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {	
-	
-
-
-
-
 	g_nCmdShow = nCmdShow;
 	MSG msg;
 
@@ -538,37 +533,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	string context = "WinMain";
 	
-	/*
-	HWND hDlg;	
-	BOOL ret;
-	InitCommonControls();
-	hDlg = CreateDialogParam(hInstance, MAKEINTRESOURCE(IDD_FORMVIEW), 0, (DLGPROC)WindowProc, 0);
-
-	if (!hDlg)
-	{
-		string err = GetLastErrorAsString();
-		LOG_ERROR__(err.c_str());
-		return -1;
-	}
-
-	ShowWindow(hDlg, nCmdShow);
-
-	while ((ret = GetMessage(&msg, 0, 0, 0)) != 0) {
-		if (ret == -1)
-			return -1;
-
-		if (!IsDialogMessage(hDlg, &msg)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
-
-	return 0; 
-	
-	*/
-
-	
-
 	LOG_INFO__("RadarClient started.");
 
 	LOG_INFO__("sizeof(RDR_INITCL) = %d", sizeof(RDR_INITCL));

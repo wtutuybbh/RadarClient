@@ -47,9 +47,14 @@ CRCSocket::CRCSocket(HWND hWnd) :
 
 	PointOK = TrackOK = ImageOK = false;
 
-	
-	
-	//Init();
+	if (!client)
+	{
+		client = new _client;
+	}
+
+	ErrorText = "";
+
+	IsConnected = false;
 }
 
 
@@ -79,63 +84,6 @@ CRCSocket::~CRCSocket()
 
 	if (CurrentPosition)
 		delete CurrentPosition;
-}
-
-void CRCSocket::Init()
-{
-	string context = "CRCSocket::Init()";
-	LOG_INFO(requestID, context, "Start");
-
-	if (WSAStartup(MAKEWORD(2, 2), &WsaDat) != 0)
-	{
-		ErrorText = "Winsock error - Winsock initialization failed!";
-		LOG_ERROR__(ErrorText.c_str());
-		WSACleanup();
-	}
-
-	// Create our socket
-
-	Socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (Socket == INVALID_SOCKET)
-	{
-		ErrorText = "Winsock error - Socket creation Failed!";
-		LOG_ERROR__(ErrorText.c_str());
-		WSACleanup();
-	}
-	int nResult = WSAAsyncSelect(Socket, hWnd, WM_SOCKET, (FD_CLOSE | FD_READ | FD_CONNECT));
-	if (nResult)
-	{
-		LOG_ERROR__("WSAAsyncSelect failed");
-		MessageBox(hWnd, "WSAAsyncSelect failed", "Critical Error", MB_ICONERROR);		
-		SendMessage(hWnd, WM_DESTROY, NULL, NULL);
-	}
-	// Resolve IP address for hostname	
-	if ((host = gethostbyname(CSettings::GetString(StringHostName).c_str())) == nullptr)
-	{
-		ErrorText = "Failed to resolve hostname!";
-		LOG_ERROR__(ErrorText.c_str());
-		WSACleanup();
-	}
-
-	// Setup our socket address structure
-
-	SockAddr.sin_port = htons(CSettings::GetInt(IntPort));
-	SockAddr.sin_family = AF_INET;
-	SockAddr.sin_addr.s_addr = *((unsigned long*)host->h_addr);
-	
-	if (!client)
-	{
-		client = new _client;
-	}
-	client->Socket = &Socket;
-	client->offset = 0;
-	client->buff = new char[TXRXBUFSIZE];
-
-	ErrorText = "";
-
-	IsConnected = false;
-
-	LOG_INFO(requestID, context, "End");
 }
 
 void CRCSocket::connect(const std::string& host, const std::string& service, boost::posix_time::time_duration timeout)
@@ -178,11 +126,12 @@ void CRCSocket::connect(const std::string& host, const std::string& service, boo
 void CRCSocket::handle_connect(
 	const boost::system::error_code& ec,
 	boost::system::error_code* out_ec)
-{
-	*out_ec = ec;
+{	
+	*out_ec = ec;	
 }
 void CRCSocket::read(boost::posix_time::time_duration timeout)
 {
+	LOG_INFO(requestID, "read", "read_count=%d", read_count);
 	// Set a deadline for the asynchronous operation. Since this function uses
 	// a composed operation (async_read_until), the deadline applies to the
 	// entire operation, rather than individual reads from the socket.
@@ -200,21 +149,25 @@ void CRCSocket::read(boost::posix_time::time_duration timeout)
 	// object is used as a callback and will update the ec variable when the
 	// operation completes. The blocking_udp_client.cpp example shows how you
 	// can use boost::bind rather than boost::lambda.
-	boost::asio::async_read(socket_, input_buffer_, boost::asio::transfer_at_least(1), boost::bind(&CRCSocket::handle_read, this, _1, _2, &ec, &length));
+	boost::asio::async_read(socket_, input_buffer_, boost::asio::transfer_at_least(1), boost::bind(&CRCSocket::handle_read, this, _1, _2, &ec, &length, read_count));
 
 	// Block until the asynchronous operation has completed.
 	do io_service_.run_one(); while (ec == boost::asio::error::would_block);
 
 	if (ec)
 		throw boost::system::system_error(ec);
+
+	read_count++;
 }
 void CRCSocket::handle_read(
 	const boost::system::error_code& ec, std::size_t length,
-	boost::system::error_code* out_ec, std::size_t* out_length)
+	boost::system::error_code* out_ec, std::size_t* out_length, long read_count)
 {
 	//std::cout << make_string(input_buffer_) << '\n';
+	LOG_INFO(requestID, "handle_read", "read_count=%d, handle_read_count=%d", read_count, handle_read_count);
 	*out_ec = ec;
 	*out_length = length;
+	handle_read_count++;
 }
 void CRCSocket::check_deadline()
 	{
@@ -237,16 +190,29 @@ void CRCSocket::check_deadline()
 		// Put the actor back to sleep.
 		deadline_.async_wait(boost::bind(&CRCSocket::check_deadline, this));
 	}
-int CRCSocket::Connect()
+void CRCSocket::Connect()
 {
 	string context = "CRCSocket::Connect()";
-	LOG_INFO(requestID, context, "Start");
-	
-	connect(CSettings::GetString(StringHostName), num2str(CSettings::GetInt(IntPort), 0), boost::posix_time::seconds(connectionTimeout));
+	try
+	{
+		LOG_INFO(requestID, context, "Start");
 
-	//int errorCode = WSAGetLastError();
-	LOG_INFO(requestID, context, (boost::format("End: return %1%") % cResult).str().c_str());
-	return cResult;
+		connect(CSettings::GetString(StringHostName), num2str(CSettings::GetInt(IntPort), 0), boost::posix_time::seconds(connectionTimeout));
+
+		IsConnected = true;
+
+		stopReadLoop = false;
+
+		LOG_INFO(requestID, context, "Connected successfully");
+
+		boost::thread t(boost::bind(&CRCSocket::ReadLoop, this));
+
+		t.detach();
+	}
+	catch (std::exception& e)
+	{
+		LOG_ERROR(requestID, context, "Error during connection. e.what()=%s", e.what());
+	}
 }
 
 int CRCSocket::Read()
@@ -255,7 +221,7 @@ int CRCSocket::Read()
 	if (ReadLogEnabled) LOG_INFO(requestID, context, "Start");
 	if (!IsConnected && !OnceClosed)
 	{
-		LOG_INFO(requestID, context, "First read, setting state to 'Connected'");
+		LOG_WARN(requestID, context, "First read, setting state to 'Connected'");
 		IsConnected = true;
 		PostMessage(hWnd, CM_CONNECT, IsConnected, NULL);
 	}
@@ -263,12 +229,7 @@ int CRCSocket::Read()
 	{
 		LOG_ERROR__("Not connected.");
 		return 0;
-	}	
-	if (!client->buff)
-	{
-		LOG_ERROR__("client->buff is nullptr.");
-		return 0;
-	}			
+	}				
 
 	char *szIncoming = nullptr;
 	_sh *sh;
@@ -276,18 +237,25 @@ int CRCSocket::Read()
 	unsigned int offset, length;
 	char * OutBuff = nullptr;
 
-	const char * asiobuf = nullptr;
-
 	try {
 		szIncoming = new char[TXRXBUFSIZE];
 		ZeroMemory(szIncoming, sizeof(szIncoming));
 
 		read(boost::posix_time::seconds(connectionTimeout));
 
-		recev = input_buffer_.size();
-		client->buff = boost::asio::buffer_cast<char*>(input_buffer_.data());
+		std::string s((std::istreambuf_iterator<char>(&input_buffer_)), std::istreambuf_iterator<char>());
 
-		if (ReadLogEnabled) LOG_INFO(requestID, context, (boost::format("recv returned %1% bytes of data") % recev).str().c_str());
+		std::vector<char> cstr(s.c_str(), s.c_str() + s.size() + 1);
+
+		client->buff = (char *)cstr.data();
+
+		recev = input_buffer_.size();
+
+		if (ReadLogEnabled) {
+			LOG_INFO("received", context, "recv returned %d bytes of data", recev);
+			LOG_INFO("received", context, "string is: [%s]", s);
+		}
+		return (int)s.length();
 
 		offset = recev + client->offset;
 		if (offset < sizeof(_sh)) //приняли меньше шапки
@@ -341,11 +309,23 @@ int CRCSocket::Read()
 	return recev;
 }
 
-int CRCSocket::Close()
+void CRCSocket::ReadLoop()
+{
+	for (;;)
+	{
+		if (stopReadLoop)
+			break;
+		Read();	
+	}
+}
+
+void CRCSocket::Close()
 {	
 	boost::system::error_code ignored_ec;
 	socket_.close(ignored_ec);
 	deadline_.expires_at(boost::posix_time::pos_infin);
+	IsConnected = false;
+	stopReadLoop = true;
 }
 
 unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)

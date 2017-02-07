@@ -167,5 +167,3 @@ std::string vformat(const char *fmt, va_list ap);
 
 
 std::string GetLastErrorAsString();
-
-std::string make_string(boost::asio::streambuf& streambuf);

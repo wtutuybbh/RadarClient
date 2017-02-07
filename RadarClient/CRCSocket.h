@@ -361,7 +361,7 @@ struct send_queue_element
 struct _client                     //Клиенты
 {
 	char *buff{ nullptr };
-	SOCKET *Socket{ nullptr };
+	//SOCKET *Socket{ nullptr };
 	unsigned int offset { 0 };
 	vector<send_queue_element> send_queue;  // очередь отправляемых данных
 };
@@ -427,7 +427,7 @@ public:
 
 class CRCSocket
 {
-	
+	bool stopReadLoop{ false };
 
 	bool OnceClosed;
 	char *hole{ nullptr };
@@ -441,15 +441,16 @@ class CRCSocket
 
 	boost::thread *receiver_thread; //thread for data receiving
 
+	int read_count{ 0 }, handle_read_count{ 0 };
 
 	void check_deadline();
 
 	int connectionTimeout{ 10 };
-	void handle_read(const boost::system::error_code& ec, std::size_t length, boost::system::error_code* out_ec, std::size_t* out_length);
+	void handle_read(const boost::system::error_code& ec, std::size_t length, boost::system::error_code* out_ec, std::size_t* out_length, long read_count);
 	void handle_connect(const boost::system::error_code& ec, boost::system::error_code* out_ec);
 public:
 	void connect(const std::string& host, const std::string& service, boost::posix_time::time_duration timeout);	
-	void read(boost::posix_time::time_duration timeout);	
+	void read(boost::posix_time::time_duration timeout);
 
 	static const std::string requestID;
 
@@ -461,10 +462,10 @@ public:
 	int IDX, NumViewSct;
 	//used when receiving data:
 	std::string ErrorText;
-	WSADATA WsaDat;
-	SOCKET Socket;
-	struct hostent *host{ nullptr };
-	SOCKADDR_IN SockAddr;
+	//WSADATA WsaDat;
+	//SOCKET Socket;
+	//struct hostent *host{ nullptr };
+	//SOCKADDR_IN SockAddr;
 	HWND hWnd;
 	_client *client{ nullptr };
 
@@ -494,12 +495,12 @@ public:
 
 	bool IsConnected;
 
-	void Init();
-	int Connect();
+	void Connect();
 
-	bool ReadLogEnabled{ false };
+	bool ReadLogEnabled{ true };
 	bool PostDataLogEnabled{ true };
 	int Read();
+	void ReadLoop();
 
 	void Close();
 	unsigned int PostData(WPARAM wParam, LPARAM lParam);
