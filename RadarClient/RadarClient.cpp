@@ -536,6 +536,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	LOG_INFO__("RadarClient started.");
 
 	LOG_INFO__("sizeof(RDR_INITCL) = %d", sizeof(RDR_INITCL));
+	LOG_INFO__("sizeof(_sh) = %d", sizeof(_sh));
 		
 	if (!CSettings::Init())
 	{

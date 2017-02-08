@@ -429,7 +429,6 @@ class CRCSocket
 {
 	bool stopReadLoop{ false };
 
-	bool OnceClosed;
 	char *hole{ nullptr };
 	int LENDATAOTOBR {1};
 
@@ -439,15 +438,20 @@ class CRCSocket
 	boost::asio::deadline_timer deadline_;
 	boost::asio::streambuf input_buffer_;
 
-	boost::thread *receiver_thread; //thread for data receiving
-
-	int read_count{ 0 }, handle_read_count{ 0 };
-
 	void check_deadline();
 
 	int connectionTimeout{ 10 };
-	void handle_read(const boost::system::error_code& ec, std::size_t length, boost::system::error_code* out_ec, std::size_t* out_length, long read_count);
+	void handle_read(const boost::system::error_code& ec, std::size_t length, boost::system::error_code* out_ec, std::size_t* out_length);
 	void handle_connect(const boost::system::error_code& ec, boost::system::error_code* out_ec);
+
+	_sh *sh_tmp{ nullptr };
+	int input_offset{ 0 };
+	int sh_offset{ 0 }, buff_offset{ 0 }, amount{ 0 }, length{ 0 }, read_count{ 0 };
+
+	bool wait_sh{ true };
+	bool wait_end{ false };
+
+	bool check_sh(_sh *sh);
 public:
 	void connect(const std::string& host, const std::string& service, boost::posix_time::time_duration timeout);	
 	void read(boost::posix_time::time_duration timeout);
@@ -455,13 +459,13 @@ public:
 	static const std::string requestID;
 
 	bool Initialized {false};
-	bool PointOK, TrackOK, ImageOK;
+	bool PointOK{ false }, TrackOK{ false }, ImageOK{ false };
 	vector<TRK*> Tracks;
 	vector<TRK*> trak;
 	float MMAXP;
 	int IDX, NumViewSct;
 	//used when receiving data:
-	std::string ErrorText;
+	std::string ErrorText{ "" };
 	//WSADATA WsaDat;
 	//SOCKET Socket;
 	//struct hostent *host{ nullptr };
@@ -493,7 +497,7 @@ public:
 	CRCSocket(HWND hWnd);
 	~CRCSocket();
 
-	bool IsConnected;
+	bool IsConnected{ false };
 
 	void Connect();
 

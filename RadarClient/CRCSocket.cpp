@@ -29,32 +29,12 @@ CRCSocket::CRCSocket(HWND hWnd) :
 	LOG_INFO(requestID, context, (boost::format("Start... hWnd=%1%") % hWnd).str().c_str());
 
 	this->hWnd = hWnd;
-	OnceClosed = false;
-	
-
-	this->info_p = nullptr;
-	this->info_i = nullptr;
-
-	this->pts = nullptr;
-	this->s_rdrinit = nullptr;
 
 	hole = new char[TXRXBUFSIZE];
 
+	client = new _client;
 
-	s_rdrinit = nullptr;
-
-	client = nullptr;
-
-	PointOK = TrackOK = ImageOK = false;
-
-	if (!client)
-	{
-		client = new _client;
-	}
-
-	ErrorText = "";
-
-	IsConnected = false;
+	sh_tmp = new _sh;
 }
 
 
@@ -151,7 +131,7 @@ void CRCSocket::read(boost::posix_time::time_duration timeout)
 	// object is used as a callback and will update the ec variable when the
 	// operation completes. The blocking_udp_client.cpp example shows how you
 	// can use boost::bind rather than boost::lambda.
-	boost::asio::async_read(socket_, input_buffer_, boost::asio::transfer_at_least(1), boost::bind(&CRCSocket::handle_read, this, _1, _2, &ec, &length, read_count));
+	boost::asio::async_read(socket_, input_buffer_, boost::asio::transfer_at_least(1), boost::bind(&CRCSocket::handle_read, this, _1, _2, &ec, &length));
 
 	// Block until the asynchronous operation has completed.
 	int do_count = 0;
@@ -162,16 +142,14 @@ void CRCSocket::read(boost::posix_time::time_duration timeout)
 	}
 	while (ec == boost::asio::error::would_block);
 
-	LOG_INFO(requestID, "read", "read_count=%d, do_count=%d", read_count, do_count);
+	LOG_INFO(requestID, "read", "do_count=%d", do_count);
 
 	if (ec)
 		throw boost::system::system_error(ec);
-
-	read_count++;
 }
 void CRCSocket::handle_read(
 	const boost::system::error_code& ec, std::size_t length,
-	boost::system::error_code* out_ec, std::size_t* out_length, long read_count)
+	boost::system::error_code* out_ec, std::size_t* out_length)
 {
 	*out_ec = ec;
 	*out_length = length;
@@ -181,9 +159,11 @@ void CRCSocket::handle_read(
 	if (stopReadLoop) {
 		IsConnected = false;
 		stopReadLoop = false;
+		Close();
 		return;
 	}
 
+	read_count++;
 	read(boost::posix_time::seconds(connectionTimeout));
 }
 void CRCSocket::check_deadline()
@@ -232,133 +212,103 @@ void CRCSocket::Connect()
 
 	}
 }
-
+bool CRCSocket::check_sh(_sh *sh) {
+	if (sh->word1 != 2863311530/* 0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку
+	{
+		return false;
+	}
+	return true;
+}
 int CRCSocket::Read()
 {	
 	const char * input_buffer = boost::asio::buffer_cast<const char*>(input_buffer_.data());
-	string context = "CRCSocket::Read()";
+	string context = "CRCSocket::Read(" + num2str(read_count, 0) + ")";
 	//if (ReadLogEnabled) LOG_INFO(requestID, context, "Start");				
 
 	char *szIncoming = nullptr;
-	_sh *sh;
-	int recev;
-	unsigned int offset, length;
+	_sh *sh = nullptr;
+	int recev = 0, sh_amount = 0;
+	unsigned int offset;
 	char * OutBuff = nullptr;
 
-	try {
+
 		recev = input_buffer_.size();
-
-		client->buff = new char[recev];
-
-		memcpy(client->buff, input_buffer, recev);
-
-		sh = (struct _sh*)client->buff;
-		if (sh->word1 != 2863311530/* 0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку
-		{
-			if (client->buff)
-			{
-				delete[] client->buff;
-				client->buff = nullptr;
-			}
-			if (ReadLogEnabled) LOG_WARN(requestID, context, "wrong sh! sh->word1 = %d, sh->word2 = %d", sh->word1, sh->word2);
-			return recev;
-		}
-		else
-		{
-			client->offset = 0;
-		}
-		//return (int)s.length();
-
-		offset = recev + client->offset;
-		if (offset < sizeof(_sh)) //приняли меньше шапки
-		{
-			client->offset = offset; //Запомнили что что-то приняли
-			if (client->buff)
-			{
-				delete[] client->buff;
-				client->buff = nullptr;
-			}
-			return recev;
-		}
-		
-		
-		length = sh->dlina;
-		if (ReadLogEnabled) {
-			LOG_INFO(requestID, context, "0 | recev=%d, length = sh->dlina = %d, offset = %d, client->offset = %d", recev, length, offset, client->offset);
-		}
-		while (length < offset)  // приняли больше или ровно 1 порцию
-		{
-			try // защита на выделение памяти
-			{
-				if (length <= 0) {
-					if (client->buff)
-					{
-						delete[] client->buff;
-						client->buff = nullptr;
+		input_offset = 0;
+		while (input_offset <= recev) {
+			if (wait_sh) {
+				if (sh_offset > 0 && sh_offset < sizeof(_sh)) {
+					amount = min(recev - input_offset, sizeof(_sh) - sh_offset);
+					if (amount > 0) {
+						memcpy(sh_tmp + sh_offset, input_buffer + input_offset, amount);
+						sh_offset += amount;
+						input_offset += amount;
+					}
+					continue;
+				}
+				if (sh_offset==0 && recev - input_offset >= sizeof(_sh) || sh_offset == sizeof(_sh)) { // simplest case
+					if (sh_offset == 0) {
+						sh = (struct _sh*)(input_buffer + input_offset);
+						input_offset += sizeof(_sh);
+					}
+					else {
+						sh = (struct _sh*)sh_tmp;
 					}
 					
+				}
+				if (!check_sh(sh)) {
+					LOG_ERROR__("sh error. sh->word1=%d, sh->word2=%d, input_offset=%d, sh_offset=%d, sh->type=%d, sh->dlina=%d", sh->word1, sh->word2, input_offset, sh_offset, sh->type, sh->dlina);
+					if (sh_offset == sizeof(_sh)) {
+						sh_offset = 0;
+					}
+					for (auto i = input_offset + 1; i < recev; i++) {
+						sh = (struct _sh*)(input_buffer + i);
+						if (check_sh(sh)) {
+							LOG_WARN__("found good sh at position %d, sh->dlina=%d", i, sh->dlina);
+						}
+					}
 					return recev;
 				}
-				OutBuff = new char[length];              // Выделим память под принятую порцию // operator delete[] in method FreeMemory()
-				memcpy(OutBuff, client->buff, length); // Скопируем принятые данные
-
-				PostMessage(hWnd, CM_POSTDATA, (WPARAM)OutBuff, length); //Отошлем в очередь на обработку
-				memcpy(client->buff, &client->buff[length], offset - length);// Перепишем остаток в начало
-				if (ReadLogEnabled) {
-					LOG_INFO(requestID, context, "1 | recev=%d, length = sh->dlina = %d, offset = %d, client->offset = %d", recev, length, offset, client->offset);
-				}
-				offset -= length;
 				length = sh->dlina;
-				if (ReadLogEnabled) {
-					LOG_INFO(requestID, context, "2 | recev=%d, length = sh->dlina = %d, offset = %d, client->offset = %d, sh->word1 = %d, sh->word2 = %d", recev, length, offset, client->offset, sh->word1, sh->word2);
+				if (length > 0) {
+					client->buff = new char[length];
+					memcpy(client->buff, sh, sizeof(_sh));
+					buff_offset = sizeof(_sh);
+					sh_offset = 0;
+					wait_sh = false;
+					wait_end = true;
+
+					LOG_INFO__("_sh_ found: | recev=%d, length = sh->dlina = %d, input_offset = %d, sh->word1 = %d, sh->word2 = %d", recev, length, input_offset, sh->word1, sh->word2);
+
+					continue;
 				}
-				if (sh->word1 != 2863311530 /*0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку 
-				{
-					client->offset = 0;
-					if (ReadLogEnabled) {
-						LOG_INFO(requestID, context, "3 | recev=%d, length = sh->dlina = %d, offset = %d, client->offset = %d", recev, length, offset, client->offset);
-					}
-					if (client->buff)
-					{
-						delete[] client->buff;
-						client->buff = nullptr;
-					}
+				else {
+					LOG_ERROR__("sh error. sh->dlina=%d", sh->dlina);
 					return recev;
 				}
+			}
+			if (wait_end) {
+				if (buff_offset > 0 && buff_offset < length) {
+					amount = min(recev - input_offset, length - buff_offset);
+					if (amount > 0) {
+						memcpy(client->buff + buff_offset, input_buffer + input_offset, amount);
+						buff_offset += amount;
+						input_offset += amount;					
+					}	
+					else {
+						return recev;
+					}
+				}
+				if (buff_offset == sizeof(_sh) && recev - input_offset >= length - sizeof(_sh) || buff_offset == length) { // simplest case
+					PostMessage(hWnd, CM_POSTDATA, (WPARAM)client->buff, length); //Отошлем в очередь на обработку
+					LOG_INFO__("BODY found: | recev=%d, length = sh->dlina = %d, input_offset = %d", recev, length, input_offset);
 
-			}
-			catch (std::bad_alloc)
-			{  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
-			   // YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
-				if (client->buff) 
-				{
-					delete[] client->buff;
-					client->buff = nullptr;
-				}					
-				return recev;
+					sh_offset = 0;
+					wait_sh = true;
+					wait_end = false;
+				}
 			}
 		}
-	}
-	catch (std::bad_alloc)
-	{  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
-	   // YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
-		if (client->buff)
-		{
-			delete[] client->buff;
-			client->buff = nullptr;
-		}
-		return 0;
-	}
-	//приняли меньше чем 1 порция
-	client->offset = offset; //Запомним что что-то приняли
-	if (ReadLogEnabled) {
-		LOG_INFO(requestID, context, "4 | recev=%d, length = sh->dlina = %d, offset = %d, client->offset = %d", recev, length, offset, client->offset);
-	}
-	if (client->buff)
-	{
-		delete[] client->buff;
-		client->buff = nullptr;
-	}
+
 	return recev;
 }
 
@@ -367,8 +317,7 @@ void CRCSocket::Close()
 	boost::system::error_code ignored_ec;
 	socket_.close(ignored_ec);
 	deadline_.expires_at(boost::posix_time::pos_infin);
-	
-	stopReadLoop = true;
+	IsConnected = false;
 }
 
 unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
