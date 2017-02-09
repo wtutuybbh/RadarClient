@@ -258,13 +258,13 @@ LRESULT CUserInterface::RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM w
 	if (VPControl && VPControl->Camera)
 	{
 		if (ButtonID == CameraPosition_ID[0]) { // FROM_RADAR
-			this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->y0 + 1, 0);
+			if (this->VPControl->Scene && this->VPControl->Scene->MeshReady()) this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->GetY0() + 1, 0);
 		}
 		if (ButtonID == CameraPosition_ID[1]) { // FROM_100M_ABOVE_RADAR
-			this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->y0 + 100.0f / this->VPControl->Scene->MPPv, 0);
+			if (this->VPControl->Scene && this->VPControl->Scene->MeshReady()) this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->GetY0() + 100.0f / this->VPControl->Scene->MPPv, 0);
 		}
 		if (ButtonID == CameraPosition_ID[2]) { // FROM_1000M_ABOVE_RADAR
-			this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->y0 + 1000.0f / this->VPControl->Scene->MPPv, 0);
+			if (this->VPControl->Scene && this->VPControl->Scene->MeshReady()) this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->GetY0() + 1000.0f / this->VPControl->Scene->MPPv, 0);
 		}
 	}
 	return LRESULT();
@@ -313,7 +313,7 @@ LRESULT CUserInterface::Trackbar_CameraDirection_VTilt(HWND hwnd, UINT uMsg, WPA
 	{
 		glm::vec3 p = VPControl->Camera->GetPosition();
 		
-		VPControl->Camera->SetPosition(p.x, VPControl->Scene->y0 + (5000 - VPControl->Scene->y0)*(100 - val)/100/ VPControl->Scene->MPPv, p.z);
+		if (VPControl->Scene->MeshReady()) VPControl->Camera->SetPosition(p.x, VPControl->Scene->GetY0() + (5000 - VPControl->Scene->GetY0())*(100 - val)/100/ VPControl->Scene->MPPv, p.z);
 	}
 
 	return LRESULT();

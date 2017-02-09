@@ -70,7 +70,7 @@ class CMesh : public C3DObjectModel
 	float PtHeight(int nX, int nY) const;
 	int texsize;
 
-	glm::vec3 * Bounds{ nullptr };	
+	glm::vec3 * bounds{ nullptr };	
 
 	CRCTextureDataFile *maptexture { nullptr };
 	CRCAltitudeDataFile *altitude{ nullptr };
@@ -102,6 +102,5 @@ public:
 	void BindUniforms(CViewPortControl *vpControl) override;
 	glm::vec3 * CMesh::GetBounds() override;
 	void InitMiniMap();
-	void LoadToGPU(int vpId);
 	bool Ready();
 };

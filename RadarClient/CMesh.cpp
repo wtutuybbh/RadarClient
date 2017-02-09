@@ -93,9 +93,9 @@ bool CMesh::LoadHeightmap()
 		if (data[i] > maxheight) maxheight = data[i];
 		if (data[i] < minheight) minheight = data[i];
 	}
-	Bounds = new glm::vec3[2];
-	Bounds[0].x = Bounds[0].y = Bounds[0].z = FLT_MAX;
-	Bounds[1].x = Bounds[1].y = Bounds[1].z = FLT_MIN;
+	bounds = new glm::vec3[2];
+	bounds[0].x = bounds[0].y = bounds[0].z = FLT_MAX;
+	bounds[1].x = bounds[1].y = bounds[1].z = FLT_MIN;
 
 	double dlon = alt_.DLon();
 	double dlat = alt_.DLat();
@@ -143,9 +143,9 @@ bool CMesh::LoadHeightmap()
 			mincolor * (1 - level) + maxcolor * level,
 			glm::vec2(((float)X) / W, ((float)Y) / H) };
 
-		rcutils::takeminmax((*buffer)[i].vert.x, &(Bounds[0].x), &(Bounds[1].x));
-		rcutils::takeminmax((*buffer)[i].vert.y, &(Bounds[0].y), &(Bounds[1].y));
-		rcutils::takeminmax((*buffer)[i].vert.z, &(Bounds[0].z), &(Bounds[1].z));
+		rcutils::takeminmax((*buffer)[i].vert.x, &(bounds[0].x), &(bounds[1].x));
+		rcutils::takeminmax((*buffer)[i].vert.y, &(bounds[0].y), &(bounds[1].y));
+		rcutils::takeminmax((*buffer)[i].vert.z, &(bounds[0].z), &(bounds[1].z));
 	}
 	averageHeight /= H * W;
 	idxArray = new unsigned short[N];
@@ -213,7 +213,7 @@ CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize,
 	std::string context = "CMesh::CMesh";
 	LOG_INFO(requestID, context, "Start... clearAfter=%d, position=(%f, %f), max_range=%f, texsize=%d, resolution=%d", clearAfter , position.x, position.y, max_range, texsize, resolution);
 
-	Bounds = nullptr;
+	bounds = nullptr;
 	this->position = position;
 	this->texsize = texsize;
 	this->resolution = resolution;
@@ -235,13 +235,13 @@ CMesh::~CMesh()
 		auto *buffer = (vector<VBOData>*)it->second->GetBuffer();
 		delete buffer;
 	}
-	if (Bounds)
-		delete[] Bounds;
+	if (bounds)
+		delete[] bounds;
 }
 glm::vec3 CMesh::GetSize() {
 	auto b = GetBounds();
 	if (b) return b[1] - b[0];
-	return glm::vec3(0);
+	return glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
 bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)
@@ -404,25 +404,25 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 glm::vec3 * CMesh::GetBounds()
 {
 	if (Ready())
-		return Bounds;
+		return bounds;
 	return nullptr;
 }
 
 void CMesh::InitMiniMap()
 {
-	if (Bounds && maptexture)
+	if (bounds && maptexture)
 	{
 		C3DObjectVBO *newvbo = new C3DObjectVBO(false);
 		
 		std::vector<VBOData> *buffer = new std::vector<VBOData>;
 		float y = 0;
-		buffer->push_back({ glm::vec4(Bounds[0].x, y, Bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
-		buffer->push_back({ glm::vec4(Bounds[0].x, y, Bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
-		buffer->push_back({ glm::vec4(Bounds[1].x, y, Bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
+		buffer->push_back({ glm::vec4(bounds[0].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
+		buffer->push_back({ glm::vec4(bounds[0].x, y, bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
+		buffer->push_back({ glm::vec4(bounds[1].x, y, bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
 
-		buffer->push_back({ glm::vec4(Bounds[1].x, y, Bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
-		buffer->push_back({ glm::vec4(Bounds[1].x, y, Bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-		buffer->push_back({ glm::vec4(Bounds[0].x, y, Bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
+		buffer->push_back({ glm::vec4(bounds[1].x, y, bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
+		buffer->push_back({ glm::vec4(bounds[1].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+		buffer->push_back({ glm::vec4(bounds[0].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
 
 		newvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 
@@ -463,6 +463,11 @@ bool CMesh::Ready() {
 	}
 	return false;
 }
-float GetCenterHeight() {
+float CMesh::GetCenterHeight() {
+	return centerHeight;
+}
 
+float CMesh::GetAverageHeight()
+{
+	return averageHeight;
 }

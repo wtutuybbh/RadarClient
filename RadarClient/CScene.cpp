@@ -948,6 +948,11 @@ glm::vec2 CScene::CameraXYForMiniMap() const
 bool CScene::MeshReady() {
 	return Mesh && Mesh->Ready();
 }
+float CScene::GetY0() {
+	if (Mesh && Mesh->Ready())
+		return Mesh->GetCenterHeight() / MPPv;
+	return FLT_MIN;
+}
 void CScene::DrawBitmaps() const
 {
 	if (!Mesh || !Mesh->Ready()) {

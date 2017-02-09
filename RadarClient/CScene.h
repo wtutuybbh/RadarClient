@@ -180,4 +180,6 @@ public:
 	glm::vec3 GetMeshSize();
 
 	bool MeshReady();
+
+	float GetY0();
 };
