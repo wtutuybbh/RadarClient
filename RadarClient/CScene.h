@@ -68,10 +68,10 @@ public:
 	float rayWidth, minE, maxE, minDist, maxDist, minA, maxA;
 	int rayDensity, rayArraySize;
 
-	float AxisGridShift = 50.0f;
-	float YAxisLength = 1000.0f;
-	float markSize = 10.0f;
-	int markDistance = 100;
+	float AxisGridShift{ 50.0f };
+	float YAxisLength{ 1000.0f };
+	float markSize{ 10.0f };
+	int markDistance{ 100 };
 
 
 	int vertexCount_Ray;
@@ -99,7 +99,7 @@ public:
 	unsigned short *info{ nullptr };
 
 	int zeroLevel = ZEROLEVEL_ACTUALHEIGHT;
-	float y0;
+	//float y0;
 
 	std::vector<CSector*> Sectors; //points
 
@@ -133,8 +133,8 @@ public:
 
 	C3DObjectModel *RayObj{ nullptr };
 
-	glm::vec3 MeshSize;
-	glm::vec3 * m_Bounds{ nullptr };
+	//glm::vec3 MeshSize;
+	
 	CScene();
 	~CScene();
 
@@ -177,4 +177,7 @@ public:
 	glm::vec3 GetGeographicCoordinates(glm::vec3 glCoords);
 
 	void LoadMesh();
+	glm::vec3 GetMeshSize();
+
+	bool MeshReady();
 };

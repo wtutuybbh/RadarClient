@@ -26,11 +26,6 @@
 #include "CUserInterface.h"
 #include "CRCLogger.h"
 
-
-float CMesh::AverageHeight;
-CMesh **CMesh::Meshs;
-int CMesh::TotalMeshsCount;
-
 const std::string CScene::requestID = "CScene";
 
 void CScene::PushSelection(C3DObjectModel* o)
@@ -69,8 +64,11 @@ CScene::CScene()
 	MPPh = CSettings::GetFloat(FloatMPPh);
 	texsize = CSettings::GetInt(IntTexSize);
 
+	CScene::LoadMesh();
+	/*
 	boost::thread t(boost::bind(&CScene::LoadMesh, this));
 	t.detach();
+	*/
 
 	mmPointer = new CMiniMapPointer(MiniMap, this);	
 
@@ -155,16 +153,6 @@ CScene::~CScene() {
 	if (Camera)
 		delete Camera;
 
-	if(CMesh::Meshs)
-	{
-		for (int i = 0; i < CMesh::TotalMeshsCount; i++)
-		{
-			delete CMesh::Meshs[i];
-		}
-		delete[] CMesh::Meshs;
-		CMesh::Meshs = nullptr;
-	}
-
 	if (info)
 	{
 		delete[] info;
@@ -192,11 +180,6 @@ CScene::~CScene() {
 		delete ImageSet;
 	}
 
-	if (m_Bounds)
-	{
-		delete[] m_Bounds;
-	}
-
 	if (RayObj)
 	{
 		delete RayObj;
@@ -208,7 +191,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	if (!VBOisBuilt) {
 		PrepareVBOs();
 		VBOisBuilt = BuildVBOs();
-		Camera->Move(glm::vec3(0, y0 + 235, -310), false);
+		Camera->Move(glm::vec3(0, 235, -310), false);
 		Camera->RadarPosition = glm::vec3(0, y0, 0);
 	}
 	glEnable(GL_DEPTH_TEST);
@@ -336,6 +319,12 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 
 bool CScene::PrepareVBOs()
 {	
+	if (!Mesh || !Mesh->Ready()) {
+		return false;
+	}
+
+	float y0 = Mesh->GetCenterHeight() / MPPv;
+
 	AxisGrid = new glm::vec3[vertexCount];
 
 	int i0 = 0;
@@ -486,8 +475,11 @@ bool CScene::PrepareVBOs()
 
 bool CScene::PrepareRayVBO()
 {
-	/*if (!Initialized)
-		return false;*/
+	if (!Mesh || !Mesh->Ready()) {
+		return false;
+	}
+	float y0 = Mesh->GetCenterHeight() / MPPv;
+
 	if (rdrinit) {
 		maxDist = rdrinit->dR * rdrinit->maxR;
 
@@ -800,6 +792,11 @@ void CScene::Init(RDR_INITCL* init)
 
 CRCPointModel * CScene::GetCRCPointFromRDRTRACK(RDRTRACK * tp) const
 {
+	if (!Mesh || !Mesh->Ready()) {
+		return nullptr;
+	}
+
+	float y0 = Mesh->GetCenterHeight() / MPPv;
 	//TODO: need common formula here
 	float r = 0.75 * sqrt(tp->X * tp->X + tp->Y * tp->Y) / 1;
 	float a = glm::radians(-120 + 0.02 * 1000 * (atan(tp->X / tp->Y)) / (M_PI / 180));
@@ -812,10 +809,11 @@ CRCPointModel * CScene::GetCRCPointFromRDRTRACK(RDRTRACK * tp) const
 void CScene::SetCameraPositionFromMiniMapXY(float x, float y, float direction) const
 /* x and y from -1 to 1 */
 {
-	if (m_Bounds) 
+	if (Mesh) 
 	{
-		glm::vec3 *b = m_Bounds;
-		Camera->SetPositionXZ((b[0].x + b[1].x) / 2 - x * (b[1].x - b[0].x) / 2, (b[0].z + b[1].z) / 2 + y * (b[1].z - b[0].z) / 2);
+		auto b = Mesh->GetBounds();
+		if (b && Camera)
+			Camera->SetPositionXZ((b[0].x + b[1].x) / 2 - x * (b[1].x - b[0].x) / 2, (b[0].z + b[1].z) / 2 + y * (b[1].z - b[0].z) / 2);
 	}
 }
 C3DObjectModel * CScene::GetObjectAtMiniMapPosition(int vpId, glm::vec3 p0, glm::vec3 p1) const
@@ -834,6 +832,12 @@ C3DObjectModel * CScene::GetObjectAtMiniMapPosition(int vpId, glm::vec3 p0, glm:
 C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 screenPoint, int& index)
 {
 #define CScene_GetSectorPoint_LogInfo false
+	
+	if (!Mesh || !Mesh->Ready()) {
+		return nullptr;
+	}
+	float y0 = Mesh->GetCenterHeight() / MPPv;
+
 	index = -1;
 	std::string context = "CScene::GetPointOnSurface";
 
@@ -857,7 +861,7 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 			{
 				Sectors[i]->SelectPoint(Main, index);
 				Sectors[i]->SelectPoint(MiniMap, index);
-				CRCPointModel *point = new CRCPointModel(vpControl->Id, this->y0, this->MPPh, this->MPPv, 0, 0, 0);
+				CRCPointModel *point = new CRCPointModel(vpControl->Id, y0, this->MPPh, this->MPPv, 0, 0, 0);
 				auto coords = Sectors[i]->GetPointCoords(vpControl, index);
 				point->SetCartesianCoordinates(coords);
 				LOG_INFO(requestID, context, (boost::format("(vpControl.Id=%1%, screenPoint=(%2%, %3%)) -> (Sector %4%, index=%5%, RETURN point=(%6%, %7%, %8%))") 
@@ -917,27 +921,40 @@ C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, 
 
 C3DObjectModel* CScene::GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const
 {
+	if (!Mesh || !Mesh->Ready()) {
+		return nullptr;
+	}
+
 	std::string context = "CScene::GetPointOnSurface";
 	LOG_INFO(requestID, context, (boost::format("Start... p0=(%1%, %2%, %3%), p1=(%4%, %5%, %6%)")
 		% p0.x % p0.y % p0.z % p1.x % p1.y % p1.z).str().c_str());
 	glm::vec3 dir = p1 - p0, position;
-	if (CMesh::Meshs && CMesh::Meshs[0]) {
-		CMesh::Meshs[0]->IntersectLine(Main, p0, dir, position);
-	}
+	Mesh->IntersectLine(Main, p0, dir, position);
+	
 	LOG_ERROR(requestID, context, "Not implemented!");
 	return nullptr;
 }
 
 glm::vec2 CScene::CameraXYForMiniMap() const
 {
-	if (m_Bounds && Camera) {
-		return glm::vec2(- 2 * (Camera->GetPosition().x - m_Bounds[0].x) / (m_Bounds[1].x - m_Bounds[0].x) + 1, -1 + 2 * (Camera->GetPosition().z - m_Bounds[0].z) / (m_Bounds[1].z - m_Bounds[0].z));
+	if (Mesh) {
+		auto m_Bounds = Mesh->GetBounds();
+		if (m_Bounds && Camera) {
+			return glm::vec2(-2 * (Camera->GetPosition().x - m_Bounds[0].x) / (m_Bounds[1].x - m_Bounds[0].x) + 1, -1 + 2 * (Camera->GetPosition().z - m_Bounds[0].z) / (m_Bounds[1].z - m_Bounds[0].z));
+		}
 	}
 	return glm::vec2(0);
 }
-
+bool CScene::MeshReady() {
+	return Mesh && Mesh->Ready();
+}
 void CScene::DrawBitmaps() const
 {
+	if (!Mesh || !Mesh->Ready()) {
+		return;
+	}
+	float y0 = Mesh->GetCenterHeight() / MPPv;
+
 	BitmapString(0, y0, 0, "(" + cnvrt::float2str(position.x) + "; " + cnvrt::float2str(position.y) + ")");
 	glColor4f(1.0f, 1.0f, 0.0f, 0.7f);
 	BitmapString(-10 * markDistance / MPPh, y0 + 1, 0, "1km");
@@ -1008,40 +1025,11 @@ glm::vec3 CScene::GetGeographicCoordinates(glm::vec3 glCoords)
 
 void CScene::LoadMesh()
 {
-	m_Bounds = new glm::vec3[2];
-	m_Bounds[0].x = m_Bounds[0].y = m_Bounds[0].z = FLT_MAX;
-	m_Bounds[1].x = m_Bounds[1].y = m_Bounds[1].z = FLT_MIN;
-
-	CMesh *mesh = new CMesh(Main, true, position, max_range, texsize, resolution, MPPh, MPPv);
-	rcutils::takeminmax(mesh->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(mesh->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(mesh->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-	rcutils::takeminmax(mesh->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(mesh->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(mesh->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-
-	MeshSize = m_Bounds[1] - m_Bounds[0];
-
-	Camera->MeshSize = mesh->Size = MeshSize;
-
-	mesh->Init(MiniMap);
-
-	y0 = mesh->CenterHeight / MPPv;
-	
-	if (!CMesh::Meshs) {
-		auto m = new CMesh*[1];
-	} else {
-	
-	}
-		
-	m[CMesh::TotalMeshsCount] = mesh;
-	
-
-	
-
-	CMesh::Meshs = m;
-	CMesh::TotalMeshsCount++;
-
+	auto mesh = new CMesh(true, position, max_range, texsize, resolution, MPPh, MPPv);	
 	Mesh = mesh;
 }
 
+glm::vec3 CScene::GetMeshSize() {
+	if (Mesh) return Mesh->GetSize();
+	return glm::vec3();
+}

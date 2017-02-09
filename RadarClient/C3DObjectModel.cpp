@@ -59,11 +59,8 @@ void C3DObjectModel::SetCartesianCoordinates(float x, float y, float z)
 
 int C3DObjectModel::_id;
 int C3DObjectModel::_testid;
-C3DObjectModel::C3DObjectModel(int vpId, C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObjectProgram* prog)
+C3DObjectModel::C3DObjectModel(int vpId, C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObjectProgram* prog) : C3DObjectModel()
 {
-	this->id = _id;
-	_id++;
-
 	this->vbo.insert_or_assign(vpId, vbo);
 	this->tex.insert_or_assign(vpId, tex);
 	this->prog.insert_or_assign(vpId, prog);
@@ -73,11 +70,8 @@ C3DObjectModel::C3DObjectModel(int vpId, C3DObjectVBO* vbo, C3DObjectTexture* te
 	rotateMatrix.insert_or_assign(vpId, glm::mat4(1.0f));	
 }
 
-C3DObjectModel::C3DObjectModel(C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObjectProgram* prog)
+C3DObjectModel::C3DObjectModel(C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObjectProgram* prog) : C3DObjectModel()
 {
-	this->id = _id;
-	_id++;
-
 	this->vbo.insert_or_assign(Main, vbo);
 	this->tex.insert_or_assign(Main, tex);
 	this->prog.insert_or_assign(Main, prog);
@@ -94,7 +88,10 @@ C3DObjectModel::C3DObjectModel(C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObje
 	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 }
-
+C3DObjectModel::C3DObjectModel() {
+	this->id = _id;
+	_id++;
+}
 C3DObjectModel::~C3DObjectModel()
 {
 	if (id == _testid)
@@ -121,15 +118,30 @@ C3DObjectModel::~C3DObjectModel()
 				delete it->second;
 	}
 }
+void C3DObjectModel::CreateBuffer(C3DObjectVBO *vbo_) {
 
+}
 void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)
 {
-	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
+	if (!vpControl) return;
+	
+	C3DObjectVBO *vbo_;
+	try {
+		vbo_ = vbo.at(vpControl->Id);
+	}
+	catch (...) {
+		return;
+	}
+
+	if (!vbo_)	return;
+
 	C3DObjectProgram *prog_ = prog.at(vpControl->Id);
 	C3DObjectTexture *tex_ = tex.at(vpControl->Id);
 
 	if(vbo_ && !vbo_->Ready())
 	{
+		if (!vbo_->HasBuffer())
+			CreateBuffer(vbo_);
 		if (!vbo_->HasBuffer())
 			return;
 		if (prog_) prog_->CreateProgram();

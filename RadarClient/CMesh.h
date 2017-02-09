@@ -60,9 +60,11 @@ typedef struct {
 typedef int(_cdecl * GDPALTITUDEMAP)(const char *, double *, int *, short *);
 typedef int(_cdecl * GDPALTITUDEMAP_SIZES)(const char *, double *, int *);
 
+struct VBOData;
+
 class CMesh : public C3DObjectModel
 {	
-	bool LoadHeightmap(int vpId);
+	bool LoadHeightmap();
 	AltitudeMapHeader* GetAltitudeMapHeader(const char *fileName, double lon1, double lat1, double lon2, double lat2);
 	ImageMapHeader* GetImageMapHeader(const char *imgFile, const char *datFile);
 	float PtHeight(int nX, int nY) const;
@@ -82,19 +84,24 @@ class CMesh : public C3DObjectModel
 	float MPPh, MPPv;
 
 	unsigned short *idxArray{ nullptr };
+
+	std::vector<VBOData> * buffer{ nullptr };
+	bool buffer_ready{ false };
+	int index_length{ 0 };
+	float centerHeight, averageHeight;
 public:
 	glm::vec3 Size;
-	static float Y0, AverageHeight;
-	static CMesh** Meshs;
-	static int TotalMeshsCount;
-	float LocalAverageHeight;
-	static int TotalVertexCount;
+	
 	int UseTexture, UseY0Loc;
-	CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv);
+	CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv);
 	~CMesh() override;
-	float CenterHeight;
+	float GetCenterHeight();
+	float GetAverageHeight();
+	glm::vec3 GetSize();
 	bool IntersectLine(int vpId, glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position) override;
 	void BindUniforms(CViewPortControl *vpControl) override;
 	glm::vec3 * CMesh::GetBounds() override;
-	void Init(int vpId) override;
+	void InitMiniMap();
+	void LoadToGPU(int vpId);
+	bool Ready();
 };

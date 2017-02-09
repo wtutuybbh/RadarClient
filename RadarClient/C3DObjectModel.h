@@ -36,6 +36,7 @@ public:
 	glm::vec4 Color {glm::vec4()};
 	C3DObjectModel(int vpId, C3DObjectVBO *vbo, C3DObjectTexture *tex, C3DObjectProgram *prog);
 	C3DObjectModel(C3DObjectVBO *vbo, C3DObjectTexture *tex, C3DObjectProgram *prog);
+	C3DObjectModel();
 	virtual ~C3DObjectModel();
 	virtual void Draw(CViewPortControl *vpControl, GLenum mode);
 	virtual void BindUniforms(CViewPortControl* vpControl);
@@ -53,6 +54,7 @@ public:
 	virtual void SelectObject(CUserInterface * ui);
 
 	virtual void Init(int vpId);
+	virtual void CreateBuffer(C3DObjectVBO *vbo_);
 	C3DObjectVBO * GetC3DObjectVBO(int vpId);
 
 	virtual glm::vec3 * GetBounds();

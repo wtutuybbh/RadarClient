@@ -18,15 +18,13 @@
 #define LOG_ENABLED true
 #define CMesh_LoadHeightmap_LOG true
 
-float CMesh::Y0;
-
-bool CMesh::LoadHeightmap(int vpId)
+bool CMesh::LoadHeightmap()
 {
 	string context = "CMesh::LoadHeightmap(int vpId)";
 
 	if (LOG_ENABLED && CMesh_LoadHeightmap_LOG)
 	{
-		LOG_INFO(requestID, context, "Start, vpId=" + vpId);
+		LOG_INFO(requestID, context, "Start");
 	}
 
 
@@ -107,7 +105,6 @@ bool CMesh::LoadHeightmap(int vpId)
 	float lonStretch = dlon * cnvrt::londg2m(1, latSW + dlat * (alt_.Width() - 1) / 2.0) / MPPh;
 	float latStretch = dlat * cnvrt::latdg2m(1, latSW + dlat * (alt_.Width() - 1) / 2.0) / MPPh;
 
-	LocalAverageHeight = 0;
 
 	VBOData tmp;
 	float minh = CSettings::GetFloat(FloatMinAltitude), maxh = CSettings::GetFloat(FloatMaxAltitude), h, level;
@@ -115,22 +112,24 @@ bool CMesh::LoadHeightmap(int vpId)
 
 	int H = alt_.Height();
 	int W = alt_.Width();
+
 	int N = ((W - 3) * 2 + 6 + 1)*(H - 1) - 1;
+	index_length = N;
 
 	//std::vector<VBOData> * buffer = new std::vector<VBOData>((alt_.Width() - 1) * (alt_.Height() - 1) * 6);
-	std::vector<VBOData> * buffer = new std::vector<VBOData>(H*W);
+	buffer = new std::vector<VBOData>(H*W);
 
 	int sign = -1, loop_length = (W - 2) * 2, step_length = 1, next_step = 0, change_mode = 1, mode_id = 0, special_mode_id = 4, next_big_length = loop_length, x = 0, x_prev = 0, dXtone = 1, X = 0;
 	int dYCounter = 0, dYtone = 0, next_step_Ybase_change = 0, next_step_Ybase_change_prev = 0, Ybase = 0, Y = 0;
 	int x_before_change;
-	LocalAverageHeight = 0;
+	averageHeight = 0;
 	for (auto i=0; i<H*W; i++)
 	{
 		Y = (int) i / W;
 		X = i % W;
 
 		h = alt_.ValueAt(X, Y);
-		LocalAverageHeight += h;
+		averageHeight += h;
 
 		level = (h - minh) / (maxh - minh);
 
@@ -148,7 +147,7 @@ bool CMesh::LoadHeightmap(int vpId)
 		rcutils::takeminmax((*buffer)[i].vert.y, &(Bounds[0].y), &(Bounds[1].y));
 		rcutils::takeminmax((*buffer)[i].vert.z, &(Bounds[0].z), &(Bounds[1].z));
 	}
-	LocalAverageHeight /= H * W;
+	averageHeight /= H * W;
 	idxArray = new unsigned short[N];
 	// SEE GL_LINE_STRIP.xlsx for details
 	for (int i = 0; i<N; i++)
@@ -183,11 +182,15 @@ bool CMesh::LoadHeightmap(int vpId)
 	
 	
 
-	prog.insert_or_assign(vpId, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color"));
+		
 
-	vbo.insert_or_assign(vpId, new C3DObjectVBO(clearAfter));
-	vbo.at(vpId)->SetBuffer(buffer, &(*buffer)[0], buffer->size());
-	vbo.at(vpId)->AddIndexArray(idxArray, N, GL_TRIANGLE_STRIP);
+	centerHeight = alt_.ValueAt(min(max(alt_.Width() / 2 - 1, 0), alt_.Width() - 1), min(max(alt_.Height() / 2, 0), alt_.Height() - 1));
+
+	prog.insert_or_assign(Main, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color"));
+
+	auto vbo_ = new C3DObjectVBO(clearAfter);
+	vbo_->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+	vbo_->AddIndexArray(idxArray, N, GL_TRIANGLE_STRIP);
 
 	FIBITMAP* subimage = (FIBITMAP*)maptexture->Data();
 
@@ -196,27 +199,19 @@ bool CMesh::LoadHeightmap(int vpId)
 		FIBITMAP* tempImage = subimage;
 		subimage = FreeImage_ConvertTo32Bits(tempImage);
 	}
-	tex.insert_or_assign(vpId, new C3DObjectTexture(subimage, "tex", false, false));	
+	tex.insert_or_assign(Main, new C3DObjectTexture(subimage, "tex", false, false));
 
-	CenterHeight = alt_.ValueAt(min(max(alt_.Width() / 2 - 1, 0), alt_.Width() - 1), min(max(alt_.Height() / 2, 0), alt_.Height() - 1));
-	Y0 = CenterHeight / MPPv;
+	vbo.insert_or_assign(Main, vbo_);
 
+	InitMiniMap();
 
 	return true;
 }
 
-CMesh::CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv) : C3DObjectModel(vpId, nullptr, nullptr, nullptr)
+CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv) : C3DObjectModel()
 {
 	std::string context = "CMesh::CMesh";
-	LOG_INFO(requestID, context, (boost::format("Start... vpId=%1%, clearAfter=%3%, position=(%4%, %5%), max_range=%6%, texsize=%7%, resolution=%8%") 
-		% vpId 
-		% 0 //scn 
-		% clearAfter 
-		% position.x
-		% position.y
-		% max_range
-		% texsize
-		% resolution).str().c_str());
+	LOG_INFO(requestID, context, "Start... clearAfter=%d, position=(%f, %f), max_range=%f, texsize=%d, resolution=%d", clearAfter , position.x, position.y, max_range, texsize, resolution);
 
 	Bounds = nullptr;
 	this->position = position;
@@ -226,25 +221,37 @@ CMesh::CMesh(int vpId, bool clearAfter, glm::vec2 position, double max_range, in
 	this->clearAfter = clearAfter;
 	this->MPPh = MPPh;
 	this->MPPv = MPPv;
-	LoadHeightmap(vpId);
+	
 	UseTexture = 1;
 
-	
+	boost::thread t(boost::bind(&CMesh::LoadHeightmap, this));
+	t.detach();
 }
 
 CMesh::~CMesh()
 {
 	for (auto it = begin(vbo); it != end(vbo); ++it)
 	{
-		vector<VBOData> *buffer = (vector<VBOData>*)it->second->GetBuffer();
+		auto *buffer = (vector<VBOData>*)it->second->GetBuffer();
 		delete buffer;
 	}
 	if (Bounds)
 		delete[] Bounds;
 }
+glm::vec3 CMesh::GetSize() {
+	auto b = GetBounds();
+	if (b) return b[1] - b[0];
+	return glm::vec3(0);
+}
 
 bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)
 {
+	return false;
+
+	if (!Ready()) {
+		return false;
+	}
+
 	string context = "CMesh::IntersectLine";
 	LOG_INFO(requestID, context, (boost::format("Start... vpId=%1%, orig_=(%2%, %3%, %4%), dir_=(%5%, %6%, %7%")
 		% vpId
@@ -255,7 +262,7 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 		% dir_.y
 		% dir_.z).str().c_str());
 
-	glm::vec4 planeOrig(0, AverageHeight, 0, 1), planeNormal(0, 1, 0, 0);
+	glm::vec4 planeOrig(0, averageHeight, 0, 1), planeNormal(0, 1, 0, 0);
 	float distance;
 	glm::vec4 orig(orig_, 1);
 	glm::vec4 dir(dir_, 0);
@@ -264,13 +271,10 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 	bool planeResult = glm::intersectRayPlane(orig, dir, planeOrig, planeNormal, distance);
 	glm::vec4 approxPoint = orig + distance * dir;
 	CMesh *m;
-	glm::vec3 *b; 
-	for (int i = 0; i < CMesh::TotalMeshsCount; i++) {
-		m = CMesh::Meshs[i];
-		b = m->Bounds; // now b is a shortcut for m->Bounds
-		//find appropriate part of surface by testing bounds:
+	glm::vec3 *b = GetBounds(); 
+	if (b) {		
 		if (approxPoint.x > b[0].x && approxPoint.z > b[0].z && approxPoint.x <= b[1].x && approxPoint.z <= b[1].z) {			
-			break;
+			//break;
 		}
 	}
 	
@@ -375,6 +379,9 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 
 void CMesh::BindUniforms(CViewPortControl* vpControl)
 {
+	if (!Ready()) {
+		return;
+	}
 	glm::mat4 m = GetModelMatrix(vpControl);
 	glm::mat4 v = vpControl->GetViewMatrix();
 	glm::mat4 p = vpControl->GetProjMatrix();
@@ -390,19 +397,20 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 
 		glUniform1i(useTexture_loc, UseTexture);
 		glUniform1i(usey0_loc, UseY0Loc);
-		glUniform1f(y0_loc, Y0);
-		
+		glUniform1f(y0_loc, (int)(centerHeight / MPPv));		
 	}
 }
 
 glm::vec3 * CMesh::GetBounds()
 {
-	return Bounds;
+	if (Ready())
+		return Bounds;
+	return nullptr;
 }
 
-void CMesh::Init(int vpId)
+void CMesh::InitMiniMap()
 {
-	if (Bounds && maptexture && vpId == MiniMap)
+	if (Bounds && maptexture)
 	{
 		C3DObjectVBO *newvbo = new C3DObjectVBO(false);
 		
@@ -418,10 +426,10 @@ void CMesh::Init(int vpId)
 
 		newvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
 
-		vbo.insert_or_assign(vpId, newvbo);
+		
 
 		C3DObjectProgram *newprog = new C3DObjectProgram("Minimap.v.glsl", "Minimap.f.glsl", "vertex", "texcoor", nullptr, nullptr);
-		prog.insert_or_assign(vpId, newprog);
+		prog.insert_or_assign(MiniMap, newprog);
 
 		int minimapTexSize = CSettings::GetInt(IntMinimapTextureSize);
 
@@ -434,13 +442,27 @@ void CMesh::Init(int vpId)
 		//FreeImage_Save(FIF_JPEG, mmimage, "minimap.jpg", 0);
 		C3DObjectTexture *newtex = new C3DObjectTexture(mmimage, "tex", false, false); //new C3DObjectTexture("video.png", "tex");// 
 
-		tex.insert_or_assign(vpId, newtex);
+		tex.insert_or_assign(MiniMap, newtex);
 
-		scaleMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
-		rotateMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
-		translateMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
+		scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+		rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+		translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 
 		delete maptexture;
 		maptexture = nullptr;
+
+		vbo.insert_or_assign(MiniMap, newvbo);
 	}
+}
+bool CMesh::Ready() {
+	try {
+		if (vbo.at(Main) && vbo.at(MiniMap)) return true;
+	}
+	catch (...) {
+
+	}
+	return false;
+}
+float GetCenterHeight() {
+
 }
