@@ -272,7 +272,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		g_vpControl->Add(hWnd, PANEL_WIDTH, 0, (clientRect.right - clientRect.left) - PANEL_WIDTH, clientRect.bottom - clientRect.top - INFO_HEIGHT);
 		g_vpControl->Id = Main;
-		g_vpControl->InitGL();
+
+		if (!g_vpControl->InitGL()) {
+			TerminateApplication(window);
+		}
 		
 		g_Socket = new CRCSocket(hWnd);
 		g_Socket->Connect();
@@ -283,7 +286,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		//return 0;
 		g_Minimap->Add(hWnd, 0, 0, g_UI->MinimapSize, g_UI->MinimapSize);
 		g_Minimap->Id = MiniMap;
-		g_Minimap->InitGL();
+
+		if (!g_Minimap->InitGL()) {
+			TerminateApplication(window);
+		}
 
 		HRSRC       hrsrc;
 		HGLOBAL     hglobal;

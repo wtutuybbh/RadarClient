@@ -381,12 +381,14 @@ bool CViewPortControl::InitGL()
 	RECT clientRect;
 	
 	GetClientRect(hWnd, &clientRect);
+	LOG_INFO__("GetClientRect OK");
 
 	RECT windowRect = { 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top };	// Define Our Window Coordinates
 
 	GLuint PixelFormat;
 
 	hDC = GetDC(hWnd);
+	LOG_INFO__("GetClientRect OK");
 
 	if (hDC == nullptr)												// Did We Get A Device Context?
 	{
@@ -398,6 +400,7 @@ bool CViewPortControl::InitGL()
 	}
 
 	PixelFormat = ChoosePixelFormat(hDC, &pfd);
+	LOG_INFO__("ChoosePixelFormat OK");
 
 	if (PixelFormat == 0)												// Did We Find A Compatible Format?
 	{
@@ -422,6 +425,7 @@ bool CViewPortControl::InitGL()
 	}
 
 	hRC = wglCreateContext(hDC);						// Try To Get A Rendering Context
+	LOG_INFO__("wglCreateContext OK");
 	if (hRC == nullptr)												// Did We Get A Rendering Context?
 	{
 		// Failed
@@ -439,27 +443,31 @@ bool CViewPortControl::InitGL()
 		LOG_ERROR(requestID, context, "MakeCurrent() == false, return false");
 		return false;
 	}
+	LOG_INFO__("MakeCurrent OK");
 
-	GLenum err = glewInit();
-
+	GLenum err = glewInit();	
 	if (GLEW_OK != err)
 	{
 		GLenum en = glGetError();
 		const GLubyte *s = glewGetErrorString(err);
 		/* Problem: glewInit failed, something is seriously wrong. */
 		LOG_ERROR(requestID, "CViewPortControl::InitGL", "Problem: glewInit failed, something is seriously wrong.");
+		return false;
 	}
-
+	LOG_INFO__("glewInit OK");
 	const GLubyte* version = glGetString(GL_VERSION);
-
+	LOG_INFO__("glGetString OK");
 
 	glm::vec4 bgColor = CSettings::GetColor(ColorBackgroud);
 	glClearColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+	LOG_INFO__("glClearColor OK");
 																//glClearDepth(1.0f);										// Depth Buffer Setup
 	glDepthFunc(GL_LEQUAL);									// The Type Of Depth Testing¸¸¸¸ (Less Or Equal)
-
+	LOG_INFO__("glDepthFunc OK");
 	glShadeModel(GL_SMOOTH);									// Select Smooth Shading
+	LOG_INFO__("glShadeModel OK");
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);			// Set Perspective Calculations To Most Accurate
+	LOG_INFO__("glHint OK");
 
 	LOG_INFO(requestID, context, "Success, return true.");
 	return true;

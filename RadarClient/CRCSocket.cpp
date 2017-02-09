@@ -20,6 +20,31 @@ const std::string CRCSocket::requestID = "CRCSocket";
 using boost::asio::deadline_timer;
 using boost::asio::ip::tcp;
 
+std::string what_msg(int value) {
+	if (value == MSGBASE) return "MSGBASE";
+
+
+
+	if (value == MSG_RPOINTS) return "MSG_RPOINTS";
+	if (value == MSG_RIMAGE) return "MSG_RIMAGE";
+
+
+
+
+	if (value == MSG_PTSTRK) return "MSG_PTSTRK";  // список подтвержденных точек
+	if (value == MSG_OBJTRK) return "MSG_OBJTRK";    // список траекторий
+	if (value == MSG_DELTRK) return "MSG_DELTRK"; // список удаленных траекторий
+	if (value == MSG_LOCATION) return "MSG_LOCATION";
+
+	if (value == MSG_ECHO) return "MSG_ECHO";
+
+	if (value == MSG_INIT) return "MSG_INIT";
+
+	if (value == MSG_STRING) return "MSG_STRING";
+
+	return "";
+}
+
 CRCSocket::CRCSocket(HWND hWnd) : 
 	socket_(io_service_),
 	deadline_(io_service_),
@@ -213,7 +238,7 @@ void CRCSocket::Connect()
 	}
 }
 bool CRCSocket::check_sh(_sh *sh) {
-	if (sh->word1 != 2863311530/* 0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку
+	if (sh->word1 != 2863311530/* 0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/ || sh->dlina<sizeof(_sh))   // проверим шапку
 	{
 		return false;
 	}
@@ -221,8 +246,7 @@ bool CRCSocket::check_sh(_sh *sh) {
 }
 int CRCSocket::Read()
 {	
-	const char * input_buffer = boost::asio::buffer_cast<const char*>(input_buffer_.data());
-	string context = "CRCSocket::Read(" + num2str(read_count, 0) + ")";
+	
 	//if (ReadLogEnabled) LOG_INFO(requestID, context, "Start");				
 
 	char *szIncoming = nullptr;
@@ -233,15 +257,32 @@ int CRCSocket::Read()
 
 
 		recev = input_buffer_.size();
+
+		const char * input_buffer = boost::asio::buffer_cast<const char*>(input_buffer_.data());
+
+		string context = "Read " + std::to_string(read_count) + ", " + std::to_string(recev) + " bytes.";
+
+		
+		if (!wait_sh && recev > sizeof(_sh) && check_sh((struct _sh*)(input_buffer))) {
+			wait_sh = true;
+			if (client->buff) {
+				delete[] client->buff;
+			}
+			if (ReadLogEnabled) LOG_WARN__("packet reset, probably %d bytes lost", length - amount);
+		}
 		input_offset = 0;
-		while (input_offset <= recev) {
+		while (input_offset < recev) {			
 			if (wait_sh) {
-				if (sh_offset > 0 && sh_offset < sizeof(_sh)) {
+				if (sh_offset > 0 && sh_offset < sizeof(_sh) || sh_offset == 0 && recev - input_offset < sizeof(_sh)) {
 					amount = min(recev - input_offset, sizeof(_sh) - sh_offset);
 					if (amount > 0) {
 						memcpy(sh_tmp + sh_offset, input_buffer + input_offset, amount);
 						sh_offset += amount;
 						input_offset += amount;
+					}
+					else {
+						if (ReadLogEnabled) LOG_ERROR__("error! amount = min(recev - input_offset, sizeof(_sh) - sh_offset) = %d < 0", amount);
+						return recev;
 					}
 					continue;
 				}
@@ -252,20 +293,22 @@ int CRCSocket::Read()
 					}
 					else {
 						sh = (struct _sh*)sh_tmp;
-					}
-					
+					}					
+				}
+				
+				if (!check_sh(sh)) {
+					if (ReadLogEnabled) LOG_ERROR__("_sh_ found at %d: | check failed", input_offset - sizeof(_sh));
+					if (sh_offset == 0 && recev - input_offset > 0) { // so it is possible to find other headers..
+						auto i = 1;// max(input_offset - sizeof(_sh) + 1, 0);
+						while (!check_sh(sh) && i < recev - sizeof(_sh)) {
+							sh = (struct _sh*)(input_buffer + i);
+							input_offset = i + sizeof(_sh);
+							i++;
+						}
+					}										
 				}
 				if (!check_sh(sh)) {
-					LOG_ERROR__("sh error. sh->word1=%d, sh->word2=%d, input_offset=%d, sh_offset=%d, sh->type=%d, sh->dlina=%d", sh->word1, sh->word2, input_offset, sh_offset, sh->type, sh->dlina);
-					if (sh_offset == sizeof(_sh)) {
-						sh_offset = 0;
-					}
-					for (auto i = input_offset + 1; i < recev; i++) {
-						sh = (struct _sh*)(input_buffer + i);
-						if (check_sh(sh)) {
-							LOG_WARN__("found good sh at position %d, sh->dlina=%d", i, sh->dlina);
-						}
-					}
+					if (ReadLogEnabled) LOG_ERROR__("sh not found");
 					return recev;
 				}
 				length = sh->dlina;
@@ -275,36 +318,45 @@ int CRCSocket::Read()
 					buff_offset = sizeof(_sh);
 					sh_offset = 0;
 					wait_sh = false;
-					wait_end = true;
 
-					LOG_INFO__("_sh_ found: | recev=%d, length = sh->dlina = %d, input_offset = %d, sh->word1 = %d, sh->word2 = %d", recev, length, input_offset, sh->word1, sh->word2);
+					if (ReadLogEnabled) LOG_INFO__("_sh_ found at %d: | type = %d (%s), dlina = %d", input_offset - sizeof(_sh), sh->type, what_msg(sh->type).c_str(), length);
+					/*if (what_msg(sh->type) == "MSG_INIT") {
+						if (!s_rdrinit)
+						{
+							s_rdrinit = new RDR_INITCL;
+						}
 
+						memcpy(s_rdrinit, (RDR_INITCL*)(void*)&sh[1], sizeof(RDR_INITCL));
+
+						log_init(CRCSocket::requestID, context, s_rdrinit);
+					}*/
 					continue;
 				}
 				else {
-					LOG_ERROR__("sh error. sh->dlina=%d", sh->dlina);
+					if (ReadLogEnabled) LOG_ERROR__("sh->dlina=%d, must be >0", sh->dlina);
 					return recev;
 				}
 			}
-			if (wait_end) {
-				if (buff_offset > 0 && buff_offset < length) {
+			else {
+				if (buff_offset >= sizeof(_sh) && buff_offset < length) {
 					amount = min(recev - input_offset, length - buff_offset);
 					if (amount > 0) {
 						memcpy(client->buff + buff_offset, input_buffer + input_offset, amount);
 						buff_offset += amount;
 						input_offset += amount;					
 					}	
-					else {
-						return recev;
+					else { 
+						if (ReadLogEnabled) LOG_ERROR__("error! amount = min(recev - input_offset, length - buff_offset) = %d < 0", amount);
+						return recev; 
 					}
 				}
-				if (buff_offset == sizeof(_sh) && recev - input_offset >= length - sizeof(_sh) || buff_offset == length) { // simplest case
+				if (buff_offset == length) { // simplest case
 					PostMessage(hWnd, CM_POSTDATA, (WPARAM)client->buff, length); //Отошлем в очередь на обработку
-					LOG_INFO__("BODY found: | recev=%d, length = sh->dlina = %d, input_offset = %d", recev, length, input_offset);
+					client->buff = nullptr; // we dont care about it after PostMessage
+					if (ReadLogEnabled) LOG_INFO__("BODY found: | recev=%d, length = sh->dlina = %d, input_offset = %d", recev, length, input_offset);
 
 					sh_offset = 0;
 					wait_sh = true;
-					wait_end = false;
 				}
 			}
 		}
@@ -442,23 +494,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 
 				if (PostDataLogEnabled)
 				{
-					LOG_INFO__("MSG_INIT. Nazm=%d, Nelv=%d, dAzm=%f, dElv=%f, begAzm=%f, begElv=%f,	dR=%f, NR=%d, minR=%f, maxR=%f, ViewStep=%d, Proto[0]=%d, Proto[1]=%d, ScanMode=%d, srvTime=%d, MaxNumSectPt=%d, MaxNumSectImg=%d, blankR1=%d, blankR2=%d, MaxNAzm=%d, MaxNElv=%d",
-						s_rdrinit->Nazm, s_rdrinit->Nelv, 
-						s_rdrinit->dAzm, s_rdrinit->dElv, 
-						s_rdrinit->begAzm, s_rdrinit->begElv, 
-						s_rdrinit->dR, 
-						s_rdrinit->NR, 
-						s_rdrinit->minR, s_rdrinit->maxR, 
-						s_rdrinit->ViewStep, 
-						s_rdrinit->Proto[0], s_rdrinit->Proto[1],
-						s_rdrinit->ScanMode, 
-						s_rdrinit->srvTime, 
-						s_rdrinit->MaxNumSectPt, 
-						s_rdrinit->MaxNumSectImg, 
-						s_rdrinit->blankR1, 
-						s_rdrinit->blankR2,
-						s_rdrinit->MaxNAzm,
-						s_rdrinit->MaxNElv);
+					log_init(CRCSocket::requestID, context, s_rdrinit);
 					try
 					{
 						s_rdrinit->MaxNAzm = CSettings::GetInt(IntNazm);
@@ -711,4 +747,24 @@ void TRK::InsertPoints(RDRTRACK* pt, int N)
 		memcpy(t, &pt[i], sizeof(RDRTRACK));
 		P.push_back(t);
 	}
+}
+void log_init(std::string requestID, std::string context, RDR_INITCL *init) {
+	if (!init)	return;
+	LOG_INFO(requestID, context, "MSG_INIT. Nazm=%d, Nelv=%d, dAzm=%f, dElv=%f, begAzm=%f, begElv=%f,	dR=%f, NR=%d, minR=%f, maxR=%f, ViewStep=%d, Proto[0]=%d, Proto[1]=%d, ScanMode=%d, srvTime=%d, MaxNumSectPt=%d, MaxNumSectImg=%d, blankR1=%d, blankR2=%d, MaxNAzm=%d, MaxNElv=%d",
+		init->Nazm, init->Nelv,
+		init->dAzm, init->dElv,
+		init->begAzm, init->begElv,
+		init->dR,
+		init->NR,
+		init->minR, init->maxR,
+		init->ViewStep,
+		init->Proto[0], init->Proto[1],
+		init->ScanMode,
+		init->srvTime,
+		init->MaxNumSectPt,
+		init->MaxNumSectImg,
+		init->blankR1,
+		init->blankR2,
+		init->MaxNAzm,
+		init->MaxNElv);
 }

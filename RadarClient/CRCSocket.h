@@ -73,6 +73,8 @@ using boost::asio::ip::tcp;
 
 #define TXRXBUFSIZE 4*1024*1024
 
+std::string what_msg(int value);
+
 // точки траектории
 
 struct RDRTRACKS
@@ -449,7 +451,6 @@ class CRCSocket
 	int sh_offset{ 0 }, buff_offset{ 0 }, amount{ 0 }, length{ 0 }, read_count{ 0 };
 
 	bool wait_sh{ true };
-	bool wait_end{ false };
 
 	bool check_sh(_sh *sh);
 public:
@@ -501,7 +502,7 @@ public:
 
 	void Connect();
 
-	bool ReadLogEnabled{ true };
+	bool ReadLogEnabled{ false };
 	bool PostDataLogEnabled{ false };
 	int Read();
 
@@ -523,3 +524,6 @@ public:
 
 
 #endif // global1h
+
+
+void log_init(std::string requestID, std::string context, RDR_INITCL *s_rdrinit);

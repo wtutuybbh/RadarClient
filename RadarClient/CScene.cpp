@@ -69,7 +69,8 @@ CScene::CScene()
 	MPPh = CSettings::GetFloat(FloatMPPh);
 	texsize = CSettings::GetInt(IntTexSize);
 
-	LoadMesh();
+	boost::thread t(boost::bind(&CScene::LoadMesh, this));
+	t.detach();
 
 	mmPointer = new CMiniMapPointer(MiniMap, this);	
 
@@ -1011,24 +1012,36 @@ void CScene::LoadMesh()
 	m_Bounds[0].x = m_Bounds[0].y = m_Bounds[0].z = FLT_MAX;
 	m_Bounds[1].x = m_Bounds[1].y = m_Bounds[1].z = FLT_MIN;
 
-	Mesh = new CMesh(Main, true, position, max_range, texsize, resolution, MPPh, MPPv);
-	rcutils::takeminmax(Mesh->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(Mesh->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(Mesh->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
-	rcutils::takeminmax(Mesh->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
-	rcutils::takeminmax(Mesh->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
-	rcutils::takeminmax(Mesh->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+	CMesh *mesh = new CMesh(Main, true, position, max_range, texsize, resolution, MPPh, MPPv);
+	rcutils::takeminmax(mesh->GetBounds()[0].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(mesh->GetBounds()[0].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(mesh->GetBounds()[0].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
+	rcutils::takeminmax(mesh->GetBounds()[1].x, &(m_Bounds[0].x), &(m_Bounds[1].x));
+	rcutils::takeminmax(mesh->GetBounds()[1].y, &(m_Bounds[0].y), &(m_Bounds[1].y));
+	rcutils::takeminmax(mesh->GetBounds()[1].z, &(m_Bounds[0].z), &(m_Bounds[1].z));
 
 	MeshSize = m_Bounds[1] - m_Bounds[0];
 
-	Camera->MeshSize = Mesh->Size = MeshSize;
+	Camera->MeshSize = mesh->Size = MeshSize;
 
-	Mesh->Init(MiniMap);
+	mesh->Init(MiniMap);
 
-	CMesh::Meshs = new CMesh*[1];
-	CMesh::Meshs[0] = Mesh;
-	CMesh::TotalMeshsCount = 1;
+	y0 = mesh->CenterHeight / MPPv;
+	
+	if (!CMesh::Meshs) {
+		auto m = new CMesh*[1];
+	} else {
+	
+	}
+		
+	m[CMesh::TotalMeshsCount] = mesh;
+	
 
-	y0 = Mesh->CenterHeight / MPPv;
+	
+
+	CMesh::Meshs = m;
+	CMesh::TotalMeshsCount++;
+
+	Mesh = mesh;
 }
 
