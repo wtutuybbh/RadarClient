@@ -5,7 +5,7 @@ attribute vec2 texcoor;
 uniform mat4 mvp;
 uniform int useTexture;
 uniform int useY0;
-uniform float y0;
+uniform float y_0;
 
 varying vec2 tc;
 varying vec4 c;
@@ -16,5 +16,5 @@ void main(void)
 	useTex = vec2(useTexture, 0);
 	tc = texcoor;
 	c = color;
-	gl_Position = mix(mvp * vertex, mvp * vec4(vertex.x, y0, vertex.z, 1), useY0);	
+	gl_Position = mix(mvp * vertex, mvp * vec4(vertex.x, y_0, vertex.z, 1), useY0);	
 }

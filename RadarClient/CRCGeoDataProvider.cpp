@@ -312,7 +312,7 @@ int CRCGeoDataProvider::GetAltitudeMapSizes(const char* fileName, double* LL, in
 	LL[9] = latSW;
 	if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMapSizes_LOG)
 	{
-		LOG_INFO__("End (part 1). fileName=%s. size={width=%d, height=%d, x0=%d, y0=%d, x1=%d, y1=%d, filewidth=%d, fileheight=%d}",
+		LOG_INFO__("End (part 1). fileName=%s. size={width=%d, height=%d, x0=%d, y_0=%d, x1=%d, y1=%d, filewidth=%d, fileheight=%d}",
 			fileName, size[0], size[1], size[2], size[3], size[4], size[5], size[6], size[7]);
 		LOG_INFO__("End (part 2). fileName=%s. LL={.,.,.,., lon0=%.6f, lat0=%.6f, dlon=%.6f, dlat=%.6f, lonSW=%.6f, latSW=%.6f}",
 			fileName, LL[4], LL[5], LL[6], LL[7], LL[8], LL[9]);
@@ -383,7 +383,7 @@ int CRCGeoDataProvider::GetAltitudeMap(const char* fileName, double* LL, int* si
 	
 	if (LOG_ENABLED && CRCGeoDataProvider_GetAltitudeMap_LOG)
 	{
-		LOG_INFO__("Start (part 1)... fileName=%s. size={width=%d, height=%d, x0=%d, y0=%d, x1=%d, y1=%d, filewidth=%d, fileheight=%d}",
+		LOG_INFO__("Start (part 1)... fileName=%s. size={width=%d, height=%d, x0=%d, y_0=%d, x1=%d, y1=%d, filewidth=%d, fileheight=%d}",
 			fileName, size[0], size[1], size[2], size[3], size[4], size[5], size[6], size[7]);
 		LOG_INFO__("Start (part 2)... fileName=%s, LL[0]=%.6f, LL[1]=%.6f, LL[2]=%.6f, LL[3]=%.6f, LL[4]=%.6f, LL[5]=%.6f, LL[6]=%.6f, LL[7]=%.6f, LL[8]=%.6f, LL[9]=%.6f",
 			fileName, LL[0], LL[1], LL[2], LL[3], LL[4], LL[5], LL[6], LL[7], LL[8], LL[9]);
@@ -466,7 +466,7 @@ int CRCGeoDataProvider::GetAltitudeMap(const char* fileName, double* LL, int* si
 			//m ~ lon
 			
 			for (int p = 0; p < size[1]; p++) {
-				//size={width=463, height=240, x0=1041, y0=3361, x1=1503, y1=3600, filewidth=1801, fileheight=3601}
+				//size={width=463, height=240, x0=1041, y_0=3361, x1=1503, y1=3600, filewidth=1801, fileheight=3601}
 				// =1801*3360+1040 :
 				int rowstart_file = (size[7] - size[5] - 1 + p)*size[6] + size[2];
 				int rowstart_data = (size[5] - p) * size[6] + size[2];

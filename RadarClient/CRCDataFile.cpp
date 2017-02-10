@@ -70,14 +70,14 @@ std::string CRCDataFile::TypeName() const
 	return GetDataFileTypeName(type);
 }
 
-bool CRCDataFile::GetIntersection(CRCDataFile *src, int& x0, int& y0, int& x1, int& y1) const
+bool CRCDataFile::GetIntersection(CRCDataFile *src, int& x0, int& y_0, int& x1, int& y1) const
 {
 	if (!src)
 	{
 		LOG_ERROR_("CRCDataFile::GetIntersection", "src is nullptr");
 		return false;
 	}
-	//x0, y0, x1, y1 - coordinates of *this.
+	//x0, y_0, x1, y1 - coordinates of *this.
 	//if you need coordinates of src, just revert the call
 
 	if (this->lon1 < src->lon0 || this->lon0 > src->lon1 || this->lat1 < src->lat0 || this->lat0 > src->lat1)
@@ -90,7 +90,7 @@ bool CRCDataFile::GetIntersection(CRCDataFile *src, int& x0, int& y0, int& x1, i
 	if (x1 >= width)
 		x1--;
 
-	y0 = floor(zero_if_negative(src->lat0 - this->lat0) / lat_res);
+	y_0 = floor(zero_if_negative(src->lat0 - this->lat0) / lat_res);
 	y1 = ceil((min(this->lat1, src->lat1) - this->lat0) / lat_res);
 	if (y1 >= height)
 		y1--;

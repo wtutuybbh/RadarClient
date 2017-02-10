@@ -8,14 +8,14 @@ class CRCAltitudeDataFile :
 	//size[0] - width (lon component) of block
 	//size[1] - height (lat component) of block
 	//size[2] - x0 (lon component) of block
-	//size[3] - y0 (lat component) of block
+	//size[3] - y_0 (lat component) of block
 	//size[4] - x1 (lon component) of block
 	//size[5] - y1 (lat component) of block
 	//size[6] - width (lon component) of whole file
 	//size[7] - height (lat component) of whole file
 	//size[8] - data read methos (see GDP::DataReadMethod, GDP::CRCGeoDataProvider::GetAltitudeMap)
 	void size_set_max();
-	void size_set(int x0, int y0, int x1, int y1);
+	void size_set(int x0, int y_0, int x1, int y1);
 public:
 	CRCAltitudeDataFile(const std::string& dt2FileName);
 	CRCAltitudeDataFile(double lon0, double lat0, double lon1, double lat1, int width, int height);

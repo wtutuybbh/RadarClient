@@ -18,7 +18,7 @@ CMiniMapPointer::CMiniMapPointer(int vpId, CScene *scene) :
 	this->Scene = scene;
 	
 
-	scaleMatrix.insert_or_assign(vpId, glm::scale(glm::vec3(0.03, 0.015, 0.03)));
+	scaleMatrix.insert_or_assign(vpId, glm::scale(glm::vec3(0.03f, 0.015f, 0.03f)));
 }
 void CMiniMapPointer::CreateBuffer(C3DObjectVBO *vbo_) {
 	if (vbo_ && Scene && Scene->MeshReady()) {

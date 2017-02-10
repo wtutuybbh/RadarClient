@@ -173,7 +173,7 @@ glm::vec4 CRCTextureDataFile::ColorAt(float lon, float lat)
 		float yf = height * (lat - lat0) / (lat1 - lat0);
 
 		int x0 = floor(xf), x1 = ceil(xf);
-		int y0 = floor(yf), y1 = ceil(yf);
+		int y_0 = floor(yf), y1 = ceil(yf);
 	}
 	return glm::vec4(0);
 }

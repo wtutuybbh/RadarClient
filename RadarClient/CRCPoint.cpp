@@ -21,14 +21,14 @@ void CRCPointModel::InitStructure()
 	CRCPointModel::prog_s = new C3DObjectProgram("CRCPoint.v.glsl", "CRCPoint.f.glsl", "vertex", nullptr, "normal", nullptr);
 }
 
-CRCPointModel::CRCPointModel(int vpId, float y0, float mpph, float mppv, float r, float a, float e): C3DObjectModel(vpId, CRCPointModel::vbo_s, nullptr, CRCPointModel::prog_s)
+CRCPointModel::CRCPointModel(int vpId, float y_0, float mpph, float mppv, float r, float a, float e): C3DObjectModel(vpId, CRCPointModel::vbo_s, nullptr, CRCPointModel::prog_s)
 {
 #if defined(CRCPOINT_CONSTRUCTOR_USES_RADIANS)
-	cartesianCoords = glm::vec3(-r * sin(a) * cos(e) / mpph, y0 + r * sin(e) / mppv, r * cos(a) * cos(e) / mpph); //we always add y0 (height of the radar relative to sea level) to all cartesian coordinates 
+	cartesianCoords = glm::vec3(-r * sin(a) * cos(e) / mpph, y_0 + r * sin(e) / mppv, r * cos(a) * cos(e) / mpph); //we always add y_0 (height of the radar relative to sea level) to all cartesian coordinates 
 #else
 	float re = glm::radians(e);
 	float ra = glm::radians(a);
-	CartesianCoords = glm::vec3(-r * sin(ra) * cos(re) / mpph, y0 + r * sin(re) / mppv, r * cos(ra) * cos(re) / mpph);
+	CartesianCoords = glm::vec3(-r * sin(ra) * cos(re) / mpph, y_0 + r * sin(re) / mppv, r * cos(ra) * cos(re) / mpph);
 #endif
 
 	sphericalCoords = glm::vec3(r, a, e); // Well, it's not true spherical coordinates. Vertical axis is Y, angle E is from horizon to R (not from vertical Y). A=0 means that point is on the X=0 plane.

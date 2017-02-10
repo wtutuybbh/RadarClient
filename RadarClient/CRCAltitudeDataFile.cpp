@@ -33,12 +33,12 @@ void CRCAltitudeDataFile::size_set_max()
 	}
 }
 
-void CRCAltitudeDataFile::size_set(int x0, int y0, int x1, int y1)
+void CRCAltitudeDataFile::size_set(int x0, int y_0, int x1, int y1)
 {
 	size[0] = x1 - x0 + 1; //width (lon component) of block
-	size[1] = y1 - y0 + 1; //height (lat component) of block
+	size[1] = y1 - y_0 + 1; //height (lat component) of block
 	size[2] = x0; //(lon component) of block
-	size[3] = y0; //(lat component) of block
+	size[3] = y_0; //(lat component) of block
 	size[4] = x1; //(lon component) of block
 	size[5] = y1; //(lat component) of block
 
@@ -179,24 +179,24 @@ short CRCAltitudeDataFile::ValueAt(double lon, double lat)
 		float yf = (height - 1) * (lat - lat0) / (lat1 - lat0);
 
 		int x0 = floor(xf), x1 = ceil(xf);
-		int y0 = floor(yf), y1 = ceil(yf);
+		int y_0 = floor(yf), y1 = ceil(yf);
 
 		if (x0 < 0) x0 = 0;
-		if (y0 < 0) y0 = 0;
+		if (y_0 < 0) y_0 = 0;
 		if (x1 >= width) x1 = width - 1;
 		if (y1 >= height) y1 = height - 1;
 
 		if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)
 		{
-			LOG_INFO("ValueAt", "CRCAltitudeDataFile::ValueAt(lon, lat)", "xf=%.6f, yf=%.6f, x0=%d, y0=%d, x1=%d, y1=%d", xf, yf, x0, y0, x1, y1);
+			LOG_INFO("ValueAt", "CRCAltitudeDataFile::ValueAt(lon, lat)", "xf=%.6f, yf=%.6f, x0=%d, y_0=%d, x1=%d, y1=%d", xf, yf, x0, y_0, x1, y1);
 		}
 
 		short *adata = (short *)data;		
-		float ret = BilinearInterpolation(adata[y0*width + x0], adata[y1*width + x0], adata[y0*width + x1], adata[y1*width + x1], x0, x1, y0, y1, xf, yf);
+		float ret = BilinearInterpolation(adata[y_0*width + x0], adata[y1*width + x0], adata[y_0*width + x1], adata[y1*width + x1], x0, x1, y_0, y1, xf, yf);
 		if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)
 		{
 			LOG_INFO("ValueAt", "CRCAltitudeDataFile::ValueAt(double lon, double lat)", "BilinearInterpolation(q11=%d, q12=%d, q21=%d, q22=%d, x1=%d, x2=%d, y1=%d, y2=%d, x=%.6f, y=%.6f) = %.6f",
-				adata[y0*width + x0], adata[y1*width + x0], adata[y0*width + x1], adata[y1*width + x1], x0, x1, y0, y1, xf, yf, ret);
+				adata[y_0*width + x0], adata[y1*width + x0], adata[y_0*width + x1], adata[y1*width + x1], x0, x1, y_0, y1, xf, yf, ret);
 		}
 		return ret;
 	}

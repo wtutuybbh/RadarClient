@@ -99,7 +99,7 @@ public:
 	unsigned short *info{ nullptr };
 
 	int zeroLevel = ZEROLEVEL_ACTUALHEIGHT;
-	//float y0;
+	//float y_0;
 
 	std::vector<CSector*> Sectors; //points
 

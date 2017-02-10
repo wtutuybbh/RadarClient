@@ -392,7 +392,7 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 
 	if (vpControl->Id == Main) {		
 		int useTexture_loc = prog.at(vpControl->Id)->GetUniformLocation("useTexture");
-		int y0_loc = prog.at(vpControl->Id)->GetUniformLocation("y0");
+		int y0_loc = prog.at(vpControl->Id)->GetUniformLocation("y_0");
 		int usey0_loc = prog.at(vpControl->Id)->GetUniformLocation("useY0");
 
 		glUniform1i(useTexture_loc, UseTexture);

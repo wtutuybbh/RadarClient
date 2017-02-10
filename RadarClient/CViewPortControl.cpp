@@ -388,7 +388,7 @@ bool CViewPortControl::InitGL()
 	GLuint PixelFormat;
 
 	hDC = GetDC(hWnd);
-	LOG_INFO__("GetClientRect OK");
+	LOG_INFO__("GetDC OK");
 
 	if (hDC == nullptr)												// Did We Get A Device Context?
 	{

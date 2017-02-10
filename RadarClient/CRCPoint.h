@@ -21,7 +21,7 @@ public:
 	float pixelSize;
 
 	static void InitStructure();
-	CRCPointModel(int vpId, float y0, float mpph, float mppv, float r, float a, float e);
+	CRCPointModel(int vpId, float y_0, float mpph, float mppv, float r, float a, float e);
 	~CRCPointModel() override;
 	static std::vector<VBOData>* CreateSphereR1(int level);
 	glm::mat4 GetScaleMatrix(CViewPortControl *vpControl) override;
