@@ -258,7 +258,7 @@ LRESULT CUserInterface::RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM w
 	if (VPControl && VPControl->Camera)
 	{
 		if (ButtonID == CameraPosition_ID[0]) { // FROM_RADAR
-			if (this->VPControl->Scene && this->VPControl->Scene->MeshReady()) this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->GetY0() + 1, 0);
+			if (this->VPControl->Scene && this->VPControl->Scene->MeshReady()) this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->GetY0() + 1.0f, 0);
 		}
 		if (ButtonID == CameraPosition_ID[1]) { // FROM_100M_ABOVE_RADAR
 			if (this->VPControl->Scene && this->VPControl->Scene->MeshReady()) this->VPControl->Camera->SetPosition(0, this->VPControl->Scene->GetY0() + 100.0f / this->VPControl->Scene->MPPv, 0);
