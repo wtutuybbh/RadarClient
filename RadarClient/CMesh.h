@@ -90,7 +90,7 @@ class CMesh : public C3DObjectModel
 	int index_length{ 0 };
 	float centerHeight, averageHeight;
 public:
-	glm::vec3 Size;
+	//glm::vec3 Size;
 	
 	int UseTexture, UseY0Loc;
 	CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv);

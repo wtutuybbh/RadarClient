@@ -22,9 +22,8 @@ void CRCDataFileSet::AddTextureFile(std::string imgFile)
 	{
 		file = new CRCTextureDataFile(imgFile);
 	}
-	catch (const std::exception& ex)
-	{
-		LOG_ERROR(requestID, context, ("CRCTextureDataFile constructor throwed exception: " + std::string(ex.what())).c_str());
+	catch (const std::exception &ex) {
+		LOG_WARN("exception", "CRCDataFileSet::AddTextureFile", ex.what());
 		return;
 	}
 	if (!file)

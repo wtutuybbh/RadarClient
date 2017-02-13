@@ -27,16 +27,15 @@ CRCTextureDataFile::CRCTextureDataFile(const std::string& imgFileName) :
 
 	LOG_INFO(requestID, context, (boost::format("%1% => datFileName=%2%, dimFileName=%3%") % fileName % datFileName % dimFileName).str().c_str());
 
-	//try to read dimension data from dimension file:
+	//	try to read dimension data from dimension file:
 	try 
 	{
 		infile.open(dimFileName, std::ifstream::in | std::ifstream::binary);
 	}
-	catch (...) 
+	catch (const std::exception &ex)
 	{		
-		std::string error_string = (boost::format("infile.open() throwed exeption, dimFileName=%1%") % dimFileName).str();
-		LOG_ERROR(requestID, context, error_string.c_str());
-		throw std::exception(error_string.c_str());
+		LOG_ERROR("exception", "CRCTextureDataFile::CRCTextureDataFile", "infile.open() throwed exeption, dimFileName=%s, ex.what()=%s", dimFileName, ex.what());
+		throw ex;
 	}
 	if (!infile) {
 		LOG_WARN(requestID, context, "No *.dim file, will create new");
@@ -89,11 +88,9 @@ CRCTextureDataFile::CRCTextureDataFile(const std::string& imgFileName) :
 	{
 		infile.open(datFileName, std::ifstream::in | std::ifstream::binary);
 	}
-	catch (...) 
+	catch (const std::exception &ex)
 	{
-		std::string error_string = (boost::format("infile.open() throwed exeption, datFileName=%1%") % datFileName).str();
-		LOG_ERROR(requestID, context, error_string.c_str());
-		throw std::exception(error_string.c_str());
+		LOG_ERROR("exception", "CRCTextureDataFile::CRCTextureDataFile", "infile.open() throwed exeption, dimFileName=%s, ex.what()=%s", dimFileName, ex.what());
 	}
 	if (!infile) 
 	{
@@ -280,6 +277,7 @@ bool CRCTextureDataFile::Close()
 		FreeImage_Unload((FIBITMAP *)data);
 		return true;
 	}
+	return false;
 }
 
 bool CRCTextureDataFile::Save()
@@ -289,7 +287,8 @@ bool CRCTextureDataFile::Save()
 			FreeImage_Save(FIF_JPEG, (FIBITMAP *)data, fileName.c_str());
 			return true;
 		}
-		catch (...) {
+		catch (const std::exception &ex) {
+			LOG_WARN("exception", "CRCTextureDataFile::Save", ex.what());
 			return false;
 		}
 	}

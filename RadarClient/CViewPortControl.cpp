@@ -301,8 +301,8 @@ LRESULT CALLBACK CViewPortControl::stWinMsgHandler(HWND hwnd, UINT uMsg, WPARAM 
 		else
 			return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
-	catch (...) {
-		LOG_INFO(requestID, "CViewPortControl::stWinMsgHandler", "Exception");
+	catch (const std::exception &ex) {
+		LOG_WARN("exception", "CViewPortControl::stWinMsgHandler", ex.what());
 	}
 }
 

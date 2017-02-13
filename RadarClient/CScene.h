@@ -45,6 +45,7 @@ class CViewPortControl;
 class CScene {
 	unsigned long mainDrawCount{ 0 };
 	static const std::string requestID;
+	bool waitingForMesh{ false };
 public:
 	CLine *begAzmLine{ nullptr };
 

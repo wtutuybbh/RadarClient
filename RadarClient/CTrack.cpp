@@ -15,6 +15,7 @@ CTrack::CTrack(int id, bool selected): CSector(id)
 	ID = id;
 	Found = false;
 	Color = Selected ? CSettings::GetColor(ColorTrackSelected) : CSettings::GetColor(ColorTrack);
+	c3DObjectModel_TypeName = "CTrack";
 }
 
 
@@ -44,6 +45,9 @@ void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK*>
 	{
 		LOG_ERROR(requestID, "CTrack::Refresh", "no vbo at index Main. RETURN.");
 		return;
+	}
+	catch (const std::exception &ex) {
+		LOG_WARN("exception", "CTrack::Refresh", ex.what());
 	}
 	void *_vbuffer = _vbo->GetBuffer();
 	vector<VBOData> *vbuffer = (vector<VBOData> *)vbo.at(Main)->GetBuffer();

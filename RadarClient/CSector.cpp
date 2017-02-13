@@ -24,6 +24,8 @@ CSector::CSector(int index) : C3DObjectModel(Main, new C3DObjectVBO(false), null
 	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+
+	c3DObjectModel_TypeName = "CSector";
 }
 
 
@@ -54,6 +56,9 @@ CSector::~CSector()
 	{
 		LOG_WARN(requestID, "CSector DESTRUCTOR", "no vbo at Main");
 	}	
+	catch (const std::exception &ex) {
+		LOG_WARN("exception", "CSector::~CSector", ex.what());
+	}
 }
 
 void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init)

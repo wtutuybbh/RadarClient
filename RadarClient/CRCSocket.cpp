@@ -89,6 +89,9 @@ CRCSocket::~CRCSocket()
 
 	if (CurrentPosition)
 		delete CurrentPosition;
+
+	if (sh_tmp)
+		delete sh_tmp;
 }
 
 void CRCSocket::connect(const std::string& host, const std::string& service, boost::posix_time::time_duration timeout)
@@ -550,7 +553,8 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 		}
 		return sh->type;
 	}
-	catch (...) {
+	catch (const std::exception &ex) {
+		LOG_WARN("exception", "CRCSocket.PostData", ex.what());
 		return -1;
 	}
 	return 0;

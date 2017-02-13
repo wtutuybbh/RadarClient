@@ -6,6 +6,7 @@
 #include "C3DObjectProgram.h"
 #include "C3DObjectVBO.h"
 #include "C3DObjectTexture.h"
+#include "CRCLogger.h"
 
 const std::string C3DObjectModel::requestID = "C3DObjectModel";
 
@@ -14,15 +15,18 @@ void* C3DObjectModel::GetBufferAt(int index)
 	C3DObjectVBO* _vbo;
 	try
 	{
+		if (vbo.find(index) == vbo.end()) {
+			return nullptr;
+		}
 		_vbo = (C3DObjectVBO*)vbo.at(index);
 		if (_vbo)
 		{
 			return _vbo->GetBuffer();
 		}				
 	}
-	catch (...)
+	catch (const std::exception& ex)
 	{
-		
+		LOG_WARN("exception", "C3DObjectModel::GetBufferAt", ex.what());		
 	}
 	return nullptr;
 }
@@ -125,13 +129,12 @@ void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)
 {
 	if (!vpControl) return;
 	
-	C3DObjectVBO *vbo_;
-	try {
-		vbo_ = vbo.at(vpControl->Id);
-	}
-	catch (...) {
+	if (vbo.find(vpControl->Id) == vbo.end()) {
 		return;
 	}
+
+	C3DObjectVBO *vbo_= vbo.at(vpControl->Id);
+	
 
 	if (!vbo_)	return;
 
@@ -195,47 +198,43 @@ glm::mat4 C3DObjectModel::GetModelMatrix(CViewPortControl* vpControl)
 
 glm::mat4 C3DObjectModel::GetScaleMatrix(CViewPortControl* vpControl)
 {
-	return scaleMatrix.at(vpControl->Id);
-	try
-	{
-		return scaleMatrix.at(vpControl->Id);
-	}
-	catch (...)
-	{
+	if (scaleMatrix.find(vpControl->Id) == scaleMatrix.end()) {
+		scaleMatrix.insert_or_assign(vpControl->Id, glm::mat4(1.0f));
 		return glm::mat4(1.0f);
 	}
+	return scaleMatrix.at(vpControl->Id);	
 }
 
 glm::mat4 C3DObjectModel::GetRotateMatrix(CViewPortControl* vpControl)
 {
-	return rotateMatrix.at(vpControl->Id);
-	try 
-	{	
-		return rotateMatrix.at(vpControl->Id);
-	}
-	catch (...)
-	{
+	if (rotateMatrix.find(vpControl->Id) == rotateMatrix.end()) {
+		rotateMatrix.insert_or_assign(vpControl->Id, glm::mat4(1.0f));
 		return glm::mat4(1.0f);
 	}
+	return rotateMatrix.at(vpControl->Id);
 }
 
 glm::mat4 C3DObjectModel::GetTranslateMatrix(CViewPortControl* vpControl)
 {
-	return translateMatrix.at(vpControl->Id);
-	try {
-		return translateMatrix.at(vpControl->Id);
-	}
-	catch (...)
-	{
+	if (translateMatrix.find(vpControl->Id) == translateMatrix.end()) {
+		translateMatrix.insert_or_assign(vpControl->Id, glm::mat4(1.0f));
 		return glm::mat4(1.0f);
 	}
+	return translateMatrix.at(vpControl->Id);
 }
 
 bool C3DObjectModel::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, glm::vec3& position)
 {
 	try {
 		glm::vec3 vert0, vert1, vert2;
+		if (vbo.find(vpId) == vbo.end()) {
+			return false;
+		}
 		std::vector<VBOData> *buffer = (std::vector<VBOData> *)vbo.at(vpId)->GetBuffer();
+
+		if (!buffer) {
+			return false;
+		}
 
 		for (unsigned int i = 0; i < buffer->size() && i+1 < buffer->size() && i+2 < buffer->size(); i += 3) {
 			vert0 = glm::vec3(modelMatrix.at(vpId)*(*buffer)[i].vert);
@@ -246,7 +245,8 @@ bool C3DObjectModel::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, gl
 			}
 		}
 	}
-	catch (...) {
+	catch (const std::exception &ex) {
+		LOG_WARN("exception", "C3DObjectModel::IntersectLine", ex.what());
 		return false;
 	}
 	return false;
@@ -302,6 +302,16 @@ void C3DObjectModel::SetRotateMatrix(glm::mat4 rotate)
 		auto vpId = iter->first;
 		SetRotateMatrix(vpId, rotate);
 	}
+}
+
+std::string C3DObjectModel::GetName()
+{
+	return name;
+}
+
+void C3DObjectModel::SetName(std::string name)
+{
+	this->name = name;
 }
 
 void C3DObjectModel::SetColor(glm::vec4 color)

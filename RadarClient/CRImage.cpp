@@ -15,6 +15,7 @@ CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_IN
 		nullptr,
 		new C3DObjectProgram("CRImage.v.glsl", "CRImage.f.glsl", "vertex", nullptr, nullptr, "color"))
 {
+	c3DObjectModel_TypeName = "CRImage";
 	Azemuth = azemuth;
 	float *px = (float *)pixels;
 

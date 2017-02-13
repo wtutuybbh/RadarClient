@@ -72,7 +72,9 @@ LRESULT CUserInterface::Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 		LOG_ERROR("CUserInterface", "Wnd_Proc2", "Interface element with ID=%d not found, exception's what=%s", ctrlID, oor.what());
 		return NULL;
 	}
-
+	catch (const std::exception &ex) {
+		LOG_WARN("exception", "CUserInterface::Wnd_Proc2", ex.what());
+	}
 	return LRESULT();
 }
 

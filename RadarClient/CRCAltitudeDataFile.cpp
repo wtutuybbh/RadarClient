@@ -142,6 +142,10 @@ CRCAltitudeDataFile::CRCAltitudeDataFile(double lon0, double lat0, double lon1, 
 		LOG_ERROR(requestID, context, (error_string + ". RETURN FALSE.").c_str());
 		throw std::exception(error_string.c_str());
 	}
+	catch (const std::exception &ex) {
+		LOG_WARN("exception", "CRCAltitudeDataFile::CRCAltitudeDataFile", ex.what());
+		throw ex;
+	}
 }
 
 CRCAltitudeDataFile::~CRCAltitudeDataFile()
@@ -317,6 +321,10 @@ bool CRCAltitudeDataFile::Open()
 		{
 			LOG_ERROR(requestID, context, "memory for data not allocated. RETURN FALSE.");
 			return false;
+		}
+		catch (const std::exception &ex) {
+			LOG_WARN("exception", "CRCAltitudeDataFile::Open", ex.what());
+			throw ex;
 		}
 		short *sdata = (short*)data;
 		if (LOG_ENABLED && CRCAltitudeDataFile_Open_LOG)

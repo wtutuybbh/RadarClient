@@ -39,6 +39,8 @@ CRCPointModel::CRCPointModel(int vpId, float y_0, float mpph, float mppv, float 
 	pixelSize = 2;
 
 	Color = CSettings::GetColor(ColorPointHighLevel);
+
+	c3DObjectModel_TypeName = "CRCPointModel";
 }
 
 CRCPointModel::~CRCPointModel()

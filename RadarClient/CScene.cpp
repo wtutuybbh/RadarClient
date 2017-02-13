@@ -184,6 +184,9 @@ CScene::~CScene() {
 	{
 		delete RayObj;
 	}
+	if (Mesh) {
+		delete Mesh;
+	}
 }
 
 bool CScene::DrawScene(CViewPortControl * vpControl)
@@ -267,8 +270,12 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	glEnable(GL_DEPTH_BUFFER);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	if (Mesh)
+	if (Mesh && Mesh->Ready())
 	{
+		if (waitingForMesh && Camera) {
+			Camera->MeshSize = Mesh->GetSize();
+			waitingForMesh = false;
+		}
 		Mesh->Draw(vpControl, GL_TRIANGLES);
 	}
 
@@ -793,6 +800,8 @@ void CScene::Init(RDR_INITCL* init)
 	int r = markDistance * numCircles * marksPerCircle;
 	
 	begAzmLine = new CLine(Main, glm::vec4(0, y_0, 0, 1), glm::vec4(-r * sin(init->begAzm), y_0, r * cos(init->begAzm), 1), Simple);
+	begAzmLine->SetName("begAzmLine");
+
 	minE = init->begElv;
 	maxE = init->begElv + init->dElv * init->Nelv;
 	if (minE==0 && maxE==0)
@@ -1056,7 +1065,8 @@ glm::vec3 CScene::GetGeographicCoordinates(glm::vec3 glCoords)
 
 void CScene::LoadMesh()
 {
-	auto mesh = new CMesh(true, position, max_range, texsize, resolution, MPPh, MPPv);	
+	CMesh *mesh = new CMesh(true, position, max_range, texsize, resolution, MPPh, MPPv);	
+	waitingForMesh = true;
 	Mesh = mesh;
 }
 

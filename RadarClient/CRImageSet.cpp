@@ -52,6 +52,7 @@ void CRImageSet::Refresh(glm::vec4 origin, float mpph, float mppv, RDR_INITCL * 
 				++it;
 		}
 		CRImage *img = new CRImage(tickAzimuth, origin, mpph, mppv, rdrinit, info, pixels);
+		img->SetName(format("CRImage, tickAzimuth=%f, currentDirection=%d", tickAzimuth, currentDirection));
 		Images->push_back(img);
 
 		prevAzimuth = tickAzimuth;

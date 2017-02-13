@@ -17,9 +17,9 @@ protected:
 	std::unordered_map<int, C3DObjectTexture*> tex;
 	std::unordered_map<int, C3DObjectProgram*> prog;
 	std::unordered_map<int, glm::mat4> scaleMatrix, rotateMatrix, translateMatrix, modelMatrix;
-	glm::vec3 cartesianCoords, sphericalCoords, geoCoords;
-	
+	glm::vec3 cartesianCoords, sphericalCoords, geoCoords;	
 	std::string c3DObjectModel_TypeName {"C3DObjectModel"};
+	std::string name{ "" };
 public:
 	void *GetBufferAt(int index);
 	static int _id, _testid;
@@ -30,6 +30,7 @@ public:
 	void SetGeoCoords(glm::vec3 c);
 	glm::vec3 GetGeoCoords();
 	void SetCartesianCoordinates(float x, float y, float z);
+	
 
 
 	CScene *Scene {nullptr};
@@ -64,4 +65,7 @@ public:
 
 	void SetRotateMatrix(int vpId, glm::mat4 rotate);
 	void SetRotateMatrix(glm::mat4 rotate);
+
+	std::string GetName();
+	void SetName(std::string name);
 };

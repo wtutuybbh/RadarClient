@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "C3DObjectTexture.h"
+#include "Util.h"
+#include "CRCLogger.h"
 
 void C3DObjectTexture::InitBits()
 {
@@ -72,7 +74,8 @@ C3DObjectTexture::C3DObjectTexture(const char* imgFile, const char *textureUnifo
 	try {
 		image = FreeImage_Load(FreeImage_GetFileType(imgFile, 0), imgFile);
 	}
-	catch (...) {
+	catch (const std::exception &ex) {
+		LOG_WARN("exception", "C3DObjectTexture::C3DObjectTexture", ex.what());
 		return;
 	}
 	if (FreeImage_GetBPP(image) != 32)

@@ -30,6 +30,8 @@ CLine::CLine(int vpId, glm::vec4 a, glm::vec4 b, LineStyle style) : C3DObjectMod
 	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+
+	c3DObjectModel_TypeName = "CLine";
 }
 
 CLine::~CLine()

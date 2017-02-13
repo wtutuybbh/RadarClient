@@ -12,6 +12,7 @@ CMarkup::CMarkup(glm::vec4 origin) : C3DObjectModel (Main,
 	nullptr,
 	new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"))
 {
+	c3DObjectModel_TypeName = "CMarkup";
 
 	int markDistance = CSettings::GetInt(IntMarkupMarkDistance);
 	float mpph = CSettings::GetFloat(FloatMPPh);

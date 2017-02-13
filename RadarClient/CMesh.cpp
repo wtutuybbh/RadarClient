@@ -210,6 +210,7 @@ bool CMesh::LoadHeightmap()
 
 CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv) : C3DObjectModel()
 {
+	c3DObjectModel_TypeName = "CMesh";
 	std::string context = "CMesh::CMesh";
 	LOG_INFO(requestID, context, "Start... clearAfter=%d, position=(%f, %f), max_range=%f, texsize=%d, resolution=%d", clearAfter , position.x, position.y, max_range, texsize, resolution);
 
@@ -237,6 +238,8 @@ CMesh::~CMesh()
 	}
 	if (bounds)
 		delete[] bounds;
+	if (idxArray)
+		delete[] idxArray;
 }
 glm::vec3 CMesh::GetSize() {
 	auto b = GetBounds();
@@ -455,13 +458,13 @@ void CMesh::InitMiniMap()
 	}
 }
 bool CMesh::Ready() {
-	try {
-		if (vbo.at(Main) && vbo.at(MiniMap)) return true;
+	if (vbo.find(Main) == vbo.end()) {
+		return false;
 	}
-	catch (...) {
-
+	if (vbo.find(MiniMap) == vbo.end()) {
+		return false;
 	}
-	return false;
+	return true;
 }
 float CMesh::GetCenterHeight() {
 	return centerHeight;

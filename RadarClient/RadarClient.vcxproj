@@ -262,6 +262,7 @@ xcopy "$(SolutionDir)FreeImage\*.dll" "$(OutDir)" /d /y</Command>
     <ClInclude Include="CRCSocket.h" />
     <ClInclude Include="CTrack.h" />
     <ClInclude Include="CUserInterface.h" />
+    <ClInclude Include="logging.h" />
     <ClInclude Include="RadarClient.h" />
     <ClInclude Include="C3DObjectModel.h" />
     <ClInclude Include="CCamera.h" />

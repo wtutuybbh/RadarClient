@@ -15,6 +15,7 @@ CMiniMapPointer::CMiniMapPointer(int vpId, CScene *scene) :
 		new C3DObjectTexture("video.png", "tex"), 
 		new C3DObjectProgram("MiniMapPointer.v.glsl", "MiniMapPointer.f.glsl", "vertex", "texcoor", nullptr, nullptr))
 {
+	c3DObjectModel_TypeName = "CMiniMapPointer";
 	this->Scene = scene;
 	
 
