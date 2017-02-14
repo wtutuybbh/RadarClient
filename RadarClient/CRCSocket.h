@@ -443,6 +443,10 @@ class CRCSocket
 	void check_deadline();
 
 	int connectionTimeout{ 10 };
+
+	void read(boost::posix_time::time_duration timeout);
+	void connect(const std::string& host, const std::string& service, boost::posix_time::time_duration timeout);
+
 	void handle_read(const boost::system::error_code& ec, std::size_t length, boost::system::error_code* out_ec, std::size_t* out_length);
 	void handle_connect(const boost::system::error_code& ec, boost::system::error_code* out_ec);
 
@@ -453,10 +457,9 @@ class CRCSocket
 	bool wait_sh{ true };
 
 	bool check_sh(_sh *sh);
-public:
-	void connect(const std::string& host, const std::string& service, boost::posix_time::time_duration timeout);	
-	void read(boost::posix_time::time_duration timeout);
 
+	std::thread *t{ nullptr };
+public:
 	static const std::string requestID;
 
 	bool Initialized {false};

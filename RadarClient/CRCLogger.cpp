@@ -25,8 +25,14 @@ void CRCLogger::Info(std::string context, std::string msg)
 
 void CRCLogger::Info(std::string requestID, std::string context, std::string msg)
 {
-	BOOST_LOG_SCOPED_THREAD_TAG("RequestID", requestID);
-	Info(context, msg);
+	if (WRITE_TIMELINE_LOG) {
+		BOOST_LOG_SCOPED_THREAD_TAG("RequestID", "Timeline");
+		Info(requestID + " | " + context, msg);
+	}
+	else {
+		BOOST_LOG_SCOPED_THREAD_TAG("RequestID", requestID);
+		Info(context, msg);
+	}
 }
 
 void CRCLogger::Warn(std::string context, std::string msg)
@@ -37,9 +43,15 @@ void CRCLogger::Warn(std::string context, std::string msg)
 }
 
 void CRCLogger::Warn(std::string requestID, std::string context, std::string msg)
-{
-	BOOST_LOG_SCOPED_THREAD_TAG("RequestID", requestID);
-	Warn(context, msg);
+{	
+	if (WRITE_TIMELINE_LOG) {
+		BOOST_LOG_SCOPED_THREAD_TAG("RequestID", "Timeline");
+		Warn(requestID + " | " + context, msg);
+	}
+	else {
+		BOOST_LOG_SCOPED_THREAD_TAG("RequestID", requestID);
+		Warn(context, msg);
+	}
 }
 
 void CRCLogger::Error(std::string context, std::string msg)
@@ -50,9 +62,15 @@ void CRCLogger::Error(std::string context, std::string msg)
 }
 
 void CRCLogger::Error(std::string requestID, std::string context, std::string msg)
-{
-	BOOST_LOG_SCOPED_THREAD_TAG("RequestID", requestID);
-	Error(context, msg);
+{	
+	if (WRITE_TIMELINE_LOG) {
+		BOOST_LOG_SCOPED_THREAD_TAG("RequestID", "Timeline");
+		Error(requestID + " | " + context, msg);
+	}
+	else {
+		BOOST_LOG_SCOPED_THREAD_TAG("RequestID", requestID);
+		Error(context, msg);
+	}
 }
 
 namespace attrs = boost::log::attributes;

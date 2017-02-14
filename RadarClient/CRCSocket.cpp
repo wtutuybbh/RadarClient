@@ -51,7 +51,7 @@ CRCSocket::CRCSocket(HWND hWnd) :
 	connectionTimeout(CSettings::GetInt(IntConnectionTimeout))
 {
 	string context = "CRCSocket::CRCSocket";
-	LOG_INFO(requestID, context, (boost::format("Start... hWnd=%1%") % hWnd).str().c_str());
+	if (CRCSOCKET_LOG) LOG_INFO(requestID, context, (boost::format("Start... hWnd=%1%") % hWnd).str().c_str());
 
 	this->hWnd = hWnd;
 
@@ -60,11 +60,17 @@ CRCSocket::CRCSocket(HWND hWnd) :
 	client = new _client;
 
 	sh_tmp = new _sh;
+
+	deadline_.expires_at(boost::posix_time::pos_infin);
+	// Start the persistent actor that checks for deadline expiry.
+	check_deadline();
 }
 
 
 CRCSocket::~CRCSocket()
 {
+	Close();
+
 	if (hole)
 		delete[] hole;
 	if (client) {
@@ -91,7 +97,7 @@ CRCSocket::~CRCSocket()
 		delete CurrentPosition;
 
 	if (sh_tmp)
-		delete sh_tmp;
+		delete sh_tmp;	
 }
 
 void CRCSocket::connect(const std::string& host, const std::string& service, boost::posix_time::time_duration timeout)
@@ -121,23 +127,35 @@ void CRCSocket::connect(const std::string& host, const std::string& service, boo
 	boost::asio::async_connect(socket_, iter, boost::bind(&CRCSocket::handle_connect, this, _1, &ec));
 
 	// Block until the asynchronous operation has completed.
-	do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+	io_service_.run(); 
 
 	// Determine whether a connection was successfully established. The
 	// deadline actor may have had a chance to run and close our socket, even
 	// though the connect operation notionally succeeded. Therefore we must
 	// check whether the socket is still open before deciding if we succeeded
 	// or failed.
-	if (ec || !socket_.is_open())
-		throw boost::system::system_error(
-			ec ? ec : boost::asio::error::operation_aborted);	
+
 }
 void CRCSocket::handle_connect(
 	const boost::system::error_code& ec,
 	boost::system::error_code* out_ec)
 {	
+	if (ec || !socket_.is_open())
+		throw boost::system::system_error(
+			ec ? ec : boost::asio::error::operation_aborted);
+
 	*out_ec = ec;	
 	IsConnected = true;
+
+	stopReadLoop = false;
+
+	if (CRCSOCKET_LOG) LOG_INFO(requestID, "handle_connect", "Connected successfully");
+
+	read(boost::posix_time::seconds(connectionTimeout));
+
+	//t = new std::thread(&CRCSocket::read, this, boost::posix_time::seconds(connectionTimeout));
+
+	//t->detach();
 }
 void CRCSocket::read(boost::posix_time::time_duration timeout)
 {
@@ -161,19 +179,10 @@ void CRCSocket::read(boost::posix_time::time_duration timeout)
 	// can use boost::bind rather than boost::lambda.
 	boost::asio::async_read(socket_, input_buffer_, boost::asio::transfer_at_least(1), boost::bind(&CRCSocket::handle_read, this, _1, _2, &ec, &length));
 
-	// Block until the asynchronous operation has completed.
-	int do_count = 0;
-	do 
-	{
-		do_count++;
-		io_service_.run_one();
-	}
-	while (ec == boost::asio::error::would_block);
+	io_service_.run();	
 
-	LOG_INFO(requestID, "read", "do_count=%d", do_count);
-
-	if (ec)
-		throw boost::system::system_error(ec);
+	/*if (ec)
+		throw boost::system::system_error(ec);*/
 }
 void CRCSocket::handle_read(
 	const boost::system::error_code& ec, std::size_t length,
@@ -181,6 +190,10 @@ void CRCSocket::handle_read(
 {
 	*out_ec = ec;
 	*out_length = length;
+
+	if (ec || !socket_.is_open())
+		throw boost::system::system_error(
+			ec ? ec : boost::asio::error::operation_aborted);
 
 	Read();
 	
@@ -201,11 +214,15 @@ void CRCSocket::check_deadline()
 		// deadline before this actor had a chance to run.
 		if (deadline_.expires_at() <= deadline_timer::traits_type::now())
 		{
+			if (CRCSOCKET_LOG) LOG_INFO(requestID, "check_deadline", "deadline expired");
 			// The deadline has passed. The socket is closed so that any outstanding
 			// asynchronous operations are cancelled. This allows the blocked
 			// connect(), read_line() or write_line() functions to return.
 			boost::system::error_code ignored_ec;
+			//io_service_.post(boost::bind(&socket., this, ignored_ec));
 			socket_.close(ignored_ec);
+
+			//stopReadLoop = true;
 
 			// There is no longer an active deadline. The expiry is set to positive
 			// infinity so that the actor takes no action until a new deadline is set.
@@ -214,30 +231,23 @@ void CRCSocket::check_deadline()
 		//int count;
 		// Put the actor back to sleep.
 		deadline_.async_wait(boost::bind(&CRCSocket::check_deadline, this));
+		if (CRCSOCKET_LOG) LOG_INFO(requestID, "check_deadline", "deadline not expired");
 	}
+
 void CRCSocket::Connect()
 {
 	string context = "CRCSocket::Connect()";
 	try
 	{
-		LOG_INFO(requestID, context, "Start");
+		if (CRCSOCKET_LOG) LOG_INFO(requestID, context, "Start");
 
 		connect(CSettings::GetString(StringHostName), num2str(CSettings::GetInt(IntPort), 0), boost::posix_time::seconds(connectionTimeout));
 
-		IsConnected = true;
-
-		stopReadLoop = false;
-
-		LOG_INFO(requestID, context, "Connected successfully");
-
-		boost::thread t(boost::bind(&CRCSocket::read, this, boost::posix_time::seconds(connectionTimeout)));
-
-		t.detach();
+		
 	}
 	catch (std::exception& e)
 	{
-		LOG_ERROR(requestID, context, "Error during connection. e.what()=%s", e.what());
-
+		if (CRCSOCKET_LOG) LOG_ERROR(requestID, context, "Error during connection. e.what()=%s", e.what());
 	}
 }
 bool CRCSocket::check_sh(_sh *sh) {
@@ -271,7 +281,7 @@ int CRCSocket::Read()
 			if (client->buff) {
 				delete[] client->buff;
 			}
-			if (ReadLogEnabled) LOG_WARN__("packet reset, probably %d bytes lost", length - amount);
+			if (CRCSOCKET_LOG) if (ReadLogEnabled) LOG_WARN__("packet reset, probably %d bytes lost", length - amount);
 		}
 		input_offset = 0;
 		while (input_offset < recev) {			
@@ -284,7 +294,7 @@ int CRCSocket::Read()
 						input_offset += amount;
 					}
 					else {
-						if (ReadLogEnabled) LOG_ERROR__("error! amount = min(recev - input_offset, sizeof(_sh) - sh_offset) = %d < 0", amount);
+						if (CRCSOCKET_LOG) if (ReadLogEnabled) LOG_ERROR__("error! amount = min(recev - input_offset, sizeof(_sh) - sh_offset) = %d < 0", amount);
 						return recev;
 					}
 					continue;
@@ -300,7 +310,7 @@ int CRCSocket::Read()
 				}
 				
 				if (!check_sh(sh)) {
-					if (ReadLogEnabled) LOG_ERROR__("_sh_ found at %d: | check failed", input_offset - sizeof(_sh));
+					if (CRCSOCKET_LOG) if (ReadLogEnabled) LOG_ERROR__("_sh_ found at %d: | check failed", input_offset - sizeof(_sh));
 					if (sh_offset == 0 && recev - input_offset > 0) { // so it is possible to find other headers..
 						auto i = 1;// max(input_offset - sizeof(_sh) + 1, 0);
 						while (!check_sh(sh) && i < recev - sizeof(_sh)) {
@@ -311,7 +321,7 @@ int CRCSocket::Read()
 					}										
 				}
 				if (!check_sh(sh)) {
-					if (ReadLogEnabled) LOG_ERROR__("sh not found");
+					if (CRCSOCKET_LOG) if (ReadLogEnabled) LOG_ERROR__("sh not found");
 					return recev;
 				}
 				length = sh->dlina;
@@ -322,7 +332,7 @@ int CRCSocket::Read()
 					sh_offset = 0;
 					wait_sh = false;
 
-					if (ReadLogEnabled) LOG_INFO__("_sh_ found at %d: | type = %d (%s), dlina = %d", input_offset - sizeof(_sh), sh->type, what_msg(sh->type).c_str(), length);
+					if (CRCSOCKET_LOG) if (ReadLogEnabled) LOG_INFO__("_sh_ found at %d: | type = %d (%s), dlina = %d", input_offset - sizeof(_sh), sh->type, what_msg(sh->type).c_str(), length);
 					/*if (what_msg(sh->type) == "MSG_INIT") {
 						if (!s_rdrinit)
 						{
@@ -336,7 +346,7 @@ int CRCSocket::Read()
 					continue;
 				}
 				else {
-					if (ReadLogEnabled) LOG_ERROR__("sh->dlina=%d, must be >0", sh->dlina);
+					if (CRCSOCKET_LOG) if (ReadLogEnabled) LOG_ERROR__("sh->dlina=%d, must be >0", sh->dlina);
 					return recev;
 				}
 			}
@@ -349,14 +359,14 @@ int CRCSocket::Read()
 						input_offset += amount;					
 					}	
 					else { 
-						if (ReadLogEnabled) LOG_ERROR__("error! amount = min(recev - input_offset, length - buff_offset) = %d < 0", amount);
+						if (CRCSOCKET_LOG) if (ReadLogEnabled) LOG_ERROR__("error! amount = min(recev - input_offset, length - buff_offset) = %d < 0", amount);
 						return recev; 
 					}
 				}
 				if (buff_offset == length) { // simplest case
 					PostMessage(hWnd, CM_POSTDATA, (WPARAM)client->buff, length); //Отошлем в очередь на обработку
 					client->buff = nullptr; // we dont care about it after PostMessage
-					if (ReadLogEnabled) LOG_INFO__("BODY found: | recev=%d, length = sh->dlina = %d, input_offset = %d", recev, length, input_offset);
+					if (CRCSOCKET_LOG) if (ReadLogEnabled) LOG_INFO__("BODY found: | recev=%d, length = sh->dlina = %d, input_offset = %d", recev, length, input_offset);
 
 					sh_offset = 0;
 					wait_sh = true;
@@ -372,6 +382,13 @@ void CRCSocket::Close()
 	boost::system::error_code ignored_ec;
 	socket_.close(ignored_ec);
 	deadline_.expires_at(boost::posix_time::pos_infin);
+
+	if (t) {
+		t->join();
+		delete t;
+		t = nullptr;
+	}
+
 	IsConnected = false;
 }
 
@@ -404,7 +421,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				}
 				else
 				{
-					LOG_ERROR__("MSG_RPOINTS: readBufLength - sizeof(_sh) - sizeof(RPOINTS) - info_p->N*sizeof(RPOINT) != 0");
+					if (CRCSOCKET_LOG) LOG_ERROR__("MSG_RPOINTS: readBufLength - sizeof(_sh) - sizeof(RPOINTS) - info_p->N*sizeof(RPOINT) != 0");
 					return -1;
 				}
 
@@ -416,16 +433,16 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				{
 					if (info_p && pts)
 					{
-						LOG_INFO(requestID, context, (boost::format("MSG_RPOINTS. D=%1%, N=%2%, d1=%3%, d2=%4%, pts[0].B=%5%") % info_p->D % info_p->N % info_p->d1 % info_p->d2 % pts[0].B).str().c_str());
+						if (CRCSOCKET_LOG) LOG_INFO(requestID, context, (boost::format("MSG_RPOINTS. D=%1%, N=%2%, d1=%3%, d2=%4%, pts[0].B=%5%") % info_p->D % info_p->N % info_p->d1 % info_p->d2 % pts[0].B).str().c_str());
 						//TODO: pts may be empty...
 					}
 					if (!info_p)
 					{
-						LOG_WARN(requestID, context, "info_p is nullptr");
+						if (CRCSOCKET_LOG) LOG_WARN(requestID, context, "info_p is nullptr");
 					}
 					if (!pts)
 					{
-						LOG_WARN(requestID, context, "pts is nullptr");
+						if (CRCSOCKET_LOG) LOG_WARN(requestID, context, "pts is nullptr");
 					}		
 				}
 			}
@@ -441,7 +458,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				}
 				else
 				{
-					LOG_ERROR__("MSG_RIMAGE: readBufLength - sizeof(_sh) - sizeof(RIMAGE) - imginfo->N * imginfo->NR * 4 != 0");
+					if (CRCSOCKET_LOG) LOG_ERROR__("MSG_RIMAGE: readBufLength - sizeof(_sh) - sizeof(RIMAGE) - imginfo->N * imginfo->NR * 4 != 0");
 					return -1;
 				}
 				info_i = (RIMAGE*)PTR_D;
@@ -450,11 +467,11 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				{
 					if (info_i)
 					{
-						LOG_INFO(requestID, context, (boost::format("MSG_RIMAGE. D=%1%, N=%2%, d1=%3%, d2=%4%, NR=%5%") % info_i->D % info_i->N % info_i->d1 % info_i->d2 % info_i->NR).str().c_str());
+						if (CRCSOCKET_LOG) LOG_INFO(requestID, context, (boost::format("MSG_RIMAGE. D=%1%, N=%2%, d1=%3%, d2=%4%, NR=%5%") % info_i->D % info_i->N % info_i->d1 % info_i->d2 % info_i->NR).str().c_str());
 					}
 					if (!info_i)
 					{
-						LOG_WARN(requestID, context, "info_i is nullptr");
+						if (CRCSOCKET_LOG) LOG_WARN(requestID, context, "info_i is nullptr");
 					}
 				}
 			}
@@ -464,7 +481,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			{
 				if (PostDataLogEnabled)
 				{
-					LOG_INFO(requestID, context, "MSG_PTSTRK");
+					if (CRCSOCKET_LOG) LOG_INFO(requestID, context, "MSG_PTSTRK");
 				}
 			}
 			break;
@@ -476,11 +493,11 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				{
 					if (pTK)
 					{
-						LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, numTrack=%2%") % N % pTK->numTrack).str().c_str());
+						if (CRCSOCKET_LOG) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, numTrack=%2%") % N % pTK->numTrack).str().c_str());
 					}
 					if (!pTK)
 					{
-						LOG_WARN(requestID, context, "pTK is nullptr");
+						if (CRCSOCKET_LOG) LOG_WARN(requestID, context, "pTK is nullptr");
 					}
 				}
 				OnSrvMsg_RDRTRACK(pTK, N);			
@@ -501,11 +518,11 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 					try
 					{
 						s_rdrinit->MaxNAzm = CSettings::GetInt(IntNazm);
-						LOG_INFO__("Using settings value MaxNAzm=%d", s_rdrinit->MaxNAzm);
+						if (CRCSOCKET_LOG) LOG_INFO__("Using settings value MaxNAzm=%d", s_rdrinit->MaxNAzm);
 					}
 					catch (const std::out_of_range& oor)
 					{
-						LOG_INFO__("Using server value MaxNAzm=%d", s_rdrinit->MaxNAzm);
+						if (CRCSOCKET_LOG) LOG_INFO__("Using server value MaxNAzm=%d", s_rdrinit->MaxNAzm);
 					}
 					/*
 					struct RDR_INITCL
@@ -540,7 +557,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				RDRCURRPOS* igpsp = (RDRCURRPOS*)(void*)((char*)PTR_D);
 				if (PostDataLogEnabled)
 				{
-					LOG_INFO(requestID, context, (boost::format("MSG_LOCATION. lon=%1%, lat=%2%") % igpsp->lon % igpsp->lat).str().c_str());
+					if (CRCSOCKET_LOG) LOG_INFO(requestID, context, (boost::format("MSG_LOCATION. lon=%1%, lat=%2%") % igpsp->lon % igpsp->lat).str().c_str());
 				}
 				OnSrvMsg_LOCATION(igpsp);
 			}
@@ -554,7 +571,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 		return sh->type;
 	}
 	catch (const std::exception &ex) {
-		LOG_WARN("exception", "CRCSocket.PostData", ex.what());
+		if (CRCSOCKET_LOG) LOG_WARN("exception", "CRCSocket.PostData", ex.what());
 		return -1;
 	}
 	return 0;
@@ -570,7 +587,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		int Idx = FindTrack(info[i].numTrack);
 		if (-1 == Idx)
 		{
-			if (PostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track not found, creating new") % N).str().c_str());
+			if (CRCSOCKET_LOG) if (PostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track not found, creating new") % N).str().c_str());
 			//создаём трек
 			TRK* t1 = new TRK(info[i].numTrack);
 			Tracks.push_back(t1);
@@ -580,7 +597,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		// уже есть
 		else if (Idx >= 0 && Idx < Tracks.size())
 		{
-			if (PostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track found") % N).str().c_str());
+			if (CRCSOCKET_LOG) if (PostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track found") % N).str().c_str());
 			Tracks[Idx]->InsertPoints(info + i, 1);
 		}
 	}
@@ -732,7 +749,7 @@ TRK::TRK(int _id)
 }
 TRK::~TRK()
 {
-	LOG_INFO(CRCSocket::requestID, "TRK DESTRUCTOR", (boost::format("id=%1%") % this->id).str().c_str());
+	if (CRCSOCKET_LOG) LOG_INFO(CRCSocket::requestID, "TRK DESTRUCTOR", (boost::format("id=%1%") % this->id).str().c_str());
 	for (int i = 0; i < P.size(); i++)
 	{
 		if (P.at(i))

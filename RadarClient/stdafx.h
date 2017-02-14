@@ -89,6 +89,10 @@ typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_le
 
 #include <ctime>
 
+#include <thread>
+
+#include "logging.h"
+
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
