@@ -20,6 +20,8 @@ const std::string CRCSocket::requestID = "CRCSocket";
 using boost::asio::deadline_timer;
 using boost::asio::ip::tcp;
 
+
+
 std::string what_msg(int value) {
 	if (value == MSGBASE) return "MSGBASE";
 
@@ -126,8 +128,8 @@ void CRCSocket::connect(const std::string& host, const std::string& service, boo
 	// can use boost::bind rather than boost::lambda.
 	boost::asio::async_connect(socket_, iter, boost::bind(&CRCSocket::handle_connect, this, _1, &ec));
 
-	// Block until the asynchronous operation has completed.
-	io_service_.run(); 
+	//
+	do io_service_.run_one(); while (ec == boost::asio::error::would_block);
 
 	// Determine whether a connection was successfully established. The
 	// deadline actor may have had a chance to run and close our socket, even
@@ -135,6 +137,9 @@ void CRCSocket::connect(const std::string& host, const std::string& service, boo
 	// check whether the socket is still open before deciding if we succeeded
 	// or failed.
 
+	if (ec || !socket_.is_open())
+		throw boost::system::system_error(
+			ec ? ec : boost::asio::error::operation_aborted);
 }
 void CRCSocket::handle_connect(
 	const boost::system::error_code& ec,
@@ -151,7 +156,7 @@ void CRCSocket::handle_connect(
 
 	if (CRCSOCKET_LOG) LOG_INFO(requestID, "handle_connect", "Connected successfully");
 
-	read(boost::posix_time::seconds(connectionTimeout));
+	//read(boost::posix_time::seconds(connectionTimeout));
 
 	//t = new std::thread(&CRCSocket::read, this, boost::posix_time::seconds(connectionTimeout));
 
@@ -170,32 +175,38 @@ void CRCSocket::read(boost::posix_time::time_duration timeout)
 	// operation is incomplete. Asio guarantees that its asynchronous
 	// operations will never fail with would_block, so any other value in
 	// ec indicates completion.
+	
 	boost::system::error_code ec = boost::asio::error::would_block;
-	std::size_t length = 0;
 
 	// Start the asynchronous operation itself. The boost::lambda function
 	// object is used as a callback and will update the ec variable when the
 	// operation completes. The blocking_udp_client.cpp example shows how you
 	// can use boost::bind rather than boost::lambda.
-	boost::asio::async_read(socket_, input_buffer_, boost::asio::transfer_at_least(1), boost::bind(&CRCSocket::handle_read, this, _1, _2, &ec, &length));
+	boost::asio::async_read(socket_, input_buffer_, boost::asio::transfer_at_least(1), boost::bind(&CRCSocket::handle_read, this, _1, _2, &ec, &read_length));
 
-	io_service_.run();	
+	do io_service_.run_one(); while (ec == boost::asio::error::would_block);
 
-	/*if (ec)
-		throw boost::system::system_error(ec);*/
+	if (ec)
+		throw boost::system::system_error(ec);
 }
 void CRCSocket::handle_read(
 	const boost::system::error_code& ec, std::size_t length,
 	boost::system::error_code* out_ec, std::size_t* out_length)
 {
+	if (CRCSOCKET_LOG) LOG_INFO(requestID, "handle_read", "ec=%d, length=%d, socket_.is_open()=%d", ec.value(), length, socket_.is_open());
+
 	*out_ec = ec;
 	*out_length = length;
 
 	if (ec || !socket_.is_open())
 		throw boost::system::system_error(
 			ec ? ec : boost::asio::error::operation_aborted);
-
-	Read();
+	
+	if (*out_length > 0) {
+		input_buffer_.commit(*out_length);
+		Read();
+		input_buffer_.consume(*out_length);
+	}
 	
 	if (stopReadLoop) {
 		IsConnected = false;
@@ -205,13 +216,14 @@ void CRCSocket::handle_read(
 	}
 
 	read_count++;
-	read(boost::posix_time::seconds(connectionTimeout));
+	//read(boost::posix_time::seconds(connectionTimeout));
 }
 void CRCSocket::check_deadline()
 	{
 		// Check whether the deadline has passed. We compare the deadline against
 		// the current time since a new asynchronous operation may have moved the
 		// deadline before this actor had a chance to run.
+		if (CRCSOCKET_LOG) LOG_INFO(requestID, "check_deadline", "Start");
 		if (deadline_.expires_at() <= deadline_timer::traits_type::now())
 		{
 			if (CRCSOCKET_LOG) LOG_INFO(requestID, "check_deadline", "deadline expired");
@@ -228,10 +240,13 @@ void CRCSocket::check_deadline()
 			// infinity so that the actor takes no action until a new deadline is set.
 			deadline_.expires_at(boost::posix_time::pos_infin);
 		}
+		else {
+			if (CRCSOCKET_LOG) LOG_INFO(requestID, "check_deadline", "deadline not expired");
+		}
 		//int count;
 		// Put the actor back to sleep.
 		deadline_.async_wait(boost::bind(&CRCSocket::check_deadline, this));
-		if (CRCSOCKET_LOG) LOG_INFO(requestID, "check_deadline", "deadline not expired");
+		
 	}
 
 void CRCSocket::Connect()
@@ -240,14 +255,36 @@ void CRCSocket::Connect()
 	try
 	{
 		if (CRCSOCKET_LOG) LOG_INFO(requestID, context, "Start");
-
-		connect(CSettings::GetString(StringHostName), num2str(CSettings::GetInt(IntPort), 0), boost::posix_time::seconds(connectionTimeout));
-
 		
+		auto timeout = boost::posix_time::seconds(connectionTimeout);
+
+		connect(CSettings::GetString(StringHostName), num2str(CSettings::GetInt(IntPort), 0), timeout);
+
+		for (;;) {
+			read(timeout);
+		}
 	}
 	catch (std::exception& e)
 	{
-		if (CRCSOCKET_LOG) LOG_ERROR(requestID, context, "Error during connection. e.what()=%s", e.what());
+		if (CRCSOCKET_LOG) LOG_ERROR(requestID, context, "%s", e.what());
+	}
+}
+void CRCSocket::ConnectInThread() {
+	string context = "CRCSocket::ConnectInThread()";
+	try
+	{
+		if (CRCSOCKET_LOG) LOG_INFO(requestID, context, "Start");
+
+		if (t) {
+			t->join();
+			delete t;
+		}
+
+		t = new std::thread(&CRCSocket::Connect, this);
+		t->detach();
+	}
+	catch (std::exception& e) {
+		if (CRCSOCKET_LOG) LOG_ERROR(requestID, context, "%s", e.what());
 	}
 }
 bool CRCSocket::check_sh(_sh *sh) {

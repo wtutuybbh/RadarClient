@@ -69,6 +69,8 @@ bool hasVAO = true;
 
 int g_nCmdShow;
 
+
+
 void TerminateApplication(GL_Window* window)							// Terminate The Application
 {
 	if (window)
@@ -278,7 +280,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		
 		g_Socket = new CRCSocket(hWnd);
-		g_Socket->Connect();
+
+		
+
+		g_Socket->ConnectInThread();
 		
 		
 		g_UI = new CUserInterface(hWnd, g_vpControl, g_Socket, PANEL_WIDTH);

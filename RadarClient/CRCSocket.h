@@ -427,7 +427,7 @@ public:
 	~TRK();
 };
 
-class CRCSocket
+class CRCSocket// : public boost::enable_shared_from_this<CRCSocket>
 {
 	bool stopReadLoop{ false };
 
@@ -459,6 +459,8 @@ class CRCSocket
 	bool check_sh(_sh *sh);
 
 	std::thread *t{ nullptr };
+
+	std::size_t read_length{ 0 };
 public:
 	static const std::string requestID;
 
@@ -504,6 +506,7 @@ public:
 	bool IsConnected{ false };
 
 	void Connect();
+	void ConnectInThread();
 
 	bool ReadLogEnabled{ false };
 	bool PostDataLogEnabled{ false };
