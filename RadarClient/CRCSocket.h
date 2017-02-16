@@ -18,7 +18,6 @@
 #include "Util.h"
 
 using namespace std;
-using boost::asio::ip::tcp;
 
 #define CM_POSTDATA (WM_USER + 2)
 #define CM_SRVDATA (WM_USER + 3)
@@ -72,8 +71,6 @@ using boost::asio::ip::tcp;
 #define MSG_STRING (MSGBASE + 160)
 
 #define TXRXBUFSIZE 4*1024*1024
-
-std::string what_msg(int value);
 
 // точки траектории
 
@@ -168,11 +165,11 @@ struct STRPOINT
 //---------------------------------------------------------------------------
 /*typedef struct
 {
-	int NumSektor;                //номер кадра
-	int Btek;                     // номер элемента разрешения от 0 по азимуту
-	unsigned int CountSamer;      //количество обработанных замеров 
-	unsigned int CountSamerFalse; //количество пропущенных замеров 
-	float Data[LENDATAOTOBR];
+int NumSektor;                //номер кадра
+int Btek;                     // номер элемента разрешения от 0 по азимуту
+unsigned int CountSamer;      //количество обработанных замеров
+unsigned int CountSamerFalse; //количество пропущенных замеров
+float Data[LENDATAOTOBR];
 }STROTOBR, *PTROTOBR;*/
 //---------------------------------------------------------------------------
 struct STRTRACK
@@ -215,7 +212,7 @@ struct STRONSINCH
 	unsigned reserv2 : 32;    //
 
 };
-						  //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 
 struct STRWITHSINCH
 {
@@ -233,7 +230,7 @@ struct STRWITHSINCH
 
 };//от синхронизатора
 
-							 //---------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
 struct STRNACHVEKT
 {
 	double r0;   //дальность
@@ -243,7 +240,7 @@ struct STRNACHVEKT
 	double sc;   //ЭПР
 };///начальный вектор цели
 
-			 //---------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
 
 
 
@@ -274,7 +271,7 @@ struct RPOINTS
 	int N;
 	short d1;
 	short d2;
-	short D;	
+	short D;
 	short resv1;
 	unsigned int ObserveCount;
 };
@@ -363,8 +360,8 @@ struct send_queue_element
 struct _client                     //Клиенты
 {
 	char *buff{ nullptr };
-	//SOCKET *Socket{ nullptr };
-	unsigned int offset { 0 };
+	SOCKET *Socket{ nullptr };
+	unsigned int offset{ 0 };
 	vector<send_queue_element> send_queue;  // очередь отправляемых данных
 };
 
@@ -427,55 +424,29 @@ public:
 	~TRK();
 };
 
-class CRCSocket// : public boost::enable_shared_from_this<CRCSocket>
+class CRCSocket
 {
-	bool stopReadLoop{ false };
 
+
+	bool OnceClosed;
 	char *hole{ nullptr };
-	int LENDATAOTOBR {1};
+	int LENDATAOTOBR{ 1 };
 
-
-	boost::asio::io_service io_service_;
-	tcp::socket socket_;
-	boost::asio::deadline_timer deadline_;
-	boost::asio::streambuf input_buffer_;
-
-	void check_deadline();
-
-	int connectionTimeout{ 10 };
-
-	void read(boost::posix_time::time_duration timeout);
-	void connect(const std::string& host, const std::string& service, boost::posix_time::time_duration timeout);
-
-	void handle_read(const boost::system::error_code& ec, std::size_t length, boost::system::error_code* out_ec, std::size_t* out_length);
-	void handle_connect(const boost::system::error_code& ec, boost::system::error_code* out_ec);
-
-	_sh *sh_tmp{ nullptr };
-	int input_offset{ 0 };
-	int sh_offset{ 0 }, buff_offset{ 0 }, amount{ 0 }, length{ 0 }, read_count{ 0 };
-
-	bool wait_sh{ true };
-
-	bool check_sh(_sh *sh);
-
-	std::thread *t{ nullptr };
-
-	std::size_t read_length{ 0 };
 public:
 	static const std::string requestID;
 
-	bool Initialized {false};
-	bool PointOK{ false }, TrackOK{ false }, ImageOK{ false };
+	bool Initialized{ false };
+	bool PointOK, TrackOK, ImageOK;
 	vector<TRK*> Tracks;
 	vector<TRK*> trak;
 	float MMAXP;
 	int IDX, NumViewSct;
 	//used when receiving data:
-	std::string ErrorText{ "" };
-	//WSADATA WsaDat;
-	//SOCKET Socket;
-	//struct hostent *host{ nullptr };
-	//SOCKADDR_IN SockAddr;
+	std::string ErrorText;
+	WSADATA WsaDat;
+	SOCKET Socket;
+	struct hostent *host{ nullptr };
+	SOCKADDR_IN SockAddr;
 	HWND hWnd;
 	_client *client{ nullptr };
 
@@ -483,7 +454,7 @@ public:
 	RDR_INITCL* s_rdrinit{ nullptr };
 	RPOINTS* info_p{ nullptr };
 	RPOINT* pts{ nullptr };
-	RDRCURRPOS *CurrentPosition { nullptr };
+	RDRCURRPOS *CurrentPosition{ nullptr };
 
 	RIMAGE* info_i{ nullptr };
 	void * pixels{ nullptr };
@@ -503,16 +474,16 @@ public:
 	CRCSocket(HWND hWnd);
 	~CRCSocket();
 
-	bool IsConnected{ false };
+	bool IsConnected;
 
-	void Connect();
-	void ConnectInThread();
+	void Init();
+	int Connect();
 
 	bool ReadLogEnabled{ false };
-	bool PostDataLogEnabled{ false };
+	bool PostDataLogEnabled{ true };
 	int Read();
 
-	void Close();
+	int Close();
 	unsigned int PostData(WPARAM wParam, LPARAM lParam);
 	void OnSrvMsg_RDRTRACK(RDRTRACK* info, int N);
 	void OnSrvMsg_LOCATION(RDRCURRPOS* d);
@@ -530,6 +501,3 @@ public:
 
 
 #endif // global1h
-
-
-void log_init(std::string requestID, std::string context, RDR_INITCL *s_rdrinit);

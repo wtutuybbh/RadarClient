@@ -80,11 +80,7 @@ void TerminateApplication(GL_Window* window)							// Terminate The Application
 							
 	g_isProgramLooping = FALSE;											// Stop Looping Of The Program
 
-	if (g_Socket)
-	{
-		delete g_Socket;
-		g_Socket = nullptr;
-	}
+	
 }
 
 void ToggleFullscreen(GL_Window* window)								// Toggle Fullscreen/Windowed
@@ -280,12 +276,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		
 		g_Socket = new CRCSocket(hWnd);
-
 		
-
-		g_Socket->ConnectInThread();
-		
-		
+		g_Socket->Connect();
+				
 		g_UI = new CUserInterface(hWnd, g_vpControl, g_Socket, PANEL_WIDTH);
 
 		//return 0;
@@ -842,10 +835,19 @@ int Deinitialize(void)										// Any User DeInitialization Goes Here
 	if (g_Minimap)
 		delete g_Minimap;
 
-	if (g_UI)
+	if (g_UI) {
 		delete g_UI;
+		g_UI = nullptr;
+	}
 	if (g_hIcon)
 		DestroyIcon((HICON)g_hIcon);	
+
+	if (g_Socket)
+	{
+		delete g_Socket;
+		g_Socket = nullptr;
+	}
+
 
 	LOG_INFO(requestID, context, "End - return 0");
 	return 0;

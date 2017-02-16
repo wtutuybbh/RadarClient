@@ -1,5 +1,7 @@
 #pragma once
 
+
+
 #ifndef WINSOCK2_H_INCLUDED
 #define WINSOCK2_H_INCLUDED
 #include <winsock2.h>
@@ -43,6 +45,13 @@
 #include <boost/enable_shared_from_this.hpp>
 //Narrow-char thread-safe logger.
 typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_level> logger_t;
+
+#ifdef _DEBUG
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#define new DEBUG_NEW
+#endif
 
 #include <iostream>
 #include <ctime>
@@ -95,12 +104,7 @@ typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_le
 
 #include "logging.h"
 
-#ifdef _DEBUG
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
-#define new DEBUG_NEW
-#endif
+
 
 //for CRCGeoDataProvider and CRCTextureDataFile:
 #define DATFILE_MAXLINELENGTH 256
