@@ -225,7 +225,7 @@ CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize,
 	
 	UseTexture = 1;
 
-	boost::thread t(boost::bind(&CMesh::LoadHeightmap, this));
+	std::thread t(&CMesh::LoadHeightmap, this);
 	t.detach();
 }
 

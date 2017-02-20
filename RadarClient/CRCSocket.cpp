@@ -149,7 +149,7 @@ int CRCSocket::Connect()
 
 		string str(ws.begin(), ws.end());
 		str = str.substr(0, str.length() - 1);
-		LOG_ERROR__("cResult == SOCKET_ERROR: WSAGetLastError returned %d, %s", error, str);
+		LOG_ERROR__("cResult == SOCKET_ERROR: WSAGetLastError returned %d, %s", error, str.c_str());
 	}
 	//int errorCode = WSAGetLastError();
 	LOG_INFO(requestID, context, (boost::format("End: return %1%") % cResult).str().c_str());
