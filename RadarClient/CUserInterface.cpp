@@ -120,6 +120,31 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	return LRESULT();
 }
 
+LRESULT CUserInterface::Button_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	int g_nCmdShow = 1;
+	HRSRC       hrsrc;
+	HGLOBAL     hglobal;
+	HINSTANCE hInstance = (HINSTANCE)GetWindowLong(ParentHWND, GWL_HINSTANCE);
+	hrsrc = FindResource(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), RT_DIALOG);
+
+	hglobal = ::LoadResource(hInstance, hrsrc);
+
+	HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)hglobal, ParentHWND, (DLGPROC)&CUserInterface::Dialog_Settings);
+
+	ShowWindow(hwnd1, g_nCmdShow);
+
+	//SetWindowPos(hwnd1, HWND_TOP, 0, 720, 0, 0, SWP_NOSIZE);
+
+
+	return LRESULT();
+}
+
+LRESULT CUserInterface::Dialog_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	return LRESULT();
+}
+
 LRESULT CUserInterface::Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	return LRESULT();
@@ -245,8 +270,6 @@ LRESULT CUserInterface::Checkbox_MeasureDistance(HWND hwnd, UINT uMsg, WPARAM wP
 {
 	int ButtonID = LOWORD(wParam);
 	HWND hWnd = GetDlgItem(hwnd, ButtonID);
-	int Checked = !Button_GetCheck(hWnd);
-	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
 
 	return LRESULT();
 }
@@ -408,7 +431,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 
 	CurrentY += VStep+VStep;
 
-	FixViewToRadar_ID = InsertElement(NULL, _T("BUTTON"), _T("Вид на радар"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_FixViewToRadar);
+	//FixViewToRadar_ID = InsertElement(NULL, _T("BUTTON"), _T("Вид на радар"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_FixViewToRadar);
 
 	MeasureDistance_ID = InsertElement(NULL, _T("BUTTON"), _T("Измерения"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MeasureDistance);
 	
@@ -501,6 +524,12 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 
 	Elements.insert({ IDD_DIALOG1, new InterfaceElement{ IDD_DIALOG1, NULL, _T("IDD_DIALOG1"), _T("IDD_DIALOG1"), DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::IDD_DIALOG1_Proc } });
 	Elements.insert({ IDC_CHECK1, new InterfaceElement{ IDC_CHECK1, NULL, _T("IDC_CHECK1"), _T("IDC_CHECK1"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_FixViewToRadar } });
+	
+		
+	Elements.insert({ IDC_CHECK2, new InterfaceElement{ IDC_CHECK2, NULL, _T("IDC_CHECK2"), _T("IDC_CHECK2"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_MeasureDistance } });
+	Elements.insert({ IDC_BUTTON2, new InterfaceElement{ IDC_BUTTON2, NULL, _T("IDC_BUTTON2"), _T("IDC_BUTTON2"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Button_Settings } });
+	
+
 
 	SetChecked(ObjOptions_ID[0], 0);
 	SetChecked(ObjOptions_ID[1], 1);

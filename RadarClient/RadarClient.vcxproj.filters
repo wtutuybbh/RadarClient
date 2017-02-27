@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\XColorSpectrumCtrl">
+      <UniqueIdentifier>{985c558a-ce94-4adf-97e8-c26edf840a95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\XColorSpectrumCtrl">
+      <UniqueIdentifier>{edb81917-445f-4b77-85db-d533b07e7db7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CMesh.cpp">
@@ -107,6 +113,12 @@
     </ClCompile>
     <ClCompile Include="CRCGeoDataProvider.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XColorSpectrumCtrl\rgbhsl.cpp">
+      <Filter>Source Files\XColorSpectrumCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="XColorSpectrumCtrl\XColorSpectrumCtrl.cpp">
+      <Filter>Source Files\XColorSpectrumCtrl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -214,6 +226,21 @@
     </ClInclude>
     <ClInclude Include="logging.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XColorSpectrumCtrl\rgbhsl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XColorSpectrumCtrl\XColorSpectrumCtrl.h">
+      <Filter>Header Files\XColorSpectrumCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="XColorSpectrumCtrl\CXDC.h">
+      <Filter>Header Files\XColorSpectrumCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="XColorSpectrumCtrl\CXRect.h">
+      <Filter>Header Files\XColorSpectrumCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="XColorSpectrumCtrl\CXToolTipCtrl.h">
+      <Filter>Header Files\XColorSpectrumCtrl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
