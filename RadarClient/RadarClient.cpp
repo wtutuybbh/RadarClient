@@ -300,7 +300,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		ShowWindow(hwnd1, g_nCmdShow);
 
-		SetWindowPos(hwnd1, HWND_TOP, 0, 820, 0, 0, SWP_NOSIZE);
+		SetWindowPos(hwnd1, HWND_TOP, 0, 720, 0, 0, SWP_NOSIZE);
 
 #ifdef _DEBUG
 		g_Minimap->dwi = &g_dwi;

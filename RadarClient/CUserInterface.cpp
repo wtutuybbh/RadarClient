@@ -236,10 +236,8 @@ LRESULT CUserInterface::Checkbox_FixViewToRadar(HWND hwnd, UINT uMsg, WPARAM wPa
 {
 	int ButtonID = LOWORD(wParam);
 	HWND hWnd = GetDlgItem(hwnd, ButtonID);
-	int Checked = !Button_GetCheck(hWnd);
-	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
 	if (VPControl && VPControl->Camera)
-		this->VPControl->Camera->FixViewOnRadar = Checked;
+		this->VPControl->Camera->FixViewOnRadar = Button_GetCheck(hWnd);
 	return LRESULT();
 }
 
