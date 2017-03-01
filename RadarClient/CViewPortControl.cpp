@@ -185,7 +185,7 @@ glm::mat4 CViewPortControl::GetPV() const
 	return pv;
 }
 
-CViewPortControl::CViewPortControl(LPCSTR className)
+CViewPortControl::CViewPortControl(LPCWSTR className)
 {
 	std::string context = "CViewPortControl::CViewPortControl";
 	LOG_INFO(requestID, context, (boost::format("Start... className=%1%") % className).str().c_str());
@@ -309,7 +309,7 @@ LRESULT CALLBACK CViewPortControl::stWinMsgHandler(HWND hwnd, UINT uMsg, WPARAM 
 bool CViewPortControl::Register(void)
 {
 	std::string context = "CViewPortControl::Register";
-	WNDCLASSEXA wc = { 0 };
+	WNDCLASSEXW wc = { 0 };
 	wc.cbSize = sizeof(wc);
 	wc.style = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc = (WNDPROC)stWinMsgHandler;// ViewPortControlProc;
@@ -327,7 +327,7 @@ bool CViewPortControl::Register(void)
 	if (RegisterClassEx(&wc) == 0)							// Did Registering The Class Fail?
 	{
 		// NOTE: Failure, Should Never Happen
-		MessageBox(HWND_DESKTOP, "CViewPortControl: RegisterClassEx Failed!", "Error", MB_OK | MB_ICONEXCLAMATION);
+		MessageBox(HWND_DESKTOP, L"CViewPortControl: RegisterClassEx Failed!", L"Error", MB_OK | MB_ICONEXCLAMATION);
 		LOG_ERROR(requestID, context, "RegisterClassEx Failed");
 		return FALSE;													// Return False (Failure)
 	}

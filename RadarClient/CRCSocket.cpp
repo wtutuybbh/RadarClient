@@ -92,7 +92,7 @@ void CRCSocket::Init()
 	if (nResult)
 	{
 		LOG_ERROR__("WSAAsyncSelect failed");
-		MessageBox(hWnd, "WSAAsyncSelect failed", "Critical Error", MB_ICONERROR);
+		MessageBox(hWnd, L"WSAAsyncSelect failed", L"Critical Error", MB_ICONERROR);
 		SendMessage(hWnd, WM_DESTROY, NULL, NULL);
 	}
 	// Resolve IP address for hostname	

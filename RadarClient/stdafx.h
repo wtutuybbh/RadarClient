@@ -104,7 +104,9 @@ typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_le
 
 #include "logging.h"
 
-
+#include <codecvt>
 
 //for CRCGeoDataProvider and CRCTextureDataFile:
 #define DATFILE_MAXLINELENGTH 256
+
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")

@@ -217,6 +217,20 @@ glm::vec4 CSettings::GetColor(int key)
 	return colors.at(key);
 }
 
+std::wstring CSettings::GetColorString(int key)
+{
+	auto color = GetColor(key);
+	std::wstringstream str;
+	str << "#" << std::hex << int(255 * color.r) << int(255 * color.g) << int(255 * color.b) << int(255 * color.a);	
+	return str.str();
+}
+
+COLORREF CSettings::GetColorRGB(int key)
+{
+	auto color = CSettings::GetColor(ColorAxis);
+	return RGB(255 * color.r, 255 * color.g, 255 * color.b);
+}
+
 float CSettings::GetFloat(int key)
 {
 	return floats.at(key);

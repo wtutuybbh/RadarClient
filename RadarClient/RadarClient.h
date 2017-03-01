@@ -12,12 +12,12 @@ typedef struct {									// Structure For Keyboard Stuff
 
 typedef struct {									// Contains Information Vital To Applications
 	HINSTANCE		hInstance;						// Application Instance
-	const char*		className;						// Application ClassName
+	const wchar_t*		className;						// Application ClassName
 } Application;										// Application
 
 typedef struct {									// Window Creation Info
 	Application*		application;				// Application Structure
-	char*				title;						// Window Title
+	wchar_t*				title;						// Window Title
 	int					width;						// Width
 	int					height;						// Height
 	int					bitsPerPixel;				// Bits Per Pixel

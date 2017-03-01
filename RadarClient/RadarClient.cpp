@@ -23,9 +23,11 @@
 
 #define WM_TOGGLEFULLSCREEN (WM_USER+1)									// Application Define Message For Toggling
 
+/*
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+*/
 
 #pragma comment(lib, "ComCtl32.lib")
 
@@ -505,7 +507,7 @@ BOOL RegisterWindowClass(Application* application)						// Register A Window Cla
 	if (RegisterClassEx(&windowClass) == 0)							// Did Registering The Class Fail?
 	{
 		// NOTE: Failure, Should Never Happen
-		MessageBox(HWND_DESKTOP, "RegisterClassEx Failed!", "Error", MB_OK | MB_ICONEXCLAMATION);
+		MessageBox(HWND_DESKTOP, L"RegisterClassEx Failed!", L"Error", MB_OK | MB_ICONEXCLAMATION);
 		return FALSE;													// Return False (Failure)
 	}
 	return TRUE;														// Return True (Success)
@@ -663,18 +665,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//CSettings::SetFloat(FloatMPPh, g_mpph);
 	//CSettings::SetFloat(FloatMPPv, g_mppv);
 
-	g_vpControl = new CViewPortControl("VP3D");
-	g_Minimap = new CMinimap("VPMiniMap");
+	g_vpControl = new CViewPortControl(L"VP3D");
+	g_Minimap = new CMinimap(L"VPMiniMap");
 
 																	
-	application.className = "OpenGL";									// Application Class Name
+	application.className = L"OpenGL";									// Application Class Name
 	application.hInstance = hInstance;									// Application Instance
 
 																		
 	ZeroMemory(&window, sizeof(GL_Window));							// Make Sure Memory Is Zeroed
 	window.keys = &keys;								// Window Key Structure
 	window.init.application = &application;							// Window Application
-	window.init.title = "RadarClient DEMO version 0.001";	// Window Title
+	window.init.title = L"RadarClient DEMO version 0.001";	// Window Title
 	window.init.width = 1366;									// Window Width
 	window.init.height = 768;									// Window Height
 	window.init.bitsPerPixel = 16;									// Bits Per Pixel
@@ -686,7 +688,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (RegisterWindowClass(&application) == FALSE)					// Did Registering A Class Fail?
 	{
 		// Failure
-		MessageBox(HWND_DESKTOP, "Error Registering Window Class!", "Error", MB_OK | MB_ICONEXCLAMATION);
+		MessageBox(HWND_DESKTOP, L"Error Registering Window Class!", L"Error", MB_OK | MB_ICONEXCLAMATION);
 		return -1;														// Terminate Application
 	}
 	
@@ -769,7 +771,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		else															// If Window Creation Failed
 		{
 			// Error Creating Window
-			MessageBox(HWND_DESKTOP, "Error Creating OpenGL Window", "Error", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(HWND_DESKTOP, L"Error Creating OpenGL Window", L"Error", MB_OK | MB_ICONEXCLAMATION);
 			g_isProgramLooping = FALSE;									// Terminate The Loop
 		}
 	}																	// While (isProgramLooping)
@@ -866,8 +868,8 @@ void Draw(void)
 		g_nFPS = g_nFrames;										// Save The FPS
 		g_nFrames = 0;											// Reset The FPS Counter
 
-		char szTitle[256] = { 0 };									// Build The Title String
-		sprintf(szTitle, "RadarClient v0.000 - %d FPS", g_nFPS);
+		wchar_t szTitle[256] = { 0 };									// Build The Title String
+		swprintf(szTitle, L"RadarClient v0.000 - %d FPS", g_nFPS);
 		if (g_window)
 			SetWindowText(g_window->hWnd, szTitle);				// Set The Title
 	}

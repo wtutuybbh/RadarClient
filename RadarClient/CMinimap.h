@@ -10,7 +10,7 @@ class CMinimap :
 	glm::vec2 DragStart;
 public:
 	void Draw();
-	CMinimap(LPCSTR className) : CViewPortControl(className)
+	CMinimap(LPCWSTR className) : CViewPortControl(className)
 	{	
 		CameraDrag = false;
 	}

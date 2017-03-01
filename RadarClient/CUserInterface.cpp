@@ -17,11 +17,12 @@
 #include "CRCLogger.h"
 
 #include "CRCGridCell.h"
-#include "CRCDataFileSet.h"
-#include "CRCAltitudeDataFile.h"
 #include "resource1.h"
 
+
 const std::string CUserInterface::requestID = "CUserInterface";
+HINSTANCE CUserInterface::hInstance;
+HFONT CUserInterface::Font;
 
 LRESULT Button1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	return 0;
@@ -126,13 +127,20 @@ LRESULT CUserInterface::Button_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 	HRSRC       hrsrc;
 	HGLOBAL     hglobal;
 	HINSTANCE hInstance = (HINSTANCE)GetWindowLong(ParentHWND, GWL_HINSTANCE);
-	hrsrc = FindResource(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), RT_DIALOG);
 
-	hglobal = ::LoadResource(hInstance, hrsrc);
+	auto intres = MAKEINTRESOURCE(IDD_DIALOG4);
 
-	HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)hglobal, ParentHWND, (DLGPROC)&CUserInterface::Dialog_Settings);
+	auto ret = DialogBox(hInstance, intres, ParentHWND, DLGPROC(&CUserInterface::Dialog_Settings));
 
-	ShowWindow(hwnd1, g_nCmdShow);
+	//auto hDialog = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG2), ParentHWND, DLGPROC(&CUserInterface::Dialog_Settings));
+
+	//auto err = GetLastError();
+
+	//hglobal = ::LoadResource(hInstance, hrsrc);
+
+	//HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)hglobal, ParentHWND, (DLGPROC)&CUserInterface::Dialog_Settings);
+
+	//ShowWindow(hwnd1, g_nCmdShow);
 
 	//SetWindowPos(hwnd1, HWND_TOP, 0, 720, 0, 0, SWP_NOSIZE);
 
@@ -140,9 +148,51 @@ LRESULT CUserInterface::Button_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 	return LRESULT();
 }
 
-LRESULT CUserInterface::Dialog_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	return LRESULT();
+	switch (uMsg)
+	{
+	case WM_INITDIALOG: {
+		auto colorgridHwnd = GetDlgItem(hDlg, IDC_CUSTOM2);
+		
+
+		//SendMessage(colorgridHwnd, ZGM_SETFONT, 2, (LPARAM)Font);
+		SendMessage(colorgridHwnd, ZGM_DIMGRID, 2, 0);
+		SendMessage(colorgridHwnd, ZGM_SHOWROWNUMBERS, false, 0);
+		SendMessage(colorgridHwnd, ZGM_EMPTYGRID, 1, 0);
+
+		wchar_t *p = nullptr;
+
+		int len = LoadString(hInstance, IDS_STRING108, reinterpret_cast<LPWSTR>(&p), 0);
+		wstring s = wstring(p, size_t(len));
+
+		//setup converter
+		using convert_type = codecvt_utf8_utf16<wchar_t>;
+		std::wstring_convert<convert_type, wchar_t> converter;
+
+		//use converter (.to_bytes: wstr->str, .from_bytes: str->wstr)
+		std::string converted_str = converter.to_bytes(s);
+		SendMessage(colorgridHwnd, ZGM_SETCELLTEXT, 1, LPARAM(converted_str.c_str()));
+
+		len = LoadString(hInstance, IDS_STRING109, reinterpret_cast<LPWSTR>(&p), 0);
+		s = wstring(p, size_t(len));
+		SendMessage(colorgridHwnd, ZGM_SETCELLTEXT, 2, LPARAM(s.c_str()));
+		
+		auto color = CSettings::GetColorString(ColorAxis);
+	}
+		break;
+
+	case WM_CTLCOLORSTATIC:
+		break;
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return false;
 }
 
 LRESULT CUserInterface::Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -193,7 +243,7 @@ float CUserInterface::GetHeight()
 	return GetTrackbarValue_VTilt(); //here elevation counts from top-up direction
 }
 
-int CUserInterface::InsertElement(DWORD xStyle, LPCSTR _class, LPCSTR text, DWORD style, int x, int y, int width, int height, UIWndProc action)
+int CUserInterface::InsertElement(DWORD xStyle, LPCWSTR _class, LPCWSTR text, DWORD style, int x, int y, int width, int height, UIWndProc action)
 {
 	Elements.insert({ CurrentID, new InterfaceElement{ CurrentID, xStyle, _class, text, style, x, y, width, height, nullptr, action } });
 	CurrentID++;
@@ -347,7 +397,7 @@ LRESULT CUserInterface::Trackbar_CameraDirection_Turn(HWND hwnd, UINT uMsg, WPAR
 
 	int val = SendMessage(GetDlgItem(hwnd, ID), TBM_GETPOS, 0, 0);
 
-	SetDlgItemText(ParentHWND, CameraDirectionValue_ID[1], std::to_string(val).c_str());
+	SetDlgItemText(ParentHWND, CameraDirectionValue_ID[1], std::to_wstring(val).c_str());
 	
 	if (VPControl && VPControl->Camera)
 		VPControl->Camera->Direction = GetDirection();
@@ -372,9 +422,9 @@ LRESULT CUserInterface::Trackbar_BegAzm(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 void CUserInterface::Trackbar_BegAzm_SetText(int labelID)
 {
 	float val = GetBegAzm();
-	stringstream stream;
+	wstringstream stream;
 	stream << fixed << setprecision(2) << val;
-	string s = stream.str();
+	wstring s = stream.str();
 	SetDlgItemText(ParentHWND, BegAzmValue_ID, s.c_str());
 }
 
@@ -389,9 +439,9 @@ LRESULT CUserInterface::Trackbar_ZeroElevation(HWND hwnd, UINT uMsg, WPARAM wPar
 void CUserInterface::Trackbar_ZeroElevation_SetText(int labelID)
 {
 	float val = GetZeroElevation();
-	stringstream stream;
+	wstringstream stream;
 	stream << fixed << setprecision(2) << val;
-	string s = stream.str();
+	wstring s = stream.str();
 	SetDlgItemText(ParentHWND, ZeroElevationValue_ID, s.c_str());
 }
 
@@ -402,6 +452,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	LOG_INFO(requestID, context, (boost::format("Start... parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%...") % parentHWND % vpControl % socket % panelWidth).str().c_str());
 
 	this->ParentHWND = parentHWND;
+	hInstance = HINSTANCE(GetWindowLong(parentHWND, GWL_HINSTANCE));
 	this->VPControl = vpControl;
 	this->Socket = socket;
 
@@ -415,7 +466,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 
 	int CurrentY = 0;
 
-	hgridmod = LoadLibrary("ZeeGrid.dll");
+	hgridmod = LoadLibrary(L"ZeeGrid.dll");
 	if (!hgridmod)
 	{
 		std::string error_string = "Unable to load ZeeGrid.DLL";

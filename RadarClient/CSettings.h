@@ -84,6 +84,8 @@ public:
 	static bool Init();
 	static bool InitPalette();
 	static glm::vec4 GetColor(int key);
+	static std::wstring GetColorString(int key);
+	static COLORREF GetColorRGB(int key);
 	static float GetFloat(int key);
 	static int GetInt(int key);
 	static std::string GetString(int key);

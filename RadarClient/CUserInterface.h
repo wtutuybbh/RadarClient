@@ -16,11 +16,13 @@ typedef LRESULT (CUserInterface::*UIWndProc)(HWND hwnd, UINT uMsg, WPARAM wParam
 struct _BGCELL;
 class TRK;
 
+
+
 typedef struct {	
 	int ID;
 	DWORD XStyle;
-	LPCSTR Class;
-	LPCSTR Text;
+	LPCWSTR Class;
+	LPCWSTR Text;
 	DWORD Style;
 	int X, Y, Width, Height;
 	HWND hWnd;	
@@ -56,7 +58,7 @@ private:
 
 	//group elements
 	int ObjOptions_ID[3], MapOptions_ID[2], MarkupOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2], MapType_ID[2];
-
+	static HINSTANCE hInstance;
 	void SetChecked(int id, bool checked);
 
 	glm::vec3 GetDirection();
@@ -67,7 +69,7 @@ private:
 
 	HMODULE hgridmod; //ZeeGrid's dll handle
 
-	HFONT Font; // user interface font
+	static HFONT Font; // user interface font
 
 	HWND GridHWND, InfoGridHWND; //ZeeGrid's window handle
 	int Column1X{ 10 }, Column2X, Column3X;
@@ -104,10 +106,10 @@ private:
 	virtual LRESULT InfoGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	virtual LRESULT IDD_DIALOG1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
 public:
 	int MinimapSize;
-	HWND ParentHWND {nullptr};
+	HWND ParentHWND{ nullptr };
+	HWND SettingsHWND {nullptr};
 	HFONT hDlgFont {nullptr};
 	
 	ElementsMap Elements;
@@ -115,7 +117,7 @@ public:
 	CViewPortControl *VPControl { nullptr };
 	CRCSocket *Socket { nullptr };
 
-	int InsertElement(DWORD xStyle, LPCSTR Class,LPCSTR Text, DWORD Style, int X, int Y, int Width, int Height, UIWndProc Action);
+	int InsertElement(DWORD xStyle, LPCWSTR Class, LPCWSTR Text, DWORD Style, int X, int Y, int Width, int Height, UIWndProc Action);
 	
 	virtual LRESULT Wnd_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

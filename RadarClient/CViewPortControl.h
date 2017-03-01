@@ -36,7 +36,7 @@ public:
 	HDC hDC;
 	HGLRC hRC;
 
-	CViewPortControl(LPCSTR className);
+	CViewPortControl(LPCWSTR className);
 	virtual ~CViewPortControl();
 	/* Register/unregister the window class */
 	
@@ -65,7 +65,7 @@ public:
 
 	bool MakeCurrent();
 
-	LPCSTR ClassName;
+	LPCWSTR ClassName;
 
 	int Height;
 	int Width;
