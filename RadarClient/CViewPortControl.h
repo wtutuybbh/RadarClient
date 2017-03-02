@@ -28,6 +28,10 @@ class CViewPortControl {
 	void Init();
 	static const std::string requestID;
 	glm::mat4 pv;
+protected:
+	bool needs_resize{ false };
+	int width, height;
+	virtual void SetSize(int width, int height);
 public:
 	CScene *Scene{ nullptr };
 	CCamera *Camera{ nullptr };
@@ -44,7 +48,8 @@ public:
 
 	bool InitGL();
 
-	virtual void ReshapeGL(int width, int height);
+	virtual void ReshapeGL();
+	
 
 	virtual LRESULT ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -63,12 +68,12 @@ public:
 
 	C3DObjectModel* Get3DObject(int x, int y);
 
-	bool MakeCurrent();
+	bool MakeCurrent() const;
 
 	LPCWSTR ClassName;
 
-	int Height;
-	int Width;
+	int GetHeight() const;
+	int GetWidth() const;
 	int X;
 	int Y;	
 

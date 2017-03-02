@@ -83,9 +83,11 @@ private:
 	virtual LRESULT Button_Colors(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Button_Load(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT Button_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	
+
+	virtual LRESULT Button_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);	
 	static LRESULT CALLBACK Dialog_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static std::string GetStringFromResourceID(int ID);
+	static std::wstring GetWStringFromResourceID(int ID);
 
 	virtual LRESULT Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

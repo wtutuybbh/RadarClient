@@ -27,6 +27,9 @@ void CViewPortControl::Paint()
 
 void CViewPortControl::Draw()
 {
+	if (needs_resize)
+		ReshapeGL();
+
 	CalcPV();
 	//g_vpControl->MakeCurrent();
 
@@ -70,12 +73,12 @@ LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wPara
 
 		case SIZE_MAXIMIZED:									// Was Window Maximized?
 			//window->isVisible = TRUE;							// Set isVisible To True
-			ReshapeGL(LOWORD(lParam), HIWORD(lParam));		// Reshape Window - LoWord=Width, HiWord=Height
+			SetSize(LOWORD(lParam), HIWORD(lParam));		// Reshape Window - LoWord=Width, HiWord=Height			
 			return 0;												// Return
 
 		case SIZE_RESTORED:										// Was Window Restored?
 			//window->isVisible = TRUE;							// Set isVisible To True
-			ReshapeGL(LOWORD(lParam), HIWORD(lParam));		// Reshape Window - LoWord=Width, HiWord=Height
+			SetSize(LOWORD(lParam), HIWORD(lParam));		// Reshape Window - LoWord=Width, HiWord=Height
 			return 0;												// Return
 		}
 		return 0;
@@ -147,8 +150,8 @@ void CViewPortControl::Add(HWND parent, int x, int y, int w, int h)
 }
 void CViewPortControl::SetPosition(int x, int y, int w, int h)
 {
-	Width = w;
-	Height = h;
+	width = w;
+	height = h;
 	X = x;
 	Y = y;
 	SetWindowPos(hWnd, nullptr, x, y, w, h, 0);
@@ -213,10 +216,10 @@ C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 	std::string context = "CViewPortControl::Get3DObject";
 	LOG_INFO(requestID, context, (boost::format("Start... x=%1%, y=%2%") % x % y).str().c_str());
 
-	glm::vec4 viewport = glm::vec4(0, 0, Width, Height);
+	glm::vec4 viewport = glm::vec4(0, 0, width, height);
 
-	glm::vec3 p0 = glm::unProject(glm::vec3(x, Height - y - 1, 0.0f), Camera->GetView(), Camera->GetProjection(), viewport);
-	glm::vec3 p1 = glm::unProject(glm::vec3(x, Height - y - 1, 1.0f), Camera->GetView(), Camera->GetProjection(), viewport);
+	glm::vec3 p0 = glm::unProject(glm::vec3(x, height - y - 1, 0.0f), Camera->GetView(), Camera->GetProjection(), viewport);
+	glm::vec3 p1 = glm::unProject(glm::vec3(x, height - y - 1, 1.0f), Camera->GetView(), Camera->GetProjection(), viewport);
 
 	if(UI->MeasureDistance())
 	{
@@ -261,21 +264,19 @@ C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 	return o;
 }
 
-bool CViewPortControl::MakeCurrent()
+bool CViewPortControl::MakeCurrent() const
 {
-	if (wglMakeCurrent(hDC, hRC) == FALSE)
-	{
-		// Failed
-		wglDeleteContext(hRC);									// Delete The Rendering Context
-		hRC = nullptr;												// Zero The Rendering Context
-		ReleaseDC(hWnd, hDC);							// Release Our Device Context
-		hDC = nullptr;												// Zero The Device Context
-		DestroyWindow(hWnd);									// Destroy The Window
-		hWnd = nullptr;												// Zero The Window Handle
-		return FALSE;													// Return False
-	}
+	return wglMakeCurrent(hDC, hRC);
+}
 
-	return TRUE;
+int CViewPortControl::GetHeight() const
+{
+	return height;
+}
+
+int CViewPortControl::GetWidth() const
+{
+	return width;
 }
 
 LRESULT CALLBACK CViewPortControl::stWinMsgHandler(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -342,6 +343,13 @@ void CViewPortControl::Init()
 	DisplayMap = 1;
 	DisplayLandscape = 1;
 	DisplayBlindZones = 0;
+}
+
+void CViewPortControl::SetSize(int width, int height)
+{
+	this->width = width;
+	this->height = height;
+	needs_resize = true;
 }
 
 void CViewPortControl::Unregister(void)
@@ -473,10 +481,8 @@ bool CViewPortControl::InitGL()
 	return true;
 }
 
-void CViewPortControl::ReshapeGL(int width, int height)									// Reshape The Window When It's Moved Or Resized
+void CViewPortControl::ReshapeGL()									// Reshape The Window When It's Moved Or Resized
 {
-	Height = height;
-	Width = width;
 	if (Scene) {
 		Scene->width = width;
 		Scene->height = height;
@@ -485,4 +491,5 @@ void CViewPortControl::ReshapeGL(int width, int height)									// Reshape The W
 		MakeCurrent();
 		glViewport(0, 0, (GLsizei)(width), (GLsizei)(height));				// Reset The Current Viewport
 	}
+	needs_resize = false;
 }

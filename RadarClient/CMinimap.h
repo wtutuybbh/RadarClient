@@ -16,7 +16,7 @@ public:
 	}
 	~CMinimap();
 	LRESULT ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
-	void ReshapeGL(int width, int height) override;
+	void ReshapeGL() override;
 	glm::mat4 GetProjMatrix() const override;
 	glm::mat4 GetViewMatrix() const override;
 #ifdef _DEBUG

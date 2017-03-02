@@ -120,6 +120,9 @@
     <ClCompile Include="XColorSpectrumCtrl\XColorSpectrumCtrl.cpp">
       <Filter>Source Files\XColorSpectrumCtrl</Filter>
     </ClCompile>
+    <ClCompile Include="CRCListView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CMesh.h">
@@ -238,6 +241,9 @@
     </ClInclude>
     <ClInclude Include="XColorSpectrumCtrl\CXToolTipCtrl.h">
       <Filter>Header Files\XColorSpectrumCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="CRCListView.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

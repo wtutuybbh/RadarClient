@@ -199,9 +199,9 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 			glm::vec3((*buffer)[i].vert),
 			mv,
 			proj,
-			glm::vec4(0, 0, vpControl->Width, vpControl->Height)
+			glm::vec4(0, 0, vpControl->GetWidth(), vpControl->GetHeight())
 			);
-		if (glm::distance(glm::vec2(screenP), glm::vec2(screenPoint.x, vpControl->Height - screenPoint.y - 1)) < PointSize)
+		if (glm::distance(glm::vec2(screenP), glm::vec2(screenPoint.x, vpControl->GetHeight() - screenPoint.y - 1)) < PointSize)
 		{
 			return i;
 		}

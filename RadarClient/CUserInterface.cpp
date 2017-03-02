@@ -130,6 +130,8 @@ LRESULT CUserInterface::Button_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 
 	auto intres = MAKEINTRESOURCE(IDD_DIALOG4);
 
+	
+
 	auto ret = DialogBox(hInstance, intres, ParentHWND, DLGPROC(&CUserInterface::Dialog_Settings));
 
 	//auto hDialog = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG2), ParentHWND, DLGPROC(&CUserInterface::Dialog_Settings));
@@ -153,30 +155,25 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 	switch (uMsg)
 	{
 	case WM_INITDIALOG: {
+		auto edit1 = GetDlgItem(hDlg, IDC_EDIT1);
+		SendMessage(edit1, WM_SETTEXT, 0, LPARAM(L"unicode текст"));
+
+		auto f = SendMessage(edit1, WM_GETFONT, 0, 0);
+
 		auto colorgridHwnd = GetDlgItem(hDlg, IDC_CUSTOM2);
 		
+		
 
-		//SendMessage(colorgridHwnd, ZGM_SETFONT, 2, (LPARAM)Font);
+		SendMessage(colorgridHwnd, ZGM_SETFONT, 0, (LPARAM)f);
 		SendMessage(colorgridHwnd, ZGM_DIMGRID, 2, 0);
 		SendMessage(colorgridHwnd, ZGM_SHOWROWNUMBERS, false, 0);
 		SendMessage(colorgridHwnd, ZGM_EMPTYGRID, 1, 0);
+				
+		auto s = GetWStringFromResourceID(IDS_STRING108);
+		SendMessage(colorgridHwnd, ZGM_SETCELLTEXT, 1, LPARAM(s.c_str()));
 
-		wchar_t *p = nullptr;
-
-		int len = LoadString(hInstance, IDS_STRING108, reinterpret_cast<LPWSTR>(&p), 0);
-		wstring s = wstring(p, size_t(len));
-
-		//setup converter
-		using convert_type = codecvt_utf8_utf16<wchar_t>;
-		std::wstring_convert<convert_type, wchar_t> converter;
-
-		//use converter (.to_bytes: wstr->str, .from_bytes: str->wstr)
-		std::string converted_str = converter.to_bytes(s);
-		SendMessage(colorgridHwnd, ZGM_SETCELLTEXT, 1, LPARAM(converted_str.c_str()));
-
-		len = LoadString(hInstance, IDS_STRING109, reinterpret_cast<LPWSTR>(&p), 0);
-		s = wstring(p, size_t(len));
-		SendMessage(colorgridHwnd, ZGM_SETCELLTEXT, 2, LPARAM(s.c_str()));
+		//s = GetWStringFromResourceID(IDS_STRING109);
+		SendMessage(colorgridHwnd, ZGM_SETCELLTEXT, 2, LPARAM(L"Значение"));
 		
 		auto color = CSettings::GetColorString(ColorAxis);
 	}
@@ -193,6 +190,23 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		break;
 	}
 	return false;
+}
+
+std::string CUserInterface::GetStringFromResourceID(int ID)
+{
+	wchar_t *p = nullptr;
+
+	int len = LoadString(hInstance, IDS_STRING108, reinterpret_cast<LPWSTR>(&p), 0);
+	wstring ws = wstring(p, size_t(len));
+	string s(ws.begin(), ws.end());
+	return s;
+}
+
+std::wstring CUserInterface::GetWStringFromResourceID(int ID)
+{
+	wchar_t *p = nullptr;
+	int len = LoadString(hInstance, IDS_STRING108, reinterpret_cast<LPWSTR>(&p), 0);
+	return wstring(p, size_t(len));
 }
 
 LRESULT CUserInterface::Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -548,14 +562,14 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	CurrentY += VStep;
 	
 	int gridX = panelWidth;
-	int gridY = vpControl->Height;
+	int gridY = vpControl->GetHeight();
 	RECT clientRect;
 	GetClientRect(parentHWND, &clientRect);
 
 
-	Grid_ID = InsertElement(NULL, _T("ZeeGrid"), _T("Список траекторий"), WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX, gridY, 2 * vpControl->Width / 3, clientRect.right - panelWidth, &CUserInterface::Grid);
-	ColorGrid_ID = InsertElement(NULL, _T("ZeeGrid"), _T("Цвета"), WS_BORDER | WS_TABSTOP | WS_CHILD, gridX, gridY, 2 * vpControl->Width / 3, clientRect.right - panelWidth, &CUserInterface::ColorGrid);
-	InfoGrid_ID = InsertElement(NULL, _T("ZeeGrid"), _T("Информация"), WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX + 2 * vpControl->Width / 3 + 2, gridY, vpControl->Width / 3 - 2, clientRect.right - panelWidth, &CUserInterface::InfoGrid);
+	Grid_ID = InsertElement(NULL, _T("ZeeGrid"), _T("Список траекторий"), WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX, gridY, 2 * vpControl->GetWidth() / 3, clientRect.right - panelWidth, &CUserInterface::Grid);
+	ColorGrid_ID = InsertElement(NULL, _T("ZeeGrid"), _T("Цвета"), WS_BORDER | WS_TABSTOP | WS_CHILD, gridX, gridY, 2 * vpControl->GetWidth() / 3, clientRect.right - panelWidth, &CUserInterface::ColorGrid);
+	InfoGrid_ID = InsertElement(NULL, _T("ZeeGrid"), _T("Информация"), WS_BORDER | WS_TABSTOP | WS_VISIBLE | WS_CHILD, gridX + 2 * vpControl->GetWidth() / 3 + 2, gridY, vpControl->GetWidth() / 3 - 2, clientRect.right - panelWidth, &CUserInterface::InfoGrid);
 
 	
 	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) {
@@ -744,13 +758,13 @@ void CUserInterface::Resize() const
 	RECT clientRect;
 	GetClientRect(ParentHWND, &clientRect);
 	HWND gridHwnd = GetDlgItem(ParentHWND, Grid_ID);
-	MoveWindow(gridHwnd, PanelWidth, VPControl->Height + 2, 2* VPControl->Width / 3, clientRect.bottom - VPControl->Height - 2, TRUE);
+	MoveWindow(gridHwnd, PanelWidth, VPControl->GetHeight() + 2, 2* VPControl->GetWidth() / 3, clientRect.bottom - VPControl->GetHeight() - 2, TRUE);
 
 	gridHwnd = GetDlgItem(ParentHWND, InfoGrid_ID);
-	MoveWindow(gridHwnd, PanelWidth + 2* VPControl->Width / 3 + 2, VPControl->Height + 2, VPControl->Width / 3 - 2, clientRect.bottom - VPControl->Height - 2, TRUE);
+	MoveWindow(gridHwnd, PanelWidth + 2* VPControl->GetWidth() / 3 + 2, VPControl->GetHeight() + 2, VPControl->GetWidth() / 3 - 2, clientRect.bottom - VPControl->GetHeight() - 2, TRUE);
 
 	gridHwnd = GetDlgItem(ParentHWND, ColorGrid_ID);
-	MoveWindow(gridHwnd, PanelWidth, VPControl->Height + 2, 2 * VPControl->Width / 3, clientRect.bottom - VPControl->Height - 2, TRUE);
+	MoveWindow(gridHwnd, PanelWidth, VPControl->GetHeight() + 2, 2 * VPControl->GetWidth() / 3, clientRect.bottom - VPControl->GetHeight() - 2, TRUE);
 	//SetWindowPos(gridHwnd, NULL, PanelWidth, VPControl->Height + 2, VPControl->Width, clientRect.bottom - VPControl->Height - 2, 0);
 }
 
@@ -761,7 +775,9 @@ void CUserInterface::InitGrid()
 	if (!InfoGridHWND)
 		InfoGridHWND = GetDlgItem(ParentHWND, InfoGrid_ID);
 
-	SendMessage(GridHWND, ZGM_SETFONT, 2, (LPARAM)Font);
+	
+
+	SendMessage(GridHWND, ZGM_SETFONT, 0, (LPARAM)Font);
 	SendMessage(GridHWND, ZGM_DIMGRID, 7, 0);
 	SendMessage(GridHWND, ZGM_SHOWROWNUMBERS, TRUE, 0);
 
@@ -807,6 +823,7 @@ HFONT CUserInterface::GetFont()
 #endif
 
 	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
+
 	return CreateFontIndirect(&(ncm.lfMessageFont));
 }
 

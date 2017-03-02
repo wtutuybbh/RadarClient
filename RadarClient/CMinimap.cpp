@@ -9,10 +9,10 @@ bool CMinimap::IsCameraHere(int x, int y) const
 {
 	if (!Camera || !Scene)
 		return false;
-	glm::vec4 viewport = glm::vec4(0, 0, Width, Height);
-	glm::vec3 wincoord0 = glm::vec3(x, Height - y - 1, 0.0f);
+	glm::vec4 viewport = glm::vec4(0, 0, GetWidth(), GetHeight());
+	glm::vec3 wincoord0 = glm::vec3(x, GetHeight() - y - 1, 0.0f);
 	glm::vec3 p0 = glm::unProject(wincoord0, Camera->GetMiniMapView(), Camera->GetMiniMapProjection(), viewport);
-	glm::vec3 wincoord1 = glm::vec3(x, Height - y - 1, 1.0f);
+	glm::vec3 wincoord1 = glm::vec3(x, GetHeight() - y - 1, 1.0f);
 	glm::vec3 p1 = glm::unProject(wincoord1, Camera->GetMiniMapView(), Camera->GetMiniMapProjection(), viewport);
 
 	if (Scene->GetObjectAtMiniMapPosition(Id, p0, p1)) {
@@ -52,12 +52,13 @@ LRESULT CMinimap::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 
 		case SIZE_MAXIMIZED:									// Was Window Maximized?
 																//window->isVisible = TRUE;							// Set isVisible To True
-			ReshapeGL(LOWORD(lParam), HIWORD(lParam));		// Reshape Window - LoWord=Width, HiWord=Height
+			SetSize(LOWORD(lParam), HIWORD(lParam));		// Reshape Window - LoWord=Width, HiWord=Height
+
 			return 0;												// Return
 
 		case SIZE_RESTORED:										// Was Window Restored?
 																//window->isVisible = TRUE;							// Set isVisible To True
-			ReshapeGL(LOWORD(lParam), HIWORD(lParam));		// Reshape Window - LoWord=Width, HiWord=Height
+			SetSize(LOWORD(lParam), HIWORD(lParam));		// Reshape Window - LoWord=Width, HiWord=Height
 			return 0;												// Return
 		}
 		return 0;
@@ -78,7 +79,7 @@ LRESULT CMinimap::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 
 			
 			if (Scene && UI && Camera) {
-				Scene->SetCameraPositionFromMiniMapXY(2.0f*(float)LOWORD(lParam) / (float)Width - 1, 1 - 2.0f * (float)HIWORD(lParam) / (float)Height, 0);
+				Scene->SetCameraPositionFromMiniMapXY(2.0f*(float)LOWORD(lParam) / (float)GetWidth() - 1, 1 - 2.0f * (float)HIWORD(lParam) / (float)GetHeight(), 0);
 
 				float r = glm::length(Camera->GetDirection());
 				float e = acos(Camera->GetDirection().y / r);
@@ -96,8 +97,8 @@ LRESULT CMinimap::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 	{
 		if (IsCameraHere((int)LOWORD(lParam), (int)HIWORD(lParam))) {
 			CameraDrag = true;
-			DragStart.x = 2.0f*(float)LOWORD(lParam) / (float)Width - 1;
-			DragStart.y = 1 - 2.0f * (float)HIWORD(lParam) / (float)Height;
+			DragStart.x = 2.0f*(float)LOWORD(lParam) / (float)GetWidth() - 1;
+			DragStart.y = 1 - 2.0f * (float)HIWORD(lParam) / (float)GetHeight();
 		}
 
 		SetFocus(hwnd);
@@ -120,14 +121,14 @@ LRESULT CMinimap::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-void CMinimap::ReshapeGL(int width, int height)
+void CMinimap::ReshapeGL()
 {
-	Height = height;
-	Width = width;
+
 	if (hDC && hRC) {
 		MakeCurrent();
 		glViewport(0, 0, (GLsizei)(width), (GLsizei)(height));
 	}
+	needs_resize = false;
 }
 
 glm::mat4 CMinimap::GetProjMatrix() const

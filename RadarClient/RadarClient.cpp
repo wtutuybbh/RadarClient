@@ -309,6 +309,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		g_UI->dwi = &g_dwi;
 		g_Socket->dwi = &g_dwi;
 #endif // _DEBUG
+
+		wglMakeCurrent(nullptr, nullptr);
+		std::thread t(GLProc);
+		t.detach();
+
 		LOG_INFO(requestID, context, "WM_CREATE: End");
 	}
 	return 0;														// Return
@@ -704,23 +709,30 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	g_isProgramLooping = TRUE;											// Program Looping Is Set To TRUE	
 
 	bool winCreated = CreateMainWindow(&window);
+	g_window = &window;
+	g_keys = &keys;
 
+	
+	
+
+	
+
+	
 	//LOG_INFO(requestID, context, (boost::format("-=point before message loop=-")).str());
 	while (g_isProgramLooping)											// Loop Until WM_QUIT Is Received
 	{
 		if (winCreated == TRUE)							// Was Window Creation Successful?
 		{
-			g_window = &window;
-			g_keys = &keys;
+			
 				isMessagePumpActive = TRUE;								// Set isMessagePumpActive To TRUE
 				
-				while (isMessagePumpActive == TRUE)						// While The Message Pump Is Active
+				while (g_window && isMessagePumpActive == TRUE)						// While The Message Pump Is Active
 				{
 					if (!g_Initialized && hasVBO && hasVAO) {
-						Initialize();					
+						Initialize();
 					}
 					// Success Creating Window.  Check For Window Messages
-					if (PeekMessage(&msg, window.hWnd, 0, 0, PM_REMOVE) != 0)
+					if (PeekMessage(&msg, g_window->hWnd, 0, 0, PM_REMOVE) != 0)
 					{
 						// Check For WM_QUIT Message
 						if (msg.message != WM_QUIT)						// Is The Message A WM_QUIT Message?
@@ -734,7 +746,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					}
 					else												// If There Are No Messages
 					{
-						if (window.isVisible == FALSE)					// If Window Is Not Visible
+						if (g_window->isVisible == FALSE)					// If Window Is Not Visible
 						{
 							WaitMessage();								// Application Is Minimized Wait For A Message
 						}
@@ -745,8 +757,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							/*tickCount = GetTickCount();				// Get The Tick Count
 							Update(tickCount - window.lastTickCount);	// Update The Counter
 							window.lastTickCount = tickCount;*/			// Set Last Count To Current Count
-							/*
-							Draw();							
+							
+							/*Draw();							
 
 							if (g_vpControl->hRC) {
 								g_vpControl->MakeCurrent();
@@ -757,8 +769,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 								g_Minimap->MakeCurrent();
 								g_Minimap->Draw();
 								SwapBuffers(g_Minimap->hDC);
-							}
-							*/
+							}*/
+							
 						}
 					}
 				}														// Loop While isMessagePumpActive == TRUE
@@ -804,20 +816,25 @@ BOOL Initialize()					// Any GL Init Code & User Initialiazation Goes Here
 		}
 		return false;
 	}
-
-	g_vpControl->Scene = new CScene();	 
-	g_vpControl->Scene->Socket = g_Socket;
-	g_vpControl->Scene->UI = g_UI;
-	g_vpControl->UI = g_UI;
-	g_vpControl->Camera = g_vpControl->Scene->Camera;
+	if (g_vpControl) {
+		g_vpControl->Scene = new CScene();
+		g_vpControl->Scene->Socket = g_Socket;
+		g_vpControl->Scene->UI = g_UI;
+		g_vpControl->UI = g_UI;
+		g_vpControl->Camera = g_vpControl->Scene->Camera;
+	}
 	
-	g_Minimap->Scene = g_vpControl->Scene;	
-	g_Minimap->UI = g_UI;
-	g_Minimap->Camera = g_vpControl->Scene->Camera;
+	if (g_Minimap) {
+		g_Minimap->Scene = g_vpControl->Scene;
+		g_Minimap->UI = g_UI;
+		g_Minimap->Camera = g_vpControl->Scene->Camera;
+	}
 	
-	g_vpControl->Camera->SetAll(0, 0, 0, 0, 0, 1, 0, 1, 0, 
-		60.0f, 4.0f/3.0f, 1.0f, 10000.0f,
-		0.01, LookAtCallback_);
+	if (g_vpControl) {
+		g_vpControl->Camera->SetAll(0, 0, 0, 0, 0, 1, 0, 1, 0,
+			60.0f, 4.0f / 3.0f, 1.0f, 10000.0f,
+			0.01, LookAtCallback_);
+	}
 
 	g_UI->FillInfoGrid(g_vpControl->Scene);
 
@@ -882,56 +899,20 @@ void Draw(void)
 void GLProc()
 {
 	bool isMessagePumpActive = true;
-	char *myargv[1];
-	int myargc = 1;
-	myargv[0] = strdup("RadarClient");
-
-	glutInit(&myargc, myargv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-
-	free(myargv[0]);
 
 	g_isProgramLooping = TRUE;											// Program Looping Is Set To TRUE	
 
 																		//LOG_INFO(requestID, context, (boost::format("-=point before message loop=-")).str());
 	while (g_isProgramLooping)											// Loop Until WM_QUIT Is Received
 	{
-			g_window = &window;
-			g_keys = &keys;
 			isMessagePumpActive = TRUE;								// Set isMessagePumpActive To TRUE
 
-			while (isMessagePumpActive == TRUE)						// While The Message Pump Is Active
+			while (g_window && isMessagePumpActive == TRUE)						// While The Message Pump Is Active
 			{
-				if (!g_Initialized && hasVBO && hasVAO) {
-					Initialize();
-				}
 				// Success Creating Window.  Check For Window Messages
-				if (PeekMessage(&msg, window.hWnd, 0, 0, PM_REMOVE) != 0)
-				{
-					// Check For WM_QUIT Message
-					if (msg.message != WM_QUIT)						// Is The Message A WM_QUIT Message?
-					{
-						DispatchMessage(&msg);						// If Not, Dispatch The Message
-					}
-					else											// Otherwise (If Message Is WM_QUIT)
-					{
-						isMessagePumpActive = FALSE;				// Terminate The Message Pump
-					}
-				}
-				else												// If There Are No Messages
-				{
-					if (window.isVisible == FALSE)					// If Window Is Not Visible
-					{
-						WaitMessage();								// Application Is Minimized Wait For A Message
-					}
-					else											// If Window Is Visible
-					{
 
-						// Process Application Loop
-						/*tickCount = GetTickCount();				// Get The Tick Count
-						Update(tickCount - window.lastTickCount);	// Update The Counter
-						window.lastTickCount = tickCount;*/			// Set Last Count To Current Count
-
+					if (g_window->isVisible)					// If Window Is Not Visible
+					{						
 						Draw();
 
 						if (g_vpControl->hRC) {
@@ -946,16 +927,16 @@ void GLProc()
 						}
 
 					}
-				}
+				
 			}														// Loop While isMessagePumpActive == TRUE
 																	//}															// If (Initialize (...
 
-			DestroyWindowGL(g_vpControl->hWnd, g_vpControl->hDC, g_vpControl->hRC);															// Application Is Finished
-			DestroyWindowGL(g_Minimap->hWnd, g_Minimap->hDC, g_Minimap->hRC);
+			//DestroyWindowGL(g_vpControl->hWnd, g_vpControl->hDC, g_vpControl->hRC);															// Application Is Finished
+			//DestroyWindowGL(g_Minimap->hWnd, g_Minimap->hDC, g_Minimap->hRC);
 
 	}																	// While (isProgramLooping)
 
-	Deinitialize();
+	//Deinitialize();
 }
 
 void LookAtCallback_(double eyex, double eyey, double eyez, double centerx, double centery, double centerz, double upx, double upy, double upz)

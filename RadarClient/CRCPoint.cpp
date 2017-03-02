@@ -141,7 +141,7 @@ glm::mat4 CRCPointModel::GetScaleMatrix(CViewPortControl* vpControl)
 {
 	//return scaleMatrix.at(vpControl->Id);
 
-	glm::vec4 viewport = glm::vec4(0, 0, vpControl->Width, vpControl->Height);
+	glm::vec4 viewport = glm::vec4(0, 0, vpControl->GetWidth(), vpControl->GetHeight());
 
 	//glm::vec3 p1 = glm::unProject(glm::vec3(x, Height - y - 1, 1.0f), Camera->GetView(), Camera->GetProjection(), viewport);
 
@@ -152,8 +152,8 @@ glm::mat4 CRCPointModel::GetScaleMatrix(CViewPortControl* vpControl)
 
 	screenPoint = screenPoint / screenPoint.w;
 
-	glm::vec3 p00 = glm::vec3((screenPoint.x + 1)*vpControl->Width / 2 + 1, vpControl->Height + (screenPoint.y - 1)*vpControl->Height / 2, 0);
-	glm::vec3 p01 = glm::vec3((screenPoint.x + 1)*vpControl->Width / 2 + 1, vpControl->Height + (screenPoint.y - 1)*vpControl->Height / 2, 1);
+	glm::vec3 p00 = glm::vec3((screenPoint.x + 1)*vpControl->GetWidth() / 2 + 1, vpControl->GetHeight() + (screenPoint.y - 1)*vpControl->GetHeight() / 2, 0);
+	glm::vec3 p01 = glm::vec3((screenPoint.x + 1)*vpControl->GetWidth() / 2 + 1, vpControl->GetHeight() + (screenPoint.y - 1)*vpControl->GetHeight() / 2, 1);
 
 	glm::vec3 p10 = glm::unProject(p00, vpControl->GetViewMatrix(), vpControl->GetProjMatrix(), viewport);
 	glm::vec3 p11 = glm::unProject(p01, vpControl->GetViewMatrix(), vpControl->GetProjMatrix(), viewport);
