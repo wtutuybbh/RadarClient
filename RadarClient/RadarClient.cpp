@@ -703,10 +703,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	g_isProgramLooping = TRUE;											// Program Looping Is Set To TRUE	
 
+	bool winCreated = CreateMainWindow(&window);
+
 	//LOG_INFO(requestID, context, (boost::format("-=point before message loop=-")).str());
 	while (g_isProgramLooping)											// Loop Until WM_QUIT Is Received
 	{
-		if (CreateMainWindow(&window) == TRUE)							// Was Window Creation Successful?
+		if (winCreated == TRUE)							// Was Window Creation Successful?
 		{
 			g_window = &window;
 			g_keys = &keys;
@@ -740,10 +742,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						{
 							
 							// Process Application Loop
-							tickCount = GetTickCount();				// Get The Tick Count
+							/*tickCount = GetTickCount();				// Get The Tick Count
 							Update(tickCount - window.lastTickCount);	// Update The Counter
-							window.lastTickCount = tickCount;			// Set Last Count To Current Count
-							
+							window.lastTickCount = tickCount;*/			// Set Last Count To Current Count
+							/*
 							Draw();							
 
 							if (g_vpControl->hRC) {
@@ -756,7 +758,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 								g_Minimap->Draw();
 								SwapBuffers(g_Minimap->hDC);
 							}
-							
+							*/
 						}
 					}
 				}														// Loop While isMessagePumpActive == TRUE
@@ -875,6 +877,85 @@ void Draw(void)
 	}
 	g_nFrames++;
 
+}
+
+void GLProc()
+{
+	bool isMessagePumpActive = true;
+	char *myargv[1];
+	int myargc = 1;
+	myargv[0] = strdup("RadarClient");
+
+	glutInit(&myargc, myargv);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+
+	free(myargv[0]);
+
+	g_isProgramLooping = TRUE;											// Program Looping Is Set To TRUE	
+
+																		//LOG_INFO(requestID, context, (boost::format("-=point before message loop=-")).str());
+	while (g_isProgramLooping)											// Loop Until WM_QUIT Is Received
+	{
+			g_window = &window;
+			g_keys = &keys;
+			isMessagePumpActive = TRUE;								// Set isMessagePumpActive To TRUE
+
+			while (isMessagePumpActive == TRUE)						// While The Message Pump Is Active
+			{
+				if (!g_Initialized && hasVBO && hasVAO) {
+					Initialize();
+				}
+				// Success Creating Window.  Check For Window Messages
+				if (PeekMessage(&msg, window.hWnd, 0, 0, PM_REMOVE) != 0)
+				{
+					// Check For WM_QUIT Message
+					if (msg.message != WM_QUIT)						// Is The Message A WM_QUIT Message?
+					{
+						DispatchMessage(&msg);						// If Not, Dispatch The Message
+					}
+					else											// Otherwise (If Message Is WM_QUIT)
+					{
+						isMessagePumpActive = FALSE;				// Terminate The Message Pump
+					}
+				}
+				else												// If There Are No Messages
+				{
+					if (window.isVisible == FALSE)					// If Window Is Not Visible
+					{
+						WaitMessage();								// Application Is Minimized Wait For A Message
+					}
+					else											// If Window Is Visible
+					{
+
+						// Process Application Loop
+						/*tickCount = GetTickCount();				// Get The Tick Count
+						Update(tickCount - window.lastTickCount);	// Update The Counter
+						window.lastTickCount = tickCount;*/			// Set Last Count To Current Count
+
+						Draw();
+
+						if (g_vpControl->hRC) {
+							g_vpControl->MakeCurrent();
+							g_vpControl->Draw();
+							SwapBuffers(g_vpControl->hDC);					// Swap Buffers (Double Buffering)
+						}
+						if (g_Minimap->hRC) {
+							g_Minimap->MakeCurrent();
+							g_Minimap->Draw();
+							SwapBuffers(g_Minimap->hDC);
+						}
+
+					}
+				}
+			}														// Loop While isMessagePumpActive == TRUE
+																	//}															// If (Initialize (...
+
+			DestroyWindowGL(g_vpControl->hWnd, g_vpControl->hDC, g_vpControl->hRC);															// Application Is Finished
+			DestroyWindowGL(g_Minimap->hWnd, g_Minimap->hDC, g_Minimap->hRC);
+
+	}																	// While (isProgramLooping)
+
+	Deinitialize();
 }
 
 void LookAtCallback_(double eyex, double eyey, double eyez, double centerx, double centery, double centerz, double upx, double upy, double upz)
