@@ -19,6 +19,8 @@
 #include "CRCGridCell.h"
 #include "resource1.h"
 
+#include "CRCListView.h"
+
 
 const std::string CUserInterface::requestID = "CUserInterface";
 HINSTANCE CUserInterface::hInstance;
@@ -155,22 +157,10 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 	switch (uMsg)
 	{
 	case WM_INITDIALOG: {
-		auto edit1 = GetDlgItem(hDlg, IDC_EDIT1);
-		SendMessage(edit1, WM_SETTEXT, 0, LPARAM(L"unicode текст"));
 
-		auto f = SendMessage(edit1, WM_GETFONT, 0, 0);
-
-		auto colorgridHwnd = GetDlgItem(hDlg, IDC_CUSTOM2);
-		
-		
-
-		SendMessage(colorgridHwnd, ZGM_SETFONT, 0, (LPARAM)f);
-		SendMessage(colorgridHwnd, ZGM_DIMGRID, 2, 0);
-		SendMessage(colorgridHwnd, ZGM_SHOWROWNUMBERS, false, 0);
-		SendMessage(colorgridHwnd, ZGM_EMPTYGRID, 1, 0);
 				
 		auto s = GetWStringFromResourceID(IDS_STRING108);
-		SendMessage(colorgridHwnd, ZGM_SETCELLTEXT, 1, LPARAM(s.c_str()));
+
 
 		//s = GetWStringFromResourceID(IDS_STRING109);
 		SendMessage(colorgridHwnd, ZGM_SETCELLTEXT, 2, LPARAM(L"Значение"));
