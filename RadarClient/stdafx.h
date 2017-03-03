@@ -110,3 +110,26 @@ typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_le
 #define DATFILE_MAXLINELENGTH 256
 
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
+typedef std::basic_string<TCHAR, std::char_traits<TCHAR>, std::allocator<TCHAR> >  tstring;
+
+inline std::wstring utf8_to_wstring(const std::string& str)
+{
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
+	return myconv.from_bytes(str);
+}
+
+// convert wstring to UTF-8 string
+inline std::string wstring_to_utf8(const std::wstring& str)
+{
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
+	return myconv.to_bytes(str);
+}
+
+#ifdef UNICODE
+#define to_tstring(s) utf8_to_wstring(s)
+#define to__string(s) wstring_to_utf8(s)
+#else
+#define to_tstring(s) s
+#define to__string(s) s
+#endif

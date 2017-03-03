@@ -72,7 +72,7 @@ class CSettings
 	static std::unordered_map<int, float> floats;
 	static std::unordered_map<int, int> ints;
 	static std::unordered_map<int, std::string> strings;
-	static std::map<std::string, Settings> stringmap;
+	static std::map<tstring, Settings> stringmap;
 
 	static FIBITMAP *RPointPalette;
 	static FIBITMAP *RImagePalette;
@@ -84,7 +84,7 @@ public:
 	static bool Init();
 	static bool InitPalette();
 	static glm::vec4 GetColor(int key);
-	static std::wstring GetColorString(int key);
+	static tstring GetColorString(int key);
 	static COLORREF GetColorRGB(int key);
 	static float GetFloat(int key);
 	static int GetInt(int key);
@@ -93,6 +93,6 @@ public:
 	static void SetInt(Settings key, int value);
 	static void SetColor(Settings key, glm::vec4 value);
 	static void SetString(Settings key, std::string value);
-	static Settings GetIndex(std::string name);
+	static Settings GetIndex(tstring name);
 };
 

@@ -161,9 +161,15 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 				
 		auto s = GetWStringFromResourceID(IDS_STRING108);
 
+		auto hwndListView = GetDlgItem(hDlg, IDC_LIST1);
 
+		CRCListView::InitListView(hwndListView, 12);
+		RECT rect;
+		GetClientRect(hwndListView, &rect);
+		ListView_SetExtendedListViewStyle(hwndListView, LVS_EX_FULLROWSELECT);
+		ListView_SetColumnWidth(hwndListView, 0, 200);
+		ListView_SetColumnWidth(hwndListView, 1, rect.right - 200);
 		//s = GetWStringFromResourceID(IDS_STRING109);
-		SendMessage(colorgridHwnd, ZGM_SETCELLTEXT, 2, LPARAM(L"Значение"));
 		
 		auto color = CSettings::GetColorString(ColorAxis);
 	}
@@ -178,6 +184,11 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 			return (INT_PTR)TRUE;
 		}
 		break;
+	case WM_SIZE:
+		CRCListView::ResizeListView(GetDlgItem(hDlg, IDC_LIST1), hDlg);
+		break;
+	case WM_NOTIFY:
+		return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST1, GetColorListViewCellText);
 	}
 	return false;
 }
@@ -197,6 +208,44 @@ std::wstring CUserInterface::GetWStringFromResourceID(int ID)
 	wchar_t *p = nullptr;
 	int len = LoadString(hInstance, IDS_STRING108, reinterpret_cast<LPWSTR>(&p), 0);
 	return wstring(p, size_t(len));
+}
+
+tstring CUserInterface::GetColorForSettingsDialog(int index)
+{
+	switch (index)
+	{
+	case 0:
+		return TEXT("ColorBackgroud");
+	case 1:
+		return  TEXT("ColorAxis");
+	case 2:
+		return  TEXT("ColorNumbers");
+	case 3:
+		return  TEXT("ColorPointLowLevel");
+	case 4:
+		return  TEXT("ColorPointHighLevel");
+	case 5:
+		return  TEXT("ColorPointSelected");
+	case 6:
+		return  TEXT("ColorTrack");
+	case 7:
+		return  TEXT("ColorTrackSelected");
+	case 8:
+		return  TEXT("ColorMeasureLine");
+	case 9:
+		return  TEXT("ColorAltitudeLowest");
+	case 10:
+		return  TEXT("ColorAltitudeHighest");
+	case 11:
+		return  TEXT("ColorBlankZones");
+	default:
+		return  TEXT("");
+	}
+}
+
+tstring CUserInterface::GetColorListViewCellText(int iItem, int iSubItem)
+{
+	return GetColorForSettingsDialog(iItem);
 }
 
 LRESULT CUserInterface::Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

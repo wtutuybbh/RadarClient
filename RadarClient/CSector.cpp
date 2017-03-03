@@ -265,6 +265,7 @@ glm::vec4 CSector::GetColor(float level)
 
 FIBITMAP * CSector::palette = nullptr;
 int CSector::paletteWidth = 0;
+
 bool CSector::InitPalette(std::string fileName)
 {
 	std::string context = "CSector::InitPalette";

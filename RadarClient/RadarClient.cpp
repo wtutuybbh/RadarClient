@@ -590,17 +590,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		if (settingName.substr(0, 6) == "String")
 		{
 			std::string settingValue(strparts.at(1).c_str());
-			CSettings::SetString(CSettings::GetIndex(settingName), settingValue);
+			CSettings::SetString(CSettings::GetIndex(to_tstring(settingName)), settingValue);
 		}
 		if(settingName.substr(0, 5) == "Float")
 		{
 			float settingValue = ::atof(strparts.at(1).c_str());
-			CSettings::SetFloat(CSettings::GetIndex(settingName), settingValue);
+			CSettings::SetFloat(CSettings::GetIndex(to_tstring(settingName)), settingValue);
 		}
 		if (settingName.substr(0, 3) == "Int")
 		{
 			int settingValue = ::_atoi64(strparts.at(1).c_str());
-			CSettings::SetInt(CSettings::GetIndex(settingName), settingValue);
+			CSettings::SetInt(CSettings::GetIndex(to_tstring(settingName)), settingValue);
 		}
 		if (settingName.substr(0, 5) == "Color")
 		{
@@ -633,7 +633,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			ss3 >> v;
 			settingValue.a = (float)v / 255.0;
 
-			CSettings::SetColor(CSettings::GetIndex(settingName), settingValue);
+			CSettings::SetColor(CSettings::GetIndex(to_tstring(settingName)), settingValue);
 		}
 	}
 

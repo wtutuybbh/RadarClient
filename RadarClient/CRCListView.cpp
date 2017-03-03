@@ -91,19 +91,21 @@ BOOL CRCListView::InitListView(HWND hwndListView, int ITEM_COUNT)
 {
 	LV_COLUMN   lvColumn;
 	int         i;
-	TCHAR       szString[5][20] = { TEXT("Main Column"), TEXT("Column 1"), TEXT("Column 2"), TEXT("Column 3"), TEXT("Column 4") };
+	TCHAR       szString[5][20] = { TEXT("Параметр"), TEXT("Значение") };
 
 	//empty the list
 	ListView_DeleteAllItems(hwndListView);
+
+	int res;
 
 	//initialize the columns
 	lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
 	lvColumn.fmt = LVCFMT_LEFT;
 	lvColumn.cx = 120;
-	for (i = 0; i < 5; i++)
+	for (i = 0; i < 2; i++)
 	{
 		lvColumn.pszText = szString[i];
-		ListView_InsertColumn(hwndListView, i, &lvColumn);
+		res = ListView_InsertColumn(hwndListView, i, &lvColumn);
 	}
 
 	InsertListViewItems(hwndListView, ITEM_COUNT);
@@ -122,7 +124,7 @@ BOOL CRCListView::InsertListViewItems(HWND hwndListView, int ITEM_COUNT)
 	return TRUE;
 }
 
-LRESULT CRCListView::ListViewNotify(HWND hWnd, LPARAM lParam, int ID_LISTVIEW)
+LRESULT CRCListView::ListViewNotify(HWND hWnd, LPARAM lParam, int ID_LISTVIEW, CellTextCallback cellText)
 {
 	LPNMHDR  lpnmh = (LPNMHDR)lParam;
 	HWND     hwndListView = GetDlgItem(hWnd, ID_LISTVIEW);
@@ -139,7 +141,7 @@ LRESULT CRCListView::ListViewNotify(HWND hWnd, LPARAM lParam, int ID_LISTVIEW)
 			if (lpdi->item.mask & LVIF_TEXT)
 			{
 				_sntprintf_s(szString, _countof(szString), _TRUNCATE,
-					TEXT("Элемент %d - Column %d"),
+					cellText(lpdi->item.iItem, lpdi->item.iSubItem).c_str(),
 					lpdi->item.iItem + 1, lpdi->item.iSubItem);
 				_tcsncpy_s(lpdi->item.pszText, lpdi->item.cchTextMax,
 					szString, _TRUNCATE);
@@ -150,7 +152,7 @@ LRESULT CRCListView::ListViewNotify(HWND hWnd, LPARAM lParam, int ID_LISTVIEW)
 			if (lpdi->item.mask & LVIF_TEXT)
 			{
 				_sntprintf_s(szString, _countof(szString), _TRUNCATE,
-					TEXT("Item %d"), lpdi->item.iItem + 1);
+					cellText(lpdi->item.iItem, lpdi->item.iSubItem).c_str(), lpdi->item.iItem + 1);
 				_tcsncpy_s(lpdi->item.pszText, lpdi->item.cchTextMax,
 					szString, _TRUNCATE);
 			}
