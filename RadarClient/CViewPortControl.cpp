@@ -231,13 +231,13 @@ C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 	if (o)
 	{
 		std::string typeName = o->GetTypeName();
-		//LOG_INFO__("Scene->GetSectorPoint: (x=%d, y=%d) => (o: %s)", x, y, typeName);
+		LOG_INFO__("Scene->GetSectorPoint: (x=%d, y=%d) => (o: %s)", x, y, typeName);
 	}
 	C3DObjectModel *t = Scene->GetFirstTrackBetweenPoints(this, glm::vec2(x, y), index);
 	if (t)
 	{
 		std::string typeName = t->GetTypeName();
-		//LOG_INFO__("Scene->GetFirstTrackBetweenPoints: (x=%d, y=%d) => (t: %s)", x, y, typeName);
+		LOG_INFO__("Scene->GetFirstTrackBetweenPoints: (x=%d, y=%d) => (t: %s)", x, y, typeName);
 	}
 	if (o && !t) {
 		o->SetColor(glm::vec4(0, 1, 0, 1));

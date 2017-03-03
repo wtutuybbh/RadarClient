@@ -219,7 +219,10 @@ std::wstring CSettings::GetColorString(int key)
 {
 	auto color = GetColor(key);
 	std::wstringstream str;
-	str << "#" << std::hex << int(255 * color.r) << int(255 * color.g) << int(255 * color.b) << int(255 * color.a);	
+	str << "#" << std::hex << std::setw(2) << std::setfill(L'0') << int(255 * color.r);
+	str << std::hex << std::setw(2) << std::setfill(L'0') << int(255 * color.g);
+	str << std::hex << std::setw(2) << std::setfill(L'0') << int(255 * color.b);
+	str << std::hex << std::setw(2) << std::setfill(L'0') << int(255 * color.a);
 	return str.str();
 }
 

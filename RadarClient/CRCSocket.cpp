@@ -188,7 +188,7 @@ int CRCSocket::Read()
 		ZeroMemory(szIncoming, sizeof(szIncoming));
 		recev = recv(Socket, client->buff + client->offset, TXRXBUFSIZE, 0);
 
-		if (ReadLogEnabled) LOG_INFO(requestID, context, (boost::format("recv returned %1% bytes of data") % recev).str().c_str());
+		if (ReadLogEnabled) LOG_INFO__("client->offset=%d", client->offset);
 
 		offset = recev + client->offset;
 		if (offset < sizeof(_sh)) //приняли меньше шапки
@@ -200,6 +200,7 @@ int CRCSocket::Read()
 		if (sh->word1 != 2863311530/* 0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку
 			return recev;
 		length = sh->dlina;
+		if (ReadLogEnabled) LOG_INFO__("sh->dlina=%d", sh->dlina);
 		while (length <= offset)  // приняли больше или ровно 1 порцию
 		{
 			try // защита на выделение памяти
@@ -312,6 +313,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 				{
 					LOG_WARN(requestID, context, "pts is nullptr");
 				}
+				
 			}
 		}
 		break;

@@ -245,7 +245,9 @@ tstring CUserInterface::GetColorForSettingsDialog(int index)
 
 tstring CUserInterface::GetColorListViewCellText(int iItem, int iSubItem)
 {
-	return GetColorForSettingsDialog(iItem);
+	if (iSubItem == 0)
+		return GetColorForSettingsDialog(iItem);
+	return CSettings::GetColorString(CSettings::GetIndex(GetColorForSettingsDialog(iItem)));
 }
 
 LRESULT CUserInterface::Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

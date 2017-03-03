@@ -114,7 +114,7 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 		(*vbuffer)[i].vert = origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0);
 		(*vbuffer)[i].norm.x = pts[i].Amp;		
 		(*vbuffer)[i].color = GetColor(pts[i].Amp);		
-		//LOG_INFO__("index= %d, i= %d, R= %d, b= %d, E= %d, Amp= %f", index, i, pts[i].R, pts[i].B, pts[i].E, pts[i].Amp);
+		LOG_INFO__("index= %d, i= %d, R= %d, b= %d, E= %d, Amp= %f", index, i, pts[i].R, pts[i].B, pts[i].E, pts[i].Amp);
 	}
 	
 	vbo.at(Main)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
