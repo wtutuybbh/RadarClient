@@ -24,6 +24,8 @@
 const std::string CUserInterface::requestID = "CUserInterface";
 HINSTANCE CUserInterface::hInstance;
 HFONT CUserInterface::Font;
+HWND CUserInterface::ParentHWND;
+CXColorSpectrumCtrl CUserInterface::m_ColorSpectrum;
 
 LRESULT Button1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	return 0;
@@ -124,30 +126,7 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 LRESULT CUserInterface::Button_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	int g_nCmdShow = 1;
-	HRSRC       hrsrc;
-	HGLOBAL     hglobal;
-	HINSTANCE hInstance = (HINSTANCE)GetWindowLong(ParentHWND, GWL_HINSTANCE);
-
-	auto intres = MAKEINTRESOURCE(IDD_DIALOG4);
-
-	
-
-	auto ret = DialogBox(hInstance, intres, ParentHWND, DLGPROC(&CUserInterface::Dialog_Settings));
-
-	//auto hDialog = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG2), ParentHWND, DLGPROC(&CUserInterface::Dialog_Settings));
-
-	//auto err = GetLastError();
-
-	//hglobal = ::LoadResource(hInstance, hrsrc);
-
-	//HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)hglobal, ParentHWND, (DLGPROC)&CUserInterface::Dialog_Settings);
-
-	//ShowWindow(hwnd1, g_nCmdShow);
-
-	//SetWindowPos(hwnd1, HWND_TOP, 0, 720, 0, 0, SWP_NOSIZE);
-
-
+	auto ret = DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG4), ParentHWND, DLGPROC(&CUserInterface::Dialog_Settings));
 	return LRESULT();
 }
 
@@ -193,6 +172,15 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 			SetWindowLong(hDlg, DWL_MSGRESULT,
 				(LONG)ProcessColorListViewCustomDraw(lParam));
 			return TRUE;
+		}
+		if (((LPNMHDR)lParam)->code == NM_DBLCLK)
+		{
+			HINSTANCE hInstance = (HINSTANCE)GetWindowLong(ParentHWND, GWL_HINSTANCE);
+
+
+
+			auto ret = DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG3), hDlg, DLGPROC(&CUserInterface::Dialog_SelectColor));
+			return LRESULT();
 		}
 		return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST1, GetColorListViewCellText);
 	}
@@ -261,6 +249,65 @@ LRESULT CUserInterface::ProcessColorListViewCustomDraw(LPARAM lParam) {
 	}
 	return CDRF_DODEFAULT;
 }
+
+LRESULT CUserInterface::Dialog_SelectColor(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if (lParam == 9001)
+	{
+		int i = 0;
+	}
+	switch (uMsg)
+	{
+	case WM_INITDIALOG: {
+		auto hWnd = GetDlgItem(hDlg, IDC_STATIC_COLOR_SPECTRUM);
+
+		RECT rect;
+		GetClientRect(hWnd, &rect);
+		POINT rectTL;
+		rectTL.x = rect.left;
+		rectTL.y = rect.top;
+		ScreenToClient(hDlg, &rectTL);
+
+		POINT rectBR;
+		rectBR.x = rect.right;
+		rectBR.y = rect.bottom;
+		ScreenToClient(hDlg, &rectBR);
+
+		rect.left = rectTL.x;
+		rect.top = rectTL.y;
+		rect.right = rectBR.x;
+		rect.bottom = rectBR.y;
+
+		//ShowWindow(hWnd, SW_HIDE);         // hide placeholder
+		m_ColorSpectrum.Create(hInstance,
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP,             // styles
+			rect,                                           // control rect
+			hDlg,                                         // parent window
+			9001,                                           // control id
+			RGB(0, 255, 0));                                  // initial color
+			//CXColorSpectrumCtrl::XCOLOR_TOOLTIP_HTML);     // tooltip format
+
+															// call SetWindowPos to insert control in proper place in tab order
+		SetWindowPos(m_ColorSpectrum.m_hWnd, hWnd, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		ShowWindow(m_ColorSpectrum.m_hWnd, SW_SHOW);
+	}
+						break;
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	case WM_NOTIFY:
+	{
+
+	}
+	break;
+	}
+	return false;
+}
+
 std::string CUserInterface::GetStringFromResourceID(int ID)
 {
 	wchar_t *p = nullptr;
@@ -328,12 +375,10 @@ void CUserInterface::SetColorListViewItemColor(LPARAM lParam, int iItem, int iSu
 
 		auto c = CSettings::GetColorRGB(CSettings::GetIndex(GetColorForSettingsDialog(iItem)));
 
-		auto cR = GetRValue(c);
-		auto cG = GetGValue(c);
-		auto cB = GetBValue(c);
-
-
 		lplvcd->clrTextBk = c;
+
+		/*
+		//uncomment to set font color
 
 		const float gamma = 2.2;
 		float L = 0.2126 * pow(GetRValue(c)/255.0, gamma)
@@ -349,7 +394,7 @@ void CUserInterface::SetColorListViewItemColor(LPARAM lParam, int iItem, int iSu
 		else
 		{
 			lplvcd->clrText = RGB(255, 255, 255);
-		}
+		}*/
 	}
 }
 
@@ -619,8 +664,9 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	string context = "CUserInterface::CUserInterface";
 	LOG_INFO(requestID, context, (boost::format("Start... parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%...") % parentHWND % vpControl % socket % panelWidth).str().c_str());
 
-	this->ParentHWND = parentHWND;
+	ParentHWND = parentHWND;
 	hInstance = HINSTANCE(GetWindowLong(parentHWND, GWL_HINSTANCE));
+
 	this->VPControl = vpControl;
 	this->Socket = socket;
 

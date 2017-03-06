@@ -4,6 +4,7 @@
 
 #include "Util.h"
 #include <CommCtrl.h>
+#include "XColorSpectrumCtrl/XColorSpectrumCtrl.h"
 
 class CScene;
 class CViewPortControl;
@@ -95,6 +96,9 @@ private:
 	static void InitColorListViewColumns(HWND hwndListView, LV_COLUMN lvColumn);
 	static LRESULT CALLBACK ProcessColorListViewCustomDraw(LPARAM lParam);
 
+	static LRESULT CALLBACK Dialog_SelectColor(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static CXColorSpectrumCtrl m_ColorSpectrum;
+
 	virtual LRESULT Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MarkupOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -116,7 +120,7 @@ private:
 	virtual LRESULT IDD_DIALOG1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 public:
 	int MinimapSize;
-	HWND ParentHWND{ nullptr };
+	static HWND ParentHWND;
 	HWND SettingsHWND {nullptr};
 	HFONT hDlgFont {nullptr};
 	

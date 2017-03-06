@@ -36,9 +36,9 @@ public:
 	CScene *Scene{ nullptr };
 	CCamera *Camera{ nullptr };
 	CUserInterface *UI{ nullptr };
-	HWND hWnd;
-	HDC hDC;
-	HGLRC hRC;
+	HWND hWnd{ nullptr };
+	HDC hDC{ nullptr };
+	HGLRC hRC {nullptr};
 
 	CViewPortControl(LPCWSTR className);
 	virtual ~CViewPortControl();
