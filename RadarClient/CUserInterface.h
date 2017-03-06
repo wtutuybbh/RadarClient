@@ -3,6 +3,7 @@
 #include "stdafx.h"
 
 #include "Util.h"
+#include <CommCtrl.h>
 
 class CScene;
 class CViewPortControl;
@@ -90,6 +91,9 @@ private:
 	static std::wstring GetWStringFromResourceID(int ID);
 	static tstring GetColorForSettingsDialog(int index);
 	static tstring GetColorListViewCellText(int iItem, int iSubItem);
+	static void SetColorListViewItemColor(LPARAM lParam, int iItem, int iSubItem);
+	static void InitColorListViewColumns(HWND hwndListView, LV_COLUMN lvColumn);
+	static LRESULT CALLBACK ProcessColorListViewCustomDraw(LPARAM lParam);
 
 	virtual LRESULT Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

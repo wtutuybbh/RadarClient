@@ -45,10 +45,10 @@ HWND g_ViewPortControl_hWnd;
 
 HANDLE g_hIcon;
 
-CViewPortControl *g_vpControl;
-CMinimap *g_Minimap;
-CUserInterface *g_UI;
-CRCSocket *g_Socket;
+CViewPortControl *g_vpControl = nullptr;
+CMinimap *g_Minimap = nullptr;
+CUserInterface *g_UI = nullptr;
+CRCSocket *g_Socket = nullptr;
 #ifdef _DEBUG
 DebugWindowInfo g_dwi;
 #endif
@@ -60,8 +60,8 @@ bool g_Initialized = false;
 
 bool g_AltPressed = false;
 
-GL_Window*	g_window;
-Keys*		g_keys;
+GL_Window*	g_window = nullptr;
+Keys*		g_keys = nullptr;
 
 std::string requestID = "RadarClient";
 

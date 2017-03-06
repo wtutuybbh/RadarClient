@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 
 #include "CRCListView.h"
-#include <CommCtrl.h>
+
 
 /*
 LRESULT CALLBACK MainWndProc(HWND hWnd,
@@ -87,26 +87,19 @@ void CRCListView::ResizeListView(HWND, HWND)
 {
 }
 
-BOOL CRCListView::InitListView(HWND hwndListView, int ITEM_COUNT)
+BOOL CRCListView::InitListView(HWND hwndListView, int ITEM_COUNT, InitListViewColumnsCallback initListViewColumns)
 {
 	LV_COLUMN   lvColumn;
-	int         i;
-	TCHAR       szString[5][20] = { TEXT("Параметр"), TEXT("Значение") };
 
 	//empty the list
 	ListView_DeleteAllItems(hwndListView);
-
-	int res;
 
 	//initialize the columns
 	lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
 	lvColumn.fmt = LVCFMT_LEFT;
 	lvColumn.cx = 120;
-	for (i = 0; i < 2; i++)
-	{
-		lvColumn.pszText = szString[i];
-		res = ListView_InsertColumn(hwndListView, i, &lvColumn);
-	}
+	
+	initListViewColumns(hwndListView, lvColumn);
 
 	InsertListViewItems(hwndListView, ITEM_COUNT);
 

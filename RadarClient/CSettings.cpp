@@ -228,7 +228,7 @@ std::wstring CSettings::GetColorString(int key)
 
 COLORREF CSettings::GetColorRGB(int key)
 {
-	auto color = CSettings::GetColor(ColorAxis);
+	auto color = CSettings::GetColor(key);
 	return RGB(255 * color.r, 255 * color.g, 255 * color.b);
 }
 

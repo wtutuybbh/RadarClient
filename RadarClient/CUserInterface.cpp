@@ -5,7 +5,6 @@
 #include "CViewPortControl.h"
 #include "CCamera.h"
 #include "CScene.h"
-#include <CommCtrl.h>
 
 #include "ZeeGrid.h"
 
@@ -163,12 +162,13 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 
 		auto hwndListView = GetDlgItem(hDlg, IDC_LIST1);
 
-		CRCListView::InitListView(hwndListView, 12);
+		CRCListView::InitListView(hwndListView, 12, InitColorListViewColumns);
 		RECT rect;
 		GetClientRect(hwndListView, &rect);
 		ListView_SetExtendedListViewStyle(hwndListView, LVS_EX_FULLROWSELECT);
-		ListView_SetColumnWidth(hwndListView, 0, 200);
-		ListView_SetColumnWidth(hwndListView, 1, rect.right - 200);
+		ListView_SetColumnWidth(hwndListView, 0, 150);
+		ListView_SetColumnWidth(hwndListView, 1, 70);
+		ListView_SetColumnWidth(hwndListView, 2, rect.right - 220);
 		//s = GetWStringFromResourceID(IDS_STRING109);
 		
 		auto color = CSettings::GetColorString(ColorAxis);
@@ -188,11 +188,79 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		CRCListView::ResizeListView(GetDlgItem(hDlg, IDC_LIST1), hDlg);
 		break;
 	case WM_NOTIFY:
+	{
+		if (((LPNMHDR)lParam)->code == NM_CUSTOMDRAW) {
+			SetWindowLong(hDlg, DWL_MSGRESULT,
+				(LONG)ProcessColorListViewCustomDraw(lParam));
+			return TRUE;
+		}
 		return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST1, GetColorListViewCellText);
+	}
+	break;
 	}
 	return false;
 }
+LRESULT CUserInterface::ProcessColorListViewCustomDraw(LPARAM lParam) {
+	LPNMLVCUSTOMDRAW lplvcd = (LPNMLVCUSTOMDRAW)lParam;
+	switch (lplvcd->nmcd.dwDrawStage)
+	{
+	case CDDS_PREPAINT: //Before the paint cycle begins
+						//request notifications for individual listview items
+		return CDRF_NOTIFYITEMDRAW;
 
+	case CDDS_ITEMPREPAINT: //Before an item is drawn
+		/*if (((int)lplvcd->nmcd.dwItemSpec % 2) == 0)
+		{
+			//customize item appearance
+			lplvcd->clrText = RGB(255, 0, 0);
+			lplvcd->clrTextBk = RGB(200, 200, 200);
+			return CDRF_NOTIFYSUBITEMDRAW;// CDRF_NEWFONT;
+		}
+		else {
+			lplvcd->clrText = RGB(0, 0, 255);
+			lplvcd->clrTextBk = RGB(255, 255, 255);
+
+			return CDRF_NOTIFYSUBITEMDRAW; // CDRF_NEWFONT;
+		}*/
+		return CDRF_NOTIFYSUBITEMDRAW;
+		break;
+
+		//Before a subitem is drawn
+	case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
+		//(int)lplvcd->nmcd.dwItemSpec
+		//lplvcd->iSubItem
+
+		/*if (1 == (int)lplvcd->nmcd.dwItemSpec)
+		{
+			if (0 == lplvcd->iSubItem)
+			{
+				//customize subitem appearance for column 0
+				lplvcd->clrText = RGB(255, 0, 0);
+				lplvcd->clrTextBk = RGB(255, 255, 255);
+
+				//To set a custom font:
+				//SelectObject(lplvcd->nmcd.hdc, 
+				//    <your custom HFONT>);
+
+				return CDRF_NEWFONT;
+			}
+			else if (1 == lplvcd->iSubItem)
+			{
+				//customize subitem appearance for columns 1..n
+				//Note: setting for column i 
+				//carries over to columnn i+1 unless
+				//      it is explicitly reset
+				lplvcd->clrTextBk = RGB(255, 0, 0);
+				lplvcd->clrTextBk = RGB(255, 255, 255);
+
+				return CDRF_NEWFONT;
+			}
+		}*/
+		SetColorListViewItemColor(lParam, int(lplvcd->nmcd.dwItemSpec), lplvcd->iSubItem);
+		break;
+	}
+	return CDRF_DODEFAULT;
+}
 std::string CUserInterface::GetStringFromResourceID(int ID)
 {
 	wchar_t *p = nullptr;
@@ -247,7 +315,52 @@ tstring CUserInterface::GetColorListViewCellText(int iItem, int iSubItem)
 {
 	if (iSubItem == 0)
 		return GetColorForSettingsDialog(iItem);
-	return CSettings::GetColorString(CSettings::GetIndex(GetColorForSettingsDialog(iItem)));
+	if (iSubItem == 1)
+		return CSettings::GetColorString(CSettings::GetIndex(GetColorForSettingsDialog(iItem)));
+	return TEXT("");
+}
+
+void CUserInterface::SetColorListViewItemColor(LPARAM lParam, int iItem, int iSubItem)
+{
+	if (iSubItem == 2)
+	{
+		LPNMLVCUSTOMDRAW lplvcd = LPNMLVCUSTOMDRAW(lParam);
+
+		auto c = CSettings::GetColorRGB(CSettings::GetIndex(GetColorForSettingsDialog(iItem)));
+
+		auto cR = GetRValue(c);
+		auto cG = GetGValue(c);
+		auto cB = GetBValue(c);
+
+
+		lplvcd->clrTextBk = c;
+
+		const float gamma = 2.2;
+		float L = 0.2126 * pow(GetRValue(c)/255.0, gamma)
+			+ 0.7152 * pow(GetGValue(c) / 255.0, gamma)
+			+ 0.0722 * pow(GetBValue(c) / 255.0, gamma);
+
+		boolean use_black = (L > pow(0.5, gamma));
+
+		if (use_black)
+		{
+			lplvcd->clrText = RGB(0, 0, 0);
+		}
+		else
+		{
+			lplvcd->clrText = RGB(255, 255, 255);
+		}
+	}
+}
+
+void CUserInterface::InitColorListViewColumns(HWND hwndListView, LV_COLUMN lvColumn)
+{
+	TCHAR       szString[3][20] = { TEXT("Параметр"), TEXT("Значение"), TEXT("Цвет") };
+	for (auto i = 0; i < 3; i++)
+	{
+		lvColumn.pszText = szString[i];
+		ListView_InsertColumn(hwndListView, i, &lvColumn);
+	}
 }
 
 LRESULT CUserInterface::Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
