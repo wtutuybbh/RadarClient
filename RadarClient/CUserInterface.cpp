@@ -124,12 +124,26 @@ LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	return LRESULT();
 }
 
+HWND CUserInterface::SettingsHWND = nullptr;
 LRESULT CUserInterface::Button_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	auto ret = DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG4), ParentHWND, DLGPROC(&CUserInterface::Dialog_Settings));
+	/*HWND hwnd1 = RCDialog(hInstance, IDD_DIALOG4, nullptr, DLGPROC(&CUserInterface::Dialog_Settings));
+	if (hwnd1)
+	{
+		ShowWindow(hwnd1, SW_SHOW);
+	}*/
+	SettingsHWND = CreateDialog(hInstance,
+		MAKEINTRESOURCE(IDD_DIALOG4),
+		hwnd,
+		(DLGPROC)&CUserInterface::Dialog_Settings);
+	ShowWindow(SettingsHWND, SW_SHOW);
+
+	//auto ret = DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG4), ParentHWND, DLGPROC(&CUserInterface::Dialog_Settings));
 	return LRESULT();
 }
 
+int CUserInterface::iItem_ColorListView = -1;
+glm::vec4 CUserInterface::oldColor_ColorListView = glm::vec4(0, 0, 0, 0);
 LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -150,7 +164,9 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		ListView_SetColumnWidth(hwndListView, 2, rect.right - 220);
 		//s = GetWStringFromResourceID(IDS_STRING109);
 		
-		auto color = CSettings::GetColorString(ColorAxis);
+		//auto color = CSettings::GetColorString(ColorAxis);
+
+		return true;
 	}
 		break;
 
@@ -168,21 +184,31 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		break;
 	case WM_NOTIFY:
 	{
-		if (((LPNMHDR)lParam)->code == NM_CUSTOMDRAW) {
-			SetWindowLong(hDlg, DWL_MSGRESULT,
-				(LONG)ProcessColorListViewCustomDraw(lParam));
-			return TRUE;
-		}
-		if (((LPNMHDR)lParam)->code == NM_DBLCLK)
+		if (((LPNMHDR)lParam)->idFrom == IDC_LIST1) // Colors
 		{
-			HINSTANCE hInstance = (HINSTANCE)GetWindowLong(ParentHWND, GWL_HINSTANCE);
+			if (((LPNMHDR)lParam)->code == NM_CUSTOMDRAW) {
+				SetWindowLong(hDlg, DWL_MSGRESULT,
+					(LONG)ProcessColorListViewCustomDraw(lParam));
+				return TRUE;
+			}
+			if (((LPNMHDR)lParam)->code == NM_DBLCLK)
+			{
+		
+				LPNMITEMACTIVATE item = LPNMITEMACTIVATE(lParam);
 
+				iItem_ColorListView = item->iItem;
+				oldColor_ColorListView = CSettings::GetColor(CSettings::GetIndex(GetColorForSettingsDialog(iItem_ColorListView)));
+				//item->iItem
 
-
-			auto ret = DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG3), hDlg, DLGPROC(&CUserInterface::Dialog_SelectColor));
-			return LRESULT();
+				auto ret = DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG3), hDlg, DLGPROC(&CUserInterface::Dialog_SelectColor));
+				if (LOWORD(ret) == IDCANCEL)
+				{
+					CSettings::SetColor(CSettings::GetIndex(GetColorForSettingsDialog(iItem_ColorListView)), oldColor_ColorListView);
+				}
+				return LRESULT();
+			}
+			return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST1, GetColorListViewCellText);
 		}
-		return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST1, GetColorListViewCellText);
 	}
 	break;
 	}
@@ -252,10 +278,29 @@ LRESULT CUserInterface::ProcessColorListViewCustomDraw(LPARAM lParam) {
 
 LRESULT CUserInterface::Dialog_SelectColor(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (lParam == 9001)
+	if (uMsg == WM_XCOLORPICKER_SELCHANGE || uMsg == WM_XCOLORPICKER_SELENDOK)
 	{
-		int i = 0;
+		auto hEditRGB = GetDlgItem(hDlg, IDC_EDIT3);
+		auto hEditHSL = GetDlgItem(hDlg, IDC_EDIT1);
+
+		auto rgb = m_ColorSpectrum.GetRGB();
+		auto a = int(oldColor_ColorListView.a * 255);
+		SetWindowText(hEditRGB, HTMLColorFormat(GetRValue(rgb), GetGValue(rgb), GetBValue(rgb), a).c_str());
+
+		BYTE h, s, l;
+		m_ColorSpectrum.GetHSL(&h, &s, &l);
+
+		SetWindowText(hEditHSL, (to_wstring(h) + TEXT(", ") + to_wstring(s) + TEXT(", ") + to_wstring(l)).c_str());
+
+		CSettings::SetColor(CSettings::GetIndex(GetColorForSettingsDialog(iItem_ColorListView)), glm::vec4(GetRValue(rgb) / 255.0, GetGValue(rgb) / 255.0, GetBValue(rgb) / 255.0, a / 255.0));
+
+		if (uMsg == WM_XCOLORPICKER_SELENDOK)
+		{
+			EndDialog(hDlg, LOWORD(TRUE));			
+		}
+		return true;
 	}
+	
 	switch (uMsg)
 	{
 	case WM_INITDIALOG: {
@@ -263,20 +308,11 @@ LRESULT CUserInterface::Dialog_SelectColor(HWND hDlg, UINT uMsg, WPARAM wParam, 
 
 		RECT rect;
 		GetClientRect(hWnd, &rect);
-		POINT rectTL;
-		rectTL.x = rect.left;
-		rectTL.y = rect.top;
-		ScreenToClient(hDlg, &rectTL);
-
-		POINT rectBR;
-		rectBR.x = rect.right;
-		rectBR.y = rect.bottom;
-		ScreenToClient(hDlg, &rectBR);
-
-		rect.left = rectTL.x;
-		rect.top = rectTL.y;
-		rect.right = rectBR.x;
-		rect.bottom = rectBR.y;
+		
+		rect.left = 0;
+		rect.top = 0;
+		rect.right = rect.right - rect.left;
+		rect.bottom = rect.bottom - rect.top;
 
 		//ShowWindow(hWnd, SW_HIDE);         // hide placeholder
 		m_ColorSpectrum.Create(hInstance,
@@ -288,6 +324,7 @@ LRESULT CUserInterface::Dialog_SelectColor(HWND hDlg, UINT uMsg, WPARAM wParam, 
 			//CXColorSpectrumCtrl::XCOLOR_TOOLTIP_HTML);     // tooltip format
 
 															// call SetWindowPos to insert control in proper place in tab order
+		m_ColorSpectrum.SetRGB(RGB(255 * oldColor_ColorListView.r, 255 * oldColor_ColorListView.g, 255 * oldColor_ColorListView.b));
 		SetWindowPos(m_ColorSpectrum.m_hWnd, hWnd, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 		ShowWindow(m_ColorSpectrum.m_hWnd, SW_SHOW);
 	}
@@ -296,7 +333,7 @@ LRESULT CUserInterface::Dialog_SelectColor(HWND hDlg, UINT uMsg, WPARAM wParam, 
 		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
 		{
 			EndDialog(hDlg, LOWORD(wParam));
-			return (INT_PTR)TRUE;
+			return INT_PTR(TRUE);
 		}
 		break;
 	case WM_NOTIFY:
@@ -330,7 +367,7 @@ tstring CUserInterface::GetColorForSettingsDialog(int index)
 	switch (index)
 	{
 	case 0:
-		return TEXT("ColorBackgroud");
+		return TEXT("ColorBackground");
 	case 1:
 		return  TEXT("ColorAxis");
 	case 2:
@@ -428,6 +465,11 @@ LRESULT CUserInterface::IDD_DIALOG1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 	return LRESULT();
 }
 
+HWND CUserInterface::GetSettingsHWND() const
+{
+	return SettingsHWND;
+}
+
 void CUserInterface::SetChecked(int id, bool checked)
 {
 	HWND hWnd = GetDlgItem(ParentHWND, id);
@@ -461,6 +503,12 @@ int CUserInterface::InsertElement(DWORD xStyle, LPCWSTR _class, LPCWSTR text, DW
 	Elements.insert({ CurrentID, new InterfaceElement{ CurrentID, xStyle, _class, text, style, x, y, width, height, nullptr, action } });
 	CurrentID++;
 	return CurrentID-1;
+}
+
+void CUserInterface::InsertHandlerElement(int ID, UIWndProc Action)
+{
+	Elements.insert({ ID, new InterfaceElement{ ID, NULL, _T("IDC_BUTTON_CONNECT"), _T("IDC_BUTTON_CONNECT"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Button_Connect } });
+
 }
 
 LRESULT CUserInterface::Button_Connect(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -698,7 +746,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 
 	//FixViewToRadar_ID = InsertElement(NULL, _T("BUTTON"), _T("Вид на радар"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_FixViewToRadar);
 
-	MeasureDistance_ID = InsertElement(NULL, _T("BUTTON"), _T("Измерения"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MeasureDistance);
+	//MeasureDistance_ID = InsertElement(NULL, _T("BUTTON"), _T("Измерения"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MeasureDistance);
 	
 	BtnColors_ID = InsertElement(NULL, _T("BUTTON"), _T("Цвета"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth/2, ButtonHeight, &CUserInterface::Button_Colors);
 	BtnLoad_ID = InsertElement(NULL, _T("BUTTON"), _T("Загр. карту"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X + ControlWidth / 2 + Column1X / 2, CurrentY, ControlWidth/4 * 3, ButtonHeight, &CUserInterface::Button_Load);
@@ -706,7 +754,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	CurrentY += VStepGrp;
 
 
-	Button_Connect_ID = InsertElement(NULL, _T("BUTTON"), _T("Cоединить"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, Column1X, CurrentY, ControlWidthL, ButtonHeight, &CUserInterface::Button_Connect);
+	//Button_Connect_ID = InsertElement(NULL, _T("BUTTON"), _T("Cоединить"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, Column1X, CurrentY, ControlWidthL, ButtonHeight, &CUserInterface::Button_Connect);
 	IsConnected_ID = InsertElement(NULL, _T("STATIC"), _T("Нет соединения"), WS_VISIBLE | WS_CHILD, Column2X, CurrentY, ControlWidthL, ButtonHeight, NULL);
 	BtnTest_ID = InsertElement(NULL, _T("BUTTON"), _T("Тест"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth / 2, ButtonHeight, &CUserInterface::Button_Test);
 
@@ -788,10 +836,13 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	}
 
 	Elements.insert({ IDD_DIALOG1, new InterfaceElement{ IDD_DIALOG1, NULL, _T("IDD_DIALOG1"), _T("IDD_DIALOG1"), DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::IDD_DIALOG1_Proc } });
-	Elements.insert({ IDC_CHECK1, new InterfaceElement{ IDC_CHECK1, NULL, _T("IDC_CHECK1"), _T("IDC_CHECK1"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_FixViewToRadar } });
-	
-		
+	Elements.insert({ IDC_CHECK1, new InterfaceElement{ IDC_CHECK1, NULL, _T("IDC_CHECK1"), _T("IDC_CHECK1"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_FixViewToRadar } });		
 	Elements.insert({ IDC_CHECK2, new InterfaceElement{ IDC_CHECK2, NULL, _T("IDC_CHECK2"), _T("IDC_CHECK2"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_MeasureDistance } });
+	Elements.insert({ IDC_BUTTON_CONNECT, new InterfaceElement{ IDC_BUTTON_CONNECT, NULL, _T("IDC_BUTTON_CONNECT"), _T("IDC_BUTTON_CONNECT"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Button_Connect } });
+	/*BtnColors_ID = InsertElement(NULL, _T("BUTTON"), _T("Цвета"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth / 2, ButtonHeight, &CUserInterface::Button_Colors);
+	BtnLoad_ID = InsertElement(NULL, _T("BUTTON"), _T("Загр. карту"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X + ControlWidth / 2 + Column1X / 2, CurrentY, ControlWidth / 4 * 3, ButtonHeight, &CUserInterface::Button_Load);
+	*/
+
 	Elements.insert({ IDC_BUTTON2, new InterfaceElement{ IDC_BUTTON2, NULL, _T("IDC_BUTTON2"), _T("IDC_BUTTON2"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Button_Settings } });
 	
 

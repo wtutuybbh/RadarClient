@@ -298,7 +298,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		hglobal = ::LoadResource(hInstance, hrsrc);
 
-		HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)hglobal, hWnd, (DLGPROC)DlgProc);
+		HWND hwnd1 = RCDialog(hInstance, IDD_DIALOG1, hWnd, DLGPROC(DlgProc));
+		//HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)(LoadResource(hInstance, FindResource(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), RT_DIALOG))), hWnd, (DLGPROC)DlgProc);
+		//HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)hglobal, hWnd, (DLGPROC)DlgProc);
 
 		ShowWindow(hwnd1, g_nCmdShow);
 
@@ -573,7 +575,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 #endif
 	
-	std::ifstream settings_txt("settings.txt");
+	std::ifstream settings_txt(TEXT("settings.txt"));
 	
 	if (!settings_txt) {
 		LOG_ERROR__("settings.txt not found.");
@@ -732,12 +734,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						Initialize();
 					}
 					// Success Creating Window.  Check For Window Messages
-					if (PeekMessage(&msg, g_window->hWnd, 0, 0, PM_REMOVE) != 0)
+					if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE) != 0)
 					{
 						// Check For WM_QUIT Message
-						if (msg.message != WM_QUIT)						// Is The Message A WM_QUIT Message?
+						if (msg.message != WM_QUIT )						// Is The Message A WM_QUIT Message?
 						{
-							DispatchMessage(&msg);						// If Not, Dispatch The Message
+							// If Not, Dispatch The Message
+							if (!g_UI || !IsWindow(g_UI->GetSettingsHWND()) || !IsDialogMessage(g_UI->GetSettingsHWND(), &msg)) 
+							{
+								DispatchMessage(&msg);
+							}
+							else
+							{
+								int i = 0;
+							}
+							if (g_UI->GetSettingsHWND())
+							{
+								int t = 1;
+							}
 						}
 						else											// Otherwise (If Message Is WM_QUIT)
 						{
@@ -915,12 +929,12 @@ void GLProc()
 					{						
 						Draw();
 
-						if (g_vpControl->hRC) {
+						if (g_vpControl && g_vpControl->hRC) {
 							g_vpControl->MakeCurrent();
 							g_vpControl->Draw();
 							SwapBuffers(g_vpControl->hDC);					// Swap Buffers (Double Buffering)
 						}
-						if (g_Minimap->hRC) {
+						if (g_Minimap && g_Minimap->hRC) {
 							g_Minimap->MakeCurrent();
 							g_Minimap->Draw();
 							SwapBuffers(g_Minimap->hDC);

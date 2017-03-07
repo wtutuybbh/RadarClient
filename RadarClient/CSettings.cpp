@@ -22,8 +22,8 @@ std::map<tstring, Settings> CSettings::stringmap;
 
 bool CSettings::Init()
 {
-	colors.insert_or_assign(ColorBackgroud, glm::vec4(0, 0, 0, 1));
-	stringmap.insert_or_assign(TEXT("ColorBackgroud"), ColorBackgroud);	
+	colors.insert_or_assign(ColorBackground, glm::vec4(0, 0, 0, 1));
+	stringmap.insert_or_assign(TEXT("ColorBackground"), ColorBackground);	
 
 	colors.insert_or_assign(ColorAxis, glm::vec4(0.5, 0.5, 0.5, 0.5));
 	stringmap.insert_or_assign(TEXT("ColorAxis"), ColorAxis);

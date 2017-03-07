@@ -180,7 +180,7 @@ int CRCSocket::Read()
 	char *szIncoming = nullptr;
 	_sh *sh;
 	int recev;
-	unsigned int offset, length;
+	unsigned int offset=0, length=0;
 	char * OutBuff = nullptr;
 
 	try {
@@ -188,12 +188,14 @@ int CRCSocket::Read()
 		ZeroMemory(szIncoming, sizeof(szIncoming));
 		recev = recv(Socket, client->buff + client->offset, TXRXBUFSIZE, 0);
 
-		if (ReadLogEnabled) LOG_INFO__("client->offset=%d", client->offset);
+		if (ReadLogEnabled) LOG_INFO__("recev=%d, client->offset=%d", recev, client->offset);
 
 		offset = recev + client->offset;
+		if (ReadLogEnabled) LOG_INFO__("offset=%d (CHANGE!) (1)", offset);
 		if (offset < sizeof(_sh)) //приняли меньше шапки
 		{
 			client->offset = offset; //Запомнили что что-то приняли
+			if (ReadLogEnabled) LOG_INFO__("client->offset=%d (CHANGE!) (1)", client->offset);
 			return recev;
 		}
 		sh = (struct _sh*)client->buff;
@@ -212,10 +214,12 @@ int CRCSocket::Read()
 				memcpy(client->buff, &client->buff[length], offset - length);// Перепишем остаток в начало
 
 				offset -= length;
+				if (ReadLogEnabled) LOG_INFO__("offset=%d (CHANGE!) (2)", offset);
 				length = sh->dlina;
 				if (sh->word1 != 2863311530 /*0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку 
 				{
 					client->offset = 0;
+					if (ReadLogEnabled) LOG_INFO__("client->offset=%d (CHANGE!) (2)", client->offset);
 					if (szIncoming)
 						delete[] szIncoming;
 					return recev;
@@ -238,6 +242,7 @@ int CRCSocket::Read()
 	}
 	//приняли меньше чем 1 порция
 	client->offset = offset; //Запомним что что-то приняли
+	if (ReadLogEnabled) LOG_INFO__("client->offset=%d (CHANGE!) (3)", client->offset);
 	if (szIncoming)
 		delete[] szIncoming;
 	return recev;

@@ -450,3 +450,18 @@ std::string GetLastErrorAsString()
 
 	return message;
 }
+
+std::wstring HTMLColorFormat(int r, int g, int b, int a)
+{
+	std::wstringstream str;
+	str << "#" << std::hex << std::setw(2) << std::setfill(L'0') << r;
+	str << std::hex << std::setw(2) << std::setfill(L'0') << std::uppercase << g;
+	str << std::hex << std::setw(2) << std::setfill(L'0') << b;
+	str << std::hex << std::setw(2) << std::setfill(L'0') << a;
+	return str.str();
+}
+
+HWND RCDialog(HINSTANCE hInstance, int ID, HWND hWnd, DLGPROC DlgProc)
+{
+	return CreateDialogIndirect(hInstance, LPCDLGTEMPLATE(LoadResource(hInstance, FindResource(hInstance, MAKEINTRESOURCE(ID), RT_DIALOG))), hWnd, DlgProc);
+}

@@ -50,6 +50,8 @@ void CViewPortControl::Draw()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
+	glm::vec4 bgColor = CSettings::GetColor(ColorBackground);
+	glClearColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a);
 	if (Scene)
 		Scene->DrawScene(this);
 }
@@ -466,7 +468,7 @@ bool CViewPortControl::InitGL()
 	const GLubyte* version = glGetString(GL_VERSION);
 	LOG_INFO__("glGetString OK");
 
-	glm::vec4 bgColor = CSettings::GetColor(ColorBackgroud);
+	glm::vec4 bgColor = CSettings::GetColor(ColorBackground);
 	glClearColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a);
 	LOG_INFO__("glClearColor OK");
 																//glClearDepth(1.0f);										// Depth Buffer Setup

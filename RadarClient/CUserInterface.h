@@ -99,6 +99,9 @@ private:
 	static LRESULT CALLBACK Dialog_SelectColor(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	static CXColorSpectrumCtrl m_ColorSpectrum;
 
+	static int iItem_ColorListView;
+	static glm::vec4 oldColor_ColorListView;
+
 	virtual LRESULT Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MarkupOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -121,7 +124,8 @@ private:
 public:
 	int MinimapSize;
 	static HWND ParentHWND;
-	HWND SettingsHWND {nullptr};
+	static HWND SettingsHWND;	
+	HWND GetSettingsHWND() const;
 	HFONT hDlgFont {nullptr};
 	
 	ElementsMap Elements;
@@ -130,6 +134,7 @@ public:
 	CRCSocket *Socket { nullptr };
 
 	int InsertElement(DWORD xStyle, LPCWSTR Class, LPCWSTR Text, DWORD Style, int X, int Y, int Width, int Height, UIWndProc Action);
+	void InsertHandlerElement(int ID, UIWndProc Action);
 	
 	virtual LRESULT Wnd_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Wnd_Proc2(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

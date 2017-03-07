@@ -167,3 +167,7 @@ std::string vformat(const char *fmt, va_list ap);
 
 
 std::string GetLastErrorAsString();
+
+std::wstring HTMLColorFormat(int r, int g, int b, int a);
+
+HWND RCDialog(HINSTANCE hInstance, int ID, HWND hWnd, DLGPROC DlgProc);

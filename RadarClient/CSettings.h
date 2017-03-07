@@ -4,7 +4,7 @@
 
 enum Settings
 {
-	ColorBackgroud,
+	ColorBackground,
 	ColorAxis,
 	ColorNumbers,
 	ColorPointLowLevel,
@@ -94,5 +94,7 @@ public:
 	static void SetColor(Settings key, glm::vec4 value);
 	static void SetString(Settings key, std::string value);
 	static Settings GetIndex(tstring name);
+
+	static bool Save();
 };
 
