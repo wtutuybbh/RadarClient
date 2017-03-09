@@ -996,7 +996,8 @@ void CScene::DrawBitmaps() const
 	float y_0 = Mesh->GetCenterHeight() / MPPv;
 
 	BitmapString(0, y_0, 0, "(" + cnvrt::float2str(position.x) + "; " + cnvrt::float2str(position.y) + ")");
-	glColor4f(1.0f, 1.0f, 0.0f, 0.7f);
+	auto color = CSettings::GetColor(ColorNumbers);
+	glColor4f(color.r, color.g, color.b, color.a);
 	BitmapString(-10 * markDistance / MPPh, y_0 + 1, 0, "1km");
 	BitmapString(10 * markDistance / MPPh, y_0 + 1, 0, "1km");
 	BitmapString(0, y_0 + 1, -10 * markDistance / MPPh, "1km");
