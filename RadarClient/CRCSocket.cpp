@@ -114,7 +114,7 @@ void CRCSocket::Init()
 		client = new _client;
 	}
 	client->Socket = &Socket;
-	client->offset = 0;
+
 	client->buff = new char[TXRXBUFSIZE];
 
 	ErrorText = "";
@@ -179,73 +179,95 @@ int CRCSocket::Read()
 
 	char *szIncoming = nullptr;
 	_sh *sh;
-	int recev;
-	unsigned int offset=0, length=0;
+	int recev = 0, this_recv_offset = 0, sh_offset = 0;
 	char * OutBuff = nullptr;
 
-	try {
-		szIncoming = new char[TXRXBUFSIZE];
-		ZeroMemory(szIncoming, sizeof(szIncoming));
-		recev = recv(Socket, client->buff + client->offset, TXRXBUFSIZE, 0);
-
-		if (ReadLogEnabled) LOG_INFO__("recev=%d, client->offset=%d", recev, client->offset);
-
-		offset = recev + client->offset;
-		if (ReadLogEnabled) LOG_INFO__("offset=%d (CHANGE!) (1)", offset);
-		if (offset < sizeof(_sh)) //приняли меньше шапки
+	try {		
+		sh_offset = 0;
+		recev = recv(Socket, client->buff + client->recv_offset, TXRXBUFSIZE - client->recv_offset, 0);
+		if (ReadLogEnabled) LOG_INFO__("client->read_number=%d, recev=%d, client->recv_offset=%d", client->read_number, recev, client->recv_offset);
+		client->read_number++;
+		if (recev<=0)
 		{
-			client->offset = offset; //Запомнили что что-то приняли
-			if (ReadLogEnabled) LOG_INFO__("client->offset=%d (CHANGE!) (1)", client->offset);
+			LOG_WARN__("recev<=0");
 			return recev;
 		}
-		sh = (struct _sh*)client->buff;
-		if (sh->word1 != 2863311530/* 0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку
+		this_recv_offset = client->recv_offset + recev;
+		if (this_recv_offset < sizeof(_sh)) //приняли меньше шапки
+		{		
+			if (ReadLogEnabled) LOG_INFO__("this_recv_offset = %d < sizeof(_sh)", this_recv_offset);
+			client->recv_offset += recev;
 			return recev;
-		length = sh->dlina;
-		if (ReadLogEnabled) LOG_INFO__("sh->dlina=%d", sh->dlina);
-		while (length <= offset)  // приняли больше или ровно 1 порцию
+		}
+		sh = (struct _sh*)(client->buff);
+		if (!test_sh(sh))
 		{
-			try // защита на выделение памяти
+			if (ReadLogEnabled) LOG_ERROR__("wrong sh at position 0: sh = (struct _sh*)(client->buff);");
+			return recev;
+		}
+		else
+		{
+			if (ReadLogEnabled) LOG_INFO__("first block has length=%d", sh->dlina);
+		}
+		while(sh_offset < TXRXBUFSIZE && sh_offset + sh->dlina <= this_recv_offset)
+		{
+			if (ReadLogEnabled) LOG_INFO__("while loop, sh_offset=%d, sh->dlina=%d", sh_offset, sh->dlina);
+			sh = (struct _sh*)(client->buff + sh_offset);
+			if (!test_sh(sh))
 			{
-				OutBuff = new char[length];              // Выделим память под принятую порцию // operator delete[] in method FreeMemory()
-				memcpy(OutBuff, client->buff, length); // Скопируем принятые данные
-
-				PostMessage(hWnd, CM_POSTDATA, (WPARAM)OutBuff, length); //Отошлем в очередь на обработку
-				memcpy(client->buff, &client->buff[length], offset - length);// Перепишем остаток в начало
-
-				offset -= length;
-				if (ReadLogEnabled) LOG_INFO__("offset=%d (CHANGE!) (2)", offset);
-				length = sh->dlina;
-				if (sh->word1 != 2863311530 /*0xAAAAAAAAu*/ || sh->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку 
-				{
-					client->offset = 0;
-					if (ReadLogEnabled) LOG_INFO__("client->offset=%d (CHANGE!) (2)", client->offset);
-					if (szIncoming)
-						delete[] szIncoming;
-					return recev;
-				}
-
+				if (ReadLogEnabled) LOG_ERROR__("wrong sh at position [%d]: sh = (struct _sh*)(client->buff);", sh_offset);
+				return recev;
 			}
-			catch (std::bad_alloc)
-			{  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
-			   // YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
-				if (szIncoming)
-					delete[] szIncoming;
+			OutBuff = new char[sh->dlina];
+			memcpy(OutBuff, client->buff + sh_offset, sh->dlina);
+			PostMessage(hWnd, CM_POSTDATA, WPARAM(OutBuff), sh->dlina);
+			if (ReadLogEnabled) LOG_INFO__("sent %d bytes to processing, sh->type=%d", sh->dlina, sh->type);
+			if (this_recv_offset - sh_offset - sh->dlina > sizeof(_sh))
+			{
+				// next sh_ can be retrieved
+				if (ReadLogEnabled) LOG_INFO__("next sh_ can be retrieved. we move pointer sh_offset: %d -> %d", sh_offset, sh_offset + sh->dlina);
+				sh_offset += sh->dlina;
+				sh = (struct _sh*)(client->buff + sh_offset);
+				if (ReadLogEnabled) LOG_INFO__("sh->dlina after retrieve = %d", sh->dlina);
+			}
+			else
+			{
+				if (ReadLogEnabled) LOG_INFO__("next sh_ can NOT be retrieved. remaining tail length = %d", this_recv_offset - sh_offset - sh->dlina);
+				if (this_recv_offset - sh_offset - sh->dlina > 0) 
+				{
+					memcpy(client->buff, client->buff + sh_offset + sh->dlina, this_recv_offset - sh_offset - sh->dlina);					
+				}
+				client->recv_offset = this_recv_offset - sh_offset - sh->dlina;
 				return recev;
 			}
 		}
+
+		
+
+		
+			if (ReadLogEnabled) LOG_INFO__("some data for the next read. remaining tail length = %d", this_recv_offset - sh_offset);
+
+			if (sh_offset > 0)
+			{
+				memcpy(client->buff, client->buff + sh_offset, this_recv_offset - sh_offset);
+			}
+			client->recv_offset = this_recv_offset - sh_offset;
+
+			return recev;
+		
+
+		if (ReadLogEnabled) LOG_INFO__("wtf? sh_offset=0?");
+
+		return recev;
+		
+		
 	}
 	catch (std::bad_alloc)
 	{  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
 	   // YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
 		return 0;
 	}
-	//приняли меньше чем 1 порция
-	client->offset = offset; //Запомним что что-то приняли
-	if (ReadLogEnabled) LOG_INFO__("client->offset=%d (CHANGE!) (3)", client->offset);
-	if (szIncoming)
-		delete[] szIncoming;
-	return recev;
+
 }
 
 int CRCSocket::Close()
@@ -649,6 +671,16 @@ TRK::~TRK()
 	}
 	P.clear();
 }
+
+bool CRCSocket::test_sh(_sh* ptr)
+{
+	if (ptr->word1 != 2863311530/* 0xAAAAAAAAu*/ || ptr->word2 != 1431655765 /*0x55555555u*/)   // проверим шапку
+	{
+		return false;
+	}
+	return true;
+}
+
 void TRK::InsertPoints(RDRTRACK* pt, int N)
 {
 	for (int i = 0; i < N; i++)

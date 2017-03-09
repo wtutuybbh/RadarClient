@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "stdafx.h"
 
+#define ReadLogEnabled  true
+#define PostDataLogEnabled  false
 
 #ifndef global1h
 #define global1h
@@ -361,8 +363,10 @@ struct _client                     //Клиенты
 {
 	char *buff{ nullptr };
 	SOCKET *Socket{ nullptr };
-	unsigned int offset{ 0 };
+	unsigned int recv_offset{ 0 };
 	vector<send_queue_element> send_queue;  // очередь отправляемых данных
+//#ifdef _DEBUG
+	unsigned long read_number{ 0 };
 };
 
 
@@ -431,7 +435,7 @@ class CRCSocket
 	bool OnceClosed;
 	char *hole{ nullptr };
 	int LENDATAOTOBR{ 1 };
-
+	bool test_sh(struct _sh *ptr);
 public:
 	static const std::string requestID;
 
@@ -479,8 +483,7 @@ public:
 	void Init();
 	int Connect();
 
-	bool ReadLogEnabled{ true };
-	bool PostDataLogEnabled{ true };
+	
 	int Read();
 
 	int Close();
