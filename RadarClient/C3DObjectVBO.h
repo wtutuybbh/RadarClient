@@ -13,10 +13,10 @@ class C3DObjectVBO
 {
 	static const std::string requestID;
 
-	void *buffer{ nullptr }, *vbuffer{ nullptr };
-	unsigned int vboId { 0 }, vaoId { 0 };
+	std::vector<VBOData> *vbuffer{ nullptr };
+	unsigned int vboId { 0 }, vaoId { 0 }, vbufferSize {0};
 	bool ready{ false }, clearAfter;
-	int bufferSize{ 0 }, elementSize{ sizeof(VBOData) };
+	int elementSize{ sizeof(VBOData) };
 
 	std::vector<unsigned short *> *idxArrays { nullptr };
 	std::vector<int> *idxLengths { nullptr };
@@ -28,7 +28,7 @@ public:
 
 	explicit C3DObjectVBO(bool clearAfter);
 	virtual C3DObjectVBO* InitStructure();
-	virtual void SetBuffer(void *vbuffer, void* buffer, int size);
+	virtual void SetVBuffer(std::vector<VBOData> *vbuffer);
 	void Bind() const;
 	void LoadToGPU();
 	void Reload();
@@ -37,7 +37,7 @@ public:
 	static void UnBind();
 	void Draw(GLenum mode) const;
 
-	void* GetBuffer() const;
+	std::vector<VBOData>* GetVBuffer() const;
 
 	virtual void AddIndexArray(unsigned short *idxArray, int length, GLenum mode);
 	virtual void ClearIndexArray();

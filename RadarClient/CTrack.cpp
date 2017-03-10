@@ -49,8 +49,7 @@ void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK*>
 	catch (const std::exception &ex) {
 		LOG_WARN("exception", "CTrack::Refresh", ex.what());
 	}
-	void *_vbuffer = _vbo->GetBuffer();
-	vector<VBOData> *vbuffer = (vector<VBOData> *)vbo.at(Main)->GetBuffer();
+	vector<VBOData> *vbuffer = (vector<VBOData> *)vbo.at(Main)->GetVBuffer();
 	if (vbuffer) {
 		vbuffer->clear();
 		vbuffer->resize(trackPoints->size());
@@ -88,9 +87,9 @@ void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK*>
 		(*vbuffer)[i].color = Color;
 	}
 
-	vbo.at(Main)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
+	vbo.at(Main)->SetVBuffer(vbuffer);
 	vbo.at(Main)->NeedsReload = true;
-	vbo.at(MiniMap)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
+	vbo.at(MiniMap)->SetVBuffer(vbuffer);
 	vbo.at(MiniMap)->NeedsReload = true;
 }
 
@@ -100,7 +99,7 @@ void CTrack::SelectTrack(int vpId, bool selectState)
 
 	C3DObjectVBO *vbo_ = vbo.at(vpId);
 
-	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
+	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetVBuffer();
 
 	if (!buffer || buffer->size() == 0)
 		return;

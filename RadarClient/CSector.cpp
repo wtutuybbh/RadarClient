@@ -28,39 +28,6 @@ CSector::CSector(int index) : C3DObjectModel(Main, new C3DObjectVBO(false), null
 	c3DObjectModel_TypeName = "CSector";
 }
 
-
-CSector::~CSector()
-{
-	C3DObjectVBO* _vbo;
-	try
-	{
-		_vbo = (C3DObjectVBO*)vbo.at(Main);
-		if (_vbo)
-		{
-			auto _b = _vbo->GetBuffer();
-			if (_b)
-			{
-				delete _b;
-			}
-			else
-			{
-				LOG_WARN(requestID, "CSector DESTRUCTOR", "buffer is nullptr");
-			}
-		}
-		else
-		{
-			LOG_WARN(requestID, "CSector DESTRUCTOR", "vbo at Main is nullptr");
-		}
-	}
-	catch (std::out_of_range ex)
-	{
-		LOG_WARN(requestID, "CSector DESTRUCTOR", "no vbo at Main");
-	}	
-	catch (const std::exception &ex) {
-		LOG_WARN("exception", "CSector::~CSector", ex.what());
-	}
-}
-
 void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init)
 {
 	std::string context = "CSector::Refresh";
@@ -117,11 +84,11 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 		LOG_INFO__("index= %d, i= %d, R= %d, b= %d, E= %d, Amp= %f", index, i, pts[i].R, pts[i].B, pts[i].E, pts[i].Amp);
 	}
 	
-	vbo.at(Main)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
+	vbo.at(Main)->SetVBuffer(vbuffer);
 	vbo.at(Main)->NeedsReload = true;
 	if (vbo.find(MiniMap) != vbo.end())
 	{
-		vbo.at(MiniMap)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
+		vbo.at(MiniMap)->SetVBuffer(vbuffer);
 		vbo.at(MiniMap)->NeedsReload = true;
 	}
 }
@@ -129,7 +96,7 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 void CSector::Dump(CViewPortControl* vpControl, std::ofstream *outfile)
 {
 	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
-	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
+	vector<VBOData> *buffer = vbo_->GetVBuffer();
 	for (auto it = buffer->begin(); it != buffer->end(); ++it)
 	{
 		*outfile << (*it).norm.x << char(13) << std::endl;
@@ -166,7 +133,7 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
 
 	//so, it works only if buffer elements have datatype of VBOData (or identical) and organized using std::vector
-	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
+	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetVBuffer();
 
 	if (!buffer || buffer->size() == 0) 
 	{
@@ -213,7 +180,7 @@ glm::vec3 CSector::GetPointCoords(CViewPortControl* vpControl, int index)
 {
 	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
 
-	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
+	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetVBuffer();
 
 	return glm::vec3(buffer->at(index).vert);
 }
@@ -222,7 +189,7 @@ void CSector::SelectPoint(int vpId, int pointIndex)
 {
 	C3DObjectVBO *vbo_ = vbo.at(vpId);
 
-	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
+	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetVBuffer();
 
 	if (!buffer || buffer->size() == 0)
 		return;
@@ -235,7 +202,7 @@ void CSector::UnselectAll(int vpId)
 {
 	C3DObjectVBO *vbo_ = vbo.at(vpId);
 
-	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
+	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetVBuffer();
 
 	if (!buffer || buffer->size() == 0)
 		return;

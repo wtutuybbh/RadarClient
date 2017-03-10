@@ -19,7 +19,6 @@ protected:
 public:
 	float PointSize {3};
 	explicit CSector(int index);
-	virtual ~CSector();
 	virtual void Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init);
 	virtual void Dump(CViewPortControl* vpControl, std::ofstream *outfile);
 	void BindUniforms(CViewPortControl* vpControl) override;

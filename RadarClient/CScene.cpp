@@ -506,11 +506,11 @@ bool CScene::PrepareRayVBO()
 		auto vbo = RayObj->GetC3DObjectVBO(Main);
 
 		if (vbo) {
-			vbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+			vbo->SetVBuffer(buffer);
 		}
 
 		C3DObjectVBO *mmvbo = new C3DObjectVBO(false);
-		mmvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+		mmvbo->SetVBuffer(buffer);
 
 		RayObj->SetVBO(MiniMap, mmvbo);
 	}
@@ -552,7 +552,7 @@ bool CScene::PrepareRayVBO()
 			auto vbo = RayObj->GetC3DObjectVBO(Main);
 
 			if (vbo) {
-				vbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+				vbo->SetVBuffer(buffer);
 			}
 
 			/*C3DObjectVBO *mmvbo = new C3DObjectVBO(false);

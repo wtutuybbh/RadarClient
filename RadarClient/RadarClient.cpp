@@ -546,6 +546,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	string context = "WinMain";
 	
+	float x; 
+	float x1; 
+	float x2; 
+	short direction;
+	bool take1;
+	bool take2;
+
+	x1 = 0; x = 0.5; x2 = 2; direction = 1, take1 = false, take2 = true;
+	LOG_INFO__("rcutils::between_on_circle(%f, %f, %f, %d, %d, %d) = %d ", x, x1, x2, direction, take1, take2, rcutils::between_on_circle(x, x1, x2, direction, take1, take2));
+
 	LOG_INFO__("RadarClient started.");
 
 	LOG_INFO__("sizeof(RDR_INITCL) = %d", sizeof(RDR_INITCL));

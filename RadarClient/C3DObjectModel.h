@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
+
 class C3DObjectVBO;
 class C3DObjectTexture;
 class C3DObjectProgram;
@@ -12,6 +13,7 @@ class CViewPortControl;
 class C3DObjectModel
 {	
 protected:
+	std::mutex m;
 	static const std::string requestID;
 	std::unordered_map<int, C3DObjectVBO*> vbo;
 	std::unordered_map<int, C3DObjectTexture*> tex;

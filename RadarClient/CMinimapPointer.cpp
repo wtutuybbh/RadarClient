@@ -35,14 +35,8 @@ void CMiniMapPointer::CreateBuffer(C3DObjectVBO *vbo_) {
 		buffer->push_back({ glm::vec4(meshSize.x, y, -meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 		buffer->push_back({ glm::vec4(-meshSize.x, y, -meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
 
-		vbo_->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+		vbo_->SetVBuffer(buffer);
 	}
-}
-CMiniMapPointer::~CMiniMapPointer()
-{
-	auto buffer = (vector<VBOData>*)vbo.at(MiniMap)->GetBuffer();
-	if (buffer)
-		delete buffer;
 }
 
 glm::mat4 CMiniMapPointer::GetRotateMatrix(CViewPortControl* vpControl)

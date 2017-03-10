@@ -1,11 +1,13 @@
 #pragma once
 #include "C3DObjectModel.h"
+
 class CViewPortControl;
 class CRImage;
 struct RDR_INITCL;
 struct RIMAGE;
 class CRImageSet
 {
+	std::mutex m;
 public:
 	std::vector<CRImage*> *Images{ nullptr };
 	float prevAzimuth {0.0f}; //azimuth from previous scan

@@ -106,6 +106,8 @@ typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_le
 
 #include <codecvt>
 
+#include <mutex>
+
 //for CRCGeoDataProvider and CRCTextureDataFile:
 #define DATFILE_MAXLINELENGTH 256
 

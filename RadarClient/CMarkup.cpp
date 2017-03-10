@@ -110,8 +110,8 @@ CMarkup::CMarkup(glm::vec4 origin) : C3DObjectModel (Main,
 
 	C3DObjectVBO *mmvbo = new C3DObjectVBO(false);
 
-	vbo.at(Main)->SetBuffer(buffer, &(*buffer)[0], buffer->size());
-	mmvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+	vbo.at(Main)->SetVBuffer(buffer);
+	mmvbo->SetVBuffer(buffer);
 
 	int lineMarkupCount = vertexCount_Axis + markCount * 2;
 	unsigned short * lineMarkup = new unsigned short[lineMarkupCount];
@@ -150,20 +150,6 @@ CMarkup::CMarkup(glm::vec4 origin) : C3DObjectModel (Main,
 	}
 	outfile.close();*/
 
-}
-
-
-CMarkup::~CMarkup()
-{
-	if (id == _testid)
-	{
-		int dummy;
-		dummy = 1 + 1;
-	}
-	auto buffer = (vector<VBOData>*)vbo.at(Main)->GetBuffer();
-	if (buffer)
-		delete buffer;
-	vbo.at(Main)->ClearIndexArray();
 }
 
 void CMarkup::BindUniforms(CViewPortControl* vpControl)

@@ -189,7 +189,7 @@ bool CMesh::LoadHeightmap()
 	prog.insert_or_assign(Main, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color"));
 
 	auto vbo_ = new C3DObjectVBO(clearAfter);
-	vbo_->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+	vbo_->SetVBuffer(buffer);
 	vbo_->AddIndexArray(idxArray, N, GL_TRIANGLE_STRIP);
 
 	FIBITMAP* subimage = (FIBITMAP*)maptexture->Data();
@@ -229,18 +229,6 @@ CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize,
 	t.detach();
 }
 
-CMesh::~CMesh()
-{
-	for (auto it = begin(vbo); it != end(vbo); ++it)
-	{
-		auto *buffer = (vector<VBOData>*)it->second->GetBuffer();
-		delete buffer;
-	}
-	if (bounds)
-		delete[] bounds;
-	if (idxArray)
-		delete[] idxArray;
-}
 glm::vec3 CMesh::GetSize() {
 	auto b = GetBounds();
 	if (b) return b[1] - b[0];
@@ -291,7 +279,7 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 	}
 	// 2. test triangles around approximate intersection point
 
-	vector<VBOData> *buffer = (vector<VBOData> *)m->GetC3DObjectVBO(Main)->GetBuffer();
+	vector<VBOData> *buffer = (vector<VBOData> *)m->GetC3DObjectVBO(Main)->GetVBuffer();
 
 	int X = resolution - 1, Y = resolution - 1;
 	/*
@@ -427,7 +415,7 @@ void CMesh::InitMiniMap()
 		buffer->push_back({ glm::vec4(bounds[1].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 		buffer->push_back({ glm::vec4(bounds[0].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
 
-		newvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+		newvbo->SetVBuffer(buffer);
 
 		
 

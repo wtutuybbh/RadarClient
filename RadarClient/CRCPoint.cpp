@@ -16,7 +16,7 @@ void CRCPointModel::InitStructure()
 {
 	CRCPointModel::vbo_s = new C3DObjectVBO(false);
 	std::vector<VBOData>* buffer = CRCPointModel::CreateSphereR1(1);
-	vbo_s->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+	vbo_s->SetVBuffer(buffer);
 
 	CRCPointModel::prog_s = new C3DObjectProgram("CRCPoint.v.glsl", "CRCPoint.f.glsl", "vertex", nullptr, "normal", nullptr);
 }
@@ -43,17 +43,6 @@ CRCPointModel::CRCPointModel(int vpId, float y_0, float mpph, float mppv, float 
 	c3DObjectModel_TypeName = "CRCPointModel";
 }
 
-CRCPointModel::~CRCPointModel()
-{
-	auto obj = vbo.at(Main);
-
-	vector<VBOData>* buffer = nullptr;
-	if (obj) 
-		buffer = (vector<VBOData>*)obj->GetBuffer();
-
-	if (buffer)
-		delete buffer;
-}
 
 std::vector<VBOData>* CRCPointModel::CreateSphereR1(int level)
 {

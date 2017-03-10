@@ -9,6 +9,7 @@
 
 float CRImage::maxAmp = 70;
 float CRImage::minAmp = 0;
+const std::string CRImage::requestID = "C3DObjectModel";
 CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels) : 
 	C3DObjectModel(
 		new C3DObjectVBO(true), 
@@ -17,16 +18,6 @@ CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_IN
 {
 	c3DObjectModel_TypeName = "CRImage";
 	Refresh(azemuth, origin, mpph, mppv, rdrinit, info, pixels);
-}
-
-
-CRImage::~CRImage()
-{
-	auto buffer = (vector<VBOData>*)vbo.at(Main)->GetBuffer();
-	if (buffer)
-	{
-		delete buffer;
-	}
 }
 
 FIBITMAP * CRImage::palette = nullptr;
@@ -62,7 +53,8 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 	}
 	else // 2D
 	{
-		vector<VBOData> *vbuffer = new vector<VBOData>;
+		vector<VBOData> *vbuffer = new vector<VBOData>(info->N * info->NR);
+		int v = 0;
 
 		float e = glm::radians(CSettings::GetFloat(FloatZeroElevation));
 		int paletteIndex;
@@ -92,7 +84,8 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 #if defined(CRCPOINT_CONSTRUCTOR_USES_RADIANS)
 
 				cartesianCoords = glm::vec3(origin) + glm::vec3(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph); //we always add y_0 (height of the radar relative to sea level) to all cartesian coordinates 
-				vbuffer->push_back({ glm::vec4(cartesianCoords, 1), glm::vec3(0, 0, 0), color, glm::vec2(0, 0) });
+				(*vbuffer)[v] = { glm::vec4(cartesianCoords, 1), glm::vec3(0, 0, 0), color, glm::vec2(0, 0) };
+				v++;
 #else
 				float re = glm::radians(e);
 				float ra = glm::radians(a);
@@ -100,10 +93,10 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 #endif
 			}
 		}
-		vbo.at(Main)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
-		vbo.at(MiniMap)->SetBuffer(vbuffer, &(*vbuffer)[0], vbuffer->size());
+		vbo.at(Main)->SetVBuffer(vbuffer);
+		vbo.at(MiniMap)->SetVBuffer(vbuffer);
 
-		vbo.at(Main)->NeedsReload = true;
-		vbo.at(MiniMap)->NeedsReload = true;
+		/*vbo.at(Main)->NeedsReload = true;
+		vbo.at(MiniMap)->NeedsReload = true;*/
 	}
 }

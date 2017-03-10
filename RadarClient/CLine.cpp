@@ -17,8 +17,8 @@ CLine::CLine(int vpId, glm::vec4 a, glm::vec4 b, LineStyle style) : C3DObjectMod
 
 	C3DObjectVBO *mmvbo = new C3DObjectVBO(false);
 
-	vbo.at(Main)->SetBuffer(buffer, &(*buffer)[0], buffer->size());
-	mmvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
+	vbo.at(Main)->SetVBuffer(buffer);
+	mmvbo->SetVBuffer(buffer);
 
 	vbo.insert_or_assign(MiniMap, mmvbo);
 
@@ -34,18 +34,11 @@ CLine::CLine(int vpId, glm::vec4 a, glm::vec4 b, LineStyle style) : C3DObjectMod
 	c3DObjectModel_TypeName = "CLine";
 }
 
-CLine::~CLine()
-{
-	auto buffer = (vector<VBOData>*)vbo.at(Main)->GetBuffer();
-	if (buffer)
-		delete buffer;
-}
-
 void CLine::SetPoints(glm::vec4 a, glm::vec4 b, LineStyle style)
 {
 	C3DObjectVBO *vbo_ = vbo.at(Main);
 
-	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetBuffer();
+	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetVBuffer();
 
 	if (!buffer || buffer->size() == 0)
 		return;

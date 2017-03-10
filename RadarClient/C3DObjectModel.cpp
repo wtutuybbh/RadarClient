@@ -21,7 +21,7 @@ void* C3DObjectModel::GetBufferAt(int index)
 		_vbo = (C3DObjectVBO*)vbo.at(index);
 		if (_vbo)
 		{
-			return _vbo->GetBuffer();
+			return _vbo->GetVBuffer();
 		}				
 	}
 	catch (const std::exception& ex)
@@ -98,6 +98,8 @@ C3DObjectModel::C3DObjectModel() {
 }
 C3DObjectModel::~C3DObjectModel()
 {
+	std::lock_guard<std::mutex> lock(m);
+
 	if (id == _testid)
 	{
 		int dummy;
@@ -127,6 +129,8 @@ void C3DObjectModel::CreateBuffer(C3DObjectVBO *vbo_) {
 }
 void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)
 {
+	std::lock_guard<std::mutex> lock(m);
+
 	if (!vpControl) return;
 	
 	if (vbo.find(vpControl->Id) == vbo.end()) {
@@ -230,7 +234,7 @@ bool C3DObjectModel::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, gl
 		if (vbo.find(vpId) == vbo.end()) {
 			return false;
 		}
-		std::vector<VBOData> *buffer = (std::vector<VBOData> *)vbo.at(vpId)->GetBuffer();
+		std::vector<VBOData> *buffer = (std::vector<VBOData> *)vbo.at(vpId)->GetVBuffer();
 
 		if (!buffer) {
 			return false;

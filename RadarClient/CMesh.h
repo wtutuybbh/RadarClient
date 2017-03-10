@@ -94,7 +94,6 @@ public:
 	
 	int UseTexture, UseY0Loc;
 	CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv);
-	~CMesh() override;
 	float GetCenterHeight();
 	float GetAverageHeight();
 	glm::vec3 GetSize();

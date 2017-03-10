@@ -6,20 +6,19 @@ const std::string C3DObjectVBO::requestID = "C3DObjectVBO";
 
 C3DObjectVBO::~C3DObjectVBO()
 {
+	if (vbuffer) {
+		delete vbuffer;
+	}
 	if (idxArrays) {		
-		idxArrays->clear();
 		delete idxArrays;	
 	}
 	if (idxIds) {
-		idxIds->clear();
 		delete idxIds;
 	}
 	if (idxLengths) {
-		idxLengths->clear();
 		delete idxLengths;
 	}
 	if (idxModes) {
-		idxModes->clear();
 		delete idxModes;
 	}
 }
@@ -42,17 +41,17 @@ C3DObjectVBO* C3DObjectVBO::InitStructure()
 	b->push_back({ glm::vec4(1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
 	b->push_back({ glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 
-	buffer = b;
+	vbuffer = b;
 
 	return this;
 }
 
 
-void C3DObjectVBO::SetBuffer(void *vbuffer, void* buffer, int size)
+void C3DObjectVBO::SetVBuffer(std::vector<VBOData> *vbuffer)
 {
-	this->vbuffer = vbuffer;
-	this->buffer = buffer;
-	this->bufferSize = size;
+	if (vbuffer) {
+		this->vbuffer = vbuffer;
+	}
 }
 
 void C3DObjectVBO::Bind() const
@@ -62,14 +61,15 @@ void C3DObjectVBO::Bind() const
 
 void C3DObjectVBO::LoadToGPU()
 {
-	if (!this->ready) {
+	if (vbuffer && vbuffer->size()>0 && !this->ready) {
 		glGenVertexArrays(1, &vaoId);
 		glBindVertexArray(vaoId);
 
 		glGenBuffers(1, &vboId);
 		glBindBuffer(GL_ARRAY_BUFFER, vboId);
-		glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(VBOData), buffer, GL_STATIC_DRAW);
-
+		glBufferData(GL_ARRAY_BUFFER, vbuffer->size() * sizeof(VBOData), &(*vbuffer)[0], GL_STATIC_DRAW);
+		vbufferSize = vbuffer->size();
+		
 		if (idxArrays)
 		{
 			for (int i = 0; i < idxArrays->size(); i++)
@@ -82,18 +82,24 @@ void C3DObjectVBO::LoadToGPU()
 			}
 		}
 		this->ready = true;
+		if (this->clearAfter)
+		{
+			vbuffer->clear();
+			vbuffer->shrink_to_fit();
+		}
 	}	
 }
 
 void C3DObjectVBO::Reload()
 {
-	if (buffer == nullptr || bufferSize == 0)
+	if (vbuffer == nullptr || vbuffer->size() == 0)
 	{
 		return;
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, vboId);
-	glBufferData(GL_ARRAY_BUFFER, bufferSize * elementSize, buffer, GL_STATIC_DRAW);
-	
+	glBufferData(GL_ARRAY_BUFFER, vbuffer->size() * elementSize, &(*vbuffer)[0], GL_STATIC_DRAW);
+	vbufferSize = vbuffer->size();
+
 	if (idxArrays)
 	{
 		for (int i = 0; i < idxArrays->size(); i++)
@@ -112,7 +118,7 @@ bool C3DObjectVBO::Ready() const
 
 bool C3DObjectVBO::HasBuffer() const
 {
-	return buffer != nullptr && bufferSize > 0;
+	return vbuffer != nullptr && vbuffer->size() > 0;
 }
 
 void C3DObjectVBO::UnBind()
@@ -141,12 +147,12 @@ void C3DObjectVBO::Draw(GLenum mode) const
 		}
 	}
 	else
-	{		
-		glDrawArrays(mode, 0, bufferSize);
+	{				
+		glDrawArrays(mode, 0, vbufferSize);
 	}
 }
 
-void* C3DObjectVBO::GetBuffer() const
+std::vector<VBOData>* C3DObjectVBO::GetVBuffer() const
 {
 	return vbuffer;
 }
@@ -178,7 +184,14 @@ void C3DObjectVBO::ClearIndexArray()
 C3DObjectVBO* C3DObjectVBO::Clone()
 {
 	C3DObjectVBO* vbo_ = new C3DObjectVBO(clearAfter);
-	vbo_->SetBuffer(vbuffer, buffer, bufferSize);
+	
+	if (vbuffer)
+	{
+		std::vector<VBOData> *newvbuffer = new std::vector<VBOData>(vbuffer->size());
+		vbo_->SetVBuffer(newvbuffer);
+	}
+
+	
 	if (idxArrays)
 	{
 		for (int i = 0; i < idxArrays->size(); i++)
