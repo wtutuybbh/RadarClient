@@ -1,6 +1,8 @@
 #pragma once
 #include "stdafx.h"
 
+class C3DObjectVertices;
+
 
 struct VBOData {
 	glm::vec4 vert;
@@ -22,8 +24,13 @@ class C3DObjectVBO
 	std::vector<int> *idxLengths { nullptr };
 	std::vector<GLenum> *idxModes { nullptr };
 	std::vector<unsigned int> *idxIds{ nullptr };
+
+	
+
 public:
-	virtual ~C3DObjectVBO();
+	std::shared_ptr<C3DObjectVertices> vertices{ std::shared_ptr<C3DObjectVertices>(nullptr) };
+
+	~C3DObjectVBO();
 	bool NeedsReload { false };
 
 	explicit C3DObjectVBO(bool clearAfter);

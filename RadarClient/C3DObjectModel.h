@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "C3DObjectVertices.h"
 
 
 class C3DObjectVBO;
@@ -23,6 +24,7 @@ protected:
 	std::string c3DObjectModel_TypeName {"C3DObjectModel"};
 	std::string name{ "" };
 public:
+	std::shared_ptr<C3DObjectVertices> vertices{ std::shared_ptr<C3DObjectVertices>(nullptr) };
 	void *GetBufferAt(int index);
 	static int _id, _testid;
 	int id;

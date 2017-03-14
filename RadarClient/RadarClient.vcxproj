@@ -207,6 +207,7 @@ xcopy "$(SolutionDir)FreeImage\*.dll" "$(OutDir)" /d /y</Command>
     <ClCompile Include="C3DObjectProgram.cpp" />
     <ClCompile Include="C3DObjectTexture.cpp" />
     <ClCompile Include="C3DObjectVBO.cpp" />
+    <ClCompile Include="C3DObjectVertices.cpp" />
     <ClCompile Include="CLine.cpp" />
     <ClCompile Include="CMarkup.cpp" />
     <ClCompile Include="CRCDataFile.cpp" />
@@ -252,6 +253,7 @@ xcopy "$(SolutionDir)FreeImage\*.dll" "$(OutDir)" /d /y</Command>
     <ClInclude Include="C3DObjectProgram.h" />
     <ClInclude Include="C3DObjectTexture.h" />
     <ClInclude Include="C3DObjectVBO.h" />
+    <ClInclude Include="C3DObjectVertices.h" />
     <ClInclude Include="CLine.h" />
     <ClInclude Include="CMarkup.h" />
     <ClInclude Include="CRCDataFile.h" />

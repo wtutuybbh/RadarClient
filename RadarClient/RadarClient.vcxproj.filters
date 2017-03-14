@@ -123,6 +123,9 @@
     <ClCompile Include="CRCListView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C3DObjectVertices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CMesh.h">
@@ -243,6 +246,9 @@
       <Filter>Header Files\XColorSpectrumCtrl</Filter>
     </ClInclude>
     <ClInclude Include="CRCListView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C3DObjectVertices.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

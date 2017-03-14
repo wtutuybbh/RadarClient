@@ -20,6 +20,16 @@ CLine::CLine(int vpId, glm::vec4 a, glm::vec4 b, LineStyle style) : C3DObjectMod
 	vbo.at(Main)->SetVBuffer(buffer);
 	mmvbo->SetVBuffer(buffer);
 
+	vertices = std::make_shared<C3DObjectVertices>(2);
+	vertices.get()->SetValues(0, a, glm::vec3(0, 0, 1), glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
+	vertices.get()->SetValues(1, b, glm::vec3(0, 0, 1), glm::vec4(1, 0, 0, 1), glm::vec2(0, 1));
+	vertices.get()->needsReload = true;
+
+	vertices->AddIndexArray(2, 0);
+
+	vbo.at(Main)->vertices = vertices;
+	mmvbo->vertices = vertices;
+
 	vbo.insert_or_assign(MiniMap, mmvbo);
 
 	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
@@ -45,10 +55,18 @@ void CLine::SetPoints(glm::vec4 a, glm::vec4 b, LineStyle style)
 
 	buffer->at(0).vert = a;
 	buffer->at(1).vert = b;
+	
+	if (vertices)
+	{
+		vertices.get()->SetValues(0, a, glm::vec3(0, 0, 1), glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
+		vertices.get()->SetValues(1, b, glm::vec3(0, 0, 1), glm::vec4(1, 0, 0, 1), glm::vec2(0, 1));
+		vertices.get()->needsReload = true;
+	}
+
 
 	vbo_->NeedsReload = true;
 	vbo_ = vbo.at(MiniMap);
 	if (vbo_) {
 		vbo_->NeedsReload = true;
-	}
+	}	
 }

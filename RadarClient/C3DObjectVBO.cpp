@@ -1,14 +1,15 @@
 #include "stdafx.h"
 #include "C3DObjectVBO.h"
 #include "CRCLogger.h"
+#include "C3DObjectVertices.h"
 
 const std::string C3DObjectVBO::requestID = "C3DObjectVBO";
 
 C3DObjectVBO::~C3DObjectVBO()
 {
-	if (vbuffer) {
-		delete vbuffer;
-	}
+	//if (vbuffer) {
+	//	delete vbuffer;
+	//}
 	if (idxArrays) {		
 		delete idxArrays;	
 	}
@@ -42,6 +43,17 @@ C3DObjectVBO* C3DObjectVBO::InitStructure()
 	b->push_back({ glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
 
 	vbuffer = b;
+
+	/*NEW*/
+
+	vertices = std::make_shared<C3DObjectVertices>(6);
+
+	vertices.get()->SetValues(0, glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0));
+	vertices.get()->SetValues(1, glm::vec4(-1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1));
+	vertices.get()->SetValues(2, glm::vec4(1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1));
+	vertices.get()->SetValues(3, glm::vec4(1, 1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1));
+	vertices.get()->SetValues(4, glm::vec4(1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0));
+	vertices.get()->SetValues(5, glm::vec4(-1, -1, 0, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0));
 
 	return this;
 }
