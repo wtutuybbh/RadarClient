@@ -13,13 +13,13 @@ const std::string CSector::requestID = "CSector";
 float CSector::maxAmp = 70;
 float CSector::minAmp = 0;
 
-CSector::CSector(int index) : C3DObjectModel(Main, new C3DObjectVBO(false), nullptr, new C3DObjectProgram("CSector.v.glsl", "CSector.f.glsl", "vertex", nullptr, nullptr, "color"))
+CSector::CSector(int index) : C3DObjectModel(Main, new C3DObjectVBO(false), nullptr, new C3DObjectProgram("CSector.v.glsl", "CSector.f.glsl", "vertex", nullptr, nullptr, "color", 13 * sizeof(float)))
 {
 	this->index = index;
 
 	vbo.insert_or_assign(MiniMap, new C3DObjectVBO(false));
 	tex.insert_or_assign(MiniMap, nullptr);
-	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CSector.v.glsl", "CSector.f.glsl", "vertex", nullptr, nullptr, "color"));
+	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CSector.v.glsl", "CSector.f.glsl", "vertex", nullptr, nullptr, "color", 13 * sizeof(float)));
 
 	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
@@ -63,7 +63,10 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 
 	//mpph, mppv, pts[i].R * init->dR, init->begAzm + pts[i].B * init->dAzm, ZERO_ELEVATION + init->begElv + pts[i].E * init->dElv
 	float r, a, e;
-	vector<VBOData> *vbuffer = (vector<VBOData> *)GetBufferAt(Main);
+	vector<VBOData> *vbuffer = (vector<VBOData> *)GetBufferAt(Main); // TODO: delette!
+	if (!vertices)
+		vertices = std::make_shared<C3DObjectVertices>(info_p->N);
+
 	if (vbuffer) {
 		vbuffer->clear();
 		vbuffer->resize(info_p->N);
@@ -81,6 +84,9 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 		(*vbuffer)[i].vert = origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0);
 		(*vbuffer)[i].norm.x = pts[i].Amp;		
 		(*vbuffer)[i].color = GetColor(pts[i].Amp);		
+
+		vertices.get()->SetValues(i, origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0), glm::vec3(pts[i].Amp, 0, 0), GetColor(pts[i].Amp), glm::vec2(0, 0));
+
 		LOG_INFO__("index= %d, i= %d, R= %d, b= %d, E= %d, Amp= %f", index, i, pts[i].R, pts[i].B, pts[i].E, pts[i].Amp);
 	}
 	
@@ -91,6 +97,13 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 		vbo.at(MiniMap)->SetVBuffer(vbuffer);
 		vbo.at(MiniMap)->NeedsReload = true;
 	}
+
+	if (!vbo.at(Main)->vertices)
+		vbo.at(Main)->vertices = vertices;
+	if (!vbo.at(MiniMap)->vertices)
+		vbo.at(MiniMap)->vertices = vertices;
+
+	vertices.get()->usesCount = 2;
 }
 
 void CSector::Dump(CViewPortControl* vpControl, std::ofstream *outfile)

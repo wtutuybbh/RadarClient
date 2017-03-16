@@ -73,13 +73,15 @@ void C3DObjectVBO::Bind() const
 
 void C3DObjectVBO::LoadToGPU()
 {
-	if (vbuffer && vbuffer->size()>0 && !this->ready) {
+	//if (vbuffer && vbuffer->size()>0 && !this->ready) {
+	if (vertices && vertices.get()->vertexCount>0 && !this->ready) {
 		glGenVertexArrays(1, &vaoId);
 		glBindVertexArray(vaoId);
 
 		glGenBuffers(1, &vboId);
 		glBindBuffer(GL_ARRAY_BUFFER, vboId);
-		glBufferData(GL_ARRAY_BUFFER, vbuffer->size() * sizeof(VBOData), &(*vbuffer)[0], GL_STATIC_DRAW);
+		//glBufferData(GL_ARRAY_BUFFER, vbuffer->size() * sizeof(VBOData), &(*vbuffer)[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, vertices.get()->vertexCount * vertices.get()->vertexSize * sizeof(float), vertices.get()->vbuffer, GL_STATIC_DRAW);
 		vbufferSize = vbuffer->size();
 		
 		if (idxArrays)
@@ -130,7 +132,8 @@ bool C3DObjectVBO::Ready() const
 
 bool C3DObjectVBO::HasBuffer() const
 {
-	return vbuffer != nullptr && vbuffer->size() > 0;
+	return vbuffer != nullptr && vbuffer->size() > 0; // TODO! 
+	return vertices && vertices.get()->vertexCount > 0;
 }
 
 void C3DObjectVBO::UnBind()

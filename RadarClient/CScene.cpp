@@ -496,7 +496,7 @@ bool CScene::PrepareRayVBO()
 		//RayObj = new C3DObjectModel()
 		RayObj = new C3DObjectModel(new C3DObjectVBO(true),
 			nullptr,
-			new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
+			new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color", 13 * sizeof(float)));
 
 		std::vector<VBOData> *buffer = new std::vector<VBOData>;
 		buffer->push_back({ glm::vec4(0, y_0, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.5), glm::vec2(1, 0) });
@@ -542,7 +542,7 @@ bool CScene::PrepareRayVBO()
 			//RayObj = new C3DObjectModel()
 			RayObj = new C3DObjectModel(new C3DObjectVBO(false),
 				nullptr,
-				new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
+				new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color", 13 * sizeof(float)));
 
 			std::vector<VBOData> *buffer = new std::vector<VBOData>;
 			buffer->push_back({ glm::vec4(0, y_0, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 1), glm::vec2(1, 0) });

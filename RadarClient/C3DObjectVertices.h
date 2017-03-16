@@ -11,9 +11,12 @@ public:
 	unsigned short vertexSize{ 13 };	
 	unsigned int vertexCount{ 0 };
 	bool needsReload{ false };
+	int usesCount{ 0 };
 
 	explicit C3DObjectVertices(int vertexCount)
 	{
+		if (vertexCount > USHRT_MAX)
+			throw std::exception("vertexCount must be greater less than USHRT_MAX (65535)");
 		if (vertexCount <= 0)
 			throw std::exception("vertexCount must be greater than 0");
 
@@ -46,9 +49,12 @@ public:
 	}
 	void SetValues(int offset, float vx, float vy, float vz, float vt, float nx, float ny, float nz, float cr, float cg, float cb, float ca, float tu, float tv) const;
 	void SetValues(int offset, glm::vec4 v, glm::vec3 n, glm::vec4 c, glm::vec2 t) const;
+	void SetValues(int offset, glm::vec4 v, glm::vec3 n, glm::vec4 c, glm::vec4 c2, glm::vec2 t) const;
 
-	void AddIndexArray(int length, GLenum mode);
+	unsigned short * AddIndexArray(int length, GLenum mode);
 	void SetIndex(int a, int i, int v);
+
+	float * GetBuffer() const;
 };
 
 

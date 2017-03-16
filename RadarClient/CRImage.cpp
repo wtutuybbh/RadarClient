@@ -14,7 +14,7 @@ CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_IN
 	C3DObjectModel(
 		new C3DObjectVBO(true), 
 		nullptr,
-		new C3DObjectProgram("CRImage.v.glsl", "CRImage.f.glsl", "vertex", nullptr, nullptr, "color"))
+		new C3DObjectProgram("CRImage.v.glsl", "CRImage.f.glsl", "vertex", nullptr, nullptr, "color", 13 * sizeof(float)))
 {
 	c3DObjectModel_TypeName = "CRImage";
 	Refresh(azemuth, origin, mpph, mppv, rdrinit, info, pixels);
@@ -54,6 +54,10 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 	else // 2D
 	{
 		vector<VBOData> *vbuffer = new vector<VBOData>(info->N * info->NR);
+
+		if (!vertices)
+			vertices = std::make_shared<C3DObjectVertices>(info->N * info->NR);
+
 		int v = 0;
 
 		float e = glm::radians(CSettings::GetFloat(FloatZeroElevation));
@@ -85,6 +89,9 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 
 				cartesianCoords = glm::vec3(origin) + glm::vec3(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph); //we always add y_0 (height of the radar relative to sea level) to all cartesian coordinates 
 				(*vbuffer)[v] = { glm::vec4(cartesianCoords, 1), glm::vec3(0, 0, 0), color, glm::vec2(0, 0) };
+
+				vertices.get()->SetValues(v, glm::vec4(cartesianCoords, 1), glm::vec3(0, 0, 0), color, glm::vec2(0, 0));
+
 				v++;
 #else
 				float re = glm::radians(e);
@@ -96,6 +103,11 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 		vbo.at(Main)->SetVBuffer(vbuffer);
 		vbo.at(MiniMap)->SetVBuffer(vbuffer);
 
+		if (!vbo.at(Main)->vertices)
+			vbo.at(Main)->vertices = vertices;
+		if (!vbo.at(MiniMap)->vertices)
+			vbo.at(MiniMap)->vertices = vertices;
+		vertices.get()->usesCount = 2;
 		/*vbo.at(Main)->NeedsReload = true;
 		vbo.at(MiniMap)->NeedsReload = true;*/
 	}

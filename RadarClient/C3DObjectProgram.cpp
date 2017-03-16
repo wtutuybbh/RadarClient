@@ -8,7 +8,7 @@ C3DObjectProgram::~C3DObjectProgram()
 {
 }
 
-C3DObjectProgram::C3DObjectProgram(const char* vShaderFile, const char* fShaderFile, const char* vertexAttribName, const char * textureAttribName, const char * normalAttribName, const char * colorAttribName)
+C3DObjectProgram::C3DObjectProgram(const char* vShaderFile, const char* fShaderFile, const char* vertexAttribName, const char * textureAttribName, const char * normalAttribName, const char * colorAttribName, unsigned short elementSize)
 {
 	this->vShaderFile = vShaderFile?string(vShaderFile):string();
 	this->fShaderFile = fShaderFile?string(fShaderFile):string();
@@ -16,7 +16,7 @@ C3DObjectProgram::C3DObjectProgram(const char* vShaderFile, const char* fShaderF
 	this->textureAttribName = textureAttribName?string(textureAttribName):string();
 	this->normalAttribName = normalAttribName?string(normalAttribName):string();
 	this->colorAttribName = colorAttribName?string(colorAttribName):string();
-	this->elementSize = sizeof(VBOData);
+	this->elementSize = elementSize;
 	this->ready = false;
 }
 
@@ -74,5 +74,5 @@ void C3DObjectProgram::Bind()
 
 C3DObjectProgram* C3DObjectProgram::Clone() const
 {
-	return new C3DObjectProgram(vShaderFile.c_str(), fShaderFile.c_str(), vertexAttribName.c_str(), textureAttribName.c_str(), normalAttribName.c_str(), colorAttribName.c_str());
+	return new C3DObjectProgram(vShaderFile.c_str(), fShaderFile.c_str(), vertexAttribName.c_str(), textureAttribName.c_str(), normalAttribName.c_str(), colorAttribName.c_str(), elementSize);
 }

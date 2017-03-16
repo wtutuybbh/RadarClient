@@ -88,7 +88,7 @@ class CMesh : public C3DObjectModel
 	std::vector<VBOData> * buffer{ nullptr };
 	bool buffer_ready{ false };
 	int index_length{ 0 };
-	float centerHeight, averageHeight;
+	double centerHeight{ 0 }, averageHeight{ 0 };
 public:
 	//glm::vec3 Size;
 	

@@ -12,15 +12,6 @@
 C3DObjectVBO* CRCPointModel::vbo_s = nullptr;
 C3DObjectProgram* CRCPointModel::prog_s = nullptr;
 
-void CRCPointModel::InitStructure()
-{
-	CRCPointModel::vbo_s = new C3DObjectVBO(false);
-	std::vector<VBOData>* buffer = CRCPointModel::CreateSphereR1(1);
-	vbo_s->SetVBuffer(buffer);
-
-	CRCPointModel::prog_s = new C3DObjectProgram("CRCPoint.v.glsl", "CRCPoint.f.glsl", "vertex", nullptr, "normal", nullptr);
-}
-
 CRCPointModel::CRCPointModel(int vpId, float y_0, float mpph, float mppv, float r, float a, float e): C3DObjectModel(vpId, CRCPointModel::vbo_s, nullptr, CRCPointModel::prog_s)
 {
 #if defined(CRCPOINT_CONSTRUCTOR_USES_RADIANS)
@@ -41,6 +32,17 @@ CRCPointModel::CRCPointModel(int vpId, float y_0, float mpph, float mppv, float 
 	Color = CSettings::GetColor(ColorPointHighLevel);
 
 	c3DObjectModel_TypeName = "CRCPointModel";
+
+
+	vertices = std::make_shared<C3DObjectVertices>(1);
+	vertices.get()->SetValues(0, glm::vec4(cartesianCoords, 1), glm::vec3(0, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0));
+	vertices.get()->usesCount = 1;
+
+	vbo.insert_or_assign(Main, new C3DObjectVBO(false));
+	vbo.insert_or_assign(MiniMap, new C3DObjectVBO(false));
+
+	vbo.at(Main)->vertices = vertices;
+	vbo.at(MiniMap)->vertices = vertices;
 }
 
 

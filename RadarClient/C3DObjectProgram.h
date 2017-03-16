@@ -11,7 +11,7 @@ class C3DObjectProgram
 	int elementSize{ 0 };
 public:	
 	~C3DObjectProgram();
-	C3DObjectProgram(const char* vShaderFile, const char* fShaderFile, const char* vertexAttribName, const char * textureAttribName, const char * normalAttribName, const char * colorAttribName);
+	C3DObjectProgram(const char* vShaderFile, const char* fShaderFile, const char* vertexAttribName, const char * textureAttribName, const char * normalAttribName, const char * colorAttribName, unsigned short elementSize);
 	int GetUniformLocation(const char* uniformName) const;
 	void UseProgram();
 	void CreateProgram();

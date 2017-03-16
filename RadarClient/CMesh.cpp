@@ -118,6 +118,7 @@ bool CMesh::LoadHeightmap()
 
 	//std::vector<VBOData> * buffer = new std::vector<VBOData>((alt_.Width() - 1) * (alt_.Height() - 1) * 6);
 	buffer = new std::vector<VBOData>(H*W);
+	vertices = std::make_shared<C3DObjectVertices>(H*W, 17);
 
 	int sign = -1, loop_length = (W - 2) * 2, step_length = 1, next_step = 0, change_mode = 1, mode_id = 0, special_mode_id = 4, next_big_length = loop_length, x = 0, x_prev = 0, dXtone = 1, X = 0;
 	int dYCounter = 0, dYtone = 0, next_step_Ybase_change = 0, next_step_Ybase_change_prev = 0, Ybase = 0, Y = 0;
@@ -143,12 +144,22 @@ bool CMesh::LoadHeightmap()
 			mincolor * (1 - level) + maxcolor * level,
 			glm::vec2(((float)X) / W, ((float)Y) / H) };
 
+		vertices.get()->SetValues(i, glm::vec4(
+			lonStretch * (-X + alt_.Width() / 2.0),
+			h / MPPv,
+			latStretch * (Y - alt_.Height() / 2.0),
+			1),
+			glm::vec3(0, 1, 0),
+			mincolor * (1 - level) + maxcolor * level,
+			mincolor * (1 - level) + maxcolor * level,
+			glm::vec2(((float)X) / W, ((float)Y) / H));
+
 		rcutils::takeminmax((*buffer)[i].vert.x, &(bounds[0].x), &(bounds[1].x));
 		rcutils::takeminmax((*buffer)[i].vert.y, &(bounds[0].y), &(bounds[1].y));
 		rcutils::takeminmax((*buffer)[i].vert.z, &(bounds[0].z), &(bounds[1].z));
 	}
 	averageHeight /= H * W;
-	idxArray = new unsigned short[N];
+	idxArray = vertices.get()->AddIndexArray(N, GL_TRIANGLE_STRIP); //new unsigned short[N];
 	// SEE GL_LINE_STRIP.xlsx for details
 	for (int i = 0; i<N; i++)
 	{
@@ -186,7 +197,7 @@ bool CMesh::LoadHeightmap()
 
 	centerHeight = alt_.ValueAt(min(max(alt_.Width() / 2 - 1, 0), alt_.Width() - 1), min(max(alt_.Height() / 2, 0), alt_.Height() - 1));
 
-	prog.insert_or_assign(Main, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color"));
+	prog.insert_or_assign(Main, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color", 17 * sizeof(float)));
 
 	auto vbo_ = new C3DObjectVBO(clearAfter);
 	vbo_->SetVBuffer(buffer);
@@ -202,7 +213,8 @@ bool CMesh::LoadHeightmap()
 	tex.insert_or_assign(Main, new C3DObjectTexture(subimage, "tex", false, false));
 
 	vbo.insert_or_assign(Main, vbo_);
-
+	vbo.at(Main)->vertices = vertices;
+	vertices.get()->usesCount++;
 	InitMiniMap();
 
 	return true;
@@ -405,21 +417,34 @@ void CMesh::InitMiniMap()
 	{
 		C3DObjectVBO *newvbo = new C3DObjectVBO(false);
 		
-		std::vector<VBOData> *buffer = new std::vector<VBOData>;
+		std::vector<VBOData> *buffer = new std::vector<VBOData>; //TODO: delete this
+
+		newvbo->vertices = std::make_shared<C3DObjectVertices>(6);
+
 		float y = 0;
 		buffer->push_back({ glm::vec4(bounds[0].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
+		newvbo->vertices.get()->SetValues(0, glm::vec4(bounds[0].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0));
+
 		buffer->push_back({ glm::vec4(bounds[0].x, y, bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1) });
-		buffer->push_back({ glm::vec4(bounds[1].x, y, bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
+		newvbo->vertices.get()->SetValues(1, glm::vec4(bounds[0].x, y, bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1));
 
 		buffer->push_back({ glm::vec4(bounds[1].x, y, bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
+		newvbo->vertices.get()->SetValues(2, glm::vec4(bounds[1].x, y, bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1));
+
+		buffer->push_back({ glm::vec4(bounds[1].x, y, bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1) });
+		newvbo->vertices.get()->SetValues(3, glm::vec4(bounds[1].x, y, bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1));
+
 		buffer->push_back({ glm::vec4(bounds[1].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+		newvbo->vertices.get()->SetValues(4, glm::vec4(bounds[1].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0));
+
 		buffer->push_back({ glm::vec4(bounds[0].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0) });
+		newvbo->vertices.get()->SetValues(5, glm::vec4(bounds[0].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0));
 
 		newvbo->SetVBuffer(buffer);
-
+		newvbo->vertices->usesCount++;
 		
 
-		C3DObjectProgram *newprog = new C3DObjectProgram("Minimap.v.glsl", "Minimap.f.glsl", "vertex", "texcoor", nullptr, nullptr);
+		C3DObjectProgram *newprog = new C3DObjectProgram("Minimap.v.glsl", "Minimap.f.glsl", "vertex", "texcoor", nullptr, nullptr, 17 * sizeof(float));
 		prog.insert_or_assign(MiniMap, newprog);
 
 		int minimapTexSize = CSettings::GetInt(IntMinimapTextureSize);
