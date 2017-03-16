@@ -25,7 +25,7 @@ CMiniMapPointer::CMiniMapPointer(CScene *scene)
 	tex.insert_or_assign(MiniMap, new C3DObjectTexture("video.png", "tex"));
 	prog.insert_or_assign(MiniMap, new C3DObjectProgram("MiniMapPointer.v.glsl", "MiniMapPointer.f.glsl", "vertex", nullptr, nullptr, "color"));
 	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
-	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+	//scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 
 	scaleMatrix.insert_or_assign(MiniMap, glm::scale(glm::vec3(0.03f, 0.015f, 0.03f)));

@@ -214,8 +214,13 @@ bool C3DObjectModel::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, gl
 			return false;
 		}
 
-		if (!vertices)
+		if (!vbo.at(vpId))
 			return false;
+		if (!vertices) {
+			vertices = vbo.at(vpId)->vertices;
+			if (!vertices)
+				return false;
+		}
 
 		auto vbuffer = vertices.get()->GetBuffer();
 		auto vertexSize = vertices.get()->vertexSize;
