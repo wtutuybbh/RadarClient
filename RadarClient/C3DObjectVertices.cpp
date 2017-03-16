@@ -34,7 +34,7 @@ void C3DObjectVertices::SetValues(int offset, glm::vec4 v, glm::vec3 n, glm::vec
 		vbuffer[o] = v.x;
 		vbuffer[o + 1] = v.y;
 		vbuffer[o + 2] = v.z;
-		vbuffer[o + 3] = v.t;
+		vbuffer[o + 3] = v.w;
 		vbuffer[o + 4] = n.x;
 		vbuffer[o + 5] = n.y;
 		vbuffer[o + 6] = n.z;
@@ -58,7 +58,7 @@ void C3DObjectVertices::SetValues(int offset, glm::vec4 v, glm::vec3 n, glm::vec
 		vbuffer[o] = v.x;
 		vbuffer[o + 1] = v.y;
 		vbuffer[o + 2] = v.z;
-		vbuffer[o + 3] = v.t;
+		vbuffer[o + 3] = v.w;
 		vbuffer[o + 4] = n.x;
 		vbuffer[o + 5] = n.y;
 		vbuffer[o + 6] = n.z;
@@ -81,6 +81,7 @@ unsigned short * C3DObjectVertices::AddIndexArray(int length, GLenum mode)
 	idxArrays.push_back(arr);
 	idxLengths.push_back(length);
 	idxModes.push_back(mode);
+	idxIds.push_back(0);
 	return arr;
 }
 
@@ -92,4 +93,9 @@ void C3DObjectVertices::SetIndex(int a, int i, int v)
 float* C3DObjectVertices::GetBuffer() const
 {
 	return vbuffer;
+}
+
+glm::vec4 *C3DObjectVertices::getv(int offset)
+{	
+	return reinterpret_cast<glm::vec4*>(vbuffer + offset * vertexSize);
 }

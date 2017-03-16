@@ -12,7 +12,7 @@
 C3DObjectVBO* CRCPointModel::vbo_s = nullptr;
 C3DObjectProgram* CRCPointModel::prog_s = nullptr;
 
-CRCPointModel::CRCPointModel(int vpId, float y_0, float mpph, float mppv, float r, float a, float e): C3DObjectModel(vpId, CRCPointModel::vbo_s, nullptr, CRCPointModel::prog_s)
+CRCPointModel::CRCPointModel(int vpId, float y_0, float mpph, float mppv, float r, float a, float e)
 {
 #if defined(CRCPOINT_CONSTRUCTOR_USES_RADIANS)
 	cartesianCoords = glm::vec3(-r * sin(a) * cos(e) / mpph, y_0 + r * sin(e) / mppv, r * cos(a) * cos(e) / mpph); //we always add y_0 (height of the radar relative to sea level) to all cartesian coordinates 
@@ -43,90 +43,90 @@ CRCPointModel::CRCPointModel(int vpId, float y_0, float mpph, float mppv, float 
 
 	vbo.at(Main)->vertices = vertices;
 	vbo.at(MiniMap)->vertices = vertices;
+	vertices.get()->usesCount = 2;
 }
 
-
-std::vector<VBOData>* CRCPointModel::CreateSphereR1(int level)
-{
-	if (level < 0)
-		level = 0;
-
-	std::vector<VBOData>* buffer = new std::vector<VBOData>;
-
-	buffer->push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-
-	buffer->push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-
-	buffer->push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-
-	buffer->push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-
-	buffer->push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-
-	buffer->push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-
-	buffer->push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-
-	buffer->push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-	buffer->push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
-
-
-	if (level == 0) {
-		return buffer;
-	}
-
-	//glm::mat3 mat3_05 = glm::mat3(0.5);
-	//glm::mat4 mat4_05 = glm::mat4(0.5);
-	float mat3_05 = 0.5f;
-	float mat4_05 = 0.5f;
-
-	int N = 8 * pow(4, level - 1);
-
-	for (int i = 0; i < N; i++) {
-
-		VBOData d01 = { mat4_05*((*buffer)[0].vert + (*buffer)[1].vert), mat3_05*((*buffer)[0].norm + (*buffer)[1].norm), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) };
-		VBOData d12 = { mat4_05*((*buffer)[2].vert + (*buffer)[1].vert), mat3_05*((*buffer)[2].norm + (*buffer)[1].norm), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) };
-		VBOData d20 = { mat4_05*((*buffer)[0].vert + (*buffer)[2].vert), mat3_05*((*buffer)[0].norm + (*buffer)[2].norm), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) };
-
-		buffer->push_back((*buffer)[0]);
-		buffer->push_back(d01);
-		buffer->push_back(d20);
-
-		buffer->push_back(d01);
-		buffer->push_back((*buffer)[1]);
-		buffer->push_back(d12);
-
-		buffer->push_back(d12);
-		buffer->push_back((*buffer)[2]);
-		buffer->push_back(d20);
-
-		buffer->push_back(d01);
-		buffer->push_back(d12);
-		buffer->push_back(d20);
-
-		buffer->erase(buffer->begin(), buffer->begin() + 3);
-	}
-	for (int i = 0; i < buffer->size(); i++) {
-		(*buffer)[i].vert = glm::vec4(glm::normalize(glm::vec3((*buffer)[i].vert)), 1);
-		(*buffer)[i].norm = glm::normalize((*buffer)[i].norm);
-	}
-	return buffer;
-}
+//std::vector<VBOData>* CRCPointModel::CreateSphereR1(int level)
+//{
+//	if (level < 0)
+//		level = 0;
+//
+//	std::vector<VBOData>* buffer = new std::vector<VBOData>;
+//
+//	buffer->push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//
+//	buffer->push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//
+//	buffer->push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//
+//	buffer->push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(0, 1, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//
+//	buffer->push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//
+//	buffer->push_back({ glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//
+//	buffer->push_back({ glm::vec4(-1, 0, 0, 1), glm::vec3(-1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//
+//	buffer->push_back({ glm::vec4(0, 0, -1, 1), glm::vec3(0, 0, -1), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(1, 0, 0, 1), glm::vec3(1, 0, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//	buffer->push_back({ glm::vec4(0, -1, 0, 1), glm::vec3(0, -1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) });
+//
+//
+//	if (level == 0) {
+//		return buffer;
+//	}
+//
+//	//glm::mat3 mat3_05 = glm::mat3(0.5);
+//	//glm::mat4 mat4_05 = glm::mat4(0.5);
+//	float mat3_05 = 0.5f;
+//	float mat4_05 = 0.5f;
+//
+//	int N = 8 * pow(4, level - 1);
+//
+//	for (int i = 0; i < N; i++) {
+//
+//		VBOData d01 = { mat4_05*((*buffer)[0].vert + (*buffer)[1].vert), mat3_05*((*buffer)[0].norm + (*buffer)[1].norm), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) };
+//		VBOData d12 = { mat4_05*((*buffer)[2].vert + (*buffer)[1].vert), mat3_05*((*buffer)[2].norm + (*buffer)[1].norm), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) };
+//		VBOData d20 = { mat4_05*((*buffer)[0].vert + (*buffer)[2].vert), mat3_05*((*buffer)[0].norm + (*buffer)[2].norm), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0) };
+//
+//		buffer->push_back((*buffer)[0]);
+//		buffer->push_back(d01);
+//		buffer->push_back(d20);
+//
+//		buffer->push_back(d01);
+//		buffer->push_back((*buffer)[1]);
+//		buffer->push_back(d12);
+//
+//		buffer->push_back(d12);
+//		buffer->push_back((*buffer)[2]);
+//		buffer->push_back(d20);
+//
+//		buffer->push_back(d01);
+//		buffer->push_back(d12);
+//		buffer->push_back(d20);
+//
+//		buffer->erase(buffer->begin(), buffer->begin() + 3);
+//	}
+//	for (int i = 0; i < buffer->size(); i++) {
+//		(*buffer)[i].vert = glm::vec4(glm::normalize(glm::vec3((*buffer)[i].vert)), 1);
+//		(*buffer)[i].norm = glm::normalize((*buffer)[i].norm);
+//	}
+//	return buffer;
+//}
 
 glm::mat4 CRCPointModel::GetScaleMatrix(CViewPortControl* vpControl)
 {

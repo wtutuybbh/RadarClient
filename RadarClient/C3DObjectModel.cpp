@@ -10,27 +10,6 @@
 
 const std::string C3DObjectModel::requestID = "C3DObjectModel";
 
-void* C3DObjectModel::GetBufferAt(int index)
-{
-	C3DObjectVBO* _vbo;
-	try
-	{
-		if (vbo.find(index) == vbo.end()) {
-			return nullptr;
-		}
-		_vbo = (C3DObjectVBO*)vbo.at(index);
-		if (_vbo)
-		{
-			return _vbo->GetVBuffer();
-		}				
-	}
-	catch (const std::exception& ex)
-	{
-		LOG_WARN("exception", "C3DObjectModel::GetBufferAt", ex.what());		
-	}
-	return nullptr;
-}
-
 void C3DObjectModel::SetCartesianCoordinates(glm::vec4 c)
 {
 	cartesianCoords = glm::vec3(c);
@@ -63,35 +42,35 @@ void C3DObjectModel::SetCartesianCoordinates(float x, float y, float z)
 
 int C3DObjectModel::_id;
 int C3DObjectModel::_testid;
-C3DObjectModel::C3DObjectModel(int vpId, C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObjectProgram* prog) : C3DObjectModel()
-{
-	this->vbo.insert_or_assign(vpId, vbo);
-	this->tex.insert_or_assign(vpId, tex);
-	this->prog.insert_or_assign(vpId, prog);
-
-	translateMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
-	scaleMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
-	rotateMatrix.insert_or_assign(vpId, glm::mat4(1.0f));	
-}
-
-C3DObjectModel::C3DObjectModel(C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObjectProgram* prog) : C3DObjectModel()
-{
-	this->vbo.insert_or_assign(Main, vbo);
-	this->tex.insert_or_assign(Main, tex);
-	this->prog.insert_or_assign(Main, prog);
-
-	this->vbo.insert_or_assign(MiniMap, vbo ? vbo->Clone() : nullptr);
-	this->tex.insert_or_assign(MiniMap, tex ? tex->Clone() : nullptr);
-	this->prog.insert_or_assign(MiniMap, prog ? prog->Clone() : nullptr);
-
-	translateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
-	scaleMatrix.insert_or_assign(Main, glm::mat4(1.0f));
-	rotateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
-
-	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
-	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
-	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
-}
+//C3DObjectModel::C3DObjectModel(int vpId, C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObjectProgram* prog) : C3DObjectModel()
+//{
+//	this->vbo.insert_or_assign(vpId, vbo);
+//	this->tex.insert_or_assign(vpId, tex);
+//	this->prog.insert_or_assign(vpId, prog);
+//
+//	translateMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
+//	scaleMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
+//	rotateMatrix.insert_or_assign(vpId, glm::mat4(1.0f));	
+//}
+//
+//C3DObjectModel::C3DObjectModel(C3DObjectVBO* vbo, C3DObjectTexture* tex, C3DObjectProgram* prog) : C3DObjectModel()
+//{
+//	this->vbo.insert_or_assign(Main, vbo);
+//	this->tex.insert_or_assign(Main, tex);
+//	this->prog.insert_or_assign(Main, prog);
+//
+//	this->vbo.insert_or_assign(MiniMap, vbo ? vbo->Clone() : nullptr);
+//	this->tex.insert_or_assign(MiniMap, tex ? tex->Clone() : nullptr);
+//	this->prog.insert_or_assign(MiniMap, prog ? prog->Clone() : nullptr);
+//
+//	translateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
+//	scaleMatrix.insert_or_assign(Main, glm::mat4(1.0f));
+//	rotateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
+//
+//	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+//	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+//	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+//}
 C3DObjectModel::C3DObjectModel() {
 	this->id = _id;
 	_id++;
@@ -100,11 +79,11 @@ C3DObjectModel::~C3DObjectModel()
 {
 	std::lock_guard<std::mutex> lock(m);
 
-	if (id == _testid)
-	{
-		int dummy;
-		dummy = 1 + 1;
-	}
+	//if (id == _testid)
+	//{
+	//	int dummy;
+	//	dummy = 1 + 1;
+	//}
 	if (vbo.size()>0)
 	{
 		for (auto it = begin(vbo); it != end(vbo); ++it)
@@ -234,16 +213,21 @@ bool C3DObjectModel::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, gl
 		if (vbo.find(vpId) == vbo.end()) {
 			return false;
 		}
-		std::vector<VBOData> *buffer = (std::vector<VBOData> *)vbo.at(vpId)->GetVBuffer();
 
-		if (!buffer) {
+		if (!vertices)
 			return false;
-		}
 
-		for (unsigned int i = 0; i < buffer->size() && i+1 < buffer->size() && i+2 < buffer->size(); i += 3) {
-			vert0 = glm::vec3(modelMatrix.at(vpId)*(*buffer)[i].vert);
-			vert1 = glm::vec3(modelMatrix.at(vpId)*(*buffer)[i + 1].vert);
-			vert2 = glm::vec3(modelMatrix.at(vpId)*(*buffer)[i + 2].vert);
+		auto vbuffer = vertices.get()->GetBuffer();
+		auto vertexSize = vertices.get()->vertexSize;
+		auto vertexCount = vertices.get()->vertexCount;
+
+		if (!vbuffer || vertexCount == 0)
+			return false;
+
+		for (unsigned int i = 0; i < vertexCount && i+1 < vertexCount && i+2 < vertexCount; i += 3) {
+			vert0 = glm::vec3(modelMatrix.at(vpId)* *vertices.get()->getv(i));
+			vert1 = glm::vec3(modelMatrix.at(vpId)* *vertices.get()->getv(i + 1));
+			vert2 = glm::vec3(modelMatrix.at(vpId)* *vertices.get()->getv(i + 2));
 			if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, position)) {
 				return true;
 			}

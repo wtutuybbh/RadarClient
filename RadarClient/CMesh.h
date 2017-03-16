@@ -60,8 +60,6 @@ typedef struct {
 typedef int(_cdecl * GDPALTITUDEMAP)(const char *, double *, int *, short *);
 typedef int(_cdecl * GDPALTITUDEMAP_SIZES)(const char *, double *, int *);
 
-struct VBOData;
-
 class CMesh : public C3DObjectModel
 {	
 	bool LoadHeightmap();
@@ -85,7 +83,6 @@ class CMesh : public C3DObjectModel
 
 	unsigned short *idxArray{ nullptr };
 
-	std::vector<VBOData> * buffer{ nullptr };
 	bool buffer_ready{ false };
 	int index_length{ 0 };
 	double centerHeight{ 0 }, averageHeight{ 0 };

@@ -13,14 +13,20 @@ const std::string CSector::requestID = "CSector";
 float CSector::maxAmp = 70;
 float CSector::minAmp = 0;
 
-CSector::CSector(int index) : C3DObjectModel(Main, new C3DObjectVBO(false), nullptr, new C3DObjectProgram("CSector.v.glsl", "CSector.f.glsl", "vertex", nullptr, nullptr, "color", 13 * sizeof(float)))
+CSector::CSector(int index) : C3DObjectModel()
 {
 	this->index = index;
 
+	vbo.insert_or_assign(Main, new C3DObjectVBO(false));
+	tex.insert_or_assign(Main, nullptr);
+	prog.insert_or_assign(Main, new C3DObjectProgram("CSector.v.glsl", "CSector.f.glsl", "vertex", nullptr, nullptr, "color"));
+	translateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
+	scaleMatrix.insert_or_assign(Main, glm::mat4(1.0f));
+	rotateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
+
 	vbo.insert_or_assign(MiniMap, new C3DObjectVBO(false));
 	tex.insert_or_assign(MiniMap, nullptr);
-	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CSector.v.glsl", "CSector.f.glsl", "vertex", nullptr, nullptr, "color", 13 * sizeof(float)));
-
+	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CSector.v.glsl", "CSector.f.glsl", "vertex", nullptr, nullptr, "color"));
 	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
@@ -63,38 +69,26 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 
 	//mpph, mppv, pts[i].R * init->dR, init->begAzm + pts[i].B * init->dAzm, ZERO_ELEVATION + init->begElv + pts[i].E * init->dElv
 	float r, a, e;
-	vector<VBOData> *vbuffer = (vector<VBOData> *)GetBufferAt(Main); // TODO: delette!
-	if (!vertices)
+	if (!vertices && info_p->N > 0)
 		vertices = std::make_shared<C3DObjectVertices>(info_p->N);
-
-	if (vbuffer) {
-		vbuffer->clear();
-		vbuffer->resize(info_p->N);
-	}
-	else {
-		vbuffer = new vector<VBOData>(info_p->N);
-	}
+	if (!vertices)
+		return;
 	float zeroElevation = glm::radians(CSettings::GetFloat(FloatZeroElevation));
 	for (int i = 0; i < info_p->N; i++) 
 	{
 		//here we calculate point spherical coordinates
 		r = pts[i].R * init->dR;
 		a = init->begAzm + pts[i].B * init->dAzm;
-		e = zeroElevation + init->begElv + pts[i].E * init->dElv;
-		(*vbuffer)[i].vert = origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0);
-		(*vbuffer)[i].norm.x = pts[i].Amp;		
-		(*vbuffer)[i].color = GetColor(pts[i].Amp);		
+		e = zeroElevation + init->begElv + pts[i].E * init->dElv;	
 
 		vertices.get()->SetValues(i, origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0), glm::vec3(pts[i].Amp, 0, 0), GetColor(pts[i].Amp), glm::vec2(0, 0));
 
 		LOG_INFO__("index= %d, i= %d, R= %d, b= %d, E= %d, Amp= %f", index, i, pts[i].R, pts[i].B, pts[i].E, pts[i].Amp);
 	}
 	
-	vbo.at(Main)->SetVBuffer(vbuffer);
 	vbo.at(Main)->NeedsReload = true;
 	if (vbo.find(MiniMap) != vbo.end())
 	{
-		vbo.at(MiniMap)->SetVBuffer(vbuffer);
 		vbo.at(MiniMap)->NeedsReload = true;
 	}
 
@@ -108,12 +102,7 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 
 void CSector::Dump(CViewPortControl* vpControl, std::ofstream *outfile)
 {
-	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
-	vector<VBOData> *buffer = vbo_->GetVBuffer();
-	for (auto it = buffer->begin(); it != buffer->end(); ++it)
-	{
-		*outfile << (*it).norm.x << char(13) << std::endl;
-	}
+
 }
 
 void CSector::BindUniforms(CViewPortControl* vpControl)
@@ -146,20 +135,7 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
 
 	//so, it works only if buffer elements have datatype of VBOData (or identical) and organized using std::vector
-	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetVBuffer();
 
-	if (!buffer || buffer->size() == 0) 
-	{
-		if (!buffer)
-		{
-			LOG_ERROR(requestID, context, "buffer is nullptr, RETURN -1");
-		}
-		if (buffer->size() == 0)
-		{
-			LOG_ERROR(requestID, context, "buffer->size() == 0, RETURN -1");
-		}
-		return -1;
-	}
 	glm::mat4 mv = vpControl->GetViewMatrix() * GetModelMatrix(vpControl);	
 
 	if (CSector_GetPoint_LogInfo)
@@ -171,12 +147,12 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 	}
 
 	glm::mat4 proj = vpControl->GetProjMatrix();
-	for (int i = 0; i < buffer->size(); i++)
+	for (int i = 0; i < vertices.get()->vertexCount; i++)
 	{
-		glm::vec4 p = vpControl->GetProjMatrix() * vpControl->GetViewMatrix() * GetModelMatrix(vpControl) * (*buffer)[i].vert;
+		glm::vec4 p = vpControl->GetProjMatrix() * vpControl->GetViewMatrix() * GetModelMatrix(vpControl) * *vertices.get()->getv(i);
 		p = p / p.w;
 		glm::vec3 screenP = glm::project(
-			glm::vec3((*buffer)[i].vert),
+			glm::vec3(*vertices.get()->getv(i)),
 			mv,
 			proj,
 			glm::vec4(0, 0, vpControl->GetWidth(), vpControl->GetHeight())
@@ -191,40 +167,54 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 
 glm::vec3 CSector::GetPointCoords(CViewPortControl* vpControl, int index)
 {
-	C3DObjectVBO *vbo_ = vbo.at(vpControl->Id);
-
-	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetVBuffer();
-
-	return glm::vec3(buffer->at(index).vert);
+	return glm::vec3(*vertices.get()->getv(index));
 }
 
 void CSector::SelectPoint(int vpId, int pointIndex)
 {
-	C3DObjectVBO *vbo_ = vbo.at(vpId);
+	if (!vertices)
+		return;
 
-	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetVBuffer();
+	auto vbuffer = vertices.get()->GetBuffer();
+	auto vertexSize = vertices.get()->vertexSize;
+	auto vertexCount = vertices.get()->vertexCount;
 
-	if (!buffer || buffer->size() == 0)
+	if (!vbuffer || vertexCount == 0)
 		return;
 	
-	(*buffer)[pointIndex].color = CSettings::GetColor(ColorPointSelected);
-	vbo_->NeedsReload = true;
+	auto color = CSettings::GetColor(ColorPointSelected);
+	vbuffer[pointIndex * vertexSize + 7] = color.r;
+	vbuffer[pointIndex * vertexSize + 8] = color.g;
+	vbuffer[pointIndex * vertexSize + 9] = color.b;
+	vbuffer[pointIndex * vertexSize + 10] = color.a;
+	
+	vbo.at(Main)->NeedsReload = true;
+	vbo.at(MiniMap)->NeedsReload = true;
 }
 
 void CSector::UnselectAll(int vpId)
 {
-	C3DObjectVBO *vbo_ = vbo.at(vpId);
-
-	vector<VBOData> *buffer = (vector<VBOData> *)vbo_->GetVBuffer();
-
-	if (!buffer || buffer->size() == 0)
+	if (!vertices)
 		return;
 
-	for (int i = 0; i < buffer->size(); i++)
+	auto vbuffer = vertices.get()->GetBuffer();
+	auto vertexSize = vertices.get()->vertexSize;
+	auto vertexCount = vertices.get()->vertexCount;
+
+	if (!vbuffer || vertexCount == 0)
+		return;
+
+	for (int i = 0; i < vertexCount; i++)
 	{
-		buffer->at(i).color = GetColor(buffer->at(i).norm.x);
+		auto color = GetColor(vbuffer[i * vertexSize + 4]);
+		vbuffer[i * vertexSize + 7] = color.r;
+		vbuffer[i * vertexSize + 8] = color.g;
+		vbuffer[i * vertexSize + 9] = color.b;
+		vbuffer[i * vertexSize + 10] = color.a;
 	}
-	vbo_->NeedsReload = true;
+
+	vbo.at(Main)->NeedsReload = true;
+	vbo.at(MiniMap)->NeedsReload = true;
 }
 
 glm::vec4 CSector::GetColor(float level)

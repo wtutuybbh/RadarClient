@@ -25,6 +25,7 @@
 
 #include "CUserInterface.h"
 #include "CRCLogger.h"
+#include "CRay.h"
 
 const std::string CScene::requestID = "CScene";
 
@@ -70,7 +71,7 @@ CScene::CScene()
 	t.detach();
 	*/
 
-	mmPointer = new CMiniMapPointer(MiniMap, this);	
+	mmPointer = new CMiniMapPointer(this);	
 
 		
 
@@ -201,7 +202,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
-	if (Mesh)
+	if (MeshReady())
 	{
 		Mesh->UseTexture = vpControl->DisplayMap;
 		Mesh->UseY0Loc = !vpControl->DisplayLandscape;
@@ -242,10 +243,11 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 			it->second->Draw(vpControl, GL_POINTS);
 			it->second->Draw(vpControl, GL_LINE_STRIP);
 			glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
-			vector<VBOData> *buffer = (vector<VBOData> *)it->second->GetBufferAt(vpControl->Id);
+			auto buffer = it->second->vertices.get()->GetBuffer();
 			if (buffer)
 			{
-				BitmapString(buffer->at(0).vert.x, buffer->at(0).vert.y + 10, buffer->at(0).vert.z, num2str(it->second->ID, 0));
+				auto vert = it->second->vertices.get()->getv(0);
+				BitmapString(vert->x, vert->y + 10, vert->z, num2str(it->second->ID, 0));
 			}							
 		}
 	}
@@ -276,7 +278,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 			Camera->MeshSize = Mesh->GetSize();
 			waitingForMesh = false;
 		}
-		Mesh->Draw(vpControl, GL_TRIANGLES);
+		//Mesh->Draw(vpControl, GL_TRIANGLES);
 	}
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
@@ -491,78 +493,15 @@ bool CScene::PrepareRayVBO()
 	}
 	float y_0 = Mesh->GetCenterHeight() / MPPv;
 
-	if (!RayObj)
-	{
-		//RayObj = new C3DObjectModel()
-		RayObj = new C3DObjectModel(new C3DObjectVBO(true),
-			nullptr,
-			new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color", 13 * sizeof(float)));
-
-		std::vector<VBOData> *buffer = new std::vector<VBOData>;
-		buffer->push_back({ glm::vec4(0, y_0, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.5), glm::vec2(1, 0) });
-		buffer->push_back({ glm::vec4(maxDist * sin(-rayWidth / 2) / MPPh, y_0, maxDist * cos(-rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.1), glm::vec2(1, 1) });
-		buffer->push_back({ glm::vec4(maxDist * sin(rayWidth / 2) / MPPh, y_0, maxDist * cos(rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 0.1), glm::vec2(0, 1) });
-
-		auto vbo = RayObj->GetC3DObjectVBO(Main);
-
-		if (vbo) {
-			vbo->SetVBuffer(buffer);
-		}
-
-		C3DObjectVBO *mmvbo = new C3DObjectVBO(false);
-		mmvbo->SetVBuffer(buffer);
-
-		RayObj->SetVBO(MiniMap, mmvbo);
-	}
-
-	if (rdrinit) {
-		maxDist = rdrinit->dR * rdrinit->maxR;
-
-		Ray = new glm::vec3[vertexCount_Ray]; //ray vertex array
-		Ray[0].x = 0;
-		Ray[0].y = y_0;
-		Ray[0].z = 0;
-
-		Ray[1].x = maxDist * sin(-rayWidth / 2) / MPPh;
-		Ray[1].y = y_0;
-		Ray[1].z = maxDist * cos(-rayWidth / 2) / MPPh;
-
-		Ray[2].x = maxDist * sin(rayWidth / 2) / MPPh;
-		Ray[2].y = y_0;
-		Ray[2].z = maxDist * cos(rayWidth / 2) / MPPh;
-
-		rayArraySize = 3;
-		ray = new unsigned short[rayArraySize]; //ray index array
-		ray[0] = 0;
-		ray[1] = 1;
-		ray[2] = 2;
 
 		if (!RayObj)
 		{
 			//RayObj = new C3DObjectModel()
-			RayObj = new C3DObjectModel(new C3DObjectVBO(false),
-				nullptr,
-				new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color", 13 * sizeof(float)));
-
-			std::vector<VBOData> *buffer = new std::vector<VBOData>;
-			buffer->push_back({ glm::vec4(0, y_0, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 1), glm::vec2(1, 0) });
-			buffer->push_back({ glm::vec4(maxDist * sin(-rayWidth / 2) / MPPh, y_0, maxDist * cos(-rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 1), glm::vec2(1, 1) });
-			buffer->push_back({ glm::vec4(maxDist * sin(rayWidth / 2) / MPPh, y_0, maxDist * cos(rayWidth / 2) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 1), glm::vec2(0, 1) });
-
-			auto vbo = RayObj->GetC3DObjectVBO(Main);
-
-			if (vbo) {
-				vbo->SetVBuffer(buffer);
-			}
-
-			/*C3DObjectVBO *mmvbo = new C3DObjectVBO(false);
-			mmvbo->SetBuffer(buffer, &(*buffer)[0], buffer->size());
-
-			RayObj->SetVBO(MiniMap, mmvbo);*/
+			RayObj = new CRay(rayWidth, maxDist, y_0);
+			return true;
 		}
 
-		return true;
-	}
+		
 	return false;
 }
 
@@ -715,7 +654,6 @@ void CScene::RefreshTracks(vector<TRK*>* tracks)
 				it->second->Found = tracks->at(i)->Found = true;
 				it->second->Refresh(glm::vec4(0, y_0, 0, 1), MPPh, MPPv, &tracks->at(i)->P);
 				it->second->SelectTrack(Main, std::find(SelectedTracksIds.begin(), SelectedTracksIds.end(), tracks->at(i)->id) != SelectedTracksIds.end());
-				it->second->SelectTrack(MiniMap, std::find(SelectedTracksIds.begin(), SelectedTracksIds.end(), tracks->at(i)->id) != SelectedTracksIds.end());				
 				insertNew = false;
 			}
 		}
@@ -895,7 +833,6 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 			if (index >= 0)
 			{
 				Sectors[i]->SelectPoint(Main, index);
-				Sectors[i]->SelectPoint(MiniMap, index);
 				CRCPointModel *point = new CRCPointModel(vpControl->Id, y_0, this->MPPh, this->MPPv, 0, 0, 0);
 				auto coords = Sectors[i]->GetPointCoords(vpControl, index);
 				point->SetCartesianCoordinates(coords);
@@ -937,10 +874,7 @@ C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, 
 			if (index >= 0)
 			{
 				SelectedTracksIds.push_back(it->second->ID);
-				it->second->SelectPoint(Main, index);
-				it->second->SelectPoint(MiniMap, index);
 				it->second->SelectTrack(Main, true);
-				it->second->SelectTrack(MiniMap, true);
 				
 				LOG_INFO(requestID, context, (boost::format("(vpControl.Id=%1%, screenPoint=(%2%, %3%)) -> (Track ID=%4%, index=%5%)") % vpControl->Id % screenPoint.x % screenPoint.y % it->second->ID % index).str().c_str());
 				return it->second;

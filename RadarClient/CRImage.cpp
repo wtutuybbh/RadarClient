@@ -10,13 +10,24 @@
 float CRImage::maxAmp = 70;
 float CRImage::minAmp = 0;
 const std::string CRImage::requestID = "C3DObjectModel";
-CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels) : 
-	C3DObjectModel(
-		new C3DObjectVBO(true), 
-		nullptr,
-		new C3DObjectProgram("CRImage.v.glsl", "CRImage.f.glsl", "vertex", nullptr, nullptr, "color", 13 * sizeof(float)))
+CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels)
 {
 	c3DObjectModel_TypeName = "CRImage";
+
+	vbo.insert_or_assign(Main, new C3DObjectVBO(false));
+	tex.insert_or_assign(Main, nullptr);
+	prog.insert_or_assign(Main, new C3DObjectProgram("CRImage.v.glsl", "CRImage.f.glsl", "vertex", nullptr, nullptr, "color"));
+	translateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
+	scaleMatrix.insert_or_assign(Main, glm::mat4(1.0f));
+	rotateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
+
+	vbo.insert_or_assign(MiniMap, new C3DObjectVBO(false));
+	tex.insert_or_assign(MiniMap, nullptr);
+	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CRImage.v.glsl", "CRImage.f.glsl", "vertex", nullptr, nullptr, "color"));
+	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+
 	Refresh(azemuth, origin, mpph, mppv, rdrinit, info, pixels);
 }
 
@@ -53,8 +64,6 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 	}
 	else // 2D
 	{
-		vector<VBOData> *vbuffer = new vector<VBOData>(info->N * info->NR);
-
 		if (!vertices)
 			vertices = std::make_shared<C3DObjectVertices>(info->N * info->NR);
 
@@ -88,7 +97,6 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 #if defined(CRCPOINT_CONSTRUCTOR_USES_RADIANS)
 
 				cartesianCoords = glm::vec3(origin) + glm::vec3(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph); //we always add y_0 (height of the radar relative to sea level) to all cartesian coordinates 
-				(*vbuffer)[v] = { glm::vec4(cartesianCoords, 1), glm::vec3(0, 0, 0), color, glm::vec2(0, 0) };
 
 				vertices.get()->SetValues(v, glm::vec4(cartesianCoords, 1), glm::vec3(0, 0, 0), color, glm::vec2(0, 0));
 
@@ -100,9 +108,6 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 #endif
 			}
 		}
-		vbo.at(Main)->SetVBuffer(vbuffer);
-		vbo.at(MiniMap)->SetVBuffer(vbuffer);
-
 		if (!vbo.at(Main)->vertices)
 			vbo.at(Main)->vertices = vertices;
 		if (!vbo.at(MiniMap)->vertices)

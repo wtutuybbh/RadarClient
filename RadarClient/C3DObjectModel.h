@@ -25,7 +25,6 @@ protected:
 	std::string name{ "" };
 public:
 	std::shared_ptr<C3DObjectVertices> vertices{ std::shared_ptr<C3DObjectVertices>(nullptr) };
-	void *GetBufferAt(int index);
 	static int _id, _testid;
 	int id;
 	void SetCartesianCoordinates(glm::vec4 c);
@@ -39,8 +38,8 @@ public:
 
 	CScene *Scene {nullptr};
 	glm::vec4 Color {glm::vec4()};
-	C3DObjectModel(int vpId, C3DObjectVBO *vbo, C3DObjectTexture *tex, C3DObjectProgram *prog);
-	C3DObjectModel(C3DObjectVBO *vbo, C3DObjectTexture *tex, C3DObjectProgram *prog);
+	//C3DObjectModel(int vpId, C3DObjectVBO *vbo, C3DObjectTexture *tex, C3DObjectProgram *prog);
+	//C3DObjectModel(C3DObjectVBO *vbo, C3DObjectTexture *tex, C3DObjectProgram *prog);
 	C3DObjectModel();
 	virtual ~C3DObjectModel();
 	virtual void Draw(CViewPortControl *vpControl, GLenum mode);

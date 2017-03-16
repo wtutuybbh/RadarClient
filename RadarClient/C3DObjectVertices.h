@@ -55,6 +55,7 @@ public:
 	void SetIndex(int a, int i, int v);
 
 	float * GetBuffer() const;
+	glm::vec4 *getv(int offset);	
 };
 
 
