@@ -816,9 +816,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	Deinitialize();
 	UnregisterClass(application.className, application.hInstance);		// UnRegister Window Class
 	
-	/*g_isProgramLooping = false;
-	if (g_gl_thread && g_gl_thread->joinable())
-		g_gl_thread->join();*/
+
+	/*g_isProgramLooping = false;*/
+	if (g_gl_thread) {
+		g_gl_thread->detach();
+		delete g_gl_thread;
+	}
+
 
 	return 0;	
 }																		// End Of WinMain()												

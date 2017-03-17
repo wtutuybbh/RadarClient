@@ -280,7 +280,23 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 		}
 		Mesh->Draw(vpControl, GL_TRIANGLES);
 	}
-
+	glDisable(GL_DEPTH_BUFFER);
+	if (Markup)
+	{
+		Markup->Draw(vpControl, 0);
+	}
+	if (begAzmLine)
+	{
+		begAzmLine->Draw(vpControl, GL_LINES);
+	}
+	if (mmPointer)
+	{
+		mmPointer->Draw(vpControl, GL_TRIANGLES);
+	}
+	if (RayObj)
+	{
+		RayObj->Draw(vpControl, GL_TRIANGLES);
+	}
 	glEnable(GL_PROGRAM_POINT_SIZE);
 
 	if (UI->GetCheckboxState_Points()) 
@@ -306,23 +322,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 		}
 	}
 	glDisable(GL_PROGRAM_POINT_SIZE);
-	glDisable(GL_DEPTH_BUFFER);
-	if (Markup)
-	{
-		Markup->Draw(vpControl, 0);
-	}
-	if (begAzmLine) 
-	{
-		begAzmLine->Draw(vpControl, GL_LINES);
-	}
-	if (mmPointer)
-	{
-		mmPointer->Draw(vpControl, GL_LINES);
-	}
-	if (RayObj)
-	{
-		RayObj->Draw(vpControl, GL_TRIANGLES);
-	}
+
 	return true;
 }
 

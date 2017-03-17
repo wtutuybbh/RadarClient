@@ -167,14 +167,20 @@ void C3DObjectModel::BindUniforms(CViewPortControl* vpControl)
 {
 	if (prog.at(vpControl->Id)) {
 		int mvpUniformLoc = prog.at(vpControl->Id)->GetUniformLocation("mvp");
-		glm::mat4 mvp = vpControl->GetProjMatrix() * vpControl->GetViewMatrix() * GetModelMatrix(vpControl->Id);
+		auto p = vpControl->GetProjMatrix();
+		auto v = vpControl->GetViewMatrix();
+		auto m = GetModelMatrix(vpControl->Id);
+		glm::mat4 mvp = p * v * m;
 		glUniformMatrix4fv(mvpUniformLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 	}
 }
 
 glm::mat4 C3DObjectModel::GetModelMatrix(int vpId)
 {
-	glm::mat4 mMatrix = GetTranslateMatrix(vpId) * GetRotateMatrix(vpId) * GetScaleMatrix(vpId);
+	auto t = GetTranslateMatrix(vpId);
+	auto r = GetRotateMatrix(vpId);
+	auto s = GetScaleMatrix(vpId);
+	glm::mat4 mMatrix = t * r * s;
 	//modelMatrix.insert_or_assign(vpControl->Id, mMatrix);
 	return mMatrix;
 }

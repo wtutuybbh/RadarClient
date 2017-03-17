@@ -208,8 +208,14 @@ void CMesh::LoadHeightmap()
 
 CMesh::~CMesh()
 {
-	if (heightMapLoader)
+	if (heightMapLoader) {
+		/*if (heightMapLoader->joinable())
+			heightMapLoader->join();*/
+		heightMapLoader->detach();
 		delete heightMapLoader;
+	}
+	if (bounds)
+		delete bounds;
 }
 
 CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv) : C3DObjectModel()
@@ -370,7 +376,6 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 	position_.y = position.y;
 	position_.z = position.z;
 	return found;*/
-	return false;
 }
 
 void CMesh::BindUniforms(CViewPortControl* vpControl)
@@ -414,19 +419,20 @@ void CMesh::InitMiniMap()
 		C3DObjectVBO *newvbo = new C3DObjectVBO(false);
 		
 		newvbo->vertices = std::make_shared<C3DObjectVertices>(6);
+		auto meshSize = (bounds[1] - bounds[0]) * 0.5f;
 
 		float y = 0;
-		newvbo->vertices.get()->SetValues(0, glm::vec4(bounds[0].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0));
+		newvbo->vertices.get()->SetValues(0, glm::vec4(-meshSize.x, y, -meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1.0, 0.0));
 
-		newvbo->vertices.get()->SetValues(1, glm::vec4(bounds[0].x, y, bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 1));
+		newvbo->vertices.get()->SetValues(1, glm::vec4(-meshSize.x, y, meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1.0, 1.0));
 
-		newvbo->vertices.get()->SetValues(2, glm::vec4(bounds[1].x, y, bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1));
+		newvbo->vertices.get()->SetValues(2, glm::vec4(meshSize.x, y, meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0.0, 1.0));
 
-		newvbo->vertices.get()->SetValues(3, glm::vec4(bounds[1].x, y, bounds[1].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 1));
+		newvbo->vertices.get()->SetValues(3, glm::vec4(meshSize.x, y, meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0.0, 1.0));
 
-		newvbo->vertices.get()->SetValues(4, glm::vec4(bounds[1].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0, 0));
+		newvbo->vertices.get()->SetValues(4, glm::vec4(meshSize.x, y, -meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0.0, 0.0));
 
-		newvbo->vertices.get()->SetValues(5, glm::vec4(bounds[0].x, y, bounds[0].z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1, 0));
+		newvbo->vertices.get()->SetValues(5, glm::vec4(-meshSize.x, y, -meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1.0, 0.0));
 
 		newvbo->vertices->usesCount++;
 		
