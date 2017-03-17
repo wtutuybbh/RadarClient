@@ -155,7 +155,7 @@ CMarkup::CMarkup(glm::vec4 origin)
 
 void CMarkup::BindUniforms(CViewPortControl* vpControl)
 {
-	glm::mat4 m = GetModelMatrix(vpControl);
+	glm::mat4 m = GetModelMatrix(vpControl->Id);
 	glm::mat4 v = vpControl->GetViewMatrix();
 	glm::mat4 p = vpControl->GetProjMatrix();
 	glm::mat4 mvp = p*v*m;

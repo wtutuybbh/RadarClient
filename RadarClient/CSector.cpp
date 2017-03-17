@@ -107,7 +107,7 @@ void CSector::Dump(CViewPortControl* vpControl, std::ofstream *outfile)
 
 void CSector::BindUniforms(CViewPortControl* vpControl)
 {
-	glm::mat4 m = GetModelMatrix(vpControl);
+	glm::mat4 m = GetModelMatrix(vpControl->Id);
 	glm::mat4 v = vpControl->GetViewMatrix();
 	glm::mat4 p = vpControl->GetProjMatrix();
 	glm::mat4 mvp = p*v*m;
@@ -136,7 +136,7 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 
 	//so, it works only if buffer elements have datatype of VBOData (or identical) and organized using std::vector
 
-	glm::mat4 mv = vpControl->GetViewMatrix() * GetModelMatrix(vpControl);	
+	glm::mat4 mv = vpControl->GetViewMatrix() * GetModelMatrix(vpControl->Id);	
 
 	if (CSector_GetPoint_LogInfo)
 	{
@@ -149,7 +149,7 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 	glm::mat4 proj = vpControl->GetProjMatrix();
 	for (int i = 0; i < vertices.get()->vertexCount; i++)
 	{
-		glm::vec4 p = vpControl->GetProjMatrix() * vpControl->GetViewMatrix() * GetModelMatrix(vpControl) * *vertices.get()->getv(i);
+		glm::vec4 p = vpControl->GetProjMatrix() * vpControl->GetViewMatrix() * GetModelMatrix(vpControl->Id) * *vertices.get()->getv(i);
 		p = p / p.w;
 		glm::vec3 screenP = glm::project(
 			glm::vec3(*vertices.get()->getv(i)),

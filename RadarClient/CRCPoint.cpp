@@ -128,48 +128,9 @@ CRCPointModel::CRCPointModel(int vpId, float y_0, float mpph, float mppv, float 
 //	return buffer;
 //}
 
-glm::mat4 CRCPointModel::GetScaleMatrix(CViewPortControl* vpControl)
-{
-	//return scaleMatrix.at(vpControl->Id);
-
-	glm::vec4 viewport = glm::vec4(0, 0, vpControl->GetWidth(), vpControl->GetHeight());
-
-	//glm::vec3 p1 = glm::unProject(glm::vec3(x, Height - y - 1, 1.0f), Camera->GetView(), Camera->GetProjection(), viewport);
-
-	glm::vec4 radarPoint = glm::vec4(cartesianCoords, 1);
-
-	glm::mat4 mvp = vpControl->GetProjMatrix() * vpControl->GetViewMatrix();
-	glm::vec4 screenPoint = mvp * radarPoint;
-
-	screenPoint = screenPoint / screenPoint.w;
-
-	glm::vec3 p00 = glm::vec3((screenPoint.x + 1)*vpControl->GetWidth() / 2 + 1, vpControl->GetHeight() + (screenPoint.y - 1)*vpControl->GetHeight() / 2, 0);
-	glm::vec3 p01 = glm::vec3((screenPoint.x + 1)*vpControl->GetWidth() / 2 + 1, vpControl->GetHeight() + (screenPoint.y - 1)*vpControl->GetHeight() / 2, 1);
-
-	glm::vec3 p10 = glm::unProject(p00, vpControl->GetViewMatrix(), vpControl->GetProjMatrix(), viewport);
-	glm::vec3 p11 = glm::unProject(p01, vpControl->GetViewMatrix(), vpControl->GetProjMatrix(), viewport);
-
-
-	float scaleFactor = pixelSize * glm::length(glm::cross(p10 - glm::vec3(radarPoint), p10 - p11)) / glm::length(p10 - p11);
-	
-	glm::mat4 scMatrix = glm::scale(glm::vec3(
-		scaleFactor,
-		scaleFactor,
-		scaleFactor));
-
-	scaleMatrix.insert_or_assign(vpControl->Id, scMatrix);
-
-	return scMatrix;
-}
-
-glm::mat4 CRCPointModel::GetTranslateMatrix(CViewPortControl* vpControl)
-{
-	return glm::translate(cartesianCoords);
-}
-
 void CRCPointModel::BindUniforms(CViewPortControl* vpControl)
 {
-	glm::mat4 mv = vpControl->GetViewMatrix() * GetModelMatrix(vpControl);
+	glm::mat4 mv = vpControl->GetViewMatrix() * GetModelMatrix(vpControl->Id);
 	glm::mat4 mvp = vpControl->GetProjMatrix() * mv;
 	glm::mat3 norm = glm::mat3(1.0f); // glm::mat3(glm::transpose(glm::inverse(mv)));
 	//glm::mat3(1.0f);

@@ -278,7 +278,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 			Camera->MeshSize = Mesh->GetSize();
 			waitingForMesh = false;
 		}
-		//Mesh->Draw(vpControl, GL_TRIANGLES);
+		Mesh->Draw(vpControl, GL_TRIANGLES);
 	}
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
@@ -317,7 +317,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	}
 	if (mmPointer)
 	{
-		mmPointer->Draw(vpControl, GL_TRIANGLES);
+		mmPointer->Draw(vpControl, GL_LINES);
 	}
 	if (RayObj)
 	{

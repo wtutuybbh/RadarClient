@@ -25,23 +25,15 @@ CLine::CLine(int vpId, glm::vec4 a, glm::vec4 b, LineStyle style)
 	vertices = std::make_shared<C3DObjectVertices>(2);
 	vertices.get()->SetValues(0, a, glm::vec3(0, 0, 1), glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
 	vertices.get()->SetValues(1, b, glm::vec3(0, 0, 1), glm::vec4(1, 0, 0, 1), glm::vec2(0, 1));
-	vertices.get()->needsReload = true;
+	//vertices.get()->needsReload = true;
 
-	vertices->AddIndexArray(2, 0);
+	auto idx = vertices->AddIndexArray(2, GL_LINES);
+	idx[0] = 0;
+	idx[1] = 1;
 
 	vbo.at(Main)->vertices = vertices;
 	vbo.at(MiniMap)->vertices = vertices;
 	vertices.get()->usesCount = 2;
-
-
-	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
-
-	tex.insert_or_assign(MiniMap, nullptr);
-
-
-	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
-	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
-	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 
 	c3DObjectModel_TypeName = "CLine";
 }

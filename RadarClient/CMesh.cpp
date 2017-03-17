@@ -18,7 +18,7 @@
 #define LOG_ENABLED true
 #define CMesh_LoadHeightmap_LOG true
 
-bool CMesh::LoadHeightmap()
+void CMesh::LoadHeightmap()
 {
 	string context = "CMesh::LoadHeightmap(int vpId)";
 
@@ -203,7 +203,13 @@ bool CMesh::LoadHeightmap()
 	vertices.get()->usesCount++;
 	InitMiniMap();
 
-	return true;
+	ready = true;
+}
+
+CMesh::~CMesh()
+{
+	if (heightMapLoader)
+		delete heightMapLoader;
 }
 
 CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv) : C3DObjectModel()
@@ -223,8 +229,9 @@ CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize,
 	
 	UseTexture = 1;
 
-	std::thread t(&CMesh::LoadHeightmap, this);
-	t.detach();
+	heightMapLoader = new std::thread (&CMesh::LoadHeightmap, this);
+	heightMapLoader->join();
+	//t.detach();
 }
 
 glm::vec3 CMesh::GetSize() {
@@ -371,7 +378,7 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 	if (!Ready()) {
 		return;
 	}
-	glm::mat4 m = GetModelMatrix(vpControl);
+	glm::mat4 m = GetModelMatrix(vpControl->Id);
 	glm::mat4 v = vpControl->GetViewMatrix();
 	glm::mat4 p = vpControl->GetProjMatrix();
 	glm::mat4 mvp = p*v*m;
@@ -451,13 +458,7 @@ void CMesh::InitMiniMap()
 	}
 }
 bool CMesh::Ready() {
-	if (vbo.find(Main) == vbo.end()) {
-		return false;
-	}
-	if (vbo.find(MiniMap) == vbo.end()) {
-		return false;
-	}
-	return true;
+	return ready;
 }
 float CMesh::GetCenterHeight() {
 	return centerHeight;

@@ -167,43 +167,41 @@ void C3DObjectModel::BindUniforms(CViewPortControl* vpControl)
 {
 	if (prog.at(vpControl->Id)) {
 		int mvpUniformLoc = prog.at(vpControl->Id)->GetUniformLocation("mvp");
-		glm::mat4 mvp = vpControl->GetProjMatrix() * vpControl->GetViewMatrix() * GetModelMatrix(vpControl);
+		glm::mat4 mvp = vpControl->GetProjMatrix() * vpControl->GetViewMatrix() * GetModelMatrix(vpControl->Id);
 		glUniformMatrix4fv(mvpUniformLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 	}
 }
 
-glm::mat4 C3DObjectModel::GetModelMatrix(CViewPortControl* vpControl)
+glm::mat4 C3DObjectModel::GetModelMatrix(int vpId)
 {
-	glm::mat4 mMatrix = GetTranslateMatrix(vpControl) * GetRotateMatrix(vpControl) * GetScaleMatrix(vpControl);
-	modelMatrix.insert_or_assign(vpControl->Id, mMatrix);
+	glm::mat4 mMatrix = GetTranslateMatrix(vpId) * GetRotateMatrix(vpId) * GetScaleMatrix(vpId);
+	//modelMatrix.insert_or_assign(vpControl->Id, mMatrix);
 	return mMatrix;
 }
 
-glm::mat4 C3DObjectModel::GetScaleMatrix(CViewPortControl* vpControl)
+glm::mat4 C3DObjectModel::GetScaleMatrix(int vpId)
 {
-	if (scaleMatrix.find(vpControl->Id) == scaleMatrix.end()) {
-		scaleMatrix.insert_or_assign(vpControl->Id, glm::mat4(1.0f));
+	if (scaleMatrix.find(vpId) == scaleMatrix.end()) {
+		scaleMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
 		return glm::mat4(1.0f);
 	}
-	return scaleMatrix.at(vpControl->Id);	
+	return scaleMatrix.at(vpId);	
 }
 
-glm::mat4 C3DObjectModel::GetRotateMatrix(CViewPortControl* vpControl)
+glm::mat4 C3DObjectModel::GetRotateMatrix(int vpId)
 {
-	if (rotateMatrix.find(vpControl->Id) == rotateMatrix.end()) {
-		rotateMatrix.insert_or_assign(vpControl->Id, glm::mat4(1.0f));
-		return glm::mat4(1.0f);
+	if (rotateMatrix.find(vpId) == rotateMatrix.end()) {
+		rotateMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
 	}
-	return rotateMatrix.at(vpControl->Id);
+	return rotateMatrix.at(vpId);
 }
 
-glm::mat4 C3DObjectModel::GetTranslateMatrix(CViewPortControl* vpControl)
+glm::mat4 C3DObjectModel::GetTranslateMatrix(int vpId)
 {
-	if (translateMatrix.find(vpControl->Id) == translateMatrix.end()) {
-		translateMatrix.insert_or_assign(vpControl->Id, glm::mat4(1.0f));
-		return glm::mat4(1.0f);
+	if (translateMatrix.find(vpId) == translateMatrix.end()) {
+		translateMatrix.insert_or_assign(vpId, glm::mat4(1.0f));
 	}
-	return translateMatrix.at(vpControl->Id);
+	return translateMatrix.at(vpId);
 }
 
 bool C3DObjectModel::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, glm::vec3& position)
@@ -229,10 +227,12 @@ bool C3DObjectModel::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, gl
 		if (!vbuffer || vertexCount == 0)
 			return false;
 
+		auto mm = GetModelMatrix(vpId);
+
 		for (unsigned int i = 0; i < vertexCount && i+1 < vertexCount && i+2 < vertexCount; i += 3) {
-			vert0 = glm::vec3(modelMatrix.at(vpId)* *vertices.get()->getv(i));
-			vert1 = glm::vec3(modelMatrix.at(vpId)* *vertices.get()->getv(i + 1));
-			vert2 = glm::vec3(modelMatrix.at(vpId)* *vertices.get()->getv(i + 2));
+			vert0 = glm::vec3(mm* *vertices.get()->getv(i));
+			vert1 = glm::vec3(mm* *vertices.get()->getv(i + 1));
+			vert2 = glm::vec3(mm* *vertices.get()->getv(i + 2));
 			if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, position)) {
 				return true;
 			}

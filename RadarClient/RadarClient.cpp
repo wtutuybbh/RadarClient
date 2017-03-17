@@ -31,7 +31,14 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #pragma comment(lib, "ComCtl32.lib")
 
-static BOOL g_isProgramLooping;											// Window Creation Loop, For FullScreen/Windowed Toggle																		// Between Fullscreen / Windowed Mode
+bool g_isProgramLooping = true;	
+bool g_isMessagePumpActive = true;
+
+bool g_InsaneLogMode = false;
+
+bool gl_isProgramLooping = true;
+bool gl_isMessagePumpActive = true;
+// Window Creation Loop, For FullScreen/Windowed Toggle																		// Between Fullscreen / Windowed Mode
 static BOOL g_createFullScreen;											// If TRUE, Then Create Fullscreen
 
 float		g_flYRot = 0.0f;									// Rotation
@@ -71,16 +78,12 @@ bool hasVAO = true;
 
 int g_nCmdShow;
 
-
+std::thread *g_gl_thread = nullptr;
 
 void TerminateApplication(GL_Window* window)							// Terminate The Application
 {
-	if (window)
-	{
-		PostMessage(window->hWnd, WM_QUIT, 0, 0);// Send A WM_QUIT Message
-	}
-							
-	g_isProgramLooping = FALSE;											// Stop Looping Of The Program
+	gl_isProgramLooping = false;
+	gl_isMessagePumpActive = false;										// Stop Looping Of The Program
 
 	
 }
@@ -313,8 +316,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 #endif // _DEBUG
 
 		wglMakeCurrent(nullptr, nullptr);
-		std::thread t(GLProc);
-		t.detach();
+		g_gl_thread = new std::thread(GLProc);
 
 		LOG_INFO(requestID, context, "WM_CREATE: End");
 	}
@@ -393,11 +395,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return 0;
 	}
 	break;
-	case WM_TOGGLEFULLSCREEN: {							// Toggle FullScreen Mode On/Off
-		g_createFullScreen = (g_createFullScreen == TRUE) ? FALSE : TRUE;
-		PostMessage(hWnd, WM_QUIT, 0, 0);
-		break;															// Break
-	}
 	case WM_MOUSEWHEEL: {
 		double zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 		if (g_vpControl->Camera) {
@@ -798,6 +795,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						}
 					}
 				}														// Loop While isMessagePumpActive == TRUE
+				LOG_INFO__("g_window && isMessagePumpActive == FALSE");
 			//}															// If (Initialize (...
 
 			DestroyWindowGL(g_vpControl->hWnd, g_vpControl->hDC, g_vpControl->hRC);															// Application Is Finished
@@ -814,9 +812,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 	}																	// While (isProgramLooping)
 
+	LOG_INFO__("Before Deinitialize()");
 	Deinitialize();
 	UnregisterClass(application.className, application.hInstance);		// UnRegister Window Class
 	
+	/*g_isProgramLooping = false;
+	if (g_gl_thread && g_gl_thread->joinable())
+		g_gl_thread->join();*/
+
 	return 0;	
 }																		// End Of WinMain()												
 
@@ -922,19 +925,23 @@ void Draw(void)
 
 void GLProc()
 {
-	bool isMessagePumpActive = true;
+	std::string context = "GLProc";
+	//bool isMessagePumpActive = true;
 
-	g_isProgramLooping = TRUE;											// Program Looping Is Set To TRUE	
-
-																		//LOG_INFO(requestID, context, (boost::format("-=point before message loop=-")).str());
-	while (g_isProgramLooping)											// Loop Until WM_QUIT Is Received
+	//g_isProgramLooping = TRUE;											// Program Looping Is Set To TRUE	
+	
+	LOG_INFO__("Start");																	//LOG_INFO(requestID, context, (boost::format("-=point before message loop=-")).str());
+	while (gl_isProgramLooping)											// Loop Until WM_QUIT Is Received
 	{
-			isMessagePumpActive = TRUE;								// Set isMessagePumpActive To TRUE
+		//g_isMessagePumpActive = TRUE;								// Set isMessagePumpActive To TRUE
 
-			while (g_window && isMessagePumpActive == TRUE)						// While The Message Pump Is Active
+			while (g_window && gl_isMessagePumpActive)						// While The Message Pump Is Active
 			{
 				// Success Creating Window.  Check For Window Messages
-
+					if (g_InsaneLogMode)
+					{
+						LOG_INFO__("!!!");
+					}
 					if (g_window->isVisible)					// If Window Is Not Visible
 					{						
 						Draw();
@@ -954,12 +961,19 @@ void GLProc()
 				
 			}														// Loop While isMessagePumpActive == TRUE
 																	//}															// If (Initialize (...
-
+			LOG_INFO__("g_window && gl_isMessagePumpActive == false");
 			//DestroyWindowGL(g_vpControl->hWnd, g_vpControl->hDC, g_vpControl->hRC);															// Application Is Finished
 			//DestroyWindowGL(g_Minimap->hWnd, g_Minimap->hDC, g_Minimap->hRC);
 
 	}																	// While (isProgramLooping)
 
+	LOG_INFO__("gl_isProgramLooping is false, GLProc() exit");
+	if (g_window)
+	{
+		g_isProgramLooping = false;
+		PostMessage(g_window->hWnd, WM_QUIT, 0, 0);// Send A WM_QUIT Message
+	}
+	//LOG_INFO__("gl_isProgramLooping is false, GLProc() exit, thread::id=%d", std::this_thread::get_id());
 	//Deinitialize();
 }
 

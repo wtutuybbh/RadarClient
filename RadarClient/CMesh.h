@@ -62,10 +62,8 @@ typedef int(_cdecl * GDPALTITUDEMAP_SIZES)(const char *, double *, int *);
 
 class CMesh : public C3DObjectModel
 {	
-	bool LoadHeightmap();
-	AltitudeMapHeader* GetAltitudeMapHeader(const char *fileName, double lon1, double lat1, double lon2, double lat2);
-	ImageMapHeader* GetImageMapHeader(const char *imgFile, const char *datFile);
-	float PtHeight(int nX, int nY) const;
+	void LoadHeightmap();
+
 	int texsize;
 
 	glm::vec3 * bounds{ nullptr };	
@@ -86,9 +84,13 @@ class CMesh : public C3DObjectModel
 	bool buffer_ready{ false };
 	int index_length{ 0 };
 	double centerHeight{ 0 }, averageHeight{ 0 };
+
+	bool ready{ false };
+
+	std::thread * heightMapLoader{ nullptr };
 public:
 	//glm::vec3 Size;
-	
+	~CMesh();
 	int UseTexture, UseY0Loc;
 	CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv);
 	float GetCenterHeight();

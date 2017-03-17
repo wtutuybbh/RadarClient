@@ -42,12 +42,12 @@ public:
 	//C3DObjectModel(C3DObjectVBO *vbo, C3DObjectTexture *tex, C3DObjectProgram *prog);
 	C3DObjectModel();
 	virtual ~C3DObjectModel();
-	virtual void Draw(CViewPortControl *vpControl, GLenum mode);
+	virtual void Draw(CViewPortControl* vpControl, GLenum mode);
 	virtual void BindUniforms(CViewPortControl* vpControl);
-	virtual glm::mat4 GetModelMatrix(CViewPortControl* vpControl);
-	virtual glm::mat4 GetScaleMatrix(CViewPortControl* vpControl);
-	virtual glm::mat4 GetRotateMatrix(CViewPortControl* vpControl);
-	virtual glm::mat4 GetTranslateMatrix(CViewPortControl* vpControl);
+	virtual glm::mat4 GetModelMatrix(int vpId);
+	virtual glm::mat4 GetScaleMatrix(int vpId);
+	virtual glm::mat4 GetRotateMatrix(int vpId);
+	virtual glm::mat4 GetTranslateMatrix(int vpId);
 
 	virtual void SetColor(glm::vec4 color); //trash?
 

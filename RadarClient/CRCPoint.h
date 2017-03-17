@@ -21,7 +21,5 @@ public:
 
 
 	CRCPointModel(int vpId, float y_0, float mpph, float mppv, float r, float a, float e);
-	glm::mat4 GetScaleMatrix(CViewPortControl *vpControl) override;
-	glm::mat4 GetTranslateMatrix(CViewPortControl *vpControl) override;
 	void BindUniforms(CViewPortControl *vpControl) override;
 };
