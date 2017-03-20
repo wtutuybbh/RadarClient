@@ -7,7 +7,6 @@ struct RDR_INITCL;
 struct RIMAGE;
 class CRImageSet: public C3DObjectModel
 {
-	std::mutex m;
 public:
 	std::vector<CRImage*> *Images{ nullptr };
 	float prevAzimuth {0.0f}; //azimuth from previous scan

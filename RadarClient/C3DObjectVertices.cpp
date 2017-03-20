@@ -99,3 +99,16 @@ glm::vec4 *C3DObjectVertices::getv(int offset)
 {	
 	return reinterpret_cast<glm::vec4*>(vbuffer + offset * vertexSize);
 }
+
+void C3DObjectVertices::Translate(glm::vec3 vshift, int place)
+{
+	if (!vbuffer)
+		return;
+	for (auto i =0;i<vertexCount;i++)
+	{
+		vbuffer[i * vertexSize + place] += vshift.x;
+		vbuffer[i * vertexSize + place + 1] += vshift.y;
+		vbuffer[i * vertexSize + place + 2] += vshift.z;
+	}
+	needsReload = true;
+}

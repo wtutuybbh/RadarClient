@@ -56,6 +56,19 @@ public:
 
 	float * GetBuffer() const;
 	glm::vec4 *getv(int offset);	
+	void Translate(glm::vec3 vshift, int place);
+	void ReCreate(int vertexCount)
+	{
+		if (vertexCount > USHRT_MAX)
+			throw std::exception("vertexCount must be greater less than USHRT_MAX (65535)");
+		if (vertexCount <= 0)
+			throw std::exception("vertexCount must be greater than 0");
+
+		this->vertexCount = vertexCount;
+		if (vbuffer)
+			delete[] vbuffer;
+		vbuffer = new float[vertexCount * this->vertexSize];
+	}
 };
 
 

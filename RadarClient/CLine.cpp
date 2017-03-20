@@ -45,8 +45,5 @@ void CLine::SetPoints(glm::vec4 a, glm::vec4 b, LineStyle style)
 		vertices.get()->SetValues(0, a, glm::vec3(0, 0, 1), glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
 		vertices.get()->SetValues(1, b, glm::vec3(0, 0, 1), glm::vec4(1, 0, 0, 1), glm::vec2(0, 1));
 		vertices.get()->needsReload = true;
-	}
-
-	vbo.at(Main)->NeedsReload = true;
-	vbo.at(MiniMap)->NeedsReload = true;
+	}	
 }

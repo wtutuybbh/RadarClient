@@ -9,7 +9,6 @@ class CViewPortControl;
 class CSector :
 	public C3DObjectModel
 {
-	std::mutex m;
 	static float maxAmp;
 	static float minAmp;
 	float index {-1.0f};

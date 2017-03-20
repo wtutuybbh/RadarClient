@@ -31,6 +31,7 @@ void C3DObjectVBO::LoadToGPU()
 		glBindBuffer(GL_ARRAY_BUFFER, vboId);
 		//glBufferData(GL_ARRAY_BUFFER, vbuffer->size() * sizeof(VBOData), &(*vbuffer)[0], GL_STATIC_DRAW);
 		glBufferData(GL_ARRAY_BUFFER, vertices.get()->vertexCount * vertices.get()->vertexSize * sizeof(float), vertices.get()->vbuffer, GL_STATIC_DRAW);
+		//vertices.get()->needsReload = false;
 		vbufferSize = vertices.get()->vertexCount;
 		
 		if (vertices.get()->idxArrays.size()>0)
@@ -78,7 +79,7 @@ void C3DObjectVBO::Reload()
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertices.get()->idxLengths.at(i) * sizeof(unsigned short), vertices.get()->idxArrays.at(i), GL_STATIC_DRAW);
 		}
 	}
-	NeedsReload = false;
+	vertices.get()->needsReload = false;
 }
 
 bool C3DObjectVBO::Ready() const

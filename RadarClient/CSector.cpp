@@ -94,11 +94,7 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 		}
 	}
 	
-	vbo.at(Main)->NeedsReload = true;
-	if (vbo.find(MiniMap) != vbo.end())
-	{
-		vbo.at(MiniMap)->NeedsReload = true;
-	}
+	vertices.get()->needsReload = true;
 
 	if (!vbo.at(Main)->vertices)
 		vbo.at(Main)->vertices = vertices;
@@ -196,8 +192,7 @@ void CSector::SelectPoint(int vpId, int pointIndex)
 	vbuffer[pointIndex * vertexSize + 9] = color.b;
 	vbuffer[pointIndex * vertexSize + 10] = color.a;
 	
-	vbo.at(Main)->NeedsReload = true;
-	vbo.at(MiniMap)->NeedsReload = true;
+	vertices.get()->needsReload = true;
 }
 
 void CSector::UnselectAll(int vpId)
@@ -221,8 +216,7 @@ void CSector::UnselectAll(int vpId)
 		vbuffer[i * vertexSize + 10] = color.a;
 	}
 
-	vbo.at(Main)->NeedsReload = true;
-	vbo.at(MiniMap)->NeedsReload = true;
+	vertices.get()->needsReload = true;
 }
 
 glm::vec4 CSector::GetColor(float level)

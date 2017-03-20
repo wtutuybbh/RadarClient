@@ -123,7 +123,7 @@ void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)
 
 	C3DObjectProgram *prog_ = prog.at(vpControl->Id);
 	C3DObjectTexture *tex_ = tex.at(vpControl->Id);
-
+	bool can_be_reloaded = true;
 	if(vbo_ && !vbo_->Ready())
 	{
 		if (!vbo_->HasBuffer())
@@ -132,6 +132,7 @@ void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)
 			return;
 		if (prog_) prog_->CreateProgram();
 		vbo_->LoadToGPU();
+		can_be_reloaded = false;
 		if (prog_) prog_->Bind();
 		if (tex_) {
 			tex_->LoadToGPU();
@@ -144,7 +145,7 @@ void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)
 		prog_->UseProgram();
 	if (vbo_) {
 		vbo_->Bind();
-		if (vbo_->NeedsReload)
+		if (can_be_reloaded && vbo_->vertices && vbo_->vertices.get()->needsReload)
 			vbo_->Reload();
 	}
 
@@ -316,4 +317,17 @@ void C3DObjectModel::SetName(std::string name)
 void C3DObjectModel::SetColor(glm::vec4 color)
 {
 	Color = color;
+}
+
+void C3DObjectModel::Translate(glm::vec3 vshift)
+{
+	for(auto it = vbo.begin(); it != vbo.end(); ++it)
+	{
+		if(it->second && it->second->vertices && it->second->vertices.get()->vertexCount>0 && (!vertices || vertices != it->second->vertices))
+		{
+			it->second->vertices.get()->Translate(vshift, 0);
+		}
+	}
+	if (vertices)
+		vertices.get()->Translate(vshift, 0);
 }

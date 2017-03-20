@@ -15,6 +15,7 @@ class C3DObjectModel
 {	
 protected:
 	std::mutex m;
+	std::mutex mtxVertices;
 	static const std::string requestID;
 	std::unordered_map<int, C3DObjectVBO*> vbo;
 	std::unordered_map<int, C3DObjectTexture*> tex;
@@ -50,6 +51,8 @@ public:
 	virtual glm::mat4 GetTranslateMatrix(int vpId);
 
 	virtual void SetColor(glm::vec4 color); //trash?
+
+	virtual void Translate(glm::vec3 vshift);
 
 	virtual bool IntersectLine(int vpId, glm::vec3 & orig, glm::vec3 & dir, glm::vec3 & position);	
 	virtual float DistanceToLine(glm::vec3 p0, glm::vec3 p1);

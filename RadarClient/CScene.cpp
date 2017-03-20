@@ -238,6 +238,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	}
 
 	if (UI->GetCheckboxState_Tracks()) {
+		std::lock_guard<std::mutex> lock(mtxTracks);
 		for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
 		{
 			it->second->Draw(vpControl, GL_POINTS);
@@ -278,7 +279,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 			Camera->MeshSize = Mesh->GetSize();
 			waitingForMesh = false;
 		}
-		Mesh->Draw(vpControl, GL_TRIANGLES);
+		//Mesh->Draw(vpControl, GL_TRIANGLES);
 	}
 	glDisable(GL_DEPTH_BUFFER);
 	if (Markup)
@@ -308,6 +309,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 		}
 	}
 	if (UI->GetCheckboxState_Tracks()) {
+		std::lock_guard<std::mutex> lock(mtxTracks);
 		for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
 		{
 			it->second->Draw(vpControl, GL_POINTS);
@@ -636,53 +638,60 @@ void CScene::Dump(CViewPortControl *vpControl)
 
 void CScene::RefreshTracks(vector<TRK*>* tracks)
 {	
-	if (!Mesh || !Mesh->Ready()) {
-		return;
+	float _y_0;
+	if (Mesh && Mesh->Ready()) {
+		GetY0();
+		_y_0 = y_0;
 	}
-	float y_0 = GetY0();
-
-	if(tracks->size() == 0)
-		return;
-
-	//m->lock();
-
-	for (int i = 0; i < tracks->size(); i++)
+	else
 	{
-		bool insertNew = true;
-		for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
+		_y_0 = 0;
+	}
+	{
+		std::lock_guard<std::mutex> lock(mtxTracks);
+		if (tracks->size() == 0)
+			return;
+
+		//m->lock();
+
+		for (int i = 0; i < tracks->size(); i++)
 		{
-			if (it->first == tracks->at(i)->id) 
+			bool insertNew = true;
+			for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
 			{
-				it->second->Found = tracks->at(i)->Found = true;
-				it->second->Refresh(glm::vec4(0, y_0, 0, 1), MPPh, MPPv, &tracks->at(i)->P);
-				it->second->SelectTrack(Main, std::find(SelectedTracksIds.begin(), SelectedTracksIds.end(), tracks->at(i)->id) != SelectedTracksIds.end());
-				insertNew = false;
+				if (it->first == tracks->at(i)->id)
+				{
+					it->second->Found = tracks->at(i)->Found = true;
+					it->second->Refresh(glm::vec4(0, _y_0, 0, 1), MPPh, MPPv, &tracks->at(i)->P);
+					it->second->SelectTrack(Main, std::find(SelectedTracksIds.begin(), SelectedTracksIds.end(), tracks->at(i)->id) != SelectedTracksIds.end());
+					insertNew = false;
+				}
+			}
+			if (insertNew)
+			{
+				LOG_INFO(requestID, "CScene::RefreshTracks", "new track, id=%d", tracks->at(i)->id);
+				CTrack *t = new CTrack(tracks->at(i)->id, std::find(SelectedTracksIds.begin(), SelectedTracksIds.end(), tracks->at(i)->id) != SelectedTracksIds.end());
+				t->Refresh(glm::vec4(0, _y_0, 0, 1), MPPh, MPPv, &tracks->at(i)->P);
+				t->Found = true;
+				Tracks.insert_or_assign(tracks->at(i)->id, t);
 			}
 		}
-		if (insertNew)
+		for (auto it = Tracks.begin(); it != Tracks.end();)
 		{
-			LOG_INFO(requestID, "CScene::RefreshTracks", "new track, id=%d", tracks->at(i)->id);
-			CTrack *t = new CTrack(tracks->at(i)->id, std::find(SelectedTracksIds.begin(), SelectedTracksIds.end(), tracks->at(i)->id) != SelectedTracksIds.end());
-			t->Refresh(glm::vec4(0, y_0, 0, 1), MPPh, MPPv, &tracks->at(i)->P);
-			t->Found = true;
-			Tracks.insert_or_assign(tracks->at(i)->id, t);			
+			if (!it->second->Found)
+			{
+				LOG_INFO(requestID, "CScene::RefreshTracks", (boost::format("going to delete track with id=%1%") % it->second->ID).str().c_str());
+				delete it->second;
+				it = Tracks.erase(it);
+			}
+			else
+			{
+				it->second->Found = false;
+				++it;
+			}
 		}
+		UI->FillInfoGrid(this);
 	}
-	for (auto it = Tracks.begin(); it != Tracks.end();) 
-	{
-		if (!it->second->Found) 
-		{
-			LOG_INFO(requestID, "CScene::RefreshTracks", (boost::format("going to delete track with id=%1%") % it->second->ID).str().c_str());
-			delete it->second;
-			it = Tracks.erase(it);
-		}
-		else 
-		{
-			it->second->Found = false;
-			++it;
-		}
-	}
-	UI->FillInfoGrid(this);
 }
 
 void CScene::RefreshImages(RIMAGE* info, void* pixels)
@@ -921,8 +930,21 @@ bool CScene::MeshReady() {
 }
 float CScene::GetY0() {
 	if (Mesh && Mesh->Ready())
-		return Mesh->GetCenterHeight() / MPPv;
-	return FLT_MIN;
+	{
+		float y_0new = Mesh->GetCenterHeight() / MPPv;
+		if (y_0 != y_0new)
+		{
+			float dy = y_0new - y_0;
+			y_0 = y_0new;
+			std::lock_guard<std::mutex> lock(mtxTracks);
+			for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
+			{
+				if (it->second)
+					it->second->Translate(glm::vec3(0, dy, 0));
+			}
+		}		
+	}
+	return y_0;
 }
 void CScene::DrawBitmaps() const
 {

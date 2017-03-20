@@ -31,10 +31,15 @@ CTrack::~CTrack()
 
 void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK*>* trackPoints)
 {
+	std::lock_guard<std::mutex> lock(m);
+
 	if (!vertices && trackPoints->size() > 0)
 		vertices = std::make_shared<C3DObjectVertices>(trackPoints->size());
 	if (!vertices)
 		return;
+	if (vertices.get()->vertexCount < trackPoints->size())
+		vertices.get()->ReCreate(trackPoints->size());
+
 	float r, a, e;
 	auto vbuffer = vertices.get()->GetBuffer();
 	auto vertexSize = vertices.get()->vertexSize;
@@ -67,6 +72,7 @@ void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK*>
 		vbuffer[i * vertexSize] = v.x;
 		vbuffer[i * vertexSize + 1] = v.y;
 		vbuffer[i * vertexSize + 2] = v.z;
+		vbuffer[i * vertexSize + 3] = 1.0f;
 
 		vbuffer[i * vertexSize + 7] = Color.r;
 		vbuffer[i * vertexSize + 8] = Color.g;
@@ -74,8 +80,14 @@ void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK*>
 		vbuffer[i * vertexSize + 10] = Color.a;
 	}
 
-	vbo.at(Main)->NeedsReload = true;
-	vbo.at(MiniMap)->NeedsReload = true;
+	vertices.get()->needsReload = true;
+
+	if (!vbo.at(Main)->vertices)
+		vbo.at(Main)->vertices = vertices;
+	if (!vbo.at(MiniMap)->vertices)
+		vbo.at(MiniMap)->vertices = vertices;
+
+	vertices.get()->usesCount = 2;
 }
 
 void CTrack::SelectTrack(int vpId, bool selectState)
@@ -98,6 +110,5 @@ void CTrack::SelectTrack(int vpId, bool selectState)
 		vbuffer[i * vertexSize + 9] = color.b;
 		vbuffer[i * vertexSize + 10] = color.a;
 	}
-	vbo.at(Main)->NeedsReload = true;
-	vbo.at(MiniMap)->NeedsReload = true;
+	vertices.get()->needsReload = true;
 }

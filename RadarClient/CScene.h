@@ -46,6 +46,8 @@ class CScene {
 	unsigned long mainDrawCount{ 0 };
 	static const std::string requestID;
 	bool waitingForMesh{ false };
+	float y_0 {0};
+	std::mutex mtxTracks;
 public:
 	CLine *begAzmLine{ nullptr };
 

@@ -19,7 +19,7 @@ public:
 	std::shared_ptr<C3DObjectVertices> vertices{ std::shared_ptr<C3DObjectVertices>(nullptr) };
 
 	~C3DObjectVBO();
-	bool NeedsReload { false };
+
 
 	explicit C3DObjectVBO(bool clearAfter);
 	void Bind() const;
