@@ -272,6 +272,8 @@
     <None Include="GLSL\CMarkup.v.glsl" />
     <None Include="GLSL\CSector.f.glsl" />
     <None Include="GLSL\CSector.v.glsl" />
+    <None Include="GLSL\CRImage.f.glsl" />
+    <None Include="GLSL\CRImage.v.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Data\radar.png">

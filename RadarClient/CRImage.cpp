@@ -10,23 +10,11 @@
 float CRImage::maxAmp = 70;
 float CRImage::minAmp = 0;
 const std::string CRImage::requestID = "C3DObjectModel";
-CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels)
+CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels): CSector(azemuth)
 {
 	c3DObjectModel_TypeName = "CRImage";
 
-	vbo.insert_or_assign(Main, new C3DObjectVBO(false));
-	tex.insert_or_assign(Main, nullptr);
-	prog.insert_or_assign(Main, new C3DObjectProgram("CRImage.v.glsl", "CRImage.f.glsl", "vertex", nullptr, nullptr, "color"));
-	translateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
-	scaleMatrix.insert_or_assign(Main, glm::mat4(1.0f));
-	rotateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
-
-	vbo.insert_or_assign(MiniMap, new C3DObjectVBO(false));
-	tex.insert_or_assign(MiniMap, nullptr);
-	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CRImage.v.glsl", "CRImage.f.glsl", "vertex", nullptr, nullptr, "color"));
-	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
-	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
-	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
+	PointSize = 5;
 
 	Refresh(azemuth, origin, mpph, mppv, rdrinit, info, pixels);
 }
@@ -116,4 +104,17 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 		/*vbo.at(Main)->NeedsReload = true;
 		vbo.at(MiniMap)->NeedsReload = true;*/
 	}
+}
+
+void CRImage::BindUniforms(CViewPortControl* vpControl)
+{
+	glm::mat4 m = GetModelMatrix(vpControl->Id);
+	glm::mat4 v = vpControl->GetViewMatrix();
+	glm::mat4 p = vpControl->GetProjMatrix();
+	glm::mat4 mvp = p*v*m;
+	int mvp_loc = prog.at(vpControl->Id)->GetUniformLocation("mvp");
+	glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
+
+	int ps_loc = prog.at(vpControl->Id)->GetUniformLocation("pointSize");
+	glUniform1fv(ps_loc, 1, &PointSize);
 }

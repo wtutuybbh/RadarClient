@@ -6,6 +6,14 @@
 
 #include "stdafx.h"
 
+#define CRCSocketReadLogEnabled  false
+#define CRCSocketPostDataLogEnabled  false
+
+#define CSectorRefreshLogEnabled false
+#define CSector_GetPoint_LogInfo false
+
+#define CRImageSetRefreshLogEnabled false
+
 #ifndef _DEBUG
 
 #define LOG(severity, requestID, context, text, ...)

@@ -159,7 +159,7 @@ int CRCSocket::Connect()
 int CRCSocket::Read()
 {
 	string context = "CRCSocket::Read()";
-	if (ReadLogEnabled) LOG_INFO(requestID, context, "Start");
+	if (CRCSocketReadLogEnabled) LOG_INFO(requestID, context, "Start");
 	if (!IsConnected && !OnceClosed)
 	{
 		LOG_INFO(requestID, context, "First read, setting state to 'Connected'");
@@ -185,7 +185,7 @@ int CRCSocket::Read()
 	try {		
 		sh_offset = 0;
 		recev = recv(Socket, client->buff + client->recv_offset, TXRXBUFSIZE - client->recv_offset, 0);
-		if (ReadLogEnabled) LOG_INFO__("client->read_number=%d, recev=%d, client->recv_offset=%d", client->read_number, recev, client->recv_offset);
+		if (CRCSocketReadLogEnabled) LOG_INFO__("client->read_number=%d, recev=%d, client->recv_offset=%d", client->read_number, recev, client->recv_offset);
 		client->read_number++;
 		if (recev<=0)
 		{
@@ -195,44 +195,44 @@ int CRCSocket::Read()
 		this_recv_offset = client->recv_offset + recev;
 		if (this_recv_offset < sizeof(_sh)) //приняли меньше шапки
 		{		
-			if (ReadLogEnabled) LOG_INFO__("this_recv_offset = %d < sizeof(_sh)", this_recv_offset);
+			if (CRCSocketReadLogEnabled) LOG_INFO__("this_recv_offset = %d < sizeof(_sh)", this_recv_offset);
 			client->recv_offset += recev;
 			return recev;
 		}
 		sh = (struct _sh*)(client->buff);
 		if (!test_sh(sh))
 		{
-			if (ReadLogEnabled) LOG_ERROR__("wrong sh at position 0: sh = (struct _sh*)(client->buff);");
+			if (CRCSocketReadLogEnabled) LOG_ERROR__("wrong sh at position 0: sh = (struct _sh*)(client->buff);");
 			return recev;
 		}
 		else
 		{
-			if (ReadLogEnabled) LOG_INFO__("first block has length=%d", sh->dlina);
+			if (CRCSocketReadLogEnabled) LOG_INFO__("first block has length=%d", sh->dlina);
 		}
 		while(sh_offset < TXRXBUFSIZE && sh_offset + sh->dlina <= this_recv_offset)
 		{
-			if (ReadLogEnabled) LOG_INFO__("while loop, sh_offset=%d, sh->dlina=%d", sh_offset, sh->dlina);
+			if (CRCSocketReadLogEnabled) LOG_INFO__("while loop, sh_offset=%d, sh->dlina=%d", sh_offset, sh->dlina);
 			sh = (struct _sh*)(client->buff + sh_offset);
 			if (!test_sh(sh))
 			{
-				if (ReadLogEnabled) LOG_ERROR__("wrong sh at position [%d]: sh = (struct _sh*)(client->buff);", sh_offset);
+				if (CRCSocketReadLogEnabled) LOG_ERROR__("wrong sh at position [%d]: sh = (struct _sh*)(client->buff);", sh_offset);
 				return recev;
 			}
 			OutBuff = new char[sh->dlina];
 			memcpy(OutBuff, client->buff + sh_offset, sh->dlina);
 			PostMessage(hWnd, CM_POSTDATA, WPARAM(OutBuff), sh->dlina);
-			if (ReadLogEnabled) LOG_INFO__("sent %d bytes to processing, sh->type=%d", sh->dlina, sh->type);
+			if (CRCSocketReadLogEnabled) LOG_INFO__("sent %d bytes to processing, sh->type=%d", sh->dlina, sh->type);
 			if (this_recv_offset - sh_offset - sh->dlina > sizeof(_sh))
 			{
 				// next sh_ can be retrieved
-				if (ReadLogEnabled) LOG_INFO__("next sh_ can be retrieved. we move pointer sh_offset: %d -> %d", sh_offset, sh_offset + sh->dlina);
+				if (CRCSocketReadLogEnabled) LOG_INFO__("next sh_ can be retrieved. we move pointer sh_offset: %d -> %d", sh_offset, sh_offset + sh->dlina);
 				sh_offset += sh->dlina;
 				sh = (struct _sh*)(client->buff + sh_offset);
-				if (ReadLogEnabled) LOG_INFO__("sh->dlina after retrieve = %d", sh->dlina);
+				if (CRCSocketReadLogEnabled) LOG_INFO__("sh->dlina after retrieve = %d", sh->dlina);
 			}
 			else
 			{
-				if (ReadLogEnabled) LOG_INFO__("next sh_ can NOT be retrieved. remaining tail length = %d", this_recv_offset - sh_offset - sh->dlina);
+				if (CRCSocketReadLogEnabled) LOG_INFO__("next sh_ can NOT be retrieved. remaining tail length = %d", this_recv_offset - sh_offset - sh->dlina);
 				if (this_recv_offset - sh_offset - sh->dlina > 0) 
 				{
 					memcpy(client->buff, client->buff + sh_offset + sh->dlina, this_recv_offset - sh_offset - sh->dlina);					
@@ -245,7 +245,7 @@ int CRCSocket::Read()
 		
 
 		
-			if (ReadLogEnabled) LOG_INFO__("some data for the next read. remaining tail length = %d", this_recv_offset - sh_offset);
+			if (CRCSocketReadLogEnabled) LOG_INFO__("some data for the next read. remaining tail length = %d", this_recv_offset - sh_offset);
 
 			if (sh_offset > 0)
 			{
@@ -256,7 +256,7 @@ int CRCSocket::Read()
 			return recev;
 		
 
-		if (ReadLogEnabled) LOG_INFO__("wtf? sh_offset=0?");
+		if (CRCSocketReadLogEnabled) LOG_INFO__("wtf? sh_offset=0?");
 
 		return recev;
 		
@@ -325,7 +325,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			b1 = info_p->d1;
 			b2 = info_p->d2;
 
-			if (PostDataLogEnabled)
+			if (CRCSocketPostDataLogEnabled)
 			{
 				if (info_p && pts)
 				{
@@ -360,7 +360,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 			}
 			info_i = (RIMAGE*)PTR_D;
 			pixels = (void*)&((RIMAGE*)PTR_D)[1];
-			if (PostDataLogEnabled)
+			if (CRCSocketPostDataLogEnabled)
 			{
 				if (info_i)
 				{
@@ -376,7 +376,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 		// 
 		case MSG_PTSTRK:
 		{
-			if (PostDataLogEnabled)
+			if (CRCSocketPostDataLogEnabled)
 			{
 				LOG_INFO(requestID, context, "MSG_PTSTRK");
 			}
@@ -386,7 +386,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 		{
 			int N = *((int*)((void*)PTR_D));
 			RDRTRACK* pTK = (RDRTRACK*)(void*)(((char*)PTR_D) + 4);
-			if (PostDataLogEnabled)
+			if (CRCSocketPostDataLogEnabled)
 			{
 				if (pTK)
 				{
@@ -409,7 +409,12 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 
 			memcpy(s_rdrinit, (RDR_INITCL*)(void*)&sh[1], sizeof(RDR_INITCL));
 
-			if (PostDataLogEnabled)
+			if (s_rdrinit->MaxNAzm <= 0 && s_rdrinit->dAzm >= 0)
+			{
+				s_rdrinit->MaxNAzm = int(M_PIx2 / s_rdrinit->dAzm);
+			}
+
+			if (CRCSocketPostDataLogEnabled)
 			{
 				LOG_INFO__("MSG_INIT. Nazm=%d, Nelv=%d, dAzm=%f, dElv=%f, begAzm=%f, begElv=%f,	dR=%f, NR=%d, minR=%f, maxR=%f, ViewStep=%d, Proto[0]=%d, Proto[1]=%d, ScanMode=%d, srvTime=%d, MaxNumSectPt=%d, MaxNumSectImg=%d, blankR1=%d, blankR2=%d, MaxNAzm=%d, MaxNElv=%d",
 					s_rdrinit->Nazm, s_rdrinit->Nelv,
@@ -468,7 +473,7 @@ unsigned int CRCSocket::PostData(WPARAM wParam, LPARAM lParam)
 		case MSG_LOCATION:
 		{
 			RDRCURRPOS* igpsp = (RDRCURRPOS*)(void*)((char*)PTR_D);
-			if (PostDataLogEnabled)
+			if (CRCSocketPostDataLogEnabled)
 			{
 				LOG_INFO(requestID, context, (boost::format("MSG_LOCATION. lon=%1%, lat=%2%") % igpsp->lon % igpsp->lat).str().c_str());
 			}
@@ -499,7 +504,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		int Idx = FindTrack(info[i].numTrack);
 		if (-1 == Idx)
 		{
-			if (PostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track not found, creating new") % N).str().c_str());
+			if (CRCSocketPostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track not found, creating new") % N).str().c_str());
 			//создаём трек
 			TRK* t1 = new TRK(info[i].numTrack);
 			Tracks.push_back(t1);
@@ -509,7 +514,7 @@ void CRCSocket::OnSrvMsg_RDRTRACK(RDRTRACK * info, int N)
 		// уже есть
 		else if (Idx >= 0 && Idx < Tracks.size())
 		{
-			if (PostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track found") % N).str().c_str());
+			if (CRCSocketPostDataLogEnabled) LOG_INFO(requestID, context, (boost::format("MSG_OBJTRK. N=%1%, track found") % N).str().c_str());
 			Tracks[Idx]->InsertPoints(info + i, 1);
 		}
 	}

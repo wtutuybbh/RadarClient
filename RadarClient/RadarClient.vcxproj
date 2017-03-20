@@ -302,6 +302,8 @@ xcopy "$(SolutionDir)FreeImage\*.dll" "$(OutDir)" /d /y</Command>
     <None Include="GLSL\CMesh.vert" />
     <None Include="GLSL\CRCPoint.f.glsl" />
     <None Include="GLSL\CRCPoint.v.glsl" />
+    <None Include="GLSL\CRImage.f.glsl" />
+    <None Include="GLSL\CRImage.v.glsl" />
     <None Include="GLSL\CSector.f.glsl" />
     <None Include="GLSL\CSector.v.glsl" />
     <None Include="GLSL\Minimap.f.glsl" />

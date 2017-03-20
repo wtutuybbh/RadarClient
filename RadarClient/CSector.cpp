@@ -36,6 +36,7 @@ CSector::CSector(int index) : C3DObjectModel()
 
 void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init)
 {
+	std::lock_guard<std::mutex> lock(m);
 	std::string context = "CSector::Refresh";
 
 	if (!info_p)
@@ -74,16 +75,23 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 	if (!vertices)
 		return;
 	float zeroElevation = glm::radians(CSettings::GetFloat(FloatZeroElevation));
+	float maxDistance = CSettings::GetFloat(FloatMaxDistance);
 	for (int i = 0; i < info_p->N; i++) 
 	{
 		//here we calculate point spherical coordinates
 		r = pts[i].R * init->dR;
-		a = init->begAzm + pts[i].B * init->dAzm;
-		e = zeroElevation + init->begElv + pts[i].E * init->dElv;	
+		if (r>=0 && r <= maxDistance) {
+			a = init->begAzm + pts[i].B * init->dAzm;
+			e = zeroElevation + init->begElv + pts[i].E * init->dElv;
 
-		vertices.get()->SetValues(i, origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0), glm::vec3(pts[i].Amp, 0, 0), GetColor(pts[i].Amp), glm::vec2(0, 0));
+			vertices.get()->SetValues(i, origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0), glm::vec3(pts[i].Amp, 0, 0), GetColor(pts[i].Amp), glm::vec2(0, 0));
 
-		LOG_INFO__("index= %d, i= %d, R= %d, b= %d, E= %d, Amp= %f", index, i, pts[i].R, pts[i].B, pts[i].E, pts[i].Amp);
+			if (CSectorRefreshLogEnabled) LOG_INFO__(".index= %f, i= %d, R= %d, b= %d, E= %d, Amp= %f", index, i, pts[i].R, pts[i].B, pts[i].E, pts[i].Amp);
+		}
+		else
+		{
+			if (CSectorRefreshLogEnabled) LOG_INFO__(".index= %f, i= %d, R= %d, b= %d, E= %d, Amp= %f  -- WTF???", index, i, pts[i].R, pts[i].B, pts[i].E, pts[i].Amp);
+		}
 	}
 	
 	vbo.at(Main)->NeedsReload = true;
@@ -118,7 +126,7 @@ void CSector::BindUniforms(CViewPortControl* vpControl)
 	glUniform1fv(ps_loc, 1, &PointSize);
 }
 
-#define CSector_GetPoint_LogInfo false
+
 int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 {
 	std::string context = "CSector::GetPoint";

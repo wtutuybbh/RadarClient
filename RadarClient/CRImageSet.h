@@ -5,7 +5,7 @@ class CViewPortControl;
 class CRImage;
 struct RDR_INITCL;
 struct RIMAGE;
-class CRImageSet
+class CRImageSet: public C3DObjectModel
 {
 	std::mutex m;
 public:
@@ -14,6 +14,6 @@ public:
 	CRImageSet();
 	~CRImageSet();
 	void Refresh(glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels);
-	void Draw(CViewPortControl *vpControl, GLenum mode);
+	void Draw(CViewPortControl *vpControl, GLenum mode) override;
 };
 

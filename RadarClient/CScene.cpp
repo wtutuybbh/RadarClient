@@ -593,6 +593,8 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 		RayObj->SetRotateMatrix(glm::rotate((float)(- 2.0f * M_PI * (currentSector + 0.5) / SectorsCount), glm::vec3(0, 1, 0)));
 	}
 
+	MPPh = CSettings::GetFloat(FloatMPPh);
+	MPPv = CSettings::GetFloat(FloatMPPv);
 	Sectors[currentSector]->Refresh(glm::vec4(0, y_0, 0, 1), MPPh, MPPv, info_p, pts, init);	
 	
 	UI->FillInfoGrid(this);

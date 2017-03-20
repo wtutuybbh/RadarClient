@@ -1,8 +1,7 @@
 ﻿#pragma once
 #include "stdafx.h"
 
-#define ReadLogEnabled  false
-#define PostDataLogEnabled  false
+
 
 #ifndef global1h
 #define global1h

@@ -209,9 +209,9 @@ void CMesh::LoadHeightmap()
 CMesh::~CMesh()
 {
 	if (heightMapLoader) {
-		/*if (heightMapLoader->joinable())
-			heightMapLoader->join();*/
-		heightMapLoader->detach();
+		if (heightMapLoader->joinable())
+			heightMapLoader->join();
+		//heightMapLoader->detach();
 		delete heightMapLoader;
 	}
 	if (bounds)
@@ -236,7 +236,7 @@ CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize,
 	UseTexture = 1;
 
 	heightMapLoader = new std::thread (&CMesh::LoadHeightmap, this);
-	heightMapLoader->join();
+	//heightMapLoader->join();
 	//t.detach();
 }
 
