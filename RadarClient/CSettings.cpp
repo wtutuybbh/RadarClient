@@ -154,7 +154,36 @@ bool CSettings::InitPalette()
 
 glm::vec4 CSettings::GetColorFromHexRGBA(std::string rgba)
 {
+	unsigned short shift = 0;
+	if (rgba.substr(0, 1) == "#")
+	{
+		shift = 1;
+	}
+	glm::vec4 settingValue;
+	unsigned short v;
+	std::stringstream ss, ss1, ss2, ss3;
 
+	std::string str_r = rgba.substr(shift, 2);
+	ss << std::hex << str_r;
+	ss >> v;
+	settingValue.r = (float)v / 255.0;
+
+	str_r = rgba.substr(shift + 2, 2);
+	ss1 << std::hex << str_r;
+	ss1 >> v;
+	settingValue.g = (float)v / 255.0;
+
+	str_r = rgba.substr(shift + 4, 2);
+	ss2 << std::hex << str_r;
+	ss2 >> v;
+	settingValue.b = (float)v / 255.0;
+
+	str_r = rgba.substr(shift + 6, 2);
+	ss3 << std::hex << str_r;
+	ss3 >> v;
+	settingValue.a = (float)v / 255.0;
+
+	return settingValue;
 }
 
 glm::vec4 CSettings::GetColor(int key)
@@ -278,5 +307,13 @@ void CSettings::Load()
 	for (auto it = ints.begin(); it != ints.end(); ++it)
 	{
 		SetInt(Settings(it->first), pt.get<int>(to__string(GetName(Settings(it->first)))));
+	}
+	for (auto it = colors.begin(); it != colors.end(); ++it)
+	{
+		SetColor(Settings(it->first), GetColorFromHexRGBA(pt.get<std::string>(to__string(GetName(Settings(it->first))))));
+	}
+	for (auto it = strings.begin(); it != strings.end(); ++it)
+	{
+		SetString(Settings(it->first), pt.get<std::string>(to__string(GetName(Settings(it->first)))));
 	}
 }
