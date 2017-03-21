@@ -14,6 +14,7 @@
 #include "CRCAltitudeDataFile.h"
 #include "CRCDataFileSet.h"
 #include "CRCTextureDataFile.h"
+#include "CUserInterface.h"
 
 #define LOG_ENABLED true
 #define CMesh_LoadHeightmap_LOG true
@@ -398,9 +399,9 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 		int y0_loc = prog.at(vpControl->Id)->GetUniformLocation("y_0");
 		int usey0_loc = prog.at(vpControl->Id)->GetUniformLocation("useY0");
 
-		glUniform1i(useTexture_loc, UseTexture);
+		glUniform1i(useTexture_loc, CUserInterface::GetCheckboxState_Map());
 		glUniform1i(useBlind_loc, 0);
-		glUniform1i(usey0_loc, UseY0Loc);
+		glUniform1i(usey0_loc, !CUserInterface::GetCheckboxState_AltitudeMap());
 		glUniform1f(y0_loc, (int)(centerHeight / MPPv));		
 	}
 }

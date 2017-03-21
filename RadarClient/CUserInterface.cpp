@@ -25,6 +25,7 @@ const std::string CUserInterface::requestID = "CUserInterface";
 HINSTANCE CUserInterface::hInstance;
 HFONT CUserInterface::Font;
 HWND CUserInterface::ParentHWND;
+HWND CUserInterface::ToolboxHWND;
 CXColorSpectrumCtrl CUserInterface::m_ColorSpectrum;
 
 LRESULT Button1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -470,9 +471,9 @@ HWND CUserInterface::GetSettingsHWND() const
 	return SettingsHWND;
 }
 
-void CUserInterface::SetChecked(int id, bool checked)
+void CUserInterface::SetChecked(HWND hwnd, int id, bool checked)
 {
-	HWND hWnd = GetDlgItem(ParentHWND, id);
+	HWND hWnd = GetDlgItem(hwnd, id);
 	SendMessage(hWnd, BM_SETCHECK, checked, 0);
 }
 
@@ -485,12 +486,12 @@ glm::vec3 CUserInterface::GetDirection()
 
 float CUserInterface::GetBegAzm()
 {
-	return CSettings::GetFloat(FloatMinBegAzm) + (CSettings::GetFloat(FloatMaxBegAzm) - CSettings::GetFloat(FloatMinBegAzm)) * GetTrackbarValue(BegAzm_ID)/100.0;
+	return CSettings::GetFloat(FloatMinBegAzm) + (CSettings::GetFloat(FloatMaxBegAzm) - CSettings::GetFloat(FloatMinBegAzm)) * GetTrackbarValue(ToolboxHWND, IDC_SLIDER1)/100.0;
 }
 
 float CUserInterface::GetZeroElevation()
 {
-	return CSettings::GetFloat(FloatMinZeroElevation) + (CSettings::GetFloat(FloatMaxZeroElevation) - CSettings::GetFloat(FloatMinZeroElevation)) * GetTrackbarValue(ZeroElevation_ID) / 100.0;
+	return CSettings::GetFloat(FloatMinZeroElevation) + (CSettings::GetFloat(FloatMaxZeroElevation) - CSettings::GetFloat(FloatMinZeroElevation)) * GetTrackbarValue(ToolboxHWND, IDC_SLIDER2) / 100.0;
 }
 
 float CUserInterface::GetHeight()
@@ -522,49 +523,17 @@ LRESULT CUserInterface::Button_Connect(HWND hwnd, UINT uMsg, WPARAM wParam, LPAR
 
 LRESULT CUserInterface::Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	int ButtonID = LOWORD(wParam);
-	HWND hWnd = GetDlgItem(hwnd, ButtonID);
-	int Checked = !Button_GetCheck(hWnd);
-	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
-
-	if (ButtonID == ObjOptions_ID[0]) { // points
-		if (VPControl)
-			VPControl->DisplayPoints = Checked;
-	}
-	if (ButtonID == ObjOptions_ID[1]) { // series
-		if (VPControl)
-			VPControl->DisplaySeries = Checked;
-	}
-	if (ButtonID == ObjOptions_ID[2]) { // RLIs
-		if (VPControl)
-			VPControl->DisplayRLIs = Checked;
-	}
-
+	// points, tracks, rli's...
 	return LRESULT();
 }
 
 LRESULT CUserInterface::Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	int ButtonID = LOWORD(wParam);
-	HWND hWnd = GetDlgItem(hwnd, ButtonID);
-	int Checked = !Button_GetCheck(hWnd);
-	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
-
-	if (ButtonID == MapOptions_ID[0]) { // points
-		if (VPControl) {			
-			VPControl->DisplayLandscape = Checked;
-		}
-	}	
 	return LRESULT();
 }
 
 LRESULT CUserInterface::Checkbox_MarkupOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	int ButtonID = LOWORD(wParam);
-	HWND hWnd = GetDlgItem(hwnd, ButtonID);
-	int Checked = !Button_GetCheck(hWnd);
-	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
-
 	return LRESULT();
 }
 
@@ -676,34 +645,34 @@ LRESULT CUserInterface::Trackbar_BegAzm(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 	{
 		VPControl->Scene->SetBegAzm(glm::radians(GetBegAzm()));
 	}
-	Trackbar_BegAzm_SetText(BegAzmValue_ID);	
+	Trackbar_BegAzm_SetText(ToolboxHWND, IDC_STATIC6);
 	return LRESULT();
 }
 
-void CUserInterface::Trackbar_BegAzm_SetText(int labelID)
+void CUserInterface::Trackbar_BegAzm_SetText(HWND hwnd, int labelID)
 {
 	float val = GetBegAzm();
 	wstringstream stream;
 	stream << fixed << setprecision(2) << val;
 	wstring s = stream.str();
-	SetDlgItemText(ParentHWND, BegAzmValue_ID, s.c_str());
+	SetDlgItemText(hwnd, labelID, s.c_str());
 }
 
 LRESULT CUserInterface::Trackbar_ZeroElevation(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	CSettings::SetFloat(FloatZeroElevation, GetZeroElevation());
 	CSettings::SetFloat(FloatCTrackRefresh_e0, GetZeroElevation());
-	Trackbar_ZeroElevation_SetText(ZeroElevationValue_ID);
+	Trackbar_ZeroElevation_SetText(ToolboxHWND, IDC_STATIC7);
 	return LRESULT();
 }
 
-void CUserInterface::Trackbar_ZeroElevation_SetText(int labelID)
+void CUserInterface::Trackbar_ZeroElevation_SetText(HWND hwnd, int labelID)
 {
 	float val = GetZeroElevation();
 	wstringstream stream;
 	stream << fixed << setprecision(2) << val;
 	wstring s = stream.str();
-	SetDlgItemText(ParentHWND, ZeroElevationValue_ID, s.c_str());
+	SetDlgItemText(hwnd, labelID, s.c_str());
 }
 
 //TRACKBAR_CLASS
@@ -742,72 +711,6 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	CurrentY += MinimapSize;
 	CameraDirection_ID[1] = InsertElement(NULL, TRACKBAR_CLASS, _T("Поворот камеры:"), WS_VISIBLE | WS_CHILD | TBS_HORZ | TBS_BOTTOM, 0, CurrentY, MinimapSize, VStepGrp, &CUserInterface::Trackbar_CameraDirection_Turn);
 
-	CurrentY += VStep+VStep;
-
-	//FixViewToRadar_ID = InsertElement(NULL, _T("BUTTON"), _T("Вид на радар"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_FixViewToRadar);
-
-	//MeasureDistance_ID = InsertElement(NULL, _T("BUTTON"), _T("Измерения"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MeasureDistance);
-	
-	BtnColors_ID = InsertElement(NULL, _T("BUTTON"), _T("Цвета"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth/2, ButtonHeight, &CUserInterface::Button_Colors);
-	BtnLoad_ID = InsertElement(NULL, _T("BUTTON"), _T("Загр. карту"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X + ControlWidth / 2 + Column1X / 2, CurrentY, ControlWidth/4 * 3, ButtonHeight, &CUserInterface::Button_Load);
-
-	CurrentY += VStepGrp;
-
-
-	//Button_Connect_ID = InsertElement(NULL, _T("BUTTON"), _T("Cоединить"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, Column1X, CurrentY, ControlWidthL, ButtonHeight, &CUserInterface::Button_Connect);
-	IsConnected_ID = InsertElement(NULL, _T("STATIC"), _T("Нет соединения"), WS_VISIBLE | WS_CHILD, Column2X, CurrentY, ControlWidthL, ButtonHeight, NULL);
-	BtnTest_ID = InsertElement(NULL, _T("BUTTON"), _T("Тест"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth / 2, ButtonHeight, &CUserInterface::Button_Test);
-
-	
-	CurrentY += VStepGrp;
-
-	InsertElement(NULL, _T("STATIC"), _T("Выводить:"), WS_VISIBLE | WS_CHILD, Column1X, CurrentY, ControlWidth, ButtonHeight, NULL);
-	InsertElement(NULL, _T("STATIC"), _T("Вид местности:"), WS_VISIBLE | WS_CHILD, Column2X, CurrentY, ControlWidth, ButtonHeight, NULL);
-	InsertElement(NULL, _T("STATIC"), _T("Разметка:"), WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth, ButtonHeight, NULL);
-	CurrentY += VStep;
-	ObjOptions_ID[0] = InsertElement(NULL, _T("BUTTON"), _T("Точки"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_ObjOptions);
-	
-	// Ландшафт
-	MapOptions_ID[0] = InsertElement(NULL, _T("BUTTON"), _T("Ландшафт"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MapOptions);
-
-	MarkupOptions_ID[0] = InsertElement(NULL, _T("BUTTON"), _T("Линии"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column3X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MarkupOptions);
-	CurrentY += VStep;
-	ObjOptions_ID[1] = InsertElement(NULL, _T("BUTTON"), _T("Траектории"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_ObjOptions);
-
-	// Карта
-	MapType_ID[0] = InsertElement(NULL, _T("BUTTON"), _T("Карта"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX | WS_GROUP, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MapType);
-
-
-	MarkupOptions_ID[1] = InsertElement(NULL, _T("BUTTON"), _T("Числа"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column3X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_MarkupOptions);
-	CurrentY += VStep;
-	ObjOptions_ID[2] = InsertElement(NULL, _T("BUTTON"), _T("RLI-изображения"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_ObjOptions);
-	
-	// Слепые зоны
-	MapType_ID[1] = InsertElement(NULL, _T("BUTTON"), _T("Слепые зоны"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_CHECKBOX, Column2X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::Checkbox_BlindZones);
-
-	CurrentY += VStepGrp;
-
-	InsertElement(NULL, _T("STATIC"), _T("Начальный азимут"), WS_VISIBLE | WS_CHILD, Column2X, CurrentY, ControlWidth, ButtonHeight, NULL);
-	BegAzm_ID = InsertElement(NULL, TRACKBAR_CLASS, _T("Положение камеры:"), WS_VISIBLE | WS_CHILD | TBS_HORZ | TBS_BOTTOM, Column2X + ControlWidth + VStep / 2, CurrentY, ControlWidth, VStepGrp, &CUserInterface::Trackbar_BegAzm);
-	BegAzmValue_ID = InsertElement(NULL, _T("STATIC"), _T("BegAzmValue_ID"), WS_VISIBLE | WS_CHILD, Column2X + 2 * ControlWidth + VStep, CurrentY, ControlWidth / 2, ButtonHeight, NULL);
-
-	InsertElement(NULL, _T("STATIC"), _T("Положение камеры:"), WS_VISIBLE | WS_CHILD, Column1X, CurrentY, ControlWidth, ButtonHeight, NULL);
-	CameraPosition_ID[0] = InsertElement(NULL, _T("BUTTON"), _T("От радара"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_GROUP, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
-		
-	
-
-	CurrentY += VStep;
-	InsertElement(NULL, _T("STATIC"), _T("Начальный угол места"), WS_VISIBLE | WS_CHILD, Column2X, CurrentY, ControlWidth, ButtonHeight, NULL);
-	ZeroElevation_ID = InsertElement(NULL, TRACKBAR_CLASS, _T("Положение камеры:"), WS_VISIBLE | WS_CHILD | TBS_HORZ | TBS_BOTTOM, Column2X + ControlWidth + VStep / 2, CurrentY, ControlWidth, VStepGrp, &CUserInterface::Trackbar_ZeroElevation);
-	ZeroElevationValue_ID = InsertElement(NULL, _T("STATIC"), _T("ZeroElevationValue_ID"), WS_VISIBLE | WS_CHILD, Column2X + 2 * ControlWidth + VStep, CurrentY, ControlWidth / 2, ButtonHeight, NULL);
-
-	CameraPosition_ID[1] = InsertElement(NULL, _T("BUTTON"), _T("100м над радаром"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
-	
-
-	CurrentY += VStep;
-	
-	CameraPosition_ID[2] = InsertElement(NULL, _T("BUTTON"), _T("1км над радаром"), WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, Column1X, CurrentY, ControlWidth, ButtonHeight, &CUserInterface::RadioGroup_CameraPosition);
-	CurrentY += VStep;
 	
 	int gridX = panelWidth;
 	int gridY = vpControl->GetHeight();
@@ -845,16 +748,16 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 
 	Elements.insert({ IDC_BUTTON2, new InterfaceElement{ IDC_BUTTON2, NULL, _T("IDC_BUTTON2"), _T("IDC_BUTTON2"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Button_Settings } });
 	
+	Elements.insert({ IDC_SLIDER1, new InterfaceElement{ IDC_SLIDER1, NULL, _T("IDC_SLIDER1"), _T("IDC_SLIDER1"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Trackbar_BegAzm } });
+	Elements.insert({ IDC_SLIDER2, new InterfaceElement{ IDC_SLIDER2, NULL, _T("IDC_SLIDER2"), _T("IDC_SLIDER2"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Trackbar_ZeroElevation } });
+	
+	//Elements.insert({ IDC_CHECK3, new InterfaceElement{ IDC_CHECK3, NULL, _T("IDC_CHECK3"), _T("IDC_CHECK3"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_ObjOptions } });
 
 
-	SetChecked(ObjOptions_ID[0], 0);
-	SetChecked(ObjOptions_ID[1], 1);
-	SetChecked(ObjOptions_ID[2], 1);
-	SetChecked(MapOptions_ID[0], vpControl->DisplayLandscape);
-	SetChecked(MapType_ID[0], vpControl->DisplayMap);
-	SetChecked(MapType_ID[1], vpControl->DisplayBlindZones);
-	SetChecked(MarkupOptions_ID[0], 1);
-	SetChecked(MarkupOptions_ID[1], 1);
+
+
+
+
 
 	SendMessage(GetDlgItem(parentHWND, CameraDirection_ID[0]), TBM_SETPOS, 1, 50);
 	SendMessage(GetDlgItem(parentHWND, CameraDirection_ID[1]), TBM_SETPOS, 1, 50);
@@ -868,8 +771,8 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	GridHWND = InfoGridHWND = nullptr;
 	InitGrid();
 
-	Trackbar_BegAzm_SetText(BegAzmValue_ID);
-	Trackbar_ZeroElevation_SetText(ZeroElevationValue_ID);
+	
+	
 }
 
 CUserInterface::~CUserInterface()
@@ -901,44 +804,42 @@ void CUserInterface::ConnectionStateChanged(bool IsConnected) const
 
 bool CUserInterface::GetCheckboxState_Map()
 {
-	bool res = Button_GetCheck(GetDlgItem(ParentHWND, MapType_ID[0]));
-	return res;
+	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK7));
 }
 
 bool CUserInterface::GetCheckboxState_BlindZones()
 {
-	bool res = Button_GetCheck(GetDlgItem(ParentHWND, MapType_ID[1]));
-	return res;
+	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK8));
 }
 
 bool CUserInterface::GetCheckboxState_AltitudeMap()
 {
-	return Button_GetCheck(GetDlgItem(ParentHWND, MapOptions_ID[0]));
+	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK6));
 }
 
 bool CUserInterface::GetCheckboxState_MarkupLines()
 {
-	return Button_GetCheck(GetDlgItem(ParentHWND, MarkupOptions_ID[0]));
+	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK9));
 }
 
 bool CUserInterface::GetCheckboxState_MarkupLabels()
 {
-	return Button_GetCheck(GetDlgItem(ParentHWND, MarkupOptions_ID[1]));
+	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK10));
 }
 
 bool CUserInterface::GetCheckboxState_Points()
 {
-	return Button_GetCheck(GetDlgItem(ParentHWND, ObjOptions_ID[0]));
+	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK3));
 }
 
 bool CUserInterface::GetCheckboxState_Tracks()
 {
-	return Button_GetCheck(GetDlgItem(ParentHWND, ObjOptions_ID[1]));
+	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK4));
 }
 
 bool CUserInterface::GetCheckboxState_Images()
 {
-	return Button_GetCheck(GetDlgItem(ParentHWND, ObjOptions_ID[2]));
+	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK5));
 }
 
 int CUserInterface::GetTrackbarValue_VTilt()
@@ -955,9 +856,9 @@ int CUserInterface::GetTrackbarValue_Turn()
 	return val;
 }
 
-int CUserInterface::GetTrackbarValue(int id) const
+int CUserInterface::GetTrackbarValue(HWND hWnd, int id) const
 {
-	HWND hwnd = GetDlgItem(ParentHWND, id);
+	HWND hwnd = GetDlgItem(hWnd, id);
 	int val = SendMessage(hwnd, TBM_GETPOS, 0, 0);
 	return val;
 }
@@ -979,14 +880,14 @@ void CUserInterface::SetTrackbarValue(int id, int val) const
 
 void CUserInterface::SetTrackbarValue_BegAzm(int val)
 {
-	SetTrackbarValue(BegAzm_ID, val);
-	Trackbar_BegAzm_SetText(BegAzmValue_ID);
+	SetTrackbarValue(IDC_SLIDER1, val);
+	Trackbar_BegAzm_SetText(ToolboxHWND, IDC_STATIC6);
 }
 
 void CUserInterface::SetTrackbarValue_ZeroElevation(int val)
 {
 	SetTrackbarValue(ZeroElevation_ID, val);
-	Trackbar_ZeroElevation_SetText(ZeroElevationValue_ID);
+	Trackbar_ZeroElevation_SetText(ToolboxHWND, IDC_STATIC7);
 }
 
 void CUserInterface::ControlEnable(int ID, bool enable) const
@@ -1177,4 +1078,18 @@ int CUserInterface::GetMainTableMode() const
 void CUserInterface::SetMainTableMode(int value)
 {
 	mainTableMode = value;
+}
+
+void CUserInterface::OnInitDialog()
+{
+	Trackbar_BegAzm_SetText(ToolboxHWND, IDC_STATIC6);
+	Trackbar_ZeroElevation_SetText(ToolboxHWND, IDC_STATIC7);
+
+	SetChecked(ToolboxHWND, IDC_CHECK3, true);
+	SetChecked(ToolboxHWND, IDC_CHECK4, true);
+	SetChecked(ToolboxHWND, IDC_CHECK5, true);
+	SetChecked(ToolboxHWND, IDC_CHECK6, true);
+	SetChecked(ToolboxHWND, IDC_CHECK7, true);
+	SetChecked(ToolboxHWND, IDC_CHECK9, true);
+	SetChecked(ToolboxHWND, IDC_CHECK10, true);
 }

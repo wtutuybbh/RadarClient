@@ -279,7 +279,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 			Camera->MeshSize = Mesh->GetSize();
 			waitingForMesh = false;
 		}
-		//Mesh->Draw(vpControl, GL_TRIANGLES);
+		Mesh->Draw(vpControl, GL_TRIANGLES);
 	}
 	glDisable(GL_DEPTH_BUFFER);
 	if (Markup)

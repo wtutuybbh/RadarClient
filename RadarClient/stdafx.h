@@ -43,6 +43,7 @@
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+
 //Narrow-char thread-safe logger.
 typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_level> logger_t;
 
@@ -64,6 +65,9 @@ typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_le
 #include <unordered_map>
 #include <map>
 #define GLM_FORCE_RADIANS
+
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"

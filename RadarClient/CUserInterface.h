@@ -61,7 +61,7 @@ private:
 	//group elements
 	int ObjOptions_ID[3], MapOptions_ID[2], MarkupOptions_ID[2], CameraPosition_ID[3], CameraDirection_ID[2], CameraDirectionValue_ID[2], MapType_ID[2];
 	static HINSTANCE hInstance;
-	void SetChecked(int id, bool checked);
+	void SetChecked(HWND hwnd, int id, bool checked);
 
 	glm::vec3 GetDirection();
 	float GetBegAzm();
@@ -113,9 +113,9 @@ private:
 	virtual LRESULT Trackbar_CameraDirection_VTilt(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Trackbar_CameraDirection_Turn(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Trackbar_BegAzm(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	void Trackbar_BegAzm_SetText(int labelID);
+	void Trackbar_BegAzm_SetText(HWND hwnd, int labelID);
 	virtual LRESULT Trackbar_ZeroElevation(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	void Trackbar_ZeroElevation_SetText(int labelID);
+	void Trackbar_ZeroElevation_SetText(HWND hwnd, int labelID);
 	virtual LRESULT Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT ColorGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT InfoGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -125,6 +125,7 @@ public:
 	int MinimapSize;
 	static HWND ParentHWND;
 	static HWND SettingsHWND;	
+	static HWND ToolboxHWND;
 	HWND GetSettingsHWND() const;
 	HFONT hDlgFont {nullptr};
 	
@@ -145,18 +146,18 @@ public:
 
 	void ConnectionStateChanged(bool IsConnected) const;
 
-	bool GetCheckboxState_Points();
-	bool GetCheckboxState_Tracks();
-	bool GetCheckboxState_Images();
-	bool GetCheckboxState_Map();
-	bool GetCheckboxState_BlindZones();
-	bool GetCheckboxState_AltitudeMap();
-	bool GetCheckboxState_MarkupLines();
-	bool GetCheckboxState_MarkupLabels();
+	static bool GetCheckboxState_Points();
+	static bool GetCheckboxState_Tracks();
+	static bool GetCheckboxState_Images();
+	static bool GetCheckboxState_Map();
+	static bool GetCheckboxState_BlindZones();
+	static bool GetCheckboxState_AltitudeMap();
+	static bool GetCheckboxState_MarkupLines();
+	static bool GetCheckboxState_MarkupLabels();
 
 	int GetTrackbarValue_VTilt();
 	int GetTrackbarValue_Turn();
-	int GetTrackbarValue(int id) const;
+	int GetTrackbarValue(HWND hWnd, int id) const;
 	void SetTrackbarValue_VTilt(int val);
 	void SetTrackbarValue_Turn(int val);
 	void SetTrackbarValue(int id, int val) const;
@@ -180,6 +181,8 @@ public:
 
 	int GetMainTableMode() const;
 	void SetMainTableMode(int value);
+
+	void OnInitDialog();
 #ifdef _DEBUG
 	DebugWindowInfo *dwi;
 #endif

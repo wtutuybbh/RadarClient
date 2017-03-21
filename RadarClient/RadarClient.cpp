@@ -80,6 +80,8 @@ int g_nCmdShow;
 
 std::thread *g_gl_thread = nullptr;
 
+//HWND CUserInterface::ToolboxHWND;
+
 void TerminateApplication(GL_Window* window)							// Terminate The Application
 {
 	gl_isProgramLooping = false;
@@ -185,6 +187,12 @@ BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL
 }
 void CallUI(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	
+	if (uMsg == WM_INITDIALOG)
+	{		
+		if (g_UI)
+			g_UI->OnInitDialog();
+	}
 	if (uMsg == WM_COMMAND)
 	{
 		if (g_UI)
@@ -202,6 +210,12 @@ void CallUI(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 // Process Window Message Callbacks
 LRESULT CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	//LOG_INFO("DlgProc", "DlgProc", "hWnd=%x, uMsg=%d, wParam=%d, lParam=%d", hWnd, uMsg, wParam, lParam);
+	if (g_UI && uMsg == WM_INITDIALOG)
+	{
+		CUserInterface::ToolboxHWND = hWnd;
+		g_UI->OnInitDialog();
+	}
 	CallUI(hWnd, uMsg, wParam, lParam);
 	switch (uMsg)
 	{
@@ -302,12 +316,14 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		hglobal = ::LoadResource(hInstance, hrsrc);
 
 		HWND hwnd1 = RCDialog(hInstance, IDD_DIALOG1, hWnd, DLGPROC(DlgProc));
+
+		CUserInterface::ToolboxHWND = hwnd1;
 		//HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)(LoadResource(hInstance, FindResource(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), RT_DIALOG))), hWnd, (DLGPROC)DlgProc);
 		//HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)hglobal, hWnd, (DLGPROC)DlgProc);
 
 		ShowWindow(hwnd1, g_nCmdShow);
 
-		SetWindowPos(hwnd1, HWND_TOP, 0, 720, 0, 0, SWP_NOSIZE);
+		SetWindowPos(hwnd1, HWND_TOP, 0, PANEL_WIDTH + 30, 0, 0, SWP_NOSIZE);
 
 #ifdef _DEBUG
 		g_Minimap->dwi = &g_dwi;
@@ -563,6 +579,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		LOG_ERROR__("Settings error, program terminated");
 		return -2;
 	}
+	//
+	write_json("settings.json", CSettings::pt);
+
+	ptree newpt;
+	read_json("settings.json", newpt);
+	write_json("settings2.json", newpt);
 	C3DObjectModel::_id = 0;
 	C3DObjectModel::_testid = 0;
 

@@ -5,6 +5,7 @@
 #include "CSector.h"
 
 
+
 CSettings::CSettings()
 {
 }
@@ -19,188 +20,129 @@ std::unordered_map<int, float> CSettings::floats;
 std::unordered_map<int, int> CSettings::ints;
 std::unordered_map<int, std::string> CSettings::strings;
 std::map<tstring, Settings> CSettings::stringmap;
+std::map<Settings, tstring> CSettings::settingsmap;
+
+ptree CSettings::pt;
 
 bool CSettings::Init()
 {
-	colors.insert_or_assign(ColorBackground, glm::vec4(0, 0, 0, 1));
-	stringmap.insert_or_assign(TEXT("ColorBackground"), ColorBackground);	
+	InitColor(ColorBackground,			TEXT("ColorBackground"),	glm::vec4(0.0, 0.0, 0.0, 1));
+	InitColor(ColorAxis,				TEXT("ColorAxis"),			glm::vec4(0.5, 0.5, 0.5, 0.5));
+	InitColor(ColorNumbers,				TEXT("ColorNumbers"),		glm::vec4(0.7, 0.7, 0.7, 0.5));
+	InitColor(ColorPointLowLevel,		TEXT("ColorPointLowLevel"), glm::vec4(0.4, 0.4, 0.4, 1));
 
-	colors.insert_or_assign(ColorAxis, glm::vec4(0.5, 0.5, 0.5, 0.5));
-	stringmap.insert_or_assign(TEXT("ColorAxis"), ColorAxis);
 
-	colors.insert_or_assign(ColorNumbers, glm::vec4(0.7, 0.7, 0.7, 1));
-	stringmap.insert_or_assign(TEXT("ColorNumbers"), ColorNumbers);
+	InitColor(ColorPointHighLevel, TEXT("ColorPointHighLevel"),glm::vec4(1, 1, 1, 1));
 
-	colors.insert_or_assign(ColorPointLowLevel, glm::vec4(0.4, 0.4, 0.4, 1));
-	stringmap.insert_or_assign(TEXT("ColorPointLowLevel"), ColorPointLowLevel);
+	InitColor(ColorPointSelected, TEXT("ColorPointSelected"),glm::vec4(0.5, 1, 0.5, 1));
 
-	colors.insert_or_assign(ColorPointHighLevel, glm::vec4(1, 1, 1, 1));
-	stringmap.insert_or_assign(TEXT("ColorPointHighLevel"), ColorPointHighLevel);
-
-	colors.insert_or_assign(ColorPointSelected, glm::vec4(0.5, 1, 0.5, 1));
-	stringmap.insert_or_assign(TEXT("ColorPointSelected"), ColorPointSelected);
-
-	colors.insert_or_assign(ColorTrack, glm::vec4(1.0, 0.5, 0.5, 1));
-	stringmap.insert_or_assign(TEXT("ColorTrack"), ColorTrack);
-
-	colors.insert_or_assign(ColorTrackSelected, glm::vec4(0.5, 1, 0.5, 1));
-	stringmap.insert_or_assign(TEXT("ColorTrackSelected"), ColorTrackSelected);
-
-	colors.insert_or_assign(ColorMeasureLine, glm::vec4(1, 0.0, 0.0, 1));
-	stringmap.insert_or_assign(TEXT("ColorMeasureLine"), ColorMeasureLine);
-
-	colors.insert_or_assign(ColorAltitudeLowest, glm::vec4(0, 0, 0, 1));
-	stringmap.insert_or_assign(TEXT("ColorAltitudeLowest"), ColorAltitudeLowest);
-
-	colors.insert_or_assign(ColorAltitudeHighest, glm::vec4(0.3, 0.3, 0.3, 1));
-	stringmap.insert_or_assign(TEXT("ColorAltitudeHighest"), ColorAltitudeHighest);
-
-	colors.insert_or_assign(ColorBlankZones, glm::vec4(1.0, 0.3, 0.3, 1));
-	stringmap.insert_or_assign(TEXT("ColorBlankZones"), ColorBlankZones);
-
-	floats.insert_or_assign(FloatMinAltitude, 50);
-	stringmap.insert_or_assign(TEXT("FloatMinAltitude"), FloatMinAltitude);
-
-	floats.insert_or_assign(FloatMaxAltitude, 250);
-	stringmap.insert_or_assign(TEXT("FloatMaxAltitude"), FloatMaxAltitude);
-
-	floats.insert_or_assign(FloatMaxDistance, 7000);
-	stringmap.insert_or_assign(TEXT("FloatMaxDistance"), FloatMaxDistance);
-
-	floats.insert_or_assign(FloatBlankR1, 120);
-	stringmap.insert_or_assign(TEXT("FloatBlankR1"), FloatBlankR1);
-
-	floats.insert_or_assign(FloatBlankR2, 6500);
-	stringmap.insert_or_assign(TEXT("FloatBlankR2"), FloatBlankR2);
-
-	ints.insert_or_assign(IntMinimapTextureSize, 256);
-	stringmap.insert_or_assign(TEXT("IntMinimapTextureSize"), IntMinimapTextureSize);
-
-	ints.insert_or_assign(IntMarkupMarksPerCircle, 10);
-	stringmap.insert_or_assign(TEXT("IntMarkupMarksPerCircle"), IntMarkupMarksPerCircle);
-
-	ints.insert_or_assign(IntMarkupSegmentsPerCircle, 1000);
-	stringmap.insert_or_assign(TEXT("IntMarkupSegmentsPerCircle"), IntMarkupSegmentsPerCircle);
-
-	ints.insert_or_assign(IntMarkupNumCircles, 7);
-	stringmap.insert_or_assign(TEXT("IntMarkupNumCircles"), IntMarkupNumCircles);
-
-	ints.insert_or_assign(IntMarkupMarkDistance, 100);
-	stringmap.insert_or_assign(TEXT("IntMarkupMarkDistance"), IntMarkupMarkDistance);
-
-	ints.insert_or_assign(IntMarkupMarkSize, 10);
-	stringmap.insert_or_assign(TEXT("IntMarkupMarkSize"), IntMarkupMarkSize);
-
-	ints.insert_or_assign(IntMarkupHorizontalAxisCount, 18);
-	stringmap.insert_or_assign(TEXT("IntMarkupHorizontalAxisCount"), IntMarkupHorizontalAxisCount);
+	InitColor(ColorTrack, TEXT("ColorTrack"),glm::vec4(1.0, 0.5, 0.5, 1));
 	
-	ints.insert_or_assign(IntRayDensity, 1);
-	stringmap.insert_or_assign(TEXT("IntRayDensity"), IntRayDensity);
+	InitColor(ColorTrackSelected, TEXT("ColorTrackSelected"),glm::vec4(0.5, 1, 0.5, 1));
+
+	InitColor(ColorMeasureLine, TEXT("ColorMeasureLine"),glm::vec4(1, 0.0, 0.0, 1));
+
+	InitColor(ColorAltitudeLowest, TEXT("ColorAltitudeLowest"),glm::vec4(0, 0, 0, 1));
+
+	InitColor(ColorAltitudeHighest, TEXT("ColorAltitudeHighest"), glm::vec4(0.3, 0.3, 0.3, 1));
+
+	InitColor(ColorBlankZones, TEXT("ColorBlankZones"), glm::vec4(1.0, 0.3, 0.3, 1));
+
+	InitFloat(FloatMinAltitude, TEXT("FloatMinAltitude"), 50);
+
+	InitFloat(FloatMaxAltitude, TEXT("FloatMaxAltitude"), 250);
+
+	InitFloat(FloatMaxDistance, TEXT("FloatMaxDistance"), 7000);
+
+	InitFloat(FloatBlankR1, TEXT("FloatBlankR1"), 120);
+
+	InitFloat(FloatBlankR2, TEXT("FloatBlankR2"), 6500);
+
+	InitInt(IntMinimapTextureSize, TEXT("IntMinimapTextureSize"), 256);
+
+	InitInt(IntMarkupMarksPerCircle, TEXT("IntMarkupMarksPerCircle"), 10);
+
+	InitInt(IntMarkupSegmentsPerCircle, TEXT("IntMarkupSegmentsPerCircle"), 1000);
+
+	InitInt(IntMarkupNumCircles, TEXT("IntMarkupNumCircles"), 7);
+
+	InitInt(IntMarkupMarkDistance, TEXT("IntMarkupMarkDistance"), 100);
+
+	InitInt(IntMarkupMarkSize, TEXT("IntMarkupMarkSize"), 10);
+
+	InitInt(IntMarkupHorizontalAxisCount, TEXT("IntMarkupHorizontalAxisCount"), 18);
 	
-	floats.insert_or_assign(FloatZeroElevation, 3.0f);
-	stringmap.insert_or_assign(TEXT("FloatZeroElevation"), FloatZeroElevation);
-
-	floats.insert_or_assign(FloatCTrackRefresh_Kr, 0.75f);
-	stringmap.insert_or_assign(TEXT("FloatCTrackRefresh_Kr"), FloatCTrackRefresh_Kr);
+	InitInt(IntRayDensity, TEXT("IntRayDensity"), 1);
 	
-	floats.insert_or_assign(FloatCTrackRefresh_a0, -120.0f);
-	stringmap.insert_or_assign(TEXT("FloatCTrackRefresh_a0"), FloatCTrackRefresh_a0);
+	InitFloat(FloatZeroElevation, TEXT("FloatZeroElevation"), 3.0f);
+
+	InitFloat(FloatCTrackRefresh_Kr, TEXT("FloatCTrackRefresh_Kr"), 0.75f);
 	
-	floats.insert_or_assign(FloatCTrackRefresh_scale1, 0.02f);
-	stringmap.insert_or_assign(TEXT("FloatCTrackRefresh_scale1"), FloatCTrackRefresh_scale1);
-
-	floats.insert_or_assign(FloatCTrackRefresh_scale2, 1000.0f);
-	stringmap.insert_or_assign(TEXT("FloatCTrackRefresh_scale2"), FloatCTrackRefresh_scale2);
-
-	floats.insert_or_assign(FloatCTrackRefresh_e0, 0.0f);
-	stringmap.insert_or_assign(TEXT("FloatCTrackRefresh_e0"), FloatCTrackRefresh_e0);
+	InitFloat(FloatCTrackRefresh_a0, TEXT("FloatCTrackRefresh_a0"), -120.0f);
 	
-	floats.insert_or_assign(FloatCTrackRefresh_scale3, 1.0f);
-	stringmap.insert_or_assign(TEXT("FloatCTrackRefresh_scale3"), FloatCTrackRefresh_scale3);
+	InitFloat(FloatCTrackRefresh_scale1, TEXT("FloatCTrackRefresh_scale1"), 0.02f);
 
+	InitFloat(FloatCTrackRefresh_scale2, TEXT("FloatCTrackRefresh_scale2"), 1000.0f);
+
+	InitFloat(FloatCTrackRefresh_e0, TEXT("FloatCTrackRefresh_e0"), 0.0f);
 	
-	ints.insert_or_assign(IntPointColorThreshold_00, 400);
-	stringmap.insert_or_assign(TEXT("IntPointColorThreshold_00"), IntPointColorThreshold_00);
-
-	ints.insert_or_assign(IntPointColorThreshold_01, 1000);
-	stringmap.insert_or_assign(TEXT("IntPointColorThreshold_01"), IntPointColorThreshold_01);
-
-	ints.insert_or_assign(IntPointColorThreshold_02, 2500);
-	stringmap.insert_or_assign(TEXT("IntPointColorThreshold_02"), IntPointColorThreshold_02);
-
-	colors.insert_or_assign(ColorPointColor_00, glm::vec4(0.3, 0.3, 0.3, 1));
-	stringmap.insert_or_assign(TEXT("ColorPointColor_00"), ColorPointColor_00);
+	InitFloat(FloatCTrackRefresh_scale3, TEXT("FloatCTrackRefresh_scale3"), 1.0f);
 	
-	colors.insert_or_assign(ColorPointColor_01, glm::vec4(0.5, 0.5, 0.5, 1));
-	stringmap.insert_or_assign(TEXT("ColorPointColor_01"), ColorPointColor_01);
+	InitInt(IntPointColorThreshold_00, TEXT("IntPointColorThreshold_00"), 400);
 
-	colors.insert_or_assign(ColorPointColor_02, glm::vec4(0.6, 0.6, 0.6, 1));
-	stringmap.insert_or_assign(TEXT("ColorPointColor_02"), ColorPointColor_02);
+	InitInt(IntPointColorThreshold_01, TEXT("IntPointColorThreshold_01"), 1000);
 
-	colors.insert_or_assign(ColorPointColor_03, glm::vec4(0.8, 0.8, 0.8, 1));
-	stringmap.insert_or_assign(TEXT("ColorPointColor_03"), ColorPointColor_03);
+	InitInt(IntPointColorThreshold_02, TEXT("IntPointColorThreshold_02"), 2500);
+
+	InitColor(ColorPointColor_00, TEXT("ColorPointColor_00"), glm::vec4(0.3, 0.3, 0.3, 1));
 	
-	strings.insert_or_assign(StringHostName, "localhost");
-	stringmap.insert_or_assign(TEXT("StringHostName"), StringHostName);
+	InitColor(ColorPointColor_01, TEXT("ColorPointColor_01"), glm::vec4(0.5, 0.5, 0.5, 1));
+
+	InitColor(ColorPointColor_02, TEXT("ColorPointColor_02"), glm::vec4(0.6, 0.6, 0.6, 1));
+
+	InitColor(ColorPointColor_03, TEXT("ColorPointColor_03"), glm::vec4(0.8, 0.8, 0.8, 1));
 	
-	ints.insert_or_assign(IntPort, 10001);
-	stringmap.insert_or_assign(TEXT("IntPort"), IntPort);
-
-	floats.insert_or_assign(FloatMinBegAzm, 0);
-	stringmap.insert_or_assign(TEXT("FloatMinBegAzm"), FloatMinBegAzm);
-
-	floats.insert_or_assign(FloatMaxBegAzm, 360);
-	stringmap.insert_or_assign(TEXT("FloatMaxBegAzm"), FloatMaxBegAzm);
-
-	floats.insert_or_assign(FloatMinZeroElevation, 0);
-	stringmap.insert_or_assign(TEXT("FloatMinZeroElevation"), FloatMinZeroElevation);
-
-	floats.insert_or_assign(FloatMaxZeroElevation, 90);
-	stringmap.insert_or_assign(TEXT("FloatMaxZeroElevation"), FloatMaxZeroElevation);
-
-	floats.insert_or_assign(FloatPositionLon, 37.712919);
-	stringmap.insert_or_assign(TEXT("FloatPositionLon"), FloatPositionLon);
-
-	floats.insert_or_assign(FloatPositionLat, 55.994606);
-	stringmap.insert_or_assign(TEXT("FloatPositionLat"), FloatPositionLat);
+	InitString(StringHostName, TEXT("StringHostName"), "localhost");
 	
-	ints.insert_or_assign(IntResolution, 100);
-	stringmap.insert_or_assign(TEXT("IntResolution"), IntResolution);
+	InitInt(IntPort, TEXT("IntPort"), 10001);
+
+	InitFloat(FloatMinBegAzm, TEXT("FloatMinBegAzm"), 0);
+
+	InitFloat(FloatMaxBegAzm, TEXT("FloatMaxBegAzm"), 360);
+
+	InitFloat(FloatMinZeroElevation, TEXT("FloatMinZeroElevation"), 0);
+
+	InitFloat(FloatMaxZeroElevation, TEXT("FloatMaxZeroElevation"), 90);
+
+	InitFloat(FloatPositionLon, TEXT("FloatPositionLon"), 37.712919);
+
+	InitFloat(FloatPositionLat, TEXT("FloatPositionLat"), 55.994606);
 	
-	ints.insert_or_assign(IntTexSize, 800);
-	stringmap.insert_or_assign(TEXT("IntResolution"), IntTexSize);
+	InitInt(IntResolution, TEXT("IntResolution"), 100);
+	
+	InitInt(IntTexSize, TEXT("IntResolution"), 800);
 
-	floats.insert_or_assign(FloatMPPh, 5.0);
-	stringmap.insert_or_assign(TEXT("FloatMPPh"), FloatMPPh);
+	InitFloat(FloatMPPh, TEXT("FloatMPPh"), 5.0);
 
-	floats.insert_or_assign(FloatMPPv, 5.0);
-	stringmap.insert_or_assign(TEXT("FloatMPPv"), FloatMPPv);
+	InitFloat(FloatMPPv, TEXT("FloatMPPv"), 5.0);
 
-	stringmap.insert_or_assign(TEXT("IntNazm"), IntNazm);
+	InitInt(IntNazm, TEXT("IntNazm"), 8192);
 
-	strings.insert_or_assign(StringCSectorPaletteFileName, "rimagecolor.png");
-	stringmap.insert_or_assign(TEXT("StringCSectorPaletteFileName"), StringCSectorPaletteFileName);
+	InitString(StringCSectorPaletteFileName, TEXT("StringCSectorPaletteFileName"), "rimagecolor.png");
 
-	strings.insert_or_assign(StringCRImagePaletteFileName, "rpointcolor.png");
-	stringmap.insert_or_assign(TEXT("StringCRImagePaletteFileName"), StringCRImagePaletteFileName);
+	InitString(StringCRImagePaletteFileName, TEXT("StringCRImagePaletteFileName"), "rpointcolor.png");
 
 		
-	floats.insert_or_assign(FloatCRImageMinAmp, 0.0);
-	stringmap.insert_or_assign(TEXT("FloatCRImageMinAmp"), FloatCRImageMinAmp);
+	InitFloat(FloatCRImageMinAmp, TEXT("FloatCRImageMinAmp"), 0.0);
 		
-	floats.insert_or_assign(FloatCRImageMaxAmp, 255.0);
-	stringmap.insert_or_assign(TEXT("FloatCRImageMaxAmp"), FloatCRImageMaxAmp);
+	InitFloat(FloatCRImageMaxAmp, TEXT("FloatCRImageMaxAmp"), 255.0);
 
-	floats.insert_or_assign(FloatCSectorMinAmp, 0.0);
-	stringmap.insert_or_assign(TEXT("FloatCSectorMinAmp"), FloatCSectorMinAmp);
+	InitFloat(FloatCSectorMinAmp, TEXT("FloatCSectorMinAmp"), 0.0);
 
-	floats.insert_or_assign(FloatCSectorMaxAmp, 255.0);
-	stringmap.insert_or_assign(TEXT("FloatCSectorMaxAmp"), FloatCSectorMaxAmp);
+	InitFloat(FloatCSectorMaxAmp, TEXT("FloatCSectorMaxAmp"), 255.0);
 
-	ints.insert_or_assign(IntConnectionTimeout, 10);
-	stringmap.insert_or_assign(TEXT("IntConnectionTimeout"), IntConnectionTimeout);
-
-
+	InitInt(IntConnectionTimeout, TEXT("IntConnectionTimeout"), 10);
+	
 	return true;
 	
 }
@@ -210,14 +152,24 @@ bool CSettings::InitPalette()
 	return CSector::InitPalette(GetString(StringCSectorPaletteFileName)) && CRImage::InitPalette(GetString(StringCRImagePaletteFileName));
 }
 
+glm::vec4 CSettings::GetColorFromHexRGBA(std::string rgba)
+{
+
+}
+
 glm::vec4 CSettings::GetColor(int key)
 {
 	return colors.at(key);
 }
 
-std::wstring CSettings::GetColorString(int key)
+tstring CSettings::GetColorString(int key)
 {
 	auto color = GetColor(key);
+	return GetColorString(color);
+}
+
+tstring CSettings::GetColorString(glm::vec4 color)
+{
 	std::wstringstream str;
 	str << "#" << std::hex << std::setw(2) << std::setfill(L'0') << int(255 * color.r);
 	str << std::hex << std::setw(2) << std::setfill(L'0') << int(255 * color.g);
@@ -249,25 +201,82 @@ std::string CSettings::GetString(int key)
 
 void CSettings::SetFloat(Settings key, float value)
 {
+	//stringmap
 	floats.insert_or_assign(key, value);
+	pt.put(to__string(GetName(key)), std::to_string(value));
+}
+
+void CSettings::InitFloat(Settings key, tstring name, float value)
+{
+	stringmap.insert_or_assign(name, key);
+	settingsmap.insert_or_assign(key, name);
+	SetFloat(key, value);
 }
 
 void CSettings::SetInt(Settings key, int value)
 {
 	ints.insert_or_assign(key, value);
+	pt.put(to__string(GetName(key)), std::to_string(value));
+}
+
+void CSettings::InitInt(Settings key, tstring name, int value)
+{	
+	stringmap.insert_or_assign(name, key);
+	settingsmap.insert_or_assign(key, name);
+	SetInt(key, value);
 }
 
 void CSettings::SetColor(Settings key, glm::vec4 value)
 {
 	colors.insert_or_assign(key, value);
+	pt.put(to__string(GetName(key)), to__string(GetColorString(value)));
+
+}
+
+void CSettings::InitColor(Settings key, tstring name, glm::vec4 value)
+{
+	stringmap.insert_or_assign(name, key);
+	settingsmap.insert_or_assign(key, name);
+	SetColor(key, value);
 }
 
 void CSettings::SetString(Settings key, std::string value)
 {
 	strings.insert_or_assign(key, value);
+	pt.put(to__string(GetName(key)), value);
+}
+
+void CSettings::InitString(Settings key, tstring name, std::string value)
+{
+	stringmap.insert_or_assign(name, key);
+	settingsmap.insert_or_assign(key, name);
+	SetString(key, value);
 }
 
 Settings CSettings::GetIndex(tstring name)
 {
 	return stringmap.at(name);
+}
+
+tstring CSettings::GetName(Settings index)
+{
+	return settingsmap.at(index);
+}
+
+void CSettings::Save()
+{
+	write_json("settings.json", pt);
+}
+
+void CSettings::Load()
+{
+	read_json("settings.json", pt);
+	for(auto it = floats.begin(); it != floats.end(); ++it)
+	{
+		SetFloat(Settings(it->first), pt.get<float>(to__string(GetName(Settings(it->first)))));
+	}
+	for (auto it = ints.begin(); it != ints.end(); ++it)
+	{
+		SetInt(Settings(it->first), pt.get<int>(to__string(GetName(Settings(it->first)))));
+	}
 }

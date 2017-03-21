@@ -1,6 +1,9 @@
 #pragma once
 #include "stdafx.h"
 
+using boost::property_tree::ptree;
+using boost::property_tree::read_json;
+using boost::property_tree::write_json;
 
 enum Settings
 {
@@ -73,28 +76,44 @@ class CSettings
 	static std::unordered_map<int, int> ints;
 	static std::unordered_map<int, std::string> strings;
 	static std::map<tstring, Settings> stringmap;
+	static std::map<Settings, tstring> settingsmap;
 
 	static FIBITMAP *RPointPalette;
 	static FIBITMAP *RImagePalette;
 	static int RPointPaletteWidth;
 	static int RImagePaletteWidth;
+
+	
 public:
+	static ptree pt;
 	CSettings();
 	~CSettings();
 	static bool Init();
 	static bool InitPalette();
+	static glm::vec4 GetColorFromHexRGBA(std::string rgba);
 	static glm::vec4 GetColor(int key);
 	static tstring GetColorString(int key);
+	static tstring GetColorString(glm::vec4 color);
 	static COLORREF GetColorRGB(int key);
 	static float GetFloat(int key);
 	static int GetInt(int key);
 	static std::string GetString(int key);
-	static void SetFloat(Settings key, float value);
-	static void SetInt(Settings key, int value);
-	static void SetColor(Settings key, glm::vec4 value);
-	static void SetString(Settings key, std::string value);
-	static Settings GetIndex(tstring name);
 
-	static bool Save();
+	static void SetFloat(Settings key, float value);
+	static void InitFloat(Settings key, tstring name, float value);
+
+	static void SetInt(Settings key, int value);
+	static void InitInt(Settings key, tstring name, int value);
+
+	static void SetColor(Settings key, glm::vec4 value);
+	static void InitColor(Settings key, tstring name, glm::vec4 value);
+
+	static void SetString(Settings key, std::string value);
+	static void InitString(Settings key, tstring name, std::string value);
+
+	static Settings GetIndex(tstring name);
+	static tstring GetName(Settings index);
+	static void Save();
+	static void Load();
 };
 

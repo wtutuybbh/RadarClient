@@ -241,6 +241,8 @@ int CSector::paletteWidth = 0;
 bool CSector::InitPalette(std::string fileName)
 {
 	std::string context = "CSector::InitPalette";
+	if (palette)
+		FreeImage_Unload(palette);
 	palette = FreeImage_Load(FreeImage_GetFileType(fileName.c_str(), 0), fileName.c_str());
 	if (!palette)
 	{
