@@ -580,11 +580,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return -2;
 	}
 	//
-	write_json("settings.json", CSettings::pt);
+	/*write_json("settings.json", CSettings::pt);
 
 	ptree newpt;
 	read_json("settings.json", newpt);
-	write_json("settings2.json", newpt);
+	write_json("settings2.json", newpt);*/
 	C3DObjectModel::_id = 0;
 	C3DObjectModel::_testid = 0;
 
@@ -603,6 +603,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		_CrtSetBreakAlloc(lBreakAlloc);
 	}
 #endif
+	
 	
 	std::ifstream settings_txt(TEXT("settings.txt"));
 	
@@ -669,6 +670,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	settings_txt.close();
+	CSettings::Load();
 	LOG_INFO(requestID, context, "Settings loaded.");
 
 	if (!CSettings::InitPalette())
@@ -875,6 +877,7 @@ BOOL Initialize()					// Any GL Init Code & User Initialiazation Goes Here
 		g_vpControl->Scene->UI = g_UI;
 		g_vpControl->UI = g_UI;
 		g_vpControl->Camera = g_vpControl->Scene->Camera;
+		CUserInterface::Scene = g_vpControl->Scene;
 	}
 	
 	if (g_Minimap) {

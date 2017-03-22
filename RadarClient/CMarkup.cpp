@@ -13,14 +13,14 @@ CMarkup::CMarkup(glm::vec4 origin)
 
 	vbo.insert_or_assign(Main, new C3DObjectVBO(false));
 	tex.insert_or_assign(Main, nullptr);
-	prog.insert_or_assign(Main, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
+	prog.insert_or_assign(Main, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, "norm", "color"));
 	translateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
 	scaleMatrix.insert_or_assign(Main, glm::mat4(1.0f));
 	rotateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
 
 	vbo.insert_or_assign(MiniMap, new C3DObjectVBO(false));
 	tex.insert_or_assign(MiniMap, nullptr);
-	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
+	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, "norm", "color"));
 	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
@@ -53,6 +53,7 @@ CMarkup::CMarkup(glm::vec4 origin)
 	//vertical axis
 
 	glm::vec3 n(0, 0, 0);
+	glm::vec3 n1(0, 0, 1);
 	glm::vec2 t(0, 0);
 
 	vertices.get()->SetValues(i0, origin, n, Color, t);
@@ -105,13 +106,13 @@ CMarkup::CMarkup(glm::vec4 origin)
 	//blank zone R1:
 	R = CSettings::GetFloat(FloatBlankR1);
 	for (int i = 0; i < segmentsPerCircle; i++) {
-		vertices.get()->SetValues(i0, origin + glm::vec4(R * cos(2 * M_PI * i / segmentsPerCircle) / mpph, 0, R * sin(2 * M_PI * i / segmentsPerCircle) / mpph, 0), n, colorBlankZones, t);
+		vertices.get()->SetValues(i0, origin + glm::vec4(R * cos(2 * M_PI * i / segmentsPerCircle) / mpph, 0, R * sin(2 * M_PI * i / segmentsPerCircle) / mpph, 0), n1, colorBlankZones, t);
 		i0++;
 	}
 	//blank zone R2:
 	R = CSettings::GetFloat(FloatBlankR2);
 	for (int i = 0; i < segmentsPerCircle; i++) {
-		vertices.get()->SetValues(i0, origin + glm::vec4(R * cos(2 * M_PI * i / segmentsPerCircle) / mpph, 0, R * sin(2 * M_PI * i / segmentsPerCircle) / mpph, 0), n, colorBlankZones, t);
+		vertices.get()->SetValues(i0, origin + glm::vec4(R * cos(2 * M_PI * i / segmentsPerCircle) / mpph, 0, R * sin(2 * M_PI * i / segmentsPerCircle) / mpph, 0), n1, colorBlankZones, t);
 		i0++;
 	}
 
@@ -132,17 +133,10 @@ CMarkup::CMarkup(glm::vec4 origin)
 		}
 	}
 	
-	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
-
-	tex.insert_or_assign(MiniMap, nullptr);
-
-
-	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
-	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
-	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
-
-	vbo.at(Main)->vertices = vertices;
-	vbo.at(MiniMap)->vertices = vertices;
+	if (!vbo.at(Main)->vertices)
+		vbo.at(Main)->vertices = vertices;
+	if (!vbo.at(MiniMap)->vertices)
+		vbo.at(MiniMap)->vertices = vertices;
 	vertices.get()->usesCount = 2;
 
 	/*std::ofstream outfile("new.txt", std::ofstream::binary);
@@ -162,6 +156,12 @@ void CMarkup::BindUniforms(CViewPortControl* vpControl)
 	int mvp_loc = prog.at(vpControl->Id)->GetUniformLocation("mvp");
 	glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
 
-	int color_loc = prog.at(vpControl->Id)->GetUniformLocation("color");
-	glUniform4fv(color_loc, 1, glm::value_ptr(Color));
+	int unicolor2_loc = prog.at(vpControl->Id)->GetUniformLocation("unicolor2");
+	glUniform4fv(unicolor2_loc, 1, glm::value_ptr(CSettings::GetColor(ColorBlankZones)));
+	
+	int unicolor_loc = prog.at(vpControl->Id)->GetUniformLocation("unicolor");
+	glUniform4fv(unicolor_loc, 1, glm::value_ptr(CSettings::GetColor(ColorAxis)));
+
+	int uniweight_loc = prog.at(vpControl->Id)->GetUniformLocation("uniweight");
+	glUniform1f(uniweight_loc, uniweight);
 }

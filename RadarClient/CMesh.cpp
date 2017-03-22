@@ -120,6 +120,14 @@ void CMesh::LoadHeightmap()
 	//std::vector<VBOData> * buffer = new std::vector<VBOData>((alt_.Width() - 1) * (alt_.Height() - 1) * 6);
 	vertices = std::make_shared<C3DObjectVertices>(H*W, 17);
 
+	auto h0 = (H % 2) ? int((H + 1) / 2) : int(H / 2);
+	auto h1 = (H % 2) ? int((H + 1) / 2) : int(H / 2) + 1;
+	auto w0 = (W % 2) ? int((W + 1) / 2) : int(W / 2);
+	auto w1 = (W % 2) ? int((W + 1) / 2) : int(W / 2) + 1;
+
+	centerHeight = (alt_.ValueAt(h0, w0) + alt_.ValueAt(h0, w1) + alt_.ValueAt(h1, w0) + alt_.ValueAt(h1, w1)) / 4.0;
+	
+
 	int sign = -1, loop_length = (W - 2) * 2, step_length = 1, next_step = 0, change_mode = 1, mode_id = 0, special_mode_id = 4, next_big_length = loop_length, x = 0, x_prev = 0, dXtone = 1, X = 0;
 	int dYCounter = 0, dYtone = 0, next_step_Ybase_change = 0, next_step_Ybase_change_prev = 0, Ybase = 0, Y = 0;
 	int x_before_change;
@@ -130,10 +138,10 @@ void CMesh::LoadHeightmap()
 		Y = (int) i / W;
 		X = i % W;
 
-		h = alt_.ValueAt(X, Y);
+		h = alt_.ValueAt(X, Y) - centerHeight;
 		averageHeight += h;
+		level = h < minh ? 0 : ( h > maxh ? 1 : (h - minh) / (maxh - minh));
 
-		level = (h - minh) / (maxh - minh);
 		_x = lonStretch * (-X + alt_.Width() / 2.0);
 		_y = h / MPPv;
 		_z = latStretch * (Y - alt_.Height() / 2.0);
@@ -184,7 +192,7 @@ void CMesh::LoadHeightmap()
 
 		
 
-	centerHeight = alt_.ValueAt(min(max(alt_.Width() / 2 - 1, 0), alt_.Width() - 1), min(max(alt_.Height() / 2, 0), alt_.Height() - 1));
+	
 
 	prog.insert_or_assign(Main, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color", "color2"));
 
@@ -402,7 +410,7 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 		glUniform1i(useTexture_loc, CUserInterface::GetCheckboxState_Map());
 		glUniform1i(useBlind_loc, 0);
 		glUniform1i(usey0_loc, !CUserInterface::GetCheckboxState_AltitudeMap());
-		glUniform1f(y0_loc, (int)(centerHeight / MPPv));		
+		glUniform1f(y0_loc, 0);		
 	}
 }
 

@@ -112,3 +112,26 @@ void C3DObjectVertices::Translate(glm::vec3 vshift, int place)
 	}
 	needsReload = true;
 }
+
+boost::property_tree::ptree C3DObjectVertices::GetPropertyTree(int i_from, int i_to) const
+{
+	boost::property_tree::ptree ret;
+	ret.put("vbuffer", vbuffer);
+	ret.put("vertexCount", vertexCount);
+	ret.put("vertexSize", vertexSize);
+	if (vbuffer && vertexCount > 0)
+	{
+		boost::property_tree::ptree vbuffer_ptree;
+		for(auto i= i_from; i<vertexCount && i<=i_to; i++)
+		{
+			boost::property_tree::ptree node;
+			for (auto j=0; j<vertexSize; j++)
+			{
+				node.put(std::to_string(j), vbuffer[i*vertexSize + j]);
+			}
+			vbuffer_ptree.push_back(std::make_pair(std::to_string(i), node));
+		}
+		ret.add_child("vbuffer_content", vbuffer_ptree);
+	}
+	return ret;
+}

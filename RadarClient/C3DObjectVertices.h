@@ -16,7 +16,7 @@ public:
 	explicit C3DObjectVertices(int vertexCount)
 	{
 		if (vertexCount > USHRT_MAX)
-			throw std::exception("vertexCount must be greater less than USHRT_MAX (65535)");
+			throw std::exception("vertexCount must be less than USHRT_MAX (65535)");
 		if (vertexCount <= 0)
 			throw std::exception("vertexCount must be greater than 0");
 
@@ -60,7 +60,7 @@ public:
 	void ReCreate(int vertexCount)
 	{
 		if (vertexCount > USHRT_MAX)
-			throw std::exception("vertexCount must be greater less than USHRT_MAX (65535)");
+			throw std::exception("vertexCount must be less than USHRT_MAX (65535)");
 		if (vertexCount <= 0)
 			throw std::exception("vertexCount must be greater than 0");
 
@@ -69,6 +69,8 @@ public:
 			delete[] vbuffer;
 		vbuffer = new float[vertexCount * this->vertexSize];
 	}
+
+	boost::property_tree::ptree GetPropertyTree(int i_from, int i_to) const;
 };
 
 

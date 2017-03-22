@@ -493,13 +493,13 @@ bool CScene::PrepareRayVBO()
 	if (!Mesh || !Mesh->Ready()) {
 		return false;
 	}
-	float y_0 = Mesh->GetCenterHeight() / MPPv;
+	//float y_0 = Mesh->GetCenterHeight() / MPPv;
 
 
 		if (!RayObj)
 		{
 			//RayObj = new C3DObjectModel()
-			RayObj = new CRay(rayWidth, maxDist, y_0);
+			RayObj = new CRay(rayWidth, maxDist, 0);
 			return true;
 		}
 
@@ -609,44 +609,23 @@ void CScene::ClearSectors()
 	SectorsCount = 0;
 }
 
-void CScene::Dump(CViewPortControl *vpControl)
+void CScene::Dump() const
 {
-	time_t rawtime;
-	struct tm * timeinfo;
-	char buffer[80];
-
-	time(&rawtime);
-	timeinfo = localtime(&rawtime);
-
-	strftime(buffer, 80, "%d-%m-%Y %I:%M:%S", timeinfo);
-	std::string str(buffer);
-	string dump("dump");
-	string txt(".txt");
-	std::ofstream outfile;
-	string fname = dump + str + txt;
-	outfile.open("dump.txt");
-	if (outfile.is_open()) {
-		for (int i = 0; i < Sectors.size(); i++)
-		{
-			if (Sectors.at(i))
-				Sectors.at(i)->Dump(vpControl, &outfile);
-		}
-		outfile.flush();
-		outfile.close();
+	ptree pt;
+	if (Markup)
+	{
+		pt.add_child("Markup", Markup->vertices.get()->GetPropertyTree(0, 100));
 	}
+	if (MeshReady()) 
+	{
+		pt.add_child("Mesh", Mesh->vertices.get()->GetPropertyTree(0, 100));
+	}
+	
+	write_json("objects.json", pt);
 }
 
 void CScene::RefreshTracks(vector<TRK*>* tracks)
 {	
-	float _y_0;
-	if (Mesh && Mesh->Ready()) {
-		GetY0();
-		_y_0 = y_0;
-	}
-	else
-	{
-		_y_0 = 0;
-	}
 	{
 		std::lock_guard<std::mutex> lock(mtxTracks);
 		if (tracks->size() == 0)
@@ -662,7 +641,7 @@ void CScene::RefreshTracks(vector<TRK*>* tracks)
 				if (it->first == tracks->at(i)->id)
 				{
 					it->second->Found = tracks->at(i)->Found = true;
-					it->second->Refresh(glm::vec4(0, _y_0, 0, 1), MPPh, MPPv, &tracks->at(i)->P);
+					it->second->Refresh(glm::vec4(0, 0, 0, 1), MPPh, MPPv, &tracks->at(i)->P);
 					it->second->SelectTrack(Main, std::find(SelectedTracksIds.begin(), SelectedTracksIds.end(), tracks->at(i)->id) != SelectedTracksIds.end());
 					insertNew = false;
 				}
@@ -671,7 +650,7 @@ void CScene::RefreshTracks(vector<TRK*>* tracks)
 			{
 				LOG_INFO(requestID, "CScene::RefreshTracks", "new track, id=%d", tracks->at(i)->id);
 				CTrack *t = new CTrack(tracks->at(i)->id, std::find(SelectedTracksIds.begin(), SelectedTracksIds.end(), tracks->at(i)->id) != SelectedTracksIds.end());
-				t->Refresh(glm::vec4(0, _y_0, 0, 1), MPPh, MPPv, &tracks->at(i)->P);
+				t->Refresh(glm::vec4(0, 0, 0, 1), MPPh, MPPv, &tracks->at(i)->P);
 				t->Found = true;
 				Tracks.insert_or_assign(tracks->at(i)->id, t);
 			}
@@ -780,12 +759,12 @@ CRCPointModel * CScene::GetCRCPointFromRDRTRACK(RDRTRACK * tp) const
 		return nullptr;
 	}
 
-	float y_0 = Mesh->GetCenterHeight() / MPPv;
+	//float y_0 = Mesh->GetCenterHeight() / MPPv;
 	//TODO: need common formula here
 	float r = 0.75 * sqrt(tp->X * tp->X + tp->Y * tp->Y) / 1;
 	float a = glm::radians(-120 + 0.02 * 1000 * (atan(tp->X / tp->Y)) / (M_PI / 180));
 	float e = glm::radians(30.0f);
-	CRCPointModel* p = new CRCPointModel(Main, y_0, MPPh, MPPv, r, a, e);
+	CRCPointModel* p = new CRCPointModel(Main, 0, MPPh, MPPv, r, a, e);
 	p->Color = CSettings::GetColor(ColorTrack);
 	return p;
 }
@@ -820,7 +799,7 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 	if (!Mesh || !Mesh->Ready()) {
 		return nullptr;
 	}
-	float y_0 = Mesh->GetCenterHeight() / MPPv;
+	//float y_0 = Mesh->GetCenterHeight() / MPPv;
 
 	index = -1;
 	std::string context = "CScene::GetPointOnSurface";
@@ -844,7 +823,7 @@ C3DObjectModel * CScene::GetSectorPoint(CViewPortControl *vpControl, glm::vec2 s
 			if (index >= 0)
 			{
 				Sectors[i]->SelectPoint(Main, index);
-				CRCPointModel *point = new CRCPointModel(vpControl->Id, y_0, this->MPPh, this->MPPv, 0, 0, 0);
+				CRCPointModel *point = new CRCPointModel(vpControl->Id, 0, this->MPPh, this->MPPv, 0, 0, 0);
 				auto coords = Sectors[i]->GetPointCoords(vpControl, index);
 				point->SetCartesianCoordinates(coords);
 				LOG_INFO(requestID, context, (boost::format("(vpControl.Id=%1%, screenPoint=(%2%, %3%)) -> (Sector %4%, index=%5%, RETURN point=(%6%, %7%, %8%))") 
@@ -925,33 +904,19 @@ glm::vec2 CScene::CameraXYForMiniMap() const
 	}
 	return glm::vec2(0);
 }
-bool CScene::MeshReady() {
+bool CScene::MeshReady() const
+{
 	return Mesh && Mesh->Ready();
 }
 float CScene::GetY0() {
-	if (Mesh && Mesh->Ready())
-	{
-		float y_0new = Mesh->GetCenterHeight() / MPPv;
-		if (y_0 != y_0new)
-		{
-			float dy = y_0new - y_0;
-			y_0 = y_0new;
-			std::lock_guard<std::mutex> lock(mtxTracks);
-			for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
-			{
-				if (it->second)
-					it->second->Translate(glm::vec3(0, dy, 0));
-			}
-		}		
-	}
-	return y_0;
+	return 0;
 }
 void CScene::DrawBitmaps() const
 {
 	if (!Mesh || !Mesh->Ready()) {
 		return;
 	}
-	float y_0 = Mesh->GetCenterHeight() / MPPv;
+	float y_0 = 0;// Mesh->GetCenterHeight() / MPPv;
 
 	BitmapString(0, y_0, 0, "(" + cnvrt::float2str(position.x) + "; " + cnvrt::float2str(position.y) + ")");
 	auto color = CSettings::GetColor(ColorNumbers);
@@ -1024,7 +989,7 @@ glm::vec3 CScene::GetGeographicCoordinates(glm::vec3 glCoords)
 
 void CScene::LoadMesh()
 {
-	CMesh *mesh = new CMesh(true, position, max_range, texsize, resolution, MPPh, MPPv);	
+	CMesh *mesh = new CMesh(false, position, max_range, texsize, resolution, MPPh, MPPv);	
 	waitingForMesh = true;
 	Mesh = mesh;
 }

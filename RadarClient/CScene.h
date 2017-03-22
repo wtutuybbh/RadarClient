@@ -46,7 +46,7 @@ class CScene {
 	unsigned long mainDrawCount{ 0 };
 	static const std::string requestID;
 	bool waitingForMesh{ false };
-	float y_0 {0};
+	//float y_0 {0};
 	std::mutex mtxTracks;
 public:
 	CLine *begAzmLine{ nullptr };
@@ -154,7 +154,7 @@ public:
 
 	void RefreshSector(RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init);
 	void ClearSectors();
-	void Dump(CViewPortControl *vpControl);
+	void Dump() const;
 
 	void RefreshTracks(std::vector<TRK*> *tracks);
 
@@ -182,7 +182,7 @@ public:
 	void LoadMesh();
 	glm::vec3 GetMeshSize();
 
-	bool MeshReady();
+	bool MeshReady() const;
 
 	float GetY0();
 };

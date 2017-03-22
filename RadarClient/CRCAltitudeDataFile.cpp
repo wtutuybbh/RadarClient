@@ -4,19 +4,7 @@
 #include "CRCLogger.h"
 #include "CRCGeoDataProvider.h"
 
-//(experimental method of log management)
-//Errors are always logged!
-#define LOG_ENABLED true
-#define CRCAltitudeDataFile_v1_LOG true // constructor CRCAltitudeDataFile(const std::string& dt2FileName);
-#define CRCAltitudeDataFile_v2_LOG true // constructor CRCAltitudeDataFile(double lon0, double lat0, double lon1, double lat1, int width, int height);
-#define CRCAltitudeDataFile_DESTRUCTOR_LOG true // destructor info log
-#define CRCAltitudeDataFile_ApplyIntersection_LOG true
-#define CRCAltitudeDataFile_Open_LOG true
-#define CRCAltitudeDataFile_Close_LOG true
-#define CRCAltitudeDataFile_ValueAt_v1_LOG false
-#define CRCAltitudeDataFile_ValueAt_v2_LOG false
-#define CRCAltitudeDataFile_size_set_max_LOG true
-#define CRCAltitudeDataFile_size_set_LOG true
+
 
 void CRCAltitudeDataFile::size_set_max()
 {
@@ -125,7 +113,7 @@ CRCAltitudeDataFile::CRCAltitudeDataFile(double lon0, double lat0, double lon1, 
 	size_set_max();
 	try
 	{
-		data = new short[width * height];
+		data = new short[width * height]();
 		if (!data)
 		{
 			throw std::bad_alloc();

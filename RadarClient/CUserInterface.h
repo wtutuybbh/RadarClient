@@ -126,6 +126,7 @@ public:
 	static HWND ParentHWND;
 	static HWND SettingsHWND;	
 	static HWND ToolboxHWND;
+	static CScene *Scene;
 	HWND GetSettingsHWND() const;
 	HFONT hDlgFont {nullptr};
 	

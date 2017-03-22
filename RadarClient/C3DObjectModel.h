@@ -39,6 +39,7 @@ public:
 
 	CScene *Scene {nullptr};
 	glm::vec4 Color {glm::vec4()};
+	float uniweight{ 0.0f };
 	//C3DObjectModel(int vpId, C3DObjectVBO *vbo, C3DObjectTexture *tex, C3DObjectProgram *prog);
 	//C3DObjectModel(C3DObjectVBO *vbo, C3DObjectTexture *tex, C3DObjectProgram *prog);
 	C3DObjectModel();

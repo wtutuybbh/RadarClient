@@ -3,8 +3,9 @@
 #include "CSettings.h"
 #include "CRImage.h"
 #include "CSector.h"
+#include "CRCLogger.h"
 
-
+#include "Util.h"
 
 CSettings::CSettings()
 {
@@ -120,7 +121,7 @@ bool CSettings::Init()
 	
 	InitInt(IntResolution, TEXT("IntResolution"), 100);
 	
-	InitInt(IntTexSize, TEXT("IntResolution"), 800);
+	InitInt(IntTexSize, TEXT("IntTexSize"), 800);
 
 	InitFloat(FloatMPPh, TEXT("FloatMPPh"), 5.0);
 
@@ -230,7 +231,16 @@ std::string CSettings::GetString(int key)
 
 void CSettings::SetFloat(Settings key, float value)
 {
-	//stringmap
+	if (CSettings_Change_Log)
+	{
+		if (floats.find(key) != floats.end())
+		{
+			if (floats.at(key) != value)
+			{
+				LOG_INFO("CSettings", "SetFloat", to__string(GetName(key) + tstring(TEXT(": ")) + to_tstring(std::to_string(floats.at(key))) + tstring(TEXT(" -> ")) + to_tstring(std::to_string(value))).c_str());
+			}
+		}
+	}
 	floats.insert_or_assign(key, value);
 	pt.put(to__string(GetName(key)), std::to_string(value));
 }
@@ -244,6 +254,16 @@ void CSettings::InitFloat(Settings key, tstring name, float value)
 
 void CSettings::SetInt(Settings key, int value)
 {
+	if (CSettings_Change_Log)
+	{
+		if (ints.find(key) != ints.end())
+		{
+			if (ints.at(key) != value)
+			{
+				LOG_INFO("CSettings", "SetInt", to__string(GetName(key) + tstring(TEXT(": ")) + to_tstring(std::to_string(ints.at(key))) + tstring(TEXT(" -> ")) + to_tstring(std::to_string(value))).c_str());
+			}
+		}
+	}
 	ints.insert_or_assign(key, value);
 	pt.put(to__string(GetName(key)), std::to_string(value));
 }
@@ -257,6 +277,16 @@ void CSettings::InitInt(Settings key, tstring name, int value)
 
 void CSettings::SetColor(Settings key, glm::vec4 value)
 {
+	if (CSettings_Change_Log)
+	{
+		if (colors.find(key) != colors.end())
+		{
+			if (colors.at(key) != value)
+			{				
+				LOG_INFO("CSettings", "SetColor", to__string(GetName(key) + tstring(TEXT(": ")) + GetColorString(colors.at(key)) + tstring(TEXT(" -> ")) + GetColorString(value)).c_str());
+			}
+		}
+	}
 	colors.insert_or_assign(key, value);
 	pt.put(to__string(GetName(key)), to__string(GetColorString(value)));
 
@@ -271,6 +301,17 @@ void CSettings::InitColor(Settings key, tstring name, glm::vec4 value)
 
 void CSettings::SetString(Settings key, std::string value)
 {
+	if (CSettings_Change_Log)
+	{
+		if (strings.find(key) != strings.end())
+		{
+			if (strings.at(key) != value)
+			{
+				LOG_INFO("CSettings", "SetString", to__string(GetName(key) + tstring(TEXT(": ")) + to_tstring(strings.at(key)) + tstring(TEXT(" -> ")) + to_tstring(value)).c_str());
+
+			}
+		}
+	}
 	strings.insert_or_assign(key, value);
 	pt.put(to__string(GetName(key)), value);
 }

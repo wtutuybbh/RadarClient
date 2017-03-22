@@ -6,6 +6,5 @@ class CMarkup :
 public:
 	CMarkup(glm::vec4 origin);
 	void BindUniforms(CViewPortControl* vpControl) override;
-
 };
 

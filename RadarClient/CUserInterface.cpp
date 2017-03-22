@@ -27,6 +27,8 @@ HFONT CUserInterface::Font;
 HWND CUserInterface::ParentHWND;
 HWND CUserInterface::ToolboxHWND;
 CXColorSpectrumCtrl CUserInterface::m_ColorSpectrum;
+CScene * CUserInterface::Scene;
+
 
 LRESULT Button1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	return 0;
@@ -179,6 +181,13 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		}
+		if (LOWORD(wParam) == IDC_BUTTON1)
+		{
+			if (Scene)
+			{
+				Scene->Dump();
+			}
+		}
 		break;
 	case WM_SIZE:
 		CRCListView::ResizeListView(GetDlgItem(hDlg, IDC_LIST1), hDlg);
@@ -204,8 +213,9 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 				auto ret = DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG3), hDlg, DLGPROC(&CUserInterface::Dialog_SelectColor));
 				if (LOWORD(ret) == IDCANCEL)
 				{
-					CSettings::SetColor(CSettings::GetIndex(GetColorForSettingsDialog(iItem_ColorListView)), oldColor_ColorListView);
+					CSettings::SetColor(CSettings::GetIndex(GetColorForSettingsDialog(iItem_ColorListView)), oldColor_ColorListView);					
 				}
+				CSettings::Save();
 				return LRESULT();
 			}
 			return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST1, GetColorListViewCellText);
