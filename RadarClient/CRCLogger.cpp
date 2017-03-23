@@ -5,7 +5,6 @@
 
 void CRCLogger::GetDateTimeString(std::string& out)
 {
-
 	time_t rawtime;
 	struct tm * timeinfo;
 	char buffer[80];

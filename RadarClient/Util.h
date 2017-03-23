@@ -84,6 +84,11 @@ float MinimumDistance(glm::vec3 v, glm::vec3 w, glm::vec3 p);
 
 inline float BilinearInterpolation(float q11, float q12, float q21, float q22, float x1, float x2, float y1, float y2, float x, float y)
 {
+	if (x1 == x2)
+	{
+		return q11 * (y - y1) / ( + q22
+	}
+
 	float x2x1, y2y1, x2x, y2y, yy1, xx1;
 	x2x1 = x2 - x1;
 	y2y1 = y2 - y1;
