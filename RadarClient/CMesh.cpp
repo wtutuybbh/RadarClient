@@ -82,7 +82,7 @@ void CMesh::LoadHeightmap()
 		alt_.ApplyIntersection(set.GetFile(i));
 	}
 
-	
+	alt_.CalculateBlindZone(0);
 
 	short *data = (short *)alt_.Data();
 
@@ -142,9 +142,9 @@ void CMesh::LoadHeightmap()
 		averageHeight += h;
 		level = h < minh ? 0 : ( h > maxh ? 1 : (h - minh) / (maxh - minh));
 
-		_x = lonStretch * (-X + alt_.Width() / 2.0);
+		_x = lonStretch * (-X + alt_.Width() / 2.0 - 0.5);
 		_y = h / MPPv;
-		_z = latStretch * (Y - alt_.Height() / 2.0);
+		_z = latStretch * (Y - alt_.Height() / 2.0 + 0.5);
 		vertices.get()->SetValues(i, glm::vec4(_x, _y, _z, 1),
 			glm::vec3(0, 1, 0),
 			mincolor * (1 - level) + maxcolor * level,
@@ -156,7 +156,8 @@ void CMesh::LoadHeightmap()
 		rcutils::takeminmax(_z, &(bounds[0].z), &(bounds[1].z));
 	}
 	averageHeight /= H * W;
-	idxArray = vertices.get()->AddIndexArray(N, GL_TRIANGLE_STRIP); //new unsigned short[N];
+	//idxArray = vertices.get()->AddIndexArray(N, GL_TRIANGLE_STRIP); //new unsigned short[N];
+	idxArray2 = vertices.get()->AddIndexArray(N, GL_LINE_STRIP); //new unsigned short[N];
 	// SEE GL_LINE_STRIP.xlsx for details
 	for (int i = 0; i<N; i++)
 	{
@@ -181,8 +182,9 @@ void CMesh::LoadHeightmap()
 		//outfile << i << ";" << change_mode << ";" << next_big_length << ";" << special_mode_id << ";" << mode_id << ";" << step_length << ";" << next_step << ";" << sign << ";" << x << ";" << dXtone << ";" << X << std::endl;
 		//outfile << i << ";" << dYCounter << ";" << dYtone << ";" << next_step_Ybase_change << ";" << Ybase << ";" << Y << std::endl;
 		
-		idxArray[i] = Y * W + X;
-
+//		idxArray[i] = Y * W + X;
+		idxArray2[i] = Y * W + X;
+		
 		dXtone ^= 1;
 	}
 

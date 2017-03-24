@@ -152,6 +152,54 @@ CRCAltitudeDataFile::~CRCAltitudeDataFile()
 	}
 }
 
+void CRCAltitudeDataFile::CalculateBlindZone(float a)
+{
+	if (width % 2 || height % 2)
+	{
+		LOG_ERROR_("CalculateBlindZone", "CalculateBlindZone not yet implemented for odd sizes");
+		return;
+	}
+	if (width != height)
+	{
+		LOG_ERROR_("CalculateBlindZone", "CalculateBlindZone not yet implemented for unequal sizes");
+		return;
+	}
+	if (!data)
+	{
+		return;
+	}
+	if (!blind_zone_height)
+	{
+		blind_zone_height = new unsigned short[width * height]();
+	}
+	auto i = 0;
+	for (auto n=0; n<width/2; n++)
+	{
+		for (auto y= height /2 - n - 1; y<= height / 2 + n; y++)
+		{
+			if (y== height / 2 - 1 - n || y == height / 2 + n)
+			{
+				for (auto x = width / 2 - 1 - n; x <= width / 2 + n; x++)
+				{
+					if (CRCAltitudeDataFile_CalculateBlindZone_LOG) LOG_INFO_("CalculateBlindZone", "%d %d %d %d", i, n, y, x);
+					i++;
+				}				
+			}
+			else
+			{
+				{
+					auto x = width / 2 - 1 - n;
+					if (CRCAltitudeDataFile_CalculateBlindZone_LOG) LOG_INFO_("CalculateBlindZone", "%d %d %d %d", i, n, y, x);
+					i++;
+					x = width / 2 + n;
+					if (CRCAltitudeDataFile_CalculateBlindZone_LOG) LOG_INFO_("CalculateBlindZone", "%d %d %d %d", i, n, y, x);
+					i++;
+				}
+			}
+		}
+	}
+}
+
 short CRCAltitudeDataFile::ValueAt(int x, int y)
 {
 	if (data)

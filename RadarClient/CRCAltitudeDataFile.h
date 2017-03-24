@@ -16,12 +16,13 @@ class CRCAltitudeDataFile :
 	//size[8] - data read methos (see GDP::DataReadMethod, GDP::CRCGeoDataProvider::GetAltitudeMap)
 	void size_set_max();
 	void size_set(int x0, int y_0, int x1, int y1);
+	unsigned short *blind_zone_height {nullptr};
 public:
 	CRCAltitudeDataFile(const std::string& dt2FileName);
 	CRCAltitudeDataFile(double lon0, double lat0, double lon1, double lat1, int width, int height);
 	~CRCAltitudeDataFile();
 	
-	
+	void CalculateBlindZone(float a);
 
 	short ValueAt(int x, int y);
 	short ValueAt(double lon, double lat);

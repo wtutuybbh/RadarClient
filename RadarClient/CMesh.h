@@ -79,7 +79,7 @@ class CMesh : public C3DObjectModel
 
 	float MPPh, MPPv;
 
-	unsigned short *idxArray{ nullptr };
+	unsigned short *idxArray{ nullptr }, *idxArray2{ nullptr };
 
 	bool buffer_ready{ false };
 	int index_length{ 0 };
