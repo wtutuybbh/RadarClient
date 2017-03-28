@@ -37,6 +37,8 @@ void CRCAltitudeDataFile::size_set(int x0, int y_0, int x1, int y1)
 	}
 }
 
+
+
 CRCAltitudeDataFile::CRCAltitudeDataFile(const std::string& dt2FileName):
 	CRCDataFile(Altitude)
 {
@@ -152,7 +154,7 @@ CRCAltitudeDataFile::~CRCAltitudeDataFile()
 	}
 }
 
-void CRCAltitudeDataFile::CalculateBlindZone(float a)
+void CRCAltitudeDataFile::CalculateBlindZone(float h0, float e)
 {
 	if (width % 2 || height % 2)
 	{
@@ -171,6 +173,10 @@ void CRCAltitudeDataFile::CalculateBlindZone(float a)
 	if (!blind_zone_height)
 	{
 		blind_zone_height = new unsigned short[width * height]();
+	}
+	if (!ray_elevation_angle)
+	{
+		ray_elevation_angle = new float[width * height]();
 	}
 	auto i = 0;
 	for (auto n=0; n<width/2; n++)
@@ -198,6 +204,196 @@ void CRCAltitudeDataFile::CalculateBlindZone(float a)
 			}
 		}
 	}
+}
+void CRCAltitudeDataFile::CalculateBlindZone_get_e1e2(int x, int y, int xc, int yc, int &x1, int &y1, int &x2, int &y2)
+{
+	float _y = y - yc;// (height - 1.0f) / 2.0f;
+	float _x = x - xc;// (width - 1.0f) / 2.0f;
+	
+
+	if (_x == _y && _y > -_x)
+	{
+		x2 = x1 = x - 1;
+		y2 = y1 = y - 1;
+		return;
+	}
+	if (_x == _y && _y < -_x)
+	{
+		x2 = x1 = x + 1;
+		y2 = y1 = y + 1;
+		return;
+	}
+	if (_x == -y && _y > _x)
+	{
+		x2 = x1 = x + 1;
+		y2 = y1 = y - 1;
+		return;
+	}
+	if (_x == -y && _y < _x)
+	{
+		x2 = x1 = x - 1;
+		y2 = y1 = y + 1;
+		return;
+	}
+	/////////////////
+	if (_y > _x && _y > -_x && _x > 0) //top-right
+	{
+		x1 = x - 1;
+		x2 = x;
+		y2 = y1 = y - 1;
+		return;
+	}
+	if (_y > _x && _y > -_x && _x < 0) //top-left
+	{
+		x1 = x + 1;
+		x2 = x;
+		y2 = y1 = y - 1;
+		return;
+	}
+	/////////////////
+	if (_y > -_x && _y < _x && _y > 0) //right-top
+	{
+		x2 = x1 = x - 1;
+		y2 = y;
+		y1 = y - 1;
+		return;
+	}
+	if (_y > -_x && _y < _x && _y < 0) // right-bottom
+	{
+		x2 = x1 = x - 1;
+		y2 = y;
+		y1 = y + 1;
+		return;
+	}
+	/////////////////
+	if (_y < _x && _y < -_x && _x > 0) //bottom-right
+	{
+		x1 = x - 1;
+		x2 = x;
+		y2 = y1 = y + 1;
+		return;
+	}
+	if (_y < _x && _y < -_x && _x < 0) //bottom-left
+	{
+		x1 = x + 1;
+		x2 = x;
+		y2 = y1 = y + 1;
+		return;
+	}
+	/////////////////
+	if (_y > -_x && _y < _x && _y > 0) //left-top
+	{
+		x2 = x1 = x + 1;
+		y2 = y;
+		y1 = y - 1;
+		return;
+	}
+	if (_y > -_x && _y < _x && _y < 0) // left-bottom
+	{
+		x2 = x1 = x + 1;
+		y2 = y;
+		y1 = y + 1;
+		return;
+	}
+}
+
+float CRCAltitudeDataFile::CalculateBlindZone_get_elevation(int x, int y, int xc, int yc, int x1, int y1, int x2, int y2)
+{
+	float _y = y - yc;// (height - 1.0f) / 2.0f;
+	float _x = x - xc;// (width - 1.0f) / 2.0f;	
+
+	if (_x == 0 && _y > 0)
+	{
+		return ray_elevation_angle[(y - 1) * width + x];
+	}
+	if (_x == 0 && _y < 0)
+	{
+		return ray_elevation_angle[(y + 1) * width + x];
+	}
+	if (_x > 0 && _y == 0)
+	{
+		return ray_elevation_angle[y * width + x - 1];
+	}
+	if (_x < 0 && _y == 0)
+	{
+		return ray_elevation_angle[y * width + x + 1];
+	}
+	//////////////////////////////////////////////////
+	if (_x == _y && _y > -_x)
+	{
+		return ray_elevation_angle[(y - 1) * width + x - 1];
+	}
+	if (_x == _y && _y < -_x)
+	{
+		return ray_elevation_angle[(y + 1) * width + x + 1];
+	}
+	if (_x == -_y && _y > _x)
+	{
+		return ray_elevation_angle[(y - 1) * width + x + 1];
+	}
+	if (_x == -_y && _y < _x)
+	{
+		return ray_elevation_angle[(y + 1) * width + x - 1];
+	}
+
+	/////////////////
+	if (_y > _x && _y > -_x && _x > 0) //top-right
+	{	
+		return _x / _y * ray_elevation_angle[(y - 1) * width + x] + (1 - _x / _y) * ray_elevation_angle[(y - 1) * width + x - 1];
+	}
+	if (_y > _x && _y > -_x && _x < 0) //top-left
+	{
+		x1 = x + 1;
+		x2 = x;
+		y2 = y1 = y - 1;
+		return -_x / _y * ray_elevation_angle[(y - 1) * width + x] + (1 - _x / _y) * ray_elevation_angle[(y - 1) * width + x - 1];
+	}
+	/////////////////
+	if (_y > -_x && _y < _x && _y > 0) //right-top
+	{
+		x2 = x1 = x - 1;
+		y2 = y;
+		y1 = y - 1;
+		return;
+	}
+	if (_y > -_x && _y < _x && _y < 0) // right-bottom
+	{
+		x2 = x1 = x - 1;
+		y2 = y;
+		y1 = y + 1;
+		return;
+	}
+	/////////////////
+	if (_y < _x && _y < -_x && _x > 0) //bottom-right
+	{
+		x1 = x - 1;
+		x2 = x;
+		y2 = y1 = y + 1;
+		return;
+	}
+	if (_y < _x && _y < -_x && _x < 0) //bottom-left
+	{
+		x1 = x + 1;
+		x2 = x;
+		y2 = y1 = y + 1;
+		return;
+	}
+	/////////////////
+	if (_y > -_x && _y < _x && _y > 0) //left-top
+	{
+		x2 = x1 = x + 1;
+		y2 = y;
+		y1 = y - 1;
+		return;
+	}
+	if (_y > -_x && _y < _x && _y < 0) // left-bottom
+	{
+		x2 = x1 = x + 1;
+		y2 = y;
+		y1 = y + 1;
+		return;
+	}
+
 }
 
 short CRCAltitudeDataFile::ValueAt(int x, int y)

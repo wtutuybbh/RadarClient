@@ -82,7 +82,7 @@ void CMesh::LoadHeightmap()
 		alt_.ApplyIntersection(set.GetFile(i));
 	}
 
-	alt_.CalculateBlindZone(0);
+	alt_.CalculateBlindZone(1.5, 0);
 
 	short *data = (short *)alt_.Data();
 

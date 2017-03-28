@@ -17,12 +17,16 @@ class CRCAltitudeDataFile :
 	void size_set_max();
 	void size_set(int x0, int y_0, int x1, int y1);
 	unsigned short *blind_zone_height {nullptr};
+	float *ray_elevation_angle{ nullptr };
+	void CalculateBlindZone_get_e1e2(int x, int y, int xc, int yc, int &x1, int &y1, int &x2, int &y2);
+	float CalculateBlindZone_get_elevation(int x, int y, int xc, int yc, int x1, int y1, int x2, int y2);
 public:
 	CRCAltitudeDataFile(const std::string& dt2FileName);
 	CRCAltitudeDataFile(double lon0, double lat0, double lon1, double lat1, int width, int height);
 	~CRCAltitudeDataFile();
 	
-	void CalculateBlindZone(float a);
+	void CalculateBlindZone(float h0, float e);
+	
 
 	short ValueAt(int x, int y);
 	short ValueAt(double lon, double lat);
