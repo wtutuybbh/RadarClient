@@ -18,6 +18,8 @@ enum Settings
 	ColorMeasureLine,
 	ColorAltitudeLowest,
 	ColorAltitudeHighest,
+	ColorBlindzoneLowest,
+	ColorBlindzoneHighest,
 	ColorBlankZones,
 	FloatMinAltitude,
 	FloatMaxAltitude,

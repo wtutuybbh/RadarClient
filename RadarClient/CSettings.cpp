@@ -47,6 +47,10 @@ bool CSettings::Init()
 
 	InitColor(ColorAltitudeHighest, TEXT("ColorAltitudeHighest"), glm::vec4(0.3, 0.3, 0.3, 1));
 
+	InitColor(ColorBlindzoneLowest, TEXT("ColorBlindzoneLowest"), glm::vec4(1, 1, 1, 1));
+
+	InitColor(ColorBlindzoneHighest, TEXT("ColorBlindzoneHighest"), glm::vec4(0, 0, 0, 1));
+
 	InitColor(ColorBlankZones, TEXT("ColorBlankZones"), glm::vec4(1.0, 0.3, 0.3, 1));
 
 	InitFloat(FloatMinAltitude, TEXT("FloatMinAltitude"), 50);

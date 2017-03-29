@@ -85,14 +85,30 @@ void CMesh::LoadHeightmap()
 	alt_.CalculateBlindZone(1.5, 0);
 
 	short *data = (short *)alt_.Data();
-
+	if (!data)
+	{
+		LOG_ERROR__("data is nullptr");
+		return;
+	}
 	int nX, nZ, nTri, nIndex = 0;									// Create Variables
 	float flX, flZ;
-	short maxheight = 0, minheight = 10000;
+	float maxh = FLT_MIN, minh = FLT_MAX;
 	for (int i = 0; i < alt_.Width() * alt_.Height(); i++) {
 		
-		if (data[i] > maxheight) maxheight = data[i];
-		if (data[i] < minheight) minheight = data[i];
+		if (data[i] > maxh) maxh = data[i];
+		if (data[i] < minh) minh = data[i];
+	}
+	float maxbz = FLT_MIN, minbz = FLT_MAX;
+	float *blind_zone_height = alt_.BlindZoneHeight();
+	if (!blind_zone_height)
+	{
+		LOG_ERROR__("blind_zone_height is nullptr");
+		return;
+	}
+	for (int i = 0; i < alt_.Width() * alt_.Height(); i++) {
+
+		if (blind_zone_height[i] > maxbz) maxbz = blind_zone_height[i];
+		if (blind_zone_height[i] < minbz) minbz = blind_zone_height[i];
 	}
 	bounds = new glm::vec3[2];
 	bounds[0].x = bounds[0].y = bounds[0].z = FLT_MAX;
@@ -108,8 +124,9 @@ void CMesh::LoadHeightmap()
 
 
 
-	float minh = CSettings::GetFloat(FloatMinAltitude), maxh = CSettings::GetFloat(FloatMaxAltitude), h, level;
+	float blindZone, h, bzlevel, level;
 	glm::vec4 mincolor = CSettings::GetColor(ColorAltitudeLowest), maxcolor = CSettings::GetColor(ColorAltitudeHighest);
+	glm::vec4 minbzcolor = CSettings::GetColor(ColorBlindzoneLowest), maxbzcolor = CSettings::GetColor(ColorBlindzoneHighest);
 
 	int H = alt_.Height();
 	int W = alt_.Width();
@@ -138,17 +155,32 @@ void CMesh::LoadHeightmap()
 		Y = (int) i / W;
 		X = i % W;
 
-		h = alt_.ValueAt(X, Y) - centerHeight;
+		
+		blindZone = alt_.BlindZoneHeightAt(X, Y);
+		
+		
+
+		h = alt_.ValueAt(X, Y);
+		
+
+		level = h < minh ? 0 : (h > maxh ? 1 : (h - minh) / (maxh - minh));
+
+		h -= centerHeight;
+
 		averageHeight += h;
-		level = h < minh ? 0 : ( h > maxh ? 1 : (h - minh) / (maxh - minh));
+
+		bzlevel = blindZone < minbz ? 0 : (blindZone > maxbz ? 1 : (blindZone - minbz) / (maxbz - minbz));
 
 		_x = lonStretch * (-X + alt_.Width() / 2.0 - 0.5);
 		_y = h / MPPv;
 		_z = latStretch * (Y - alt_.Height() / 2.0 + 0.5);
+
+
+
 		vertices.get()->SetValues(i, glm::vec4(_x, _y, _z, 1),
 			glm::vec3(0, 1, 0),
 			mincolor * (1 - level) + maxcolor * level,
-			mincolor * (1 - level) + maxcolor * level,
+			minbzcolor * (1 - bzlevel) + maxbzcolor * bzlevel,
 			glm::vec2(((float)X) / W, ((float)Y) / H));
 
 		rcutils::takeminmax(_x, &(bounds[0].x), &(bounds[1].x));
@@ -156,8 +188,8 @@ void CMesh::LoadHeightmap()
 		rcutils::takeminmax(_z, &(bounds[0].z), &(bounds[1].z));
 	}
 	averageHeight /= H * W;
-	//idxArray = vertices.get()->AddIndexArray(N, GL_TRIANGLE_STRIP); //new unsigned short[N];
-	idxArray2 = vertices.get()->AddIndexArray(N, GL_LINE_STRIP); //new unsigned short[N];
+	idxArray = vertices.get()->AddIndexArray(N, GL_TRIANGLE_STRIP); //new unsigned short[N];
+	//idxArray2 = vertices.get()->AddIndexArray(N, GL_LINE_STRIP); //new unsigned short[N];
 	// SEE GL_LINE_STRIP.xlsx for details
 	for (int i = 0; i<N; i++)
 	{
@@ -182,8 +214,8 @@ void CMesh::LoadHeightmap()
 		//outfile << i << ";" << change_mode << ";" << next_big_length << ";" << special_mode_id << ";" << mode_id << ";" << step_length << ";" << next_step << ";" << sign << ";" << x << ";" << dXtone << ";" << X << std::endl;
 		//outfile << i << ";" << dYCounter << ";" << dYtone << ";" << next_step_Ybase_change << ";" << Ybase << ";" << Y << std::endl;
 		
-//		idxArray[i] = Y * W + X;
-		idxArray2[i] = Y * W + X;
+		idxArray[i] = Y * W + X;
+		//idxArray2[i] = Y * W + X;
 		
 		dXtone ^= 1;
 	}
@@ -408,10 +440,12 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 		
 		int y0_loc = prog.at(vpControl->Id)->GetUniformLocation("y_0");
 		int usey0_loc = prog.at(vpControl->Id)->GetUniformLocation("useY0");
-
-		glUniform1i(useTexture_loc, CUserInterface::GetCheckboxState_Map());
-		glUniform1i(useBlind_loc, 0);
-		glUniform1i(usey0_loc, !CUserInterface::GetCheckboxState_AltitudeMap());
+		int val = CUserInterface::GetCheckboxState_Map();
+		glUniform1i(useTexture_loc, val);
+		val = CUserInterface::GetCheckboxState_BlindZones();
+		glUniform1i(useBlind_loc, val);
+		val = !CUserInterface::GetCheckboxState_AltitudeMap();
+		glUniform1i(usey0_loc, val);
 		glUniform1f(y0_loc, 0);		
 	}
 }

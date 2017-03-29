@@ -27,7 +27,7 @@
 #define CRCAltitudeDataFile_ValueAt_v2_LOG false
 #define CRCAltitudeDataFile_size_set_max_LOG false
 #define CRCAltitudeDataFile_size_set_LOG false
-#define CRCAltitudeDataFile_CalculateBlindZone_LOG true
+#define CRCAltitudeDataFile_CalculateBlindZone_LOG false
 
 #define CSettings_Change_Log true
 

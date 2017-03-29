@@ -156,11 +156,7 @@ CRCAltitudeDataFile::~CRCAltitudeDataFile()
 
 void CRCAltitudeDataFile::CalculateBlindZone(float h0, float e)
 {
-	if (width % 2 || height % 2)
-	{
-		LOG_ERROR_("CalculateBlindZone", "CalculateBlindZone not yet implemented for odd sizes");
-		return;
-	}
+	
 	if (width != height)
 	{
 		LOG_ERROR_("CalculateBlindZone", "CalculateBlindZone not yet implemented for unequal sizes");
@@ -172,22 +168,57 @@ void CRCAltitudeDataFile::CalculateBlindZone(float h0, float e)
 	}
 	if (!blind_zone_height)
 	{
-		blind_zone_height = new unsigned short[width * height]();
+		//return;
+		blind_zone_height = new float[width * height]();
 	}
 	if (!ray_elevation_angle)
 	{
+		//return;
 		ray_elevation_angle = new float[width * height]();
 	}
+	float xc = (width - 1.0f) / 2.0f, yc = (height - 1.0f) / 2.0f;
+	float hcr0 = 0;
+	if (!(width % 2) && !(height % 2))
+	{		
+		hcr0 = h0 + (
+			ValueAt(int(width / 2 - 1), int(height / 2 - 1)) +
+			ValueAt(int(width / 2 - 1), int(height / 2 + 1)) +
+			ValueAt(int(width / 2 + 1), int(height / 2 - 1)) +
+			ValueAt(int(width / 2 + 1), int(height / 2 + 1))) / 4.0f;
+	}
+	if (!(width % 2) && height % 2)
+	{
+		hcr0 = h0 + (			
+			ValueAt(int(width / 2 - 1), int(height / 2)) +
+			ValueAt(int(width / 2 + 1), int(height / 2))) / 2.0f;
+	}
+	if ((width % 2) && !(height % 2))
+	{
+		hcr0 = h0 + (
+			ValueAt(int(width / 2), int(height / 2) - 1) +
+			ValueAt(int(width / 2), int(height / 2) + 1)) / 2.0f;
+	}
+	if ((width % 2) && !(height % 2))
+	{
+		hcr0 = h0 + 
+			ValueAt(int(width / 2), int(height / 2));
+	}
+	//double latdg2m(double dg, double lat);
+	//double londg2m(double dg, double lat);
+	float dx = cnvrt::londg2m(lon1 - lon0, (lat0 + lat1) / 2) / (width - 1);
+	float dy = cnvrt::latdg2m(lat1 - lat0, (lat0 + lat1) / 2) / (height - 1);
+	float _x, _y;
 	auto i = 0;
-	for (auto n=0; n<width/2; n++)
+	for (auto n=1; n<width/2; n++)
 	{
 		for (auto y= height /2 - n - 1; y<= height / 2 + n; y++)
 		{
-			if (y== height / 2 - 1 - n || y == height / 2 + n)
+			if (y == height / 2 - 1 - n || y == height / 2 + n)
 			{
 				for (auto x = width / 2 - 1 - n; x <= width / 2 + n; x++)
 				{
-					if (CRCAltitudeDataFile_CalculateBlindZone_LOG) LOG_INFO_("CalculateBlindZone", "%d %d %d %d", i, n, y, x);
+					CalculateBlindZone_helper(x, y, xc, yc, dx, dy, hcr0);
+					if (CRCAltitudeDataFile_CalculateBlindZone_LOG) LOG_INFO_("CalculateBlindZone", "%d %d %d %d -> %.4f", i, n, y, x, blind_zone_height[y * width + x]);					
 					i++;
 				}				
 			}
@@ -195,113 +226,21 @@ void CRCAltitudeDataFile::CalculateBlindZone(float h0, float e)
 			{
 				{
 					auto x = width / 2 - 1 - n;
-					if (CRCAltitudeDataFile_CalculateBlindZone_LOG) LOG_INFO_("CalculateBlindZone", "%d %d %d %d", i, n, y, x);
+					CalculateBlindZone_helper(x, y, xc, yc, dx, dy, hcr0);
+					if (CRCAltitudeDataFile_CalculateBlindZone_LOG) LOG_INFO_("CalculateBlindZone", "%d %d %d %d -> %.4f", i, n, y, x, blind_zone_height[y * width + x]);
 					i++;
 					x = width / 2 + n;
-					if (CRCAltitudeDataFile_CalculateBlindZone_LOG) LOG_INFO_("CalculateBlindZone", "%d %d %d %d", i, n, y, x);
+					CalculateBlindZone_helper(x, y, xc, yc, dx, dy, hcr0);
+					if (CRCAltitudeDataFile_CalculateBlindZone_LOG) LOG_INFO_("CalculateBlindZone", "%d %d %d %d -> %.4f", i, n, y, x, blind_zone_height[y * width + x]);
 					i++;
 				}
 			}
 		}
 	}
 }
-void CRCAltitudeDataFile::CalculateBlindZone_get_e1e2(int x, int y, int xc, int yc, int &x1, int &y1, int &x2, int &y2)
+
+float CRCAltitudeDataFile::CalculateBlindZone_get_elevation(int x, int y, float xc, float yc, float _x, float _y) const
 {
-	float _y = y - yc;// (height - 1.0f) / 2.0f;
-	float _x = x - xc;// (width - 1.0f) / 2.0f;
-	
-
-	if (_x == _y && _y > -_x)
-	{
-		x2 = x1 = x - 1;
-		y2 = y1 = y - 1;
-		return;
-	}
-	if (_x == _y && _y < -_x)
-	{
-		x2 = x1 = x + 1;
-		y2 = y1 = y + 1;
-		return;
-	}
-	if (_x == -y && _y > _x)
-	{
-		x2 = x1 = x + 1;
-		y2 = y1 = y - 1;
-		return;
-	}
-	if (_x == -y && _y < _x)
-	{
-		x2 = x1 = x - 1;
-		y2 = y1 = y + 1;
-		return;
-	}
-	/////////////////
-	if (_y > _x && _y > -_x && _x > 0) //top-right
-	{
-		x1 = x - 1;
-		x2 = x;
-		y2 = y1 = y - 1;
-		return;
-	}
-	if (_y > _x && _y > -_x && _x < 0) //top-left
-	{
-		x1 = x + 1;
-		x2 = x;
-		y2 = y1 = y - 1;
-		return;
-	}
-	/////////////////
-	if (_y > -_x && _y < _x && _y > 0) //right-top
-	{
-		x2 = x1 = x - 1;
-		y2 = y;
-		y1 = y - 1;
-		return;
-	}
-	if (_y > -_x && _y < _x && _y < 0) // right-bottom
-	{
-		x2 = x1 = x - 1;
-		y2 = y;
-		y1 = y + 1;
-		return;
-	}
-	/////////////////
-	if (_y < _x && _y < -_x && _x > 0) //bottom-right
-	{
-		x1 = x - 1;
-		x2 = x;
-		y2 = y1 = y + 1;
-		return;
-	}
-	if (_y < _x && _y < -_x && _x < 0) //bottom-left
-	{
-		x1 = x + 1;
-		x2 = x;
-		y2 = y1 = y + 1;
-		return;
-	}
-	/////////////////
-	if (_y > -_x && _y < _x && _y > 0) //left-top
-	{
-		x2 = x1 = x + 1;
-		y2 = y;
-		y1 = y - 1;
-		return;
-	}
-	if (_y > -_x && _y < _x && _y < 0) // left-bottom
-	{
-		x2 = x1 = x + 1;
-		y2 = y;
-		y1 = y + 1;
-		return;
-	}
-}
-
-float CRCAltitudeDataFile::CalculateBlindZone_get_elevation(int x, int y, int xc, int yc, int x1, int y1, int x2, int y2)
-{
-	float _y = y - yc;// (height - 1.0f) / 2.0f;
-	float _x = x - xc;// (width - 1.0f) / 2.0f;	
-
 	if (_x == 0 && _y > 0)
 	{
 		return ray_elevation_angle[(y - 1) * width + x];
@@ -343,55 +282,55 @@ float CRCAltitudeDataFile::CalculateBlindZone_get_elevation(int x, int y, int xc
 	}
 	if (_y > _x && _y > -_x && _x < 0) //top-left
 	{
-		x1 = x + 1;
-		x2 = x;
-		y2 = y1 = y - 1;
-		return -_x / _y * ray_elevation_angle[(y - 1) * width + x] + (1 - _x / _y) * ray_elevation_angle[(y - 1) * width + x - 1];
+		return -_x / _y * ray_elevation_angle[(y - 1) * width + x] + (1 + _x / _y) * ray_elevation_angle[(y - 1) * width + x + 1];
 	}
 	/////////////////
 	if (_y > -_x && _y < _x && _y > 0) //right-top
 	{
-		x2 = x1 = x - 1;
-		y2 = y;
-		y1 = y - 1;
-		return;
+		return _y / _x * ray_elevation_angle[y * width + x - 1] + (1 - _y / _x) * ray_elevation_angle[(y - 1) * width + x - 1];
 	}
 	if (_y > -_x && _y < _x && _y < 0) // right-bottom
 	{
-		x2 = x1 = x - 1;
-		y2 = y;
-		y1 = y + 1;
-		return;
+		return - _y / _x * ray_elevation_angle[y * width + x - 1] + (1 + _y / _x) * ray_elevation_angle[(y + 1) * width + x - 1];
 	}
 	/////////////////
 	if (_y < _x && _y < -_x && _x > 0) //bottom-right
 	{
-		x1 = x - 1;
-		x2 = x;
-		y2 = y1 = y + 1;
-		return;
+		return - _x / _y * ray_elevation_angle[(y + 1) * width + x] + (1 + _x / _y) * ray_elevation_angle[(y + 1) * width + x - 1];
 	}
 	if (_y < _x && _y < -_x && _x < 0) //bottom-left
 	{
-		x1 = x + 1;
-		x2 = x;
-		y2 = y1 = y + 1;
-		return;
+		return _x / _y * ray_elevation_angle[(y + 1) * width + x] + (1 - _x / _y) * ray_elevation_angle[(y + 1) * width + x + 1];
 	}
 	/////////////////
 	if (_y > -_x && _y < _x && _y > 0) //left-top
 	{
-		x2 = x1 = x + 1;
-		y2 = y;
-		y1 = y - 1;
-		return;
+		return - _x / _y * ray_elevation_angle[(y - 1) * width + x + 1] + (1 + _x / _y) * ray_elevation_angle[y * width + x + 1];
 	}
 	if (_y > -_x && _y < _x && _y < 0) // left-bottom
 	{
-		x2 = x1 = x + 1;
-		y2 = y;
-		y1 = y + 1;
-		return;
+		return _x / _y * ray_elevation_angle[(y + 1) * width + x + 1] + (1 - _x / _y) * ray_elevation_angle[y * width + x + 1];
+	}
+
+	return FLT_MIN;
+}
+
+void CRCAltitudeDataFile::CalculateBlindZone_helper(int x, int y, float xc, float yc, float dx, float dy, float hrc0)
+{
+	float _x = x - xc, _y = y - yc;
+	float e = CalculateBlindZone_get_elevation(x, y, xc, yc, _x, _y);
+	float h = ValueAt(x, y);
+	float e1 = atan((h - hrc0) / sqrt(_x * _x * dx * dx + _y * _y * dy * dy));
+
+	if (e1 > e)
+	{
+		blind_zone_height[y * width + x] = 0;
+		ray_elevation_angle[y * width + x] = e1;
+	}
+	else
+	{
+		blind_zone_height[y * width + x] = hrc0 + sqrt(_x * _x + _y * _y) * tan(e) - h;
+		ray_elevation_angle[y * width + x] = e;
 	}
 
 }
@@ -403,7 +342,19 @@ short CRCAltitudeDataFile::ValueAt(int x, int y)
 	return 0;
 }
 
-short CRCAltitudeDataFile::ValueAt(double lon, double lat)
+float CRCAltitudeDataFile::BlindZoneHeightAt(int x, int y)
+{
+	if (blind_zone_height)
+		return blind_zone_height[y*width + x];
+	return 0;
+}
+
+float* CRCAltitudeDataFile::BlindZoneHeight()
+{
+	return blind_zone_height;
+}
+
+short CRCAltitudeDataFile::ValueAtLL(double lon, double lat)
 {	
 	if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)
 	{
@@ -527,7 +478,7 @@ void CRCAltitudeDataFile::ApplyIntersection(CRCDataFile *src)
 			{
 				int bp = 0;
 			}
-			auto value = asrc->ValueAt(lon0 + x * dlon, lat0 + y * dlat);
+			auto value = asrc->ValueAtLL(lon0 + x * dlon, lat0 + y * dlat);
 			if (LOG_ENABLED && CRCAltitudeDataFile_ApplyIntersection_LOG)
 			{
 				LOG_INFO("ApplyIntersection", "x|y|value|", "|%d|%d|%d", x, y, value);

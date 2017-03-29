@@ -16,10 +16,10 @@ class CRCAltitudeDataFile :
 	//size[8] - data read methos (see GDP::DataReadMethod, GDP::CRCGeoDataProvider::GetAltitudeMap)
 	void size_set_max();
 	void size_set(int x0, int y_0, int x1, int y1);
-	unsigned short *blind_zone_height {nullptr};
+	float *blind_zone_height {nullptr};
 	float *ray_elevation_angle{ nullptr };
-	void CalculateBlindZone_get_e1e2(int x, int y, int xc, int yc, int &x1, int &y1, int &x2, int &y2);
-	float CalculateBlindZone_get_elevation(int x, int y, int xc, int yc, int x1, int y1, int x2, int y2);
+	float CalculateBlindZone_get_elevation(int x, int y, float xc, float yc, float _x, float _y) const;
+	void CalculateBlindZone_helper(int x, int y, float xc, float yc, float dx, float dy, float hcr0);
 public:
 	CRCAltitudeDataFile(const std::string& dt2FileName);
 	CRCAltitudeDataFile(double lon0, double lat0, double lon1, double lat1, int width, int height);
@@ -29,7 +29,9 @@ public:
 	
 
 	short ValueAt(int x, int y);
-	short ValueAt(double lon, double lat);
+	float BlindZoneHeightAt(int x, int y);
+	float * BlindZoneHeight();
+	short ValueAtLL(double lon, double lat);
 	void SetValue(int x, int y, short val/*, float resX, float resY*/) const;
 
 	void ApplyIntersection(CRCDataFile *src) override;
