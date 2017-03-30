@@ -58,11 +58,13 @@ void CMesh::LoadHeightmap()
 	CRCDataFileSet set;
 	set.AddFiles("TextureData", Texture, "");
 
-	maptexture = new CRCTextureDataFile(lon0, lat0, lon1, lat1, texsize, texsize);
+	if (!maptexture) {
+		maptexture = new CRCTextureDataFile(lon0, lat0, lon1, lat1, texsize, texsize);
 
-	for (auto i = 0; i < set.Files().size(); i++)
-	{
-		maptexture->ApplyIntersection(set.GetFile(i));
+		for (auto i = 0; i < set.Files().size(); i++)
+		{
+			maptexture->ApplyIntersection(set.GetFile(i));
+		}
 	}
 	
 	//subimage = FreeImage_Copy((FIBITMAP*)bitmap, left, top, right, bottom);
@@ -70,21 +72,23 @@ void CMesh::LoadHeightmap()
 	double px = (lon1 - lon0) / texsize;
 	double py = (lat1 - lat0) / texsize;
 
-	set.Clear();
+	if (!altitude) {
+		set.Clear();
 
-	set.AddFiles("AltitudeData", Altitude, "");	
+		set.AddFiles("AltitudeData", Altitude, "");
 
 
-	CRCAltitudeDataFile alt_(lon0, lat0, lon1, lat1, resolution, resolution);
+		altitude = new CRCAltitudeDataFile(lon0, lat0, lon1, lat1, resolution, resolution);
 
-	for (auto i = 0; i < set.Files().size(); i++)
-	{
-		alt_.ApplyIntersection(set.GetFile(i));
+		for (auto i = 0; i < set.Files().size(); i++)
+		{
+			altitude->ApplyIntersection(set.GetFile(i));
+		}
 	}
 
-	alt_.CalculateBlindZone(1.5, 0);
+	altitude->CalculateBlindZone(1.5, 0.0);
 
-	short *data = (short *)alt_.Data();
+	short *data = (short *)altitude->Data();
 	if (!data)
 	{
 		LOG_ERROR__("data is nullptr");
@@ -93,19 +97,19 @@ void CMesh::LoadHeightmap()
 	int nX, nZ, nTri, nIndex = 0;									// Create Variables
 	float flX, flZ;
 	float maxh = FLT_MIN, minh = FLT_MAX;
-	for (int i = 0; i < alt_.Width() * alt_.Height(); i++) {
+	for (int i = 0; i < altitude->Width() * altitude->Height(); i++) {
 		
 		if (data[i] > maxh) maxh = data[i];
 		if (data[i] < minh) minh = data[i];
 	}
 	float maxbz = FLT_MIN, minbz = FLT_MAX;
-	float *blind_zone_height = alt_.BlindZoneHeight();
+	float *blind_zone_height = altitude->BlindZoneHeight();
 	if (!blind_zone_height)
 	{
 		LOG_ERROR__("blind_zone_height is nullptr");
 		return;
 	}
-	for (int i = 0; i < alt_.Width() * alt_.Height(); i++) {
+	for (int i = 0; i < altitude->Width() * altitude->Height(); i++) {
 
 		if (blind_zone_height[i] > maxbz) maxbz = blind_zone_height[i];
 		if (blind_zone_height[i] < minbz) minbz = blind_zone_height[i];
@@ -114,13 +118,13 @@ void CMesh::LoadHeightmap()
 	bounds[0].x = bounds[0].y = bounds[0].z = FLT_MAX;
 	bounds[1].x = bounds[1].y = bounds[1].z = FLT_MIN;
 
-	double dlon = alt_.DLon();
-	double dlat = alt_.DLat();
+	double dlon = altitude->DLon();
+	double dlat = altitude->DLat();
 
-	double latSW = alt_.Lat0(); 
+	double latSW = altitude->Lat0();
 
-	float lonStretch = dlon * cnvrt::londg2m(1, latSW + dlat * (alt_.Width() - 1) / 2.0) / MPPh;
-	float latStretch = dlat * cnvrt::latdg2m(1, latSW + dlat * (alt_.Width() - 1) / 2.0) / MPPh;
+	float lonStretch = dlon * cnvrt::londg2m(1, latSW + dlat * (altitude->Width() - 1) / 2.0) / MPPh;
+	float latStretch = dlat * cnvrt::latdg2m(1, latSW + dlat * (altitude->Width() - 1) / 2.0) / MPPh;
 
 
 
@@ -128,8 +132,8 @@ void CMesh::LoadHeightmap()
 	glm::vec4 mincolor = CSettings::GetColor(ColorAltitudeLowest), maxcolor = CSettings::GetColor(ColorAltitudeHighest);
 	glm::vec4 minbzcolor = CSettings::GetColor(ColorBlindzoneLowest), maxbzcolor = CSettings::GetColor(ColorBlindzoneHighest);
 
-	int H = alt_.Height();
-	int W = alt_.Width();
+	int H = altitude->Height();
+	int W = altitude->Width();
 
 	int N = ((W - 3) * 2 + 6 + 1)*(H - 1) - 1;
 	index_length = N;
@@ -142,7 +146,7 @@ void CMesh::LoadHeightmap()
 	auto w0 = (W % 2) ? int((W + 1) / 2) : int(W / 2);
 	auto w1 = (W % 2) ? int((W + 1) / 2) : int(W / 2) + 1;
 
-	centerHeight = (alt_.ValueAt(h0, w0) + alt_.ValueAt(h0, w1) + alt_.ValueAt(h1, w0) + alt_.ValueAt(h1, w1)) / 4.0;
+	centerHeight = (altitude->ValueAt(h0, w0) + altitude->ValueAt(h0, w1) + altitude->ValueAt(h1, w0) + altitude->ValueAt(h1, w1)) / 4.0;
 	
 
 	int sign = -1, loop_length = (W - 2) * 2, step_length = 1, next_step = 0, change_mode = 1, mode_id = 0, special_mode_id = 4, next_big_length = loop_length, x = 0, x_prev = 0, dXtone = 1, X = 0;
@@ -156,11 +160,11 @@ void CMesh::LoadHeightmap()
 		X = i % W;
 
 		
-		blindZone = alt_.BlindZoneHeightAt(X, Y);
+		blindZone = altitude->BlindZoneHeightAt(X, Y);
 		
 		
 
-		h = alt_.ValueAt(X, Y);
+		h = altitude->ValueAt(X, Y);
 		
 
 		level = h < minh ? 0 : (h > maxh ? 1 : (h - minh) / (maxh - minh));
@@ -171,9 +175,9 @@ void CMesh::LoadHeightmap()
 
 		bzlevel = blindZone < minbz ? 0 : (blindZone > maxbz ? 1 : (blindZone - minbz) / (maxbz - minbz));
 
-		_x = lonStretch * (-X + alt_.Width() / 2.0 - 0.5);
+		_x = lonStretch * (-X + altitude->Width() / 2.0 - 0.5);
 		_y = h / MPPv;
-		_z = latStretch * (Y - alt_.Height() / 2.0 + 0.5);
+		_z = latStretch * (Y - altitude->Height() / 2.0 + 0.5);
 
 
 
