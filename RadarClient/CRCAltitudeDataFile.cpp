@@ -4,7 +4,7 @@
 #include "CRCLogger.h"
 #include "CRCGeoDataProvider.h"
 
-
+const std::string CRCAltitudeDataFile::requestID = "CRCAltitudeDataFile";
 
 void CRCAltitudeDataFile::size_set_max()
 {

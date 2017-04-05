@@ -1092,6 +1092,7 @@ void CUserInterface::SetMainTableMode(int value)
 
 void CUserInterface::OnInitDialog()
 {
+	LOG_INFO_("OnInitDialog", "ToolboxHWND=%d", ToolboxHWND);
 	Trackbar_BegAzm_SetText(ToolboxHWND, IDC_STATIC6);
 	Trackbar_ZeroElevation_SetText(ToolboxHWND, IDC_STATIC7);
 
@@ -1102,4 +1103,6 @@ void CUserInterface::OnInitDialog()
 	SetChecked(ToolboxHWND, IDC_CHECK7, true);
 	SetChecked(ToolboxHWND, IDC_CHECK9, true);
 	SetChecked(ToolboxHWND, IDC_CHECK10, true);
+
+	
 }

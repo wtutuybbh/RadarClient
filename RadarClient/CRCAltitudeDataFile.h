@@ -23,6 +23,7 @@ class CRCAltitudeDataFile :
 	float _x {0}; 
 	float _y{ 0 };
 	float _e {0};
+	static const std::string requestID;
 public:
 	CRCAltitudeDataFile(const std::string& dt2FileName);
 	CRCAltitudeDataFile(double lon0, double lat0, double lon1, double lat1, int width, int height);

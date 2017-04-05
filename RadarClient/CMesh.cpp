@@ -263,6 +263,8 @@ CMesh::~CMesh()
 	}
 	if (bounds)
 		delete bounds;
+	if (altitude)
+		delete altitude;
 }
 
 CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv) : C3DObjectModel()

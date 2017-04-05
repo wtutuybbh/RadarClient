@@ -8,6 +8,9 @@ uniform int useTexture;
 uniform int useBlind;
 uniform int useY0;
 uniform float y_0;
+uniform vec4 blindColor0;
+uniform vec4 blindColor1;
+uniform float blind_zone_height;
 
 varying vec2 tc;
 varying vec4 c;
