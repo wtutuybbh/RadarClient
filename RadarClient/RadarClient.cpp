@@ -190,8 +190,10 @@ void CallUI(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	
 	if (uMsg == WM_INITDIALOG)
 	{		
-		if (g_UI)
+		if (g_UI) {
+			LOG_INFO_("CallUI before OnInitDialog", "hWnd=%d, uMsg=%d, wParam=%d, lParam=%d", hWnd, uMsg, wParam, lParam);
 			g_UI->OnInitDialog();
+		}
 	}
 	if (uMsg == WM_COMMAND)
 	{
@@ -214,6 +216,7 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	if (g_UI && uMsg == WM_INITDIALOG)
 	{
 		CUserInterface::ToolboxHWND = hWnd;
+		LOG_INFO_("DlgProc before OnInitDialog", "hWnd=%d, uMsg=%d, wParam=%d, lParam=%d", hWnd, uMsg, wParam, lParam);
 		g_UI->OnInitDialog();
 	}
 	CallUI(hWnd, uMsg, wParam, lParam);
@@ -736,6 +739,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	
 	glutInit(&myargc, myargv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+	//glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
 
 	free(myargv[0]);
 

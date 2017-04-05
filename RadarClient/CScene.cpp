@@ -192,6 +192,7 @@ CScene::~CScene() {
 
 bool CScene::DrawScene(CViewPortControl * vpControl)
 {
+	//glEnable(GL_MULTISAMPLE);
 	if (MeshReady() && !VBOisBuilt) {
 		PrepareVBOs();
 		VBOisBuilt = BuildVBOs();
@@ -270,6 +271,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 
 bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 {
+	//glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_BUFFER);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
