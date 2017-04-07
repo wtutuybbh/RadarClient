@@ -19,8 +19,10 @@
 #define LOG_ENABLED true
 #define CMesh_LoadHeightmap_LOG true
 
-void CMesh::LoadHeightmap()
+void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures, bool reload_altitudes, bool rescan_folder_for_altitudes, bool recalculate_blindzones)
 {
+	std::lock_guard<std::mutex> lock(m);
+
 	string context = "CMesh::LoadHeightmap(int vpId)";
 
 	if (LOG_ENABLED && CMesh_LoadHeightmap_LOG)
@@ -55,38 +57,52 @@ void CMesh::LoadHeightmap()
 	//CRCTextureDataFile iMapH(lon0, lat0, lon1, lat1, texsize, texsize);
 
 	//here we get pixels from our "database"
-	CRCDataFileSet set;
-	set.AddFiles("TextureData", Texture, "");
+	
+	if (!altitudes_set)
+	{
+		altitudes_set = new CRCDataFileSet();
+	}
+	if (rescan_folder_for_altitudes || altitudes_set->CountFilesOfGivenType(Altitude) == 0)
+	{
+		altitudes_set->AddFiles("AltitudeData", Altitude, "");
+	}
+	if (!textures_set)
+	{
+		textures_set = new CRCDataFileSet();
+	}
+	if (rescan_folder_for_textures || textures_set->CountFilesOfGivenType(Texture) == 0)
+	{
+		textures_set->AddFiles("TextureData", Texture, "");
+	}
+
 
 	if (!maptexture) {
-		maptexture = new CRCTextureDataFile(lon0, lat0, lon1, lat1, texsize, texsize);
-
-		for (auto i = 0; i < set.Files().size(); i++)
+		maptexture = new CRCTextureDataFile(lon0, lat0, lon1, lat1, texsize, texsize);		
+	}
+	if (reload_textures) {
+		for (auto i = 0; i < textures_set->Files().size(); i++)
 		{
-			maptexture->ApplyIntersection(set.GetFile(i));
+			maptexture->ApplyIntersection(textures_set->GetFile(i));
 		}
 	}
-	
 	//subimage = FreeImage_Copy((FIBITMAP*)bitmap, left, top, right, bottom);
 
 	double px = (lon1 - lon0) / texsize;
 	double py = (lat1 - lat0) / texsize;
 
-	if (!altitude) {
-		set.Clear();
-
-		set.AddFiles("AltitudeData", Altitude, "");
-
-
-		altitude = new CRCAltitudeDataFile(lon0, lat0, lon1, lat1, resolution, resolution);
-
-		for (auto i = 0; i < set.Files().size(); i++)
+	if (!altitude) {	
+		altitude = new CRCAltitudeDataFile(lon0, lat0, lon1, lat1, resolution, resolution);		
+	}
+	if (reload_altitudes) {
+		for (auto i = 0; i < altitudes_set->Files().size(); i++)
 		{
-			altitude->ApplyIntersection(set.GetFile(i));
+			altitude->ApplyIntersection(altitudes_set->GetFile(i));
 		}
 	}
-
-	altitude->CalculateBlindZone(1.5, 0.0);
+	if (recalculate_blindzones)
+	{
+		altitude->CalculateBlindZone(h0, e);
+	}
 
 	short *data = (short *)altitude->Data();
 	if (!data)
@@ -94,15 +110,15 @@ void CMesh::LoadHeightmap()
 		LOG_ERROR__("data is nullptr");
 		return;
 	}
-	int nX, nZ, nTri, nIndex = 0;									// Create Variables
+	int nX, nZ, nTri, nIndex = 0;
 	float flX, flZ;
-	float maxh = FLT_MIN, minh = FLT_MAX;
+	
 	for (int i = 0; i < altitude->Width() * altitude->Height(); i++) {
 		
 		if (data[i] > maxh) maxh = data[i];
 		if (data[i] < minh) minh = data[i];
 	}
-	float maxbz = FLT_MIN, minbz = FLT_MAX;
+	
 	float *blind_zone_height = altitude->BlindZoneHeight();
 	if (!blind_zone_height)
 	{
@@ -139,7 +155,19 @@ void CMesh::LoadHeightmap()
 	index_length = N;
 
 	//std::vector<VBOData> * buffer = new std::vector<VBOData>((alt_.Width() - 1) * (alt_.Height() - 1) * 6);
-	vertices = std::make_shared<C3DObjectVertices>(H*W, 17);
+	bool make_index = false;
+	if (!vertices) 
+	{
+		vertices = std::make_shared<C3DObjectVertices>(H*W, 17);
+		make_index = true;
+	}
+	else if (vertices.get()->vertexCount != H*W)
+	{
+		vertices.get()->ReCreate(H * W);
+		make_index = true;
+	}
+
+	vertices.get()->usesCount = 0;
 
 	auto h0 = (H % 2) ? int((H + 1) / 2) : int(H / 2);
 	auto h1 = (H % 2) ? int((H + 1) / 2) : int(H / 2) + 1;
@@ -154,6 +182,7 @@ void CMesh::LoadHeightmap()
 	int x_before_change;
 	averageHeight = 0;
 	float _x,_y,_z;
+	auto v = vertices.get();
 	for (auto i=0; i<H*W; i++)
 	{
 		Y = (int) i / W;
@@ -166,12 +195,13 @@ void CMesh::LoadHeightmap()
 
 		h = altitude->ValueAt(X, Y);
 		
-
 		level = h < minh ? 0 : (h > maxh ? 1 : (h - minh) / (maxh - minh));
-
+		
+		averageHeight += h;
+		
 		h -= centerHeight;
 
-		averageHeight += h;
+		
 
 		bzlevel = blindZone < minbz ? 0 : (blindZone > maxbz ? 1 : (blindZone - minbz) / (maxbz - minbz));
 
@@ -181,7 +211,7 @@ void CMesh::LoadHeightmap()
 
 
 
-		vertices.get()->SetValues(i, glm::vec4(_x, _y, _z, 1),
+		v->SetValues(i, glm::vec4(_x, _y, _z, 1),
 			glm::vec3(0, 1, 0),
 			mincolor * (1 - level) + maxcolor * level,
 			minbzcolor * (1 - bzlevel) + maxbzcolor * bzlevel,
@@ -192,62 +222,79 @@ void CMesh::LoadHeightmap()
 		rcutils::takeminmax(_z, &(bounds[0].z), &(bounds[1].z));
 	}
 	averageHeight /= H * W;
-	idxArray = vertices.get()->AddIndexArray(N, GL_TRIANGLE_STRIP); //new unsigned short[N];
-	//idxArray2 = vertices.get()->AddIndexArray(N, GL_LINE_STRIP); //new unsigned short[N];
-	// SEE GL_LINE_STRIP.xlsx for details
-	for (int i = 0; i<N; i++)
-	{
-		x_before_change = x;
-		change_mode = (int)(next_step == i);
-		next_big_length = (step_length == loop_length && next_big_length == loop_length ? 3 : (step_length == 3 && next_big_length == 3 ? loop_length : next_big_length));
-		special_mode_id = (mode_id == 4 && special_mode_id == 4 ? 5 : (mode_id == 5 && special_mode_id == 5 ? 4 : special_mode_id));
-		mode_id = (i == 0 ? 0 : (i == N - 1 ? 6 : (change_mode == 1 ? (mode_id <= 2 ? mode_id + 1 : (mode_id == 3 ? special_mode_id : 1)) : mode_id))); // еякх(C60 = $AO$55 - 1; 6; еякх(T60 = 1; еякх(V59 <= 2; V59 + 1; еякх(V59 = 3; W60; 1)); V59)))
-		step_length = (i < 2 || i == N - 1 ? 1 : (change_mode == 1 ? (step_length>1 ? 1 : next_big_length) : step_length));
-		next_step = next_step + step_length * change_mode;
-		sign = mode_id == 1 ? -1 * sign : sign;
-		x = (mode_id == 1 ? x : (mode_id == 2 ? (x == x_prev ? x + sign : x) : (mode_id == 3 ? x + sign : x))); //=еякх(V60=1;Y59;еякх(V60=2;еякх(Y59=Y58;Y59+P60;Y59);еякх(V60=3;Y59+P60;Y59)))
-		x_prev = x_before_change;
-		X = (mode_id == 4 ? x + dXtone - 1 : (mode_id == 5 ? x + dXtone : x));
-		next_step_Ybase_change_prev = next_step_Ybase_change;
-		next_step_Ybase_change = mode_id == special_mode_id ? 1 : 0;
-		Ybase += next_step_Ybase_change_prev;
-		dYCounter = next_step_Ybase_change_prev == 0 && (dYCounter == 0 || dYCounter == 3) ? 0 : dYCounter + 1;
-		dYtone = dYCounter == 3 ? dYtone ^ 1 : dYtone;
-		Y = Ybase + (next_step_Ybase_change_prev == 0 ? !(dXtone^dYtone) : 0);
+	if (make_index) {
+		idxArray = v->AddIndexArray(N, GL_TRIANGLE_STRIP); //new unsigned short[N];
+		//idxArray2 = vertices.get()->AddIndexArray(N, GL_LINE_STRIP); //new unsigned short[N];
+		// SEE GL_LINE_STRIP.xlsx for details
+		for (int i = 0; i < N; i++)
+		{
+			x_before_change = x;
+			change_mode = (int)(next_step == i);
+			next_big_length = (step_length == loop_length && next_big_length == loop_length ? 3 : (step_length == 3 && next_big_length == 3 ? loop_length : next_big_length));
+			special_mode_id = (mode_id == 4 && special_mode_id == 4 ? 5 : (mode_id == 5 && special_mode_id == 5 ? 4 : special_mode_id));
+			mode_id = (i == 0 ? 0 : (i == N - 1 ? 6 : (change_mode == 1 ? (mode_id <= 2 ? mode_id + 1 : (mode_id == 3 ? special_mode_id : 1)) : mode_id))); // еякх(C60 = $AO$55 - 1; 6; еякх(T60 = 1; еякх(V59 <= 2; V59 + 1; еякх(V59 = 3; W60; 1)); V59)))
+			step_length = (i < 2 || i == N - 1 ? 1 : (change_mode == 1 ? (step_length > 1 ? 1 : next_big_length) : step_length));
+			next_step = next_step + step_length * change_mode;
+			sign = mode_id == 1 ? -1 * sign : sign;
+			x = (mode_id == 1 ? x : (mode_id == 2 ? (x == x_prev ? x + sign : x) : (mode_id == 3 ? x + sign : x))); //=еякх(V60=1;Y59;еякх(V60=2;еякх(Y59=Y58;Y59+P60;Y59);еякх(V60=3;Y59+P60;Y59)))
+			x_prev = x_before_change;
+			X = (mode_id == 4 ? x + dXtone - 1 : (mode_id == 5 ? x + dXtone : x));
+			next_step_Ybase_change_prev = next_step_Ybase_change;
+			next_step_Ybase_change = mode_id == special_mode_id ? 1 : 0;
+			Ybase += next_step_Ybase_change_prev;
+			dYCounter = next_step_Ybase_change_prev == 0 && (dYCounter == 0 || dYCounter == 3) ? 0 : dYCounter + 1;
+			dYtone = dYCounter == 3 ? dYtone ^ 1 : dYtone;
+			Y = Ybase + (next_step_Ybase_change_prev == 0 ? !(dXtone^dYtone) : 0);
 
-		//outfile << i << ";" << change_mode << ";" << next_big_length << ";" << special_mode_id << ";" << mode_id << ";" << step_length << ";" << next_step << ";" << sign << ";" << x << ";" << dXtone << ";" << X << std::endl;
-		//outfile << i << ";" << dYCounter << ";" << dYtone << ";" << next_step_Ybase_change << ";" << Ybase << ";" << Y << std::endl;
-		
-		idxArray[i] = Y * W + X;
-		//idxArray2[i] = Y * W + X;
-		
-		dXtone ^= 1;
+			//outfile << i << ";" << change_mode << ";" << next_big_length << ";" << special_mode_id << ";" << mode_id << ";" << step_length << ";" << next_step << ";" << sign << ";" << x << ";" << dXtone << ";" << X << std::endl;
+			//outfile << i << ";" << dYCounter << ";" << dYtone << ";" << next_step_Ybase_change << ";" << Ybase << ";" << Y << std::endl;
+
+			idxArray[i] = Y * W + X;
+			//idxArray2[i] = Y * W + X;
+
+			dXtone ^= 1;
+		}
+
 	}
-
-	
 	
 	
 
 		
 
 	
-
-	prog.insert_or_assign(Main, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color", "color2"));
-
-	auto vbo_ = new C3DObjectVBO(clearAfter);
-
-	FIBITMAP* subimage = (FIBITMAP*)maptexture->Data();
-
-	if (FreeImage_GetBPP(subimage) != 32)
-	{
-		FIBITMAP* tempImage = subimage;
-		subimage = FreeImage_ConvertTo32Bits(tempImage);
+	
+	if (prog.find(Main) == prog.end()) {
+		prog.insert_or_assign(Main, new C3DObjectProgram("CMesh.vert", "CMesh.frag", "vertex", "texcoor", nullptr, "color", "color2"));
 	}
-	tex.insert_or_assign(Main, new C3DObjectTexture(subimage, "tex", false, false));
+	
+	
+	
+	if (reload_textures) {
+		FIBITMAP* subimage = (FIBITMAP*)maptexture->Data();
 
-	vbo.insert_or_assign(Main, vbo_);
+		if (FreeImage_GetBPP(subimage) != 32)
+		{
+			FIBITMAP* tempImage = subimage;
+			subimage = FreeImage_ConvertTo32Bits(tempImage);
+		}
+		if (tex.find(Main) == tex.end()) {
+			tex.insert_or_assign(Main, new C3DObjectTexture(subimage, "tex", false, false));
+		}
+		else
+		{
+			if (tex.at(Main))
+				tex.at(Main)->Reload(subimage);
+		}
+	}
+	
+	if (vbo.find(Main) == vbo.end()) {
+		vbo.insert_or_assign(Main, new C3DObjectVBO(clearAfter));
+	}
+	
 	vbo.at(Main)->vertices = vertices;
+
 	vertices.get()->usesCount++;
+
 	InitMiniMap();
 
 	ready = true;
@@ -265,6 +312,12 @@ CMesh::~CMesh()
 		delete bounds;
 	if (altitude)
 		delete altitude;
+	if (maptexture)
+		delete maptexture;
+	if (altitudes_set)
+		delete altitudes_set;
+	if (textures_set)
+		delete textures_set;
 }
 
 CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv) : C3DObjectModel()
@@ -284,9 +337,13 @@ CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize,
 	
 	UseTexture = 1;
 
-	heightMapLoader = new std::thread (&CMesh::LoadHeightmap, this);
+	heightMapLoader = new std::thread (&CMesh::LoadHeightmap, this, true, true, true, true, true);
 	//heightMapLoader->join();
 	//t.detach();
+}
+
+void CMesh::Refresh(glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv)
+{
 }
 
 glm::vec3 CMesh::GetSize() {
@@ -432,10 +489,10 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 	if (!Ready()) {
 		return;
 	}
-	glm::mat4 m = GetModelMatrix(vpControl->Id);
+	auto mm = GetModelMatrix(vpControl->Id);
 	glm::mat4 v = vpControl->GetViewMatrix();
 	glm::mat4 p = vpControl->GetProjMatrix();
-	glm::mat4 mvp = p*v*m;
+	glm::mat4 mvp = p*v*mm;
 	int mvp_loc = prog.at(vpControl->Id)->GetUniformLocation("mvp");
 
 	glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
@@ -467,29 +524,34 @@ void CMesh::InitMiniMap()
 {
 	if (bounds && maptexture)
 	{
-		C3DObjectVBO *newvbo = new C3DObjectVBO(false);
-		
-		newvbo->vertices = std::make_shared<C3DObjectVertices>(6);
+		if (vbo.find(MiniMap) == vbo.end() || !vbo.at(MiniMap)) {
+			vbo.insert_or_assign(MiniMap, new C3DObjectVBO(false));
+		}
+		if(!vbo.at(MiniMap)->vertices)
+		{
+			vbo.at(MiniMap)->vertices = std::make_shared<C3DObjectVertices>(6);
+		}		
+
 		auto meshSize = (bounds[1] - bounds[0]) * 0.5f;
-
+		auto v = vbo.at(MiniMap)->vertices.get();
 		float y = 0;
-		newvbo->vertices.get()->SetValues(0, glm::vec4(-meshSize.x, y, -meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1.0, 0.0));
-
-		newvbo->vertices.get()->SetValues(1, glm::vec4(-meshSize.x, y, meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1.0, 1.0));
-
-		newvbo->vertices.get()->SetValues(2, glm::vec4(meshSize.x, y, meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0.0, 1.0));
-
-		newvbo->vertices.get()->SetValues(3, glm::vec4(meshSize.x, y, meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0.0, 1.0));
-
-		newvbo->vertices.get()->SetValues(4, glm::vec4(meshSize.x, y, -meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0.0, 0.0));
-
-		newvbo->vertices.get()->SetValues(5, glm::vec4(-meshSize.x, y, -meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1.0, 0.0));
-
-		newvbo->vertices->usesCount++;
 		
+		//quad for minimap:
+		v->SetValues(0, glm::vec4(-meshSize.x, y, -meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1.0, 0.0));
+		v->SetValues(1, glm::vec4(-meshSize.x, y, meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1.0, 1.0));
+		v->SetValues(2, glm::vec4(meshSize.x, y, meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0.0, 1.0));
+		v->SetValues(3, glm::vec4(meshSize.x, y, meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0.0, 1.0));
+		v->SetValues(4, glm::vec4(meshSize.x, y, -meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(0.0, 0.0));
+		v->SetValues(5, glm::vec4(-meshSize.x, y, -meshSize.z, 1), glm::vec3(0, 1, 0), glm::vec4(1, 1, 1, 1), glm::vec2(1.0, 0.0));
 
-		C3DObjectProgram *newprog = new C3DObjectProgram("Minimap.v.glsl", "Minimap.f.glsl", "vertex", "texcoor", nullptr, nullptr);
-		prog.insert_or_assign(MiniMap, newprog);
+		v->usesCount = 1;
+	
+		
+		if (prog.find(MiniMap) == prog.end() || !prog.at(MiniMap)) {
+			C3DObjectProgram *newprog = new C3DObjectProgram("Minimap.v.glsl", "Minimap.f.glsl", "vertex", "texcoor", nullptr, nullptr);
+			prog.insert_or_assign(MiniMap, newprog);
+		}
+		
 
 		int minimapTexSize = CSettings::GetInt(IntMinimapTextureSize);
 
@@ -500,18 +562,20 @@ void CMesh::InitMiniMap()
 			mmimage = FreeImage_ConvertTo32Bits(tempImage);
 		}
 		//FreeImage_Save(FIF_JPEG, mmimage, "minimap.jpg", 0);
-		C3DObjectTexture *newtex = new C3DObjectTexture(mmimage, "tex", false, false); //new C3DObjectTexture("video.png", "tex");// 
-
-		tex.insert_or_assign(MiniMap, newtex);
-
+		if (tex.find(MiniMap) == tex.end() || !tex.at(MiniMap)) {
+			C3DObjectTexture *newtex = new C3DObjectTexture(mmimage, "tex", false, false); //new C3DObjectTexture("video.png", "tex");// 
+			tex.insert_or_assign(MiniMap, newtex);
+		}
+		else
+		{
+			tex.at(MiniMap)->Reload(mmimage);
+		}
 		scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 		rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 		translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 
-		delete maptexture;
-		maptexture = nullptr;
-
-		vbo.insert_or_assign(MiniMap, newvbo);
+		/*delete maptexture;
+		maptexture = nullptr;		*/
 	}
 }
 bool CMesh::Ready() {

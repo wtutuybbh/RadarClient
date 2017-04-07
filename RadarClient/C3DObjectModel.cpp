@@ -108,7 +108,7 @@ void C3DObjectModel::CreateBuffer(C3DObjectVBO *vbo_) {
 }
 void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)
 {
-	std::lock_guard<std::mutex> lock(m);
+	//std::lock_guard<std::mutex> lock(m);
 
 	if (!vpControl) return;
 	

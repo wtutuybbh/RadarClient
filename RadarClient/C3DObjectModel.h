@@ -15,7 +15,7 @@ class C3DObjectModel
 {	
 protected:
 	std::mutex m;
-	std::mutex mtxVertices;
+	//std::mutex mtxVertices;
 	static const std::string requestID;
 	std::unordered_map<int, C3DObjectVBO*> vbo;
 	std::unordered_map<int, C3DObjectTexture*> tex;

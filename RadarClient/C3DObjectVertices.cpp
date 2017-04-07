@@ -1,6 +1,20 @@
 #include "stdafx.h"
 #include "C3DObjectVertices.h"
 
+void C3DObjectVertices::Clear()
+{
+	if (vbuffer)
+		delete[] vbuffer;
+	if (idxArrays.size()>0)
+	{
+		for (auto it = idxArrays.begin(); it != idxArrays.end(); ++it)
+		{
+			if (*it)
+				delete[] * it;
+		}
+	}
+}
+
 void C3DObjectVertices::SetValues(int offset, float vx, float vy, float vz, float vt, float nx, float ny, float nz, float cr, float cg, float cb, float ca, float tu, float tv) const
 {
 	if (vertexSize != 13)

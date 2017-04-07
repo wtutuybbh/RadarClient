@@ -6,7 +6,7 @@ using namespace std;
 class C3DObjectTexture
 {
 	string imgFile;
-	unsigned int textureId;
+	unsigned int textureId {0};
 	char *textureUniformName;
 	FIBITMAP *image { nullptr };
 	int sizeX;
@@ -21,6 +21,7 @@ public:
 
 	C3DObjectTexture(const char *imgFile, const char *textureUniformName);
 	C3DObjectTexture(FIBITMAP *image, const char *textureUniformName, bool clearAfter, bool useBits);
+	void Reload(FIBITMAP *image);
 	void Bind(unsigned int programId) const;
 	void UnloadImage();
 	void LoadToGPU();

@@ -40,6 +40,7 @@ PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB = NULL;			// VBO Deletion Procedure
 
 class CRCTextureDataFile;
 class CScene;
+class CRCDataFileSet;
 
 typedef struct {
 	GLint sizeX, sizeY;
@@ -62,7 +63,9 @@ typedef int(_cdecl * GDPALTITUDEMAP_SIZES)(const char *, double *, int *);
 
 class CMesh : public C3DObjectModel
 {	
-	void LoadHeightmap();
+	CRCDataFileSet *altitudes_set{ nullptr };
+	CRCDataFileSet *textures_set {nullptr};
+	void LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures, bool reload_altitudes, bool rescan_folder_for_altitudes, bool recalculate_blindzones);
 
 	int texsize;
 
@@ -76,8 +79,11 @@ class CMesh : public C3DObjectModel
 	glm::vec2 position;
 	int resolution;
 	double max_range;
-
+	double h0 {1.5};
+	double e {0};
 	float MPPh, MPPv;
+	float maxh{ FLT_MIN }, minh{ FLT_MAX };
+	float maxbz{ FLT_MIN }, minbz{ FLT_MAX };
 
 	unsigned short *idxArray{ nullptr }, *idxArray2{ nullptr };
 
@@ -93,6 +99,7 @@ public:
 	~CMesh();
 	int UseTexture, UseY0Loc;
 	CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv);
+	void Refresh(glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv);
 	float GetCenterHeight();
 	float GetAverageHeight();
 	glm::vec3 GetSize();

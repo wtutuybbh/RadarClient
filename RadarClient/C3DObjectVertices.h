@@ -2,6 +2,7 @@
 
 class C3DObjectVertices
 {
+	void Clear();
 public:
 	float *vbuffer {nullptr};
 	std::vector<unsigned short *> idxArrays;
@@ -36,16 +37,7 @@ public:
 	}
 	~C3DObjectVertices()
 	{
-		if (vbuffer)
-			delete[] vbuffer;
-		if (idxArrays.size()>0)
-		{
-			for (auto it=idxArrays.begin(); it != idxArrays.end(); ++it)
-			{
-				if (*it)
-					delete[] *it;
-			}
-		}
+		Clear();
 	}
 	void SetValues(int offset, float vx, float vy, float vz, float vt, float nx, float ny, float nz, float cr, float cg, float cb, float ca, float tu, float tv) const;
 	void SetValues(int offset, glm::vec4 v, glm::vec3 n, glm::vec4 c, glm::vec2 t) const;
@@ -65,9 +57,12 @@ public:
 			throw std::exception("vertexCount must be greater than 0");
 
 		this->vertexCount = vertexCount;
-		if (vbuffer)
-			delete[] vbuffer;
+		
+		Clear();
+
 		vbuffer = new float[vertexCount * this->vertexSize];
+
+		
 	}
 
 	boost::property_tree::ptree GetPropertyTree(int i_from, int i_to) const;

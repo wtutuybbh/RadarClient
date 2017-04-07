@@ -148,6 +148,14 @@ CRCAltitudeDataFile::~CRCAltitudeDataFile()
 			LOG_INFO(requestID, "DESTRUCTOR", "data deleted");
 		}
 	}
+	if (blind_zone_height)
+	{
+		delete[] blind_zone_height;
+	}
+	if (ray_elevation_angle)
+	{
+		delete[] ray_elevation_angle;
+	}
 	if (LOG_ENABLED && CRCAltitudeDataFile_DESTRUCTOR_LOG)
 	{
 		LOG_INFO(requestID, "DESTRUCTOR", "data is nullptr");

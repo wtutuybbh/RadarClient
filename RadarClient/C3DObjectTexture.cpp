@@ -21,6 +21,10 @@ void C3DObjectTexture::InitBits()
 void C3DObjectTexture::LoadToGPU()
 {
 	if (!ready && (useBits && bits || !useBits && image)) {
+		if (textureId > 0)
+		{
+			glDeleteTextures(1, &textureId);
+		}
 		glGenTextures(1, &textureId);
 		glBindTexture(GL_TEXTURE_2D, textureId);
 		
@@ -100,16 +104,20 @@ C3DObjectTexture::C3DObjectTexture(const char* imgFile, const char *textureUnifo
 C3DObjectTexture::C3DObjectTexture(FIBITMAP* image, const char* textureUniformName, bool clearAfter, bool useBits)
 {
 	this->clearAfter = clearAfter;
-	this->useBits = useBits;
+	this->useBits = useBits;	
+	this->textureUniformName = (char *)textureUniformName;
+
+	Reload(image);
+}
+
+void C3DObjectTexture::Reload(FIBITMAP* image)
+{
 	this->image = image;
 	sizeX = FreeImage_GetWidth((FIBITMAP*)image);
 	sizeY = FreeImage_GetHeight((FIBITMAP*)image);
 	if (useBits) {
 		InitBits();
-	}	
-
-	this->textureUniformName = (char *)textureUniformName;
-
+	}
 	ready = false;
 }
 
