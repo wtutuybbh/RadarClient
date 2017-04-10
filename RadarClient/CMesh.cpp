@@ -298,6 +298,7 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 	InitMiniMap();
 
 	ready = true;
+
 }
 
 CMesh::~CMesh()
@@ -581,6 +582,22 @@ void CMesh::InitMiniMap()
 bool CMesh::Ready() {
 	return ready;
 }
+
+int CMesh::GetResolution()
+{
+	return resolution;
+}
+
+CRCAltitudeDataFile * CMesh::GetAltitudeDataFile()
+{
+	return altitude;
+}
+
+float CMesh::GetHeightAtLL(float lon, float lat)
+{
+	return altitude->ValueAtLL(lon, lat);
+}
+
 float CMesh::GetCenterHeight() {
 	return centerHeight;
 }

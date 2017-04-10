@@ -139,3 +139,5 @@ inline std::string wstring_to_utf8(const std::wstring& str)
 #define to_tstring(s) s
 #define to__string(s) s
 #endif
+
+#define MSG_MESH_LOADED (0x0400 + 512 + 256)

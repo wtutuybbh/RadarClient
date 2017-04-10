@@ -4,11 +4,14 @@
 typedef void(*LookAtCallback)(double eyex, double eyey, double eyez, double centerx, double centery, double centerz, double upx, double upy, double upz);
 enum MovementType { FORWARD, BACKWARD, STRAFE_L, STRAFE_R };
 
+typedef void(*ApplyPositionBoundsCallback)(float &x, float &y, float &z);
+
 class CCamera {
 private:
 	static const std::string requestID;
 	glm::vec3 Position;
 	glm::vec3 Up0;	
+	
 public:
 	
 	glm::vec3 Direction;
@@ -59,6 +62,9 @@ public:
 	float left, right, top, bottom, znear, zfar;
 	glm::vec3 mmPosition, mmTo, mmUp;
 
+	void ApplyPositionBounds(ApplyPositionBoundsCallback apb);
+
 private:
-	LookAtCallback lookAt;
+	LookAtCallback lookAt {nullptr};
+	ApplyPositionBoundsCallback applyPositionBounds{ nullptr };
 };

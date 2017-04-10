@@ -34,6 +34,10 @@ void CCamera::SetAll(float eyex, float eyey, float eyez, float centerx, float ce
 }
 void CCamera::SetAll(float eyex, float eyey, float eyez, float centerx, float centery, float centerz, float upx, float upy, float upz, float fovy, float aspect, float zNear, float zFar, float speed)
 {
+	if (applyPositionBounds)
+	{
+		applyPositionBounds(eyex, eyey, eyez);
+	}
 	this->Position = glm::vec3(eyex, eyey, eyez);
 
 	this->Direction = glm::vec3(centerx - eyex, centery - eyey, centerz - eyez);
@@ -59,6 +63,10 @@ void CCamera::SetProjection(float fovy, float aspect, float zNear, float zFar)
 
 void CCamera::SetPosition(float x, float y, float z)
 {
+	if (applyPositionBounds)
+	{
+		applyPositionBounds(x, y, z);
+	}
 	Position = glm::vec3(x, y, z);	
 }
 
@@ -73,7 +81,12 @@ void CCamera::LookAt() {
 }
 void CCamera::MoveByView(double shift) {
 	glm::vec3 dir = glm::normalize(GetDirection());
-	Position = glm::mat3(shift) * dir + Position;
+	glm::vec3 p = glm::mat3(shift) * dir + Position;
+	if (applyPositionBounds)
+	{
+		applyPositionBounds(p.x, p.y, p.z);
+	}
+	Position = p;
 }
 
 void CCamera::Rotate(float amount, glm::vec3& axis)
@@ -85,12 +98,24 @@ void CCamera::Move(glm::vec3 const & direction, bool preserveDirection)
 {
 	if (!preserveDirection) {
 		glm::vec3 to = Position + GetDirection();
-		Position += direction;
+		glm::vec3 p = Position;
+		p += direction;
+		if (applyPositionBounds)
+		{
+			applyPositionBounds(p.x, p.y, p.z);
+		}
+		Position = p;
 		Direction = to - Position;
 	}
 	else 
 	{
-		Position += direction;
+		glm::vec3 p = Position;
+		p += direction;
+		if (applyPositionBounds)
+		{
+			applyPositionBounds(p.x, p.y, p.z);
+		}
+		Position = p;
 	}
 }
 
@@ -98,17 +123,45 @@ void CCamera::ApplyMovement(MovementType movement)
 {
 	switch (movement)
 	{
-	case FORWARD:
-		Position += glm::normalize(GetDirection());
+	case FORWARD: {
+		glm::vec3 p = Position;
+		p += glm::normalize(GetDirection());
+		if (applyPositionBounds)
+		{
+			applyPositionBounds(p.x, p.y, p.z);
+		}
+		Position = p;
+	}
 		break;
-	case BACKWARD:
-		Position -= glm::normalize(GetDirection());
+	case BACKWARD: {
+		glm::vec3 p = Position;
+		p -= glm::normalize(GetDirection());
+		if (applyPositionBounds)
+		{
+			applyPositionBounds(p.x, p.y, p.z);
+		}
+		Position = p;
+	}
 		break;
-	case STRAFE_L:
-		Position += glm::cross(glm::normalize(GetDirection()), Up);
+	case STRAFE_L: {
+		glm::vec3 p = Position; 
+		p += glm::cross(glm::normalize(GetDirection()), Up);
+		if (applyPositionBounds)
+		{
+			applyPositionBounds(p.x, p.y, p.z);
+		}
+		Position = p;
+	}
 		break;
-	case STRAFE_R:
-		Position -= glm::cross(glm::normalize(GetDirection()), Up);
+	case STRAFE_R: {
+		glm::vec3 p = Position;
+		p -= glm::cross(glm::normalize(GetDirection()), Up);
+		if (applyPositionBounds)
+		{
+			applyPositionBounds(p.x, p.y, p.z);
+		}
+		Position = p;
+	}
 		break;
 	}
 }
@@ -156,4 +209,9 @@ glm::vec3 CCamera::GetDirection()
 		return RadarPosition - Position;
 	}
 	return Direction;
+}
+
+void CCamera::ApplyPositionBounds(ApplyPositionBoundsCallback apb)
+{
+	applyPositionBounds = apb;
 }

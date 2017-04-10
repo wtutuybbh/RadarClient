@@ -36,6 +36,7 @@ public:
 	float BlindZoneHeightAt(int x, int y);
 	float * BlindZoneHeight();
 	short ValueAtLL(double lon, double lat);
+	short ValueAtLL_max(double lon, double lat);
 	void SetValue(int x, int y, short val/*, float resX, float resY*/) const;
 
 	void ApplyIntersection(CRCDataFile *src) override;

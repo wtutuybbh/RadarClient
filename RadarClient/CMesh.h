@@ -108,4 +108,7 @@ public:
 	glm::vec3 * CMesh::GetBounds() override;
 	void InitMiniMap();
 	bool Ready();
+	int GetResolution();
+	CRCAltitudeDataFile * GetAltitudeDataFile();
+	float GetHeightAtLL(float lon, float lat);
 };

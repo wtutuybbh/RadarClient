@@ -404,7 +404,7 @@ short CRCAltitudeDataFile::ValueAtLL(double lon, double lat)
 {	
 	if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)
 	{
-		LOG_INFO("ValueAt", "CRCAltitudeDataFile::ValueAt(lon, lat)", "Start... lon=%.6f, lat=%.6f", lon, lat);
+		LOG_INFO("ValueAtLL", "CRCAltitudeDataFile::ValueAtLL(lon, lat)", "Start... lon=%.6f, lat=%.6f", lon, lat);
 	}
 	if (data) {
 		if (lon < lon0 )
@@ -437,19 +437,72 @@ short CRCAltitudeDataFile::ValueAtLL(double lon, double lat)
 
 		if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)
 		{
-			LOG_INFO("CRCAltitudeDataFile", "ValueAt(lon, lat)", "xf=%.6f, yf=%.6f, x0=%d, y_0=%d, x1=%d, y1=%d", xf, yf, x0, y_0, x1, y1);
+			LOG_INFO("CRCAltitudeDataFile", "ValueAtLL(lon, lat)", "xf=%.6f, yf=%.6f, x0=%d, y_0=%d, x1=%d, y1=%d", xf, yf, x0, y_0, x1, y1);
 		}
 
 		short *adata = (short *)data;
 		float ret = BilinearInterpolation(adata[y_0*width + x0], adata[y1*width + x0], adata[y_0*width + x1], adata[y1*width + x1], x0, x1, y_0, y1, xf, yf);
 		if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)
 		{
-			LOG_INFO("", "ValueAt(lon, lat) |q11|q12|q21|q22|x1|x2|y1|y2|x|y|res|", "|%d|%d|%d|%d|%d|%d|%d|%d|%.6f|%.6f|%.6f|",
+			LOG_INFO("", "ValueAtLL(lon, lat) |q11|q12|q21|q22|x1|x2|y1|y2|x|y|res|", "|%d|%d|%d|%d|%d|%d|%d|%d|%.6f|%.6f|%.6f|",
 				adata[y_0*width + x0], adata[y1*width + x0], adata[y_0*width + x1], adata[y1*width + x1], x0, x1, y_0, y1, xf, yf, ret);
 		}
 		return ret;
 	}
-	LOG_ERROR("CRCAltitudeDataFile", "ValueAt(lon, lat)", "data is nullptr");
+	LOG_ERROR("CRCAltitudeDataFile", "ValueAtLL(lon, lat)", "data is nullptr");
+	return 0;
+}
+
+short CRCAltitudeDataFile::ValueAtLL_max(double lon, double lat)
+{
+	if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)
+	{
+		LOG_INFO("ValueAtLL_max", "CRCAltitudeDataFile::ValueAtLL_max(lon, lat)", "Start... lon=%.6f, lat=%.6f", lon, lat);
+	}
+	if (data) {
+		if (lon < lon0)
+		{
+			lon = lon0;
+		}
+		if (lon > lon1)
+		{
+			lon = lon1;
+		}
+		if (lat < lat0)
+		{
+			lat = lat0;
+		}
+		if (lat > lat1)
+		{
+			lat = lat1;
+		}
+
+		float xf = (width - 1) * (lon - lon0) / (lon1 - lon0);
+		float yf = (height - 1) * (lat - lat0) / (lat1 - lat0);
+
+		int x0 = floor(xf), x1 = ceil(xf);
+		int y_0 = floor(yf), y1 = ceil(yf);
+
+		if (x0 < 0) x0 = 0;
+		if (y_0 < 0) y_0 = 0;
+		if (x1 >= width) x1 = width - 1;
+		if (y1 >= height) y1 = height - 1;
+
+		if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)
+		{
+			LOG_INFO("CRCAltitudeDataFile", "ValueAtLL_max(lon, lat)", "xf=%.6f, yf=%.6f, x0=%d, y_0=%d, x1=%d, y1=%d", xf, yf, x0, y_0, x1, y1);
+		}
+
+		short *adata = (short *)data;
+		float ret = max(max(adata[y_0*width + x0], adata[y1*width + x0]), max(adata[y_0*width + x1], adata[y1*width + x1]));
+		if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)
+		{
+			LOG_INFO("", "ValueAtLL_max(lon, lat) |q11|q12|q21|q22|x1|x2|y1|y2|x|y|res|", "|%d|%d|%d|%d|%d|%d|%d|%d|%.6f|%.6f|%.6f|",
+				adata[y_0*width + x0], adata[y1*width + x0], adata[y_0*width + x1], adata[y1*width + x1], x0, x1, y_0, y1, xf, yf, ret);
+		}
+		return ret;
+	}
+	LOG_ERROR("CRCAltitudeDataFile", "ValueAtLL_max(lon, lat)", "data is nullptr");
 	return 0;
 }
 

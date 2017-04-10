@@ -232,6 +232,36 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
+void ApplyPositionBounds(float &x, float &y, float &z)
+{
+	if (g_vpControl && g_vpControl->Scene && g_vpControl->Scene->MeshReady())
+	{
+		auto v = g_vpControl->Scene->Mesh->vertices;
+		auto b = g_vpControl->Scene->Mesh->GetBounds();
+		auto a = g_vpControl->Scene->Mesh->GetAltitudeDataFile();
+		int res = g_vpControl->Scene->Mesh->GetResolution();
+		
+		if (v && b && a)
+		{
+
+			auto dlat = a->DLat();
+			auto dlon = a->DLon();
+
+			double lon = dlon * ((x - b[0].x) / (b[1].x - b[0].x)) * res;
+			double lat = dlat * ((z - b[0].z) / (b[1].z - b[0].z)) * res;
+
+			auto hc = g_vpControl->Scene->Mesh->GetCenterHeight();
+			auto h = a->ValueAtLL_max(lon, lat) + 5;
+
+			auto mppv = CSettings::GetFloat(FloatMPPv);
+
+			if (mppv && h - hc > mppv * y )
+			{
+				y = (h - hc) / mppv;
+			}
+		}
+	}
+}
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	string context = "WindowProc";
@@ -553,13 +583,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	g_nCmdShow = nCmdShow;
 	MSG msg;
 
+#ifdef _DEBUG
 	AllocConsole();
 	HWND console = GetConsoleWindow();
 	SetWindowPos(console, HWND_TOPMOST, 0, 0, 0, 0, SWP_DRAWFRAME | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 	ShowWindow(console, SW_NORMAL);
 
 	freopen("CONOUT$", "w", stdout);
-
+#endif
 	string context = "WinMain";
 	
 	float x; 
@@ -568,6 +599,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	short direction;
 	bool take1;
 	bool take2;
+
+	glm::vec3 test;
 
 	x1 = 0; x = 0.5; x2 = 2; direction = 1, take1 = false, take2 = true;
 	LOG_INFO__("rcutils::between_on_circle(%f, %f, %f, %d, %d, %d) = %d ", x, x1, x2, direction, take1, take2, rcutils::between_on_circle(x, x1, x2, direction, take1, take2));
@@ -881,6 +914,7 @@ BOOL Initialize()					// Any GL Init Code & User Initialiazation Goes Here
 		g_vpControl->Scene->UI = g_UI;
 		g_vpControl->UI = g_UI;
 		g_vpControl->Camera = g_vpControl->Scene->Camera;
+		g_vpControl->Camera->ApplyPositionBounds(ApplyPositionBounds);
 		CUserInterface::Scene = g_vpControl->Scene;
 	}
 	
