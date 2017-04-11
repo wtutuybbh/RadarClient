@@ -247,8 +247,8 @@ void ApplyPositionBounds(float &x, float &y, float &z)
 			auto dlat = a->DLat();
 			auto dlon = a->DLon();
 
-			double lon = dlon * ((x - b[0].x) / (b[1].x - b[0].x)) * res;
-			double lat = dlat * ((z - b[0].z) / (b[1].z - b[0].z)) * res;
+			double lon = a->Lon0() + dlon * ((-x + b[1].x) / (b[1].x - b[0].x)) * res;
+			double lat = a->Lat0() + dlat * ((z - b[0].z) / (b[1].z - b[0].z)) * res;
 
 			auto hc = g_vpControl->Scene->Mesh->GetCenterHeight();
 			auto h = a->ValueAtLL_max(lon, lat) + 5;
