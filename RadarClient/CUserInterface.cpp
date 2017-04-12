@@ -53,6 +53,7 @@ LRESULT CUserInterface::Wnd_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 			}
 		}
 	}
+
 	return LRESULT();
 }
 //in this method ID is retrieved as GetDlgCtrlID((HWND)lParam)
@@ -471,6 +472,23 @@ LRESULT CUserInterface::InfoGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	return LRESULT();
 }
 
+LRESULT CUserInterface::LonLat(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+
+	//LOG_INFO("test", "CUserInterface::LonLat", "hwnd=%d, uMsg=%d, LOWORD(wParam)=%d, HIWORD(wParam)=%d, lParam=%d", hwnd, uMsg, LOWORD(wParam), HIWORD(wParam), lParam);
+
+	if ((HIWORD(wParam) == EN_CHANGE) && //notification
+		(LOWORD(wParam) == IDC_EDIT_LON))   //your edit control ID
+	{
+		auto hw = GetDlgItem(hwnd, IDC_EDIT_LON);
+		auto lon = GetDoubleValue(hw);
+		CSettings::SetFloat(FloatPositionLon, lon);
+		CSettings::Save();
+	}
+
+	return LRESULT();
+}
+
 LRESULT CUserInterface::IDD_DIALOG1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	return LRESULT();
@@ -507,6 +525,28 @@ float CUserInterface::GetZeroElevation()
 float CUserInterface::GetHeight()
 {
 	return GetTrackbarValue_VTilt(); //here elevation counts from top-up direction
+}
+
+double CUserInterface::GetDoubleValue(HWND hw)
+{
+	if (!hw)
+	{
+		return 0;
+		//throw std::exception("CUserInterface::GetDoubleValue - hw is nullptr");
+	}
+	auto l = GetWindowTextLength(hw) + 1;
+	auto buf = new TCHAR[l];
+	GetWindowText(hw, buf, l);
+	TCHAR *stop;
+	auto ret = _tcstod(buf, &stop);
+	delete[] buf;
+	return ret;
+}
+
+void CUserInterface::SetDoubleValue(HWND hw, double val)
+{
+	tstring t = to_tstring(to_string(val));
+	SetWindowText(hw, t.c_str());
 }
 
 int CUserInterface::InsertElement(DWORD xStyle, LPCWSTR _class, LPCWSTR text, DWORD style, int x, int y, int width, int height, UIWndProc action)
@@ -763,6 +803,8 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	
 	//Elements.insert({ IDC_CHECK3, new InterfaceElement{ IDC_CHECK3, NULL, _T("IDC_CHECK3"), _T("IDC_CHECK3"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_ObjOptions } });
 
+	Elements.insert({ IDC_EDIT_LON, new InterfaceElement{ IDC_EDIT_LON, NULL, _T("IDC_EDIT_LON"), _T("IDC_EDIT_LON"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::LonLat } });
+	Elements.insert({ IDC_EDIT_LAT, new InterfaceElement{ IDC_EDIT_LAT, NULL, _T("IDC_EDIT_LAT"), _T("IDC_EDIT_LAT"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::LonLat } });
 
 
 
@@ -781,7 +823,7 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	GridHWND = InfoGridHWND = nullptr;
 	InitGrid();
 
-	
+
 	
 }
 
@@ -1025,10 +1067,14 @@ void CUserInterface::FillGrid(vector<TRK*> *tracks)
 void CUserInterface::FillInfoGrid(CScene* scene)
 {
 	std::string context = "CUserInterface::FillInfoGrid";
-	if (!scene)
+	if (!scene && !Scene)
 	{
 		LOG_WARN__("Called with parameter scene=nullptr");
 		return;
+	}
+	if (!scene)
+	{
+		scene = Scene;
 	}
 	if (!InfoGridHWND)
 	{
@@ -1046,15 +1092,34 @@ void CUserInterface::FillInfoGrid(CScene* scene)
 
 	//*(&(CRCGridCell::CRCGridCell(InfoGridHWND, ncols, r, 1))) = "test";
 
-	GRIDCELL(InfoGridHWND, ncols * r + 1) = "Местоположение радара";
+	GRIDCELL(InfoGridHWND, ncols * r + 1) = "Radar position";
 	GRIDCELL(InfoGridHWND, ncols * r + 2) = format("%.4f, %.4f", scene->position.x, scene->position.y);
+	
+	r++;
+	GRIDCELL(InfoGridHWND, ncols * r + 1) = "Radar altitude";
+	if (scene->MeshReady()) {
+		GRIDCELL(InfoGridHWND, ncols * r + 2) = format("%.1f", scene->Mesh->GetCenterHeight());
+	}
+
+
+
+	r++;	
+	GRIDCELL(InfoGridHWND, ncols * r + 1) = "Radar height";
+	GRIDCELL(InfoGridHWND, ncols * r + 2) = format("%.1f", CSettings::GetFloat(FloatPositionRadarHeight));
+
+	if (scene->Camera) {
+		auto p = scene->Camera->GetPosition();
+		r++;
+		GRIDCELL(InfoGridHWND, ncols * r + 1) = "Camera position";
+		GRIDCELL(InfoGridHWND, ncols * r + 2) = format("%.4f, %.4f, %.4f", p.x, p.y, p.z);
+	}
 
 	if (scene->Socket->IsConnected) {
 		r++;
-		GRIDCELL(InfoGridHWND, ncols * r + 1) = "Угол места, от";
+		GRIDCELL(InfoGridHWND, ncols * r + 1) = "Elevation min";
 		GRIDCELL(InfoGridHWND, ncols * r + 2) = format("%.4f", scene->minE);
 		r++;
-		GRIDCELL(InfoGridHWND, ncols * r + 1) = "Угол места, до";
+		GRIDCELL(InfoGridHWND, ncols * r + 1) = "Elevation max";
 		GRIDCELL(InfoGridHWND, ncols * r + 2) = format("%.4f", scene->maxE);
 	}
 
@@ -1104,5 +1169,6 @@ void CUserInterface::OnInitDialog()
 	SetChecked(ToolboxHWND, IDC_CHECK9, true);
 	SetChecked(ToolboxHWND, IDC_CHECK10, true);
 
-	
+	SetDoubleValue(GetDlgItem(ToolboxHWND, IDC_EDIT_LON), CSettings::GetFloat(FloatPositionLon));
+	SetDoubleValue(GetDlgItem(ToolboxHWND, IDC_EDIT_LAT), CSettings::GetFloat(FloatPositionLat));
 }

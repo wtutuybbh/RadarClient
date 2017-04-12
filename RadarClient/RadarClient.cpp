@@ -261,6 +261,7 @@ void ApplyPositionBounds(float &x, float &y, float &z)
 			}
 		}
 	}
+	g_UI->FillInfoGrid(g_vpControl->Scene);
 }
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -810,6 +811,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							// If Not, Dispatch The Message
 							if (!g_UI || !IsWindow(g_UI->GetSettingsHWND()) || !IsDialogMessage(g_UI->GetSettingsHWND(), &msg)) 
 							{
+								TranslateMessage(&msg);
 								DispatchMessage(&msg);
 							}
 							else

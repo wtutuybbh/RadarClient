@@ -31,8 +31,6 @@ bool CSettings::Init()
 	InitColor(ColorAxis,				TEXT("ColorAxis"),			glm::vec4(0.5, 0.5, 0.5, 0.5));
 	InitColor(ColorNumbers,				TEXT("ColorNumbers"),		glm::vec4(0.7, 0.7, 0.7, 0.5));
 	InitColor(ColorPointLowLevel,		TEXT("ColorPointLowLevel"), glm::vec4(0.4, 0.4, 0.4, 1));
-
-
 	InitColor(ColorPointHighLevel, TEXT("ColorPointHighLevel"),glm::vec4(1, 1, 1, 1));
 
 	InitColor(ColorPointSelected, TEXT("ColorPointSelected"),glm::vec4(0.5, 1, 0.5, 1));
@@ -148,6 +146,8 @@ bool CSettings::Init()
 
 	InitInt(IntConnectionTimeout, TEXT("IntConnectionTimeout"), 10);
 	
+	InitFloat(FloatPositionRadarHeight, TEXT("FloatPositionRadarHeight"), 1.5);
+
 	return true;
 	
 }

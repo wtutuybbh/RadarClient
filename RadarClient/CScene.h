@@ -185,4 +185,6 @@ public:
 	bool MeshReady() const;
 
 	float GetY0();
+
+	glm::vec3 XYZ2LLH(glm::vec3 xyz);
 };

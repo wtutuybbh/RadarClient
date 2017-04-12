@@ -58,6 +58,7 @@ enum Settings
 	FloatMaxZeroElevation,
 	FloatPositionLon,
 	FloatPositionLat,
+	FloatPositionRadarHeight,
 	IntResolution,
 	IntTexSize,
 	IntNazm,

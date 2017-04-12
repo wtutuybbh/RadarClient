@@ -119,6 +119,8 @@ private:
 	virtual LRESULT Grid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT ColorGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT InfoGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT LonLat(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
 
 	virtual LRESULT IDD_DIALOG1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 public:
@@ -134,6 +136,9 @@ public:
 
 	CViewPortControl *VPControl { nullptr };
 	CRCSocket *Socket { nullptr };
+
+	double GetDoubleValue(HWND hw);
+	void SetDoubleValue(HWND hw, double val);
 
 	int InsertElement(DWORD xStyle, LPCWSTR Class, LPCWSTR Text, DWORD Style, int X, int Y, int Width, int Height, UIWndProc Action);
 	void InsertHandlerElement(int ID, UIWndProc Action);

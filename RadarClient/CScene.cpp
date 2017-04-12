@@ -913,6 +913,16 @@ bool CScene::MeshReady() const
 float CScene::GetY0() {
 	return 0;
 }
+
+glm::vec3 CScene::XYZ2LLH(glm::vec3 xyz)
+{
+	if (!MeshReady())
+	{
+		return glm::vec3(0);
+	}
+
+}
+
 void CScene::DrawBitmaps() const
 {
 	if (!Mesh || !Mesh->Ready()) {
