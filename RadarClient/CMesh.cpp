@@ -64,6 +64,7 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 	}
 	if (rescan_folder_for_altitudes || altitudes_set->CountFilesOfGivenType(Altitude) == 0)
 	{
+		altitudes_set->Clear();
 		altitudes_set->AddFiles("AltitudeData", Altitude, "");
 	}
 	if (!textures_set)
@@ -72,6 +73,7 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 	}
 	if (rescan_folder_for_textures || textures_set->CountFilesOfGivenType(Texture) == 0)
 	{
+		textures_set->Clear();
 		textures_set->AddFiles("TextureData", Texture, "");
 	}
 
@@ -291,6 +293,8 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 		vbo.insert_or_assign(Main, new C3DObjectVBO(clearAfter));
 	}
 	
+	vertices->needsReload = true;
+
 	vbo.at(Main)->vertices = vertices;
 
 	vertices.get()->usesCount++;
@@ -343,8 +347,17 @@ CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize,
 	//t.detach();
 }
 
-void CMesh::Refresh(glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv)
+void CMesh::Refresh()
 {
+	position.x = CSettings::GetFloat(FloatPositionLon);
+	position.y = CSettings::GetFloat(FloatPositionLat);
+	max_range = CSettings::GetFloat(FloatMaxDistance);
+	resolution = CSettings::GetInt(IntResolution);
+	MPPv = CSettings::GetFloat(FloatMPPv);
+	MPPh = CSettings::GetFloat(FloatMPPh);
+	texsize = CSettings::GetInt(IntTexSize);
+
+	LoadHeightmap(true, true, true, true, true);
 }
 
 glm::vec3 CMesh::GetSize() {
@@ -547,6 +560,7 @@ void CMesh::InitMiniMap()
 
 		v->usesCount = 1;
 	
+		v->needsReload = true;
 		
 		if (prog.find(MiniMap) == prog.end() || !prog.at(MiniMap)) {
 			C3DObjectProgram *newprog = new C3DObjectProgram("Minimap.v.glsl", "Minimap.f.glsl", "vertex", "texcoor", nullptr, nullptr);

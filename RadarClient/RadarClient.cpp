@@ -192,7 +192,7 @@ void CallUI(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{		
 		if (g_UI) {
 			LOG_INFO_("CallUI before OnInitDialog", "hWnd=%d, uMsg=%d, wParam=%d, lParam=%d", hWnd, uMsg, wParam, lParam);
-			g_UI->OnInitDialog();
+			//g_UI->OnInitDialog();
 		}
 	}
 	if (uMsg == WM_COMMAND)
@@ -422,7 +422,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			window->keys->keyDown[wParam] = FALSE;					// Set The Selected Key (wParam) To False
 			//return 0;												// Return
 		}
-		LOG_INFO(requestID, context, (boost::format("WM_KEYUP: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str().c_str());
+		LOG_INFO("msgtest", context, (boost::format("WM_KEYUP: uMsg=%1%, wParam=%2%, lParam=%3%") % hWnd % wParam % lParam).str().c_str());
 	}
 				   break;															// Break
 	case WM_SYSKEYDOWN:

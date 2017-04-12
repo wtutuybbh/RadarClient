@@ -288,6 +288,20 @@ LRESULT CUserInterface::ProcessColorListViewCustomDraw(LPARAM lParam) {
 	return CDRF_DODEFAULT;
 }
 
+LRESULT CUserInterface::Button_Reload(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch(uMsg)
+	{
+	case WM_COMMAND:
+		if (Scene && Scene->MeshReady())
+		{
+			Scene->Mesh->Refresh();
+		}
+		break;
+	}
+	return LRESULT();
+}
+
 LRESULT CUserInterface::Dialog_SelectColor(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	if (uMsg == WM_XCOLORPICKER_SELCHANGE || uMsg == WM_XCOLORPICKER_SELENDOK)
@@ -475,23 +489,29 @@ LRESULT CUserInterface::InfoGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 LRESULT CUserInterface::LonLat(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 
-	//LOG_INFO("test", "CUserInterface::LonLat", "hwnd=%d, uMsg=%d, LOWORD(wParam)=%d, HIWORD(wParam)=%d, lParam=%d", hwnd, uMsg, LOWORD(wParam), HIWORD(wParam), lParam);
+	LOG_INFO("msgtest", "CUserInterface::LonLat", "hwnd=%d, uMsg=%d, LOWORD(wParam)=%d, HIWORD(wParam)=%d, lParam=%d", hwnd, uMsg, LOWORD(wParam), HIWORD(wParam), lParam);
 
 	if ((HIWORD(wParam) == EN_CHANGE) && //notification
 		(LOWORD(wParam) == IDC_EDIT_LON))   //your edit control ID
 	{
 		auto hw = GetDlgItem(hwnd, IDC_EDIT_LON);
-		auto lon = GetDoubleValue(hw);
-		CSettings::SetFloat(FloatPositionLon, lon);
-		CSettings::Save();
+		auto lon = float(GetDoubleValue(hw));
+		if (lon != CSettings::GetFloat(FloatPositionLon))
+		{
+			CSettings::SetFloat(FloatPositionLon, lon);
+			CSettings::Save();
+		}
 	}
 	if ((HIWORD(wParam) == EN_CHANGE) && //notification
 		(LOWORD(wParam) == IDC_EDIT_LAT))   //your edit control ID
 	{
 		auto hw = GetDlgItem(hwnd, IDC_EDIT_LAT);
-		auto lat = GetDoubleValue(hw);
-		CSettings::SetFloat(FloatPositionLon, lat);
-		CSettings::Save();
+		auto lat = float(GetDoubleValue(hw));
+		if (lat != CSettings::GetFloat(FloatPositionLat))
+		{
+			CSettings::SetFloat(FloatPositionLat, lat);
+			CSettings::Save();
+		}
 	}
 	return LRESULT();
 }
@@ -813,7 +833,9 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	Elements.insert({ IDC_EDIT_LON, new InterfaceElement{ IDC_EDIT_LON, NULL, _T("IDC_EDIT_LON"), _T("IDC_EDIT_LON"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::LonLat } });
 	Elements.insert({ IDC_EDIT_LAT, new InterfaceElement{ IDC_EDIT_LAT, NULL, _T("IDC_EDIT_LAT"), _T("IDC_EDIT_LAT"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::LonLat } });
 
-
+	
+		
+	Elements.insert({ IDC_BUTTON1, new InterfaceElement{ IDC_BUTTON1, NULL, _T("IDC_BUTTON1"), _T("IDC_BUTTON1"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Button_Reload } });
 
 
 

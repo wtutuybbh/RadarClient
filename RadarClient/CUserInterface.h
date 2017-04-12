@@ -96,6 +96,9 @@ private:
 	static void InitColorListViewColumns(HWND hwndListView, LV_COLUMN lvColumn);
 	static LRESULT CALLBACK ProcessColorListViewCustomDraw(LPARAM lParam);
 
+	virtual LRESULT Button_Reload(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+
 	static LRESULT CALLBACK Dialog_SelectColor(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	static CXColorSpectrumCtrl m_ColorSpectrum;
 
