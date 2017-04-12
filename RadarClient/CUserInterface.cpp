@@ -485,7 +485,14 @@ LRESULT CUserInterface::LonLat(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		CSettings::SetFloat(FloatPositionLon, lon);
 		CSettings::Save();
 	}
-
+	if ((HIWORD(wParam) == EN_CHANGE) && //notification
+		(LOWORD(wParam) == IDC_EDIT_LAT))   //your edit control ID
+	{
+		auto hw = GetDlgItem(hwnd, IDC_EDIT_LAT);
+		auto lat = GetDoubleValue(hw);
+		CSettings::SetFloat(FloatPositionLon, lat);
+		CSettings::Save();
+	}
 	return LRESULT();
 }
 

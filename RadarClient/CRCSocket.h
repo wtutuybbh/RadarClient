@@ -1,6 +1,17 @@
 ﻿#pragma once
 #include "stdafx.h"
 
+/******************************************************************************
+
+ОБЩИЕ СТРУКТУРЫ ДАННЫХ ДЛЯ ОБМЕНА МЕЖДУ КЛИЕНТОМ И СЕРВЕРОМ
+
+ВЕРСИЯ 12.04.17
+
+описание протокола
+файл [протокол8.docx]  - версия 1.8 от 11.11.2016
+
+******************************************************************************/
+
 
 
 #ifndef global1h
@@ -33,32 +44,12 @@ using namespace std;
 #define D2R(x) ((x)*M_PI/180.0)
 #define R2D(x) ((x)*180.0/M_PI)
 
-#define MNNAK 0.5 //коэффициент накопления от ширины ДН
-//#define LENDATAOTOBR 16 //размер массива Data[LENDATAOTOBR] в структуре STROTOBR
-//int LENDATAOTOBR = 1;
-//int counter = 0;
 
 
 #define MSGBASE (0x0400 + 512)
 
-#define MSGEND QEvent::User + 100
-#define MSCAPTION QEvent::User + 101
-#define MSGOTOBR QEvent::User + 102
-#define MSGPOINTS QEvent::User + 103
-#define MSGSTRING QEvent::User + 104
-
-#define MSGPPOINTS QEvent::User + 105  // список подтвержденных точек
-#define MSGTRACK QEvent::User + 106    // список траекторий
-#define MSGDELTRACK QEvent::User + 107 // список удаленных траекторий
-
-
 #define MSG_RPOINTS (MSGBASE + 150)
 #define MSG_RIMAGE (MSGBASE + 151)
-
-
-#define MSGPPOINTS QEvent::User + 105  // список подтвержденных точек
-#define MSGTRACK QEvent::User + 106    // список траекторий
-#define MSGDELTRACK QEvent::User + 107 // список удаленных траекторий
 
 #define MSG_PTSTRK (MSGBASE + 105)  // список подтвержденных точек
 #define MSG_OBJTRK (MSGBASE + 106)    // список траекторий
@@ -71,7 +62,7 @@ using namespace std;
 #define MSG_ECHO (MSGBASE + 158)
 #define MSG_STRING (MSGBASE + 160)
 
-#define TXRXBUFSIZE 4*1024*1024
+#define TXRXBUFSIZE 64*(1024*1024) + 512 // макс размер блока данных при обмене по сети
 
 // точки траектории
 
@@ -98,64 +89,6 @@ struct RDRTRACK
 };
 
 //---------------------------------------------------------------------------
-struct STRCONSTANT
-{
-	float HeightDN;  //ширина ДН град
-	float DeltaB;    //единица кода УСУК по В град 
-	float DeltaR;    //элемент разрешения по R м
-	float DeltaACP;  //дискрета по дальности АЦП
-	float SpeedObj;  //макcимальная скорость объекта(м/с)
-	float TimeCode;  //единица кода времени от ПЛИС(мкС)
-
-};
-
-//---------------------------------------------------------------------------
-struct STRRAB
-{
-	int vidRab;  //0-работа 1-кимс на доске вн.прерывания и данные АЦП как шум
-				 //2-кимс на доске без вн.прерываний и данных АЦП 3-кимс на хосте
-	int Bmin;    //код УСУК
-	int Bmax;    //код УСУК
-	int Rmin;    //код АЦП
-	int Rmax;    //код АЦП
-	float SpeedB;//скорость опу (дискрета по В код УСУК/единица кода времени от ПЛИС)
-	int tNakopl; // время накопления (код времени ПЛИС)
-	int delBN;   // дискрета отображения (накопления) (код УСУК)
-
-	STRCONSTANT constProg;
-};
-//---------------------------------------------------------------------------
-union USOST
-{
-	unsigned int iSost;
-	struct srtuctSost
-	{
-		int Pr : 8;
-		int Per : 8;
-		int Sinch : 8;
-		int Afu : 8;
-	}Device;
-};
-//---------------------------------------------------------------------------
-struct STRCAPTION
-{
-	unsigned int regim;     // режим работы, код аварийного завершения(>100) 
-							// 101-ошибка чтения из ХОСТ исходных данных
-							// 102-ошибка при открытии АЦП
-							// 103-ошибка инициализации АЦП
-							// 0-конец работы
-	USOST uSost;
-	int BeginB;             //начальный азимут точек код УСУК
-	int EndB;               //конечный азимут точек код УСУК
-	unsigned int sizePoint; // размер массива с данными (STRPOINT)
-	unsigned int sizeOtobr; // размер массива с данными (STROTOBR)
-	int reserv1;
-	int reserv2;
-};
-
-
-
-//---------------------------------------------------------------------------
 struct STRPOINT
 {
 	float Amp;
@@ -163,15 +96,6 @@ struct STRPOINT
 	int B;  //код УСУК
 	int time;//1==200mkC
 };
-//---------------------------------------------------------------------------
-/*typedef struct
-{
-int NumSektor;                //номер кадра
-int Btek;                     // номер элемента разрешения от 0 по азимуту
-unsigned int CountSamer;      //количество обработанных замеров
-unsigned int CountSamerFalse; //количество пропущенных замеров
-float Data[LENDATAOTOBR];
-}STROTOBR, *PTROTOBR;*/
 //---------------------------------------------------------------------------
 struct STRTRACK
 {
@@ -186,78 +110,10 @@ struct STRTRACK
 	int countFalse;      // счетчик отсутствия подтверждений
 
 };
-//---------------------------------------------------------------------------
-struct STRONSINCH
-{
-	unsigned kIsl : 1;    //команда на формирование имп излучения
-	unsigned kStart : 1;  //команда на формирование имп старта АЦП 
-	unsigned kInt : 1;    //команда на формирование имп прерываний
 
-	unsigned kAtt : 1;    //команда задания кода аттенюаторов
-	unsigned kAtt1 : 4;    //код установки аттенюатора 1
-	unsigned kAtt2 : 4;    //код установки аттенюатора 2
-
-						   // управление параметрами пачки
-	unsigned pCount : 8;   // количество импульсов в пачке
-	unsigned pVid : 8;     // период импульсов в пачке *0.1 мкС
-
-	unsigned reserv1 : 7;    //
-
-							 // управление ОПУ        
-	unsigned kOpu : 1;    //команда задания положения ОПУ 
-	unsigned oKod : 32;   //код опу
-						  //unsigned KuAP:1;    //движение по азимуту направо
-						  //unsigned KuAL:1;    //движение по азимуту налево
-	unsigned oVa : 32;      //скорость движения по азимуту
-
-	unsigned reserv2 : 32;    //
-
-};
 //---------------------------------------------------------------------------
 
-struct STRWITHSINCH
-{
-	unsigned kB : 32;     //код положения антенны по азимуту
-	unsigned kTime : 32;  //код времени
-	unsigned kAtt1 : 4;    //код установки аттенюатора 1
-	unsigned kAtt2 : 4;    //код установки аттенюатора 2
-
-	unsigned reserv1 : 12; //
-
-	unsigned opuL : 1;    //состояние ОПУ движение влево
-	unsigned opuR : 1;    //состояние ОПУ движение вправо
-
-	unsigned Va : 32;      //скорость движения по азимуту
-
-};//от синхронизатора
-
-  //---------------------------------------------------------------------------
-struct STRNACHVEKT
-{
-	double r0;   //дальность
-	double b0;   //азимут
-	double v0;   //скорость продольная
-	double psi;  //угол между проекцией л.в. на сферу и вектором скорости
-	double sc;   //ЭПР
-};///начальный вектор цели
-
-  //---------------------------------------------------------------------------
-
-
-
-struct _sh                         //Шапка массивов
-{
-	unsigned int word1;
-	unsigned int word2;
-	unsigned int date;
-	unsigned int times;
-	unsigned int reserved;
-	unsigned int type;
-	unsigned int dlina;
-};
-
-
-struct RPOINT
+struct RPOINT  // ОТМЕТКА ОБЪЕКТА (после первичной обработки)
 {
 
 	float Amp;
@@ -267,7 +123,7 @@ struct RPOINT
 	unsigned int T;   //1==200mkC
 };
 
-struct RPOINTS
+struct RPOINTS  // ОБЩАЯ СТРУКТУРА НА НАБОР ОТМЕТОК. ЗА НЕЙ СЛЕДОМ ИДУТ RPOINTS[n]
 {
 	int N;
 	short d1;
@@ -277,7 +133,7 @@ struct RPOINTS
 	unsigned int ObserveCount;
 };
 
-struct RIMAGE
+struct RIMAGE  // РАДИОИЗОБРАЖЕНИЕ
 {
 	int N;
 	short d1;
@@ -288,64 +144,18 @@ struct RIMAGE
 };
 
 
-
-
-struct STRPOINTS
-{
-
-	float Amp;
-	int R;        //код АЦП
-	int B;        //код УСУК
-	int time;   //1==200mkC
-
-};
-
-
-struct Nchannel_Data
-{
-	int SampleCount; // количество отсчетов в канале
-	int SampleSize;  // в байтах на 1 канал
-	int AZMT;       // 8200 едениц = 360 градусов
-	float* ch1offs{ nullptr }; // резерв
-	float* ch2offs{ nullptr }; // резерв
-
-	unsigned int type; //= 0 - олдскул записи. поля ниже не существуют.
-					   //  1 - имитатор. версия 1.1 / 4байта float, 2 канала, ch1=ch2, после модуля опт фильтр /
-
-
-					   //unsigned __int64 prectimer; // 1 ед = 200 мкс, время получения данных
-					   //unsigned __int64 begprectimer; // 1 ед = 200 мкс, время начала сеанса
-					   //int Nazm,Nelv; // штук
-					   //double dAzm,dElv;// в радианах
-					   //double begAzm,begElv;
-					   //time_t begCTime;
-					   //unsigned int middle_t;
-
-	int strRab_Bmax;
-	int strRab_Bmin;
-	float strRab_constProg_DeltaACP;
-	float strRab_constProg_DeltaB;
-	float strRab_constProg_DeltaR;
-	float strRab_constProg_HeightDN;
-	float strRab_constProg_SpeedObj;
-	float strRab_constProg_TimeCode;
-	int strRab_delBN;
-	int strRab_Rmax;
-	int strRab_Rmin;
-	float strRab_SpeedB;
-	int strRab_tNakopl;
-	int strRab_vidRab;
-
-	char reserv[128 - 20 * 4];
-
-
-};
-
-
-
-
-//---------------------------------------------------------------------------
 //******************обмен по сети******************************************//
+
+struct _sh  //  ЗАГОЛОВОК ВСЕХ ПАКЕТОВ ДАННЫХ ПЕРЕДАВАЕМЫХ ПО СЕТИ 
+{
+	unsigned int word1;
+	unsigned int word2;
+	unsigned int date;
+	unsigned int times;
+	unsigned int reserved;
+	unsigned int type;
+	unsigned int dlina;
+};
 
 
 /* очередь отправляемых данных
@@ -364,7 +174,7 @@ struct _client                     //Клиенты
 	SOCKET *Socket{ nullptr };
 	unsigned int recv_offset{ 0 };
 	vector<send_queue_element> send_queue;  // очередь отправляемых данных
-//#ifdef _DEBUG
+											//#ifdef _DEBUG
 	unsigned long read_number{ 0 };
 };
 
@@ -482,7 +292,7 @@ public:
 	void Init();
 	int Connect();
 
-	
+
 	int Read();
 
 	int Close();
