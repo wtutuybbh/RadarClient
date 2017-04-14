@@ -37,14 +37,29 @@ LRESULT Button1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 //in this method ID is retrieved as LOWORD(wParam)
 LRESULT CUserInterface::Wnd_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	if (uMsg == WM_INITDIALOG)
+	{
+		ToolboxHWND = hwnd;
+		OnInitDialog();
+		return LRESULT();
+	}
 	CUserInterface *ui = this;
 	if (!ui) 
 	{
 		return NULL;
 	}
+	WORD ctrlID = 0;
+	if (uMsg == WM_COMMAND)
+	{
+		ctrlID = LOWORD(wParam);
+	}
+	if (uMsg == WM_HSCROLL || uMsg == WM_VSCROLL)
+	{
+		ctrlID = GetDlgCtrlID((HWND)lParam);
+	}
+	
 	for (ElementsMap::iterator it = Elements.begin(); it != Elements.end(); ++it) 
 	{
-		auto ctrlID = LOWORD(wParam);
 		if (ctrlID == it->second->ID) 
 		{
 			if (it->second->Action) 

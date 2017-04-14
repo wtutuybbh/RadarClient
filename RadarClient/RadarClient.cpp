@@ -187,38 +187,16 @@ BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL
 }
 void CallUI(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	
-	//if (uMsg == WM_INITDIALOG)
-	//{		
-	//	if (g_UI) {
-	//		LOG_INFO_("CallUI before OnInitDialog", "hWnd=%d, uMsg=%d, wParam=%d, lParam=%d", hWnd, uMsg, wParam, lParam);
-	//		//g_UI->OnInitDialog();
-	//	}
-	//}
-	if (uMsg == WM_COMMAND)
+	if (g_UI)
 	{
-		if (g_UI)
-		{
-			g_UI->Wnd_Proc(hWnd, uMsg, wParam, lParam);
-		}
-	}
-	if (uMsg == WM_HSCROLL || uMsg == WM_VSCROLL)
-	{
-		if (g_UI) {
-			g_UI->Wnd_Proc2(hWnd, uMsg, wParam, lParam);
-		}
+		g_UI->Wnd_Proc(hWnd, uMsg, wParam, lParam);
 	}
 }
 // Process Window Message Callbacks
 LRESULT CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	//LOG_INFO("DlgProc", "DlgProc", "hWnd=%x, uMsg=%d, wParam=%d, lParam=%d", hWnd, uMsg, wParam, lParam);
-	if (g_UI && uMsg == WM_INITDIALOG)
-	{
-		CUserInterface::ToolboxHWND = hWnd;
-		LOG_INFO_("DlgProc before OnInitDialog", "hWnd=%d, uMsg=%d, wParam=%d, lParam=%d", hWnd, uMsg, wParam, lParam);
-		g_UI->OnInitDialog();
-	}
+
 	CallUI(hWnd, uMsg, wParam, lParam);
 	switch (uMsg)
 	{
@@ -581,6 +559,7 @@ public:
 // Program Entry (WinMain)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {	
+	CUserInterface::ToolboxHWND = nullptr;
 	g_nCmdShow = nCmdShow;
 	MSG msg;
 

@@ -658,7 +658,8 @@ bool CRCAltitudeDataFile::Open()
 	}
 	if (data)
 	{
-		LOG_ERROR(requestID, context, "data is not nullptr (file already opened). RETURN FALSE.");
+		LOG_ERROR(requestID, context, "data is not nullptr (file already opened). RETURN TRUE.");
+		return true;
 	}
 	return false;
 }

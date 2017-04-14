@@ -43,5 +43,6 @@ public:
 	void SetName(std::string fileName);
 	std::string GetName() const;
 	static std::string GetDataFileTypeName(DataFileType t);
+	void SetLonLat(double lon0, double lat0, double lon1, double lat1);
 };
 

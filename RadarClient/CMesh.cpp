@@ -82,6 +82,7 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 		maptexture = new CRCTextureDataFile(lon0, lat0, lon1, lat1, texsize, texsize);		
 	}
 	if (reload_textures) {
+		maptexture->SetLonLat(lon0, lat0, lon1, lat1);
 		for (auto i = 0; i < textures_set->Files().size(); i++)
 		{
 			maptexture->ApplyIntersection(textures_set->GetFile(i));
@@ -96,6 +97,7 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 		altitude = new CRCAltitudeDataFile(lon0, lat0, lon1, lat1, resolution, resolution);		
 	}
 	if (reload_altitudes) {
+		altitude->SetLonLat(lon0, lat0, lon1, lat1);
 		for (auto i = 0; i < altitudes_set->Files().size(); i++)
 		{
 			altitude->ApplyIntersection(altitudes_set->GetFile(i));

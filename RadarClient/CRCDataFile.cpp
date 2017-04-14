@@ -191,3 +191,11 @@ std::string CRCDataFile::GetDataFileTypeName(DataFileType t)
 	}
 	return std::string();
 }
+
+void CRCDataFile::SetLonLat(double lon0, double lat0, double lon1, double lat1)
+{
+	this->lon0 = lon0;
+	this->lat0 = lat0;
+	this->lon1 = lon1;
+	this->lat1 = lat1;
+}
