@@ -188,13 +188,13 @@ BOOL DestroyWindowGL(HWND hWnd, HDC hDC, HGLRC hRC)								// Destroy The OpenGL
 void CallUI(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	
-	if (uMsg == WM_INITDIALOG)
-	{		
-		if (g_UI) {
-			LOG_INFO_("CallUI before OnInitDialog", "hWnd=%d, uMsg=%d, wParam=%d, lParam=%d", hWnd, uMsg, wParam, lParam);
-			//g_UI->OnInitDialog();
-		}
-	}
+	//if (uMsg == WM_INITDIALOG)
+	//{		
+	//	if (g_UI) {
+	//		LOG_INFO_("CallUI before OnInitDialog", "hWnd=%d, uMsg=%d, wParam=%d, lParam=%d", hWnd, uMsg, wParam, lParam);
+	//		//g_UI->OnInitDialog();
+	//	}
+	//}
 	if (uMsg == WM_COMMAND)
 	{
 		if (g_UI)
