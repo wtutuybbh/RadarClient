@@ -147,6 +147,11 @@ CMarkup::CMarkup(glm::vec4 origin)
 
 }
 
+void CMarkup::ShowLabels(bool show_labels)
+{
+	this->show_labels = show_labels;
+}
+
 void CMarkup::BindUniforms(CViewPortControl* vpControl)
 {
 	glm::mat4 m = GetModelMatrix(vpControl->Id);
@@ -164,4 +169,9 @@ void CMarkup::BindUniforms(CViewPortControl* vpControl)
 
 	int uniweight_loc = prog.at(vpControl->Id)->GetUniformLocation("uniweight");
 	glUniform1f(uniweight_loc, uniweight);
+}
+
+void CMarkup::Draw(CViewPortControl* vpControl, GLenum mode)
+{
+	C3DObjectModel::Draw(vpControl, mode);
 }

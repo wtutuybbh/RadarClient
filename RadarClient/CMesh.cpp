@@ -134,7 +134,9 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 		if (blind_zone_height[i] > maxbz) maxbz = blind_zone_height[i];
 		if (blind_zone_height[i] < minbz) minbz = blind_zone_height[i];
 	}
-	bounds = new glm::vec3[2];
+	if (!bounds) {
+		bounds = new glm::vec3[2];
+	}
 	bounds[0].x = bounds[0].y = bounds[0].z = FLT_MAX;
 	bounds[1].x = bounds[1].y = bounds[1].z = FLT_MIN;
 
@@ -333,7 +335,6 @@ CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize,
 	std::string context = "CMesh::CMesh";
 	LOG_INFO(requestID, context, "Start... clearAfter=%d, position=(%f, %f), max_range=%f, texsize=%d, resolution=%d", clearAfter , position.x, position.y, max_range, texsize, resolution);
 
-	bounds = nullptr;
 	this->position = position;
 	this->texsize = texsize;
 	this->resolution = resolution;
