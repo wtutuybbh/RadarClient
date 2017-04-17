@@ -9,5 +9,6 @@ public:
 	void ShowLabels(bool show_labels);
 	void BindUniforms(CViewPortControl* vpControl) override;
 	void Draw(CViewPortControl* vpControl, GLenum mode) override;
+	void CMarkup::DrawBitmaps() const;
 };
 

@@ -147,6 +147,11 @@ bool CSettings::Init()
 	InitInt(IntConnectionTimeout, TEXT("IntConnectionTimeout"), 10);
 	
 	InitFloat(FloatPositionRadarHeight, TEXT("FloatPositionRadarHeight"), 1.5);
+	
+	InitFloat(FloatMarkDistance, TEXT("FloatMarkDistance"), 100);
+	
+	InitFloat(FloatMaxDist, TEXT("FloatMaxDist"), 5000);
+
 
 	return true;
 	
@@ -347,18 +352,46 @@ void CSettings::Load()
 	read_json("settings.json", pt);
 	for(auto it = floats.begin(); it != floats.end(); ++it)
 	{
-		SetFloat(Settings(it->first), pt.get<float>(to__string(GetName(Settings(it->first)))));
+		try 
+		{
+			SetFloat(Settings(it->first), pt.get<float>(to__string(GetName(Settings(it->first)))));
+		}
+		catch (...)
+		{
+			
+		}
 	}
 	for (auto it = ints.begin(); it != ints.end(); ++it)
 	{
-		SetInt(Settings(it->first), pt.get<int>(to__string(GetName(Settings(it->first)))));
+		try
+		{
+			SetInt(Settings(it->first), pt.get<int>(to__string(GetName(Settings(it->first)))));
+		}
+		catch (...)
+		{
+
+		}
 	}
 	for (auto it = colors.begin(); it != colors.end(); ++it)
 	{
-		SetColor(Settings(it->first), GetColorFromHexRGBA(pt.get<std::string>(to__string(GetName(Settings(it->first))))));
+		try
+		{
+			SetColor(Settings(it->first), GetColorFromHexRGBA(pt.get<std::string>(to__string(GetName(Settings(it->first))))));
+		}
+		catch (...)
+		{
+
+		}
 	}
 	for (auto it = strings.begin(); it != strings.end(); ++it)
 	{
-		SetString(Settings(it->first), pt.get<std::string>(to__string(GetName(Settings(it->first)))));
+		try
+		{
+			SetString(Settings(it->first), pt.get<std::string>(to__string(GetName(Settings(it->first)))));
+		}
+		catch (...)
+		{
+
+		}
 	}
 }

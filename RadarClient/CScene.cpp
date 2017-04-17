@@ -85,8 +85,7 @@ CScene::CScene()
 	rayWidth = 10;
 	minE = 10;
 	maxE = 30;
-	minDist = 100;
-	maxDist = 5000;
+
 	
 
 	rayDensity = 1;
@@ -193,9 +192,8 @@ CScene::~CScene() {
 bool CScene::DrawScene(CViewPortControl * vpControl)
 {
 	//glEnable(GL_MULTISAMPLE);
-	if (MeshReady() && !VBOisBuilt) {
+	if (MeshReady()) {
 		PrepareVBOs();
-		VBOisBuilt = BuildVBOs();
 		Camera->Move(glm::vec3(0, 235, -310), false);
 		Camera->RadarPosition = glm::vec3(0, GetY0(), 0);
 	}
@@ -335,159 +333,12 @@ bool CScene::PrepareVBOs()
 	if (!Mesh || !Mesh->Ready()) {
 		return false;
 	}
-	float y_0 = GetY0();
-
 	
 	if (!Markup) {
-		Markup = new CMarkup(glm::vec4(0, y_0, 0, 1));
-	}
-
-	AxisGrid = new glm::vec3[vertexCount];
-
-	int i0 = 0;
-	//vertical axis
-
-	AxisGrid[i0].x = 0; AxisGrid[i0].y = y_0, AxisGrid[i0].z = 0;
-	AxisGrid[i0 + 1].x = 0; AxisGrid[i0 + 1].y = y_0 + YAxisLength, AxisGrid[i0 + 1].z = 0;
-	i0 += 2;
-	//horizontal axis
-	for (int a = 0; a < (vertexCount_Axis - 2)/2 *10; a += 10) {
-		AxisGrid[i0].x = maxDist * sin(cnvrt::dg2rad(a)) / MPPh; AxisGrid[i0].y = y_0, AxisGrid[i0].z = maxDist * cos(cnvrt::dg2rad(a)) / MPPh;
-		AxisGrid[i0+1].x = -maxDist * sin(cnvrt::dg2rad(a)) / MPPh; AxisGrid[i0+1].y = y_0, AxisGrid[i0+1].z = -maxDist * cos(cnvrt::dg2rad(a)) / MPPh;
-		i0+=2;
-	}			
-	
-	//marks:
-	for (int i = 0; i < markCount / 5; i+=1) {
-		
-		AxisGrid[i0 + 1].x = AxisGrid[i0].x = (i + 1) * markDistance / MPPh;
-		AxisGrid[i0 + 1].y = AxisGrid[i0].y = y_0;
-		AxisGrid[i0].z = -markSize / 2.0;
-		AxisGrid[i0 + 1].z = markSize / 2.0;
-		i0 += 2;
-	}
-	for (int i = 0; i < markCount / 5; i += 1) {
-
-		AxisGrid[i0 + 1].x = AxisGrid[i0].x = -(i + 1) * markDistance / MPPh;
-		AxisGrid[i0 + 1].y = AxisGrid[i0].y = y_0;
-		AxisGrid[i0].z = -markSize / 2.0;
-		AxisGrid[i0 + 1].z = markSize / 2.0;
-		i0 += 2;
-	}
-	for (int i = 0; i < markCount / 5; i += 1) {
-
-		AxisGrid[i0 + 1].z = AxisGrid[i0].z = (i + 1) * markDistance / MPPh;
-		AxisGrid[i0 + 1].y = AxisGrid[i0].y = y_0;
-		AxisGrid[i0].x = -markSize / 2.0;
-		AxisGrid[i0 + 1].x = markSize / 2.0;
-		i0 += 2;
-	}
-	for (int i = 0; i < markCount / 5; i += 1) {
-
-		AxisGrid[i0 + 1].z = AxisGrid[i0].z = -(i + 1) * markDistance / MPPh;
-		AxisGrid[i0 + 1].y = AxisGrid[i0].y = y_0;
-		AxisGrid[i0].x = -markSize / 2.0;
-		AxisGrid[i0 + 1].x = markSize / 2.0;
-		i0 += 2;
-	}
-	for (int i = 0; i < markCount / 5; i += 1) {
-
-		AxisGrid[i0 + 1].z = AxisGrid[i0].z = 0;
-		AxisGrid[i0 + 1].y = AxisGrid[i0].y = y_0 + (i + 1) * markDistance / MPPv;
-		AxisGrid[i0].x = -markSize / 2.0;
-		AxisGrid[i0 + 1].x = markSize / 2.0;
-		i0 += 2;
-	}
-	//circles:
-	float R = 0;
-	for (int c = 0; c < numCircles; c++) {
-		R += markDistance * marksPerCircle;
-		for (int i = 0; i < segmentsPerCircle; i++) {
-			AxisGrid[i0].x = R * cos(2 * M_PI * i / segmentsPerCircle) / MPPh;
-			AxisGrid[i0].y = y_0;
-			AxisGrid[i0].z = R * sin(2 * M_PI * i / segmentsPerCircle) / MPPh;
-			i0++;
-		}
-	}
-
-	//infobox index array
-	info = new unsigned short[vertexCount_Info];
-
-
-	//infobox
-	AxisGrid[i0].x = 0;
-	AxisGrid[i0].y = 0;
-	AxisGrid[i0].z = -1;
-	info[0] = i0;
-
-	i0++;
-	AxisGrid[i0].x = infoWidth;
-	AxisGrid[i0].y = 0;
-	AxisGrid[i0].z = -1;
-	info[1] = i0;
-
-	i0++;
-	AxisGrid[i0].x = infoWidth;
-	AxisGrid[i0].y = infoHeight;
-	AxisGrid[i0].z = -1;
-	info[2] = i0;
-
-	i0++;
-	AxisGrid[i0].x = 0;
-	AxisGrid[i0].y = infoHeight;
-	AxisGrid[i0].z = -1;
-	info[3] = i0;
-
-	/*std::ofstream outfile("old.txt", std::ofstream::binary);
-	for (int i = 0; i < i0; i++) {
-		outfile << AxisGrid[i].x << ";" << AxisGrid[i].y << ";" << AxisGrid[i].z << "\r\n";
-	}
-	outfile.close();*/
-
-	glm::vec4 axisColor = CSettings::GetColor(ColorAxis);
-
-	//axis and markup color array
-	AxisGridColor = new CColorRGBA[vertexCount];	
-	for (int i = 0/*vertexCount_Ray*/; i < vertexCount - vertexCount_Info; i++) {
-		AxisGridColor[i].r = axisColor.r;
-		AxisGridColor[i].g = axisColor.g;
-		AxisGridColor[i].b = axisColor.b;
-		AxisGridColor[i].a = axisColor.a;
-	}
-	//info box color array
-	for (int i = vertexCount - vertexCount_Info; i < vertexCount; i++) {
-		AxisGridColor[i].r = 0.3f;
-		AxisGridColor[i].g = 0.3f;
-		AxisGridColor[i].b = 0.3f;
-		AxisGridColor[i].a = 0.1f;
-	}
-
-	//ray color array
-	RayColor = new CColorRGBA[vertexCount_Ray];
-	for (int i = 0; i < vertexCount_Ray; i++) {
-		RayColor[i].r = 1.0f;
-		RayColor[i].g = 0.0f;
-		RayColor[i].b = 0.0f;
-		RayColor[i].a = 1.0f;
-	}
-	
-	//index array for axis markup
-	markup = new unsigned short[vertexCount/* - vertexCount_Ray*/];
-	for (int i = 0; i < vertexCount/* - vertexCount_Ray*/; i++) {
-		markup[i] = /*vertexCount_Ray +*/ i;
-	}
-
-	//index array for circles
-	circles = new unsigned short*[numCircles];
-	for (int c = 0; c < numCircles; c++) {
-		circles[c] = new unsigned short[segmentsPerCircle];
-		for (int i = 0; i < segmentsPerCircle; i++) {
-			circles[c][i] = /*vertexCount_Ray +*/ vertexCount_Axis + markCount * 2 + segmentsPerCircle*c + i;
-		}
+		Markup = new CMarkup(glm::vec4(0, 0, 0, 1));
 	}
 
 	return true;
-
 }
 
 bool CScene::PrepareRayVBO()
@@ -501,7 +352,7 @@ bool CScene::PrepareRayVBO()
 		if (!RayObj)
 		{
 			//RayObj = new C3DObjectModel()
-			RayObj = new CRay(rayWidth, maxDist, 0);
+			RayObj = new CRay(rayWidth, CSettings::GetFloat(FloatMaxDist), 0);
 			return true;
 		}
 
@@ -515,42 +366,6 @@ bool CScene::MiniMapPrepareAndBuildVBO()
 	return false;
 }
 
-bool CScene::BuildVBOs()
-{
-	if (AxisGrid && AxisGridColor) {
-		glGenBuffers(1, &AxisGrid_VBOName);
-		glBindBuffer(GL_ARRAY_BUFFER, AxisGrid_VBOName);
-		glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(float), AxisGrid, GL_STATIC_DRAW);
-
-		glGenBuffers(1, &AxisGrid_VBOName_c);
-		glBindBuffer(GL_ARRAY_BUFFER, AxisGrid_VBOName_c);
-		glBufferData(GL_ARRAY_BUFFER, vertexCount * 4 * sizeof(float), AxisGridColor, GL_STATIC_DRAW);
-
-		return true;
-	}
-
-	return false;
-}
-
-bool CScene::BuildRayVBO()
-{
-	if (Ray && RayColor) {
-		glGenBuffers(1, &Ray_VBOName);
-		glBindBuffer(GL_ARRAY_BUFFER, Ray_VBOName);
-		glBufferData(GL_ARRAY_BUFFER, vertexCount_Ray * 3 * sizeof(float), Ray, GL_STATIC_DRAW);
-	
-		glGenBuffers(1, &Ray_VBOName_c);
-		glBindBuffer(GL_ARRAY_BUFFER, Ray_VBOName_c);
-		glBufferData(GL_ARRAY_BUFFER, vertexCount_Ray * 4 * sizeof(float), RayColor, GL_STATIC_DRAW);
-
-		delete Ray; Ray = nullptr;
-		delete RayColor; RayColor = nullptr;
-
-		return true;
-	}
-	
-	return false;
-}
 
 void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 {
@@ -739,7 +554,9 @@ void CScene::Init(RDR_INITCL* init)
 		minE = maxE = CSettings::GetFloat(FloatZeroElevation);
 	}
 	rayWidth = init->dAzm * init->ViewStep;
-	maxDist = init->dR * init->maxR;
+
+	CSettings::SetFloat(FloatMaxDist, init->dR * init->maxR);
+
 	SectorsCount = init->MaxNAzm / init->ViewStep;
 	Sectors.resize(SectorsCount);
 	for (int i = 0; i < Sectors.size(); i++)
@@ -964,7 +781,7 @@ void CScene::DrawBitmaps() const
 	BitmapString(0, y_0 + 50 * markDistance / MPPv, 0, "5km");
 
 	for (int a = 0; a < 360; a += 10) {
-		BitmapString(-(maxDist + 50 * MPPh) * sin(cnvrt::dg2rad(a)) / MPPh, y_0, (maxDist + 50 * MPPh) * cos(cnvrt::dg2rad(a)) / MPPh, cnvrt::float2str(a) + "°");
+		BitmapString(-(CSettings::GetFloat(FloatMaxDist) + 50 * MPPh) * sin(cnvrt::dg2rad(a)) / MPPh, y_0, (CSettings::GetFloat(FloatMaxDist) + 50 * MPPh) * cos(cnvrt::dg2rad(a)) / MPPh, cnvrt::float2str(a) + "°");
 	}
 
 	glColor3f(0.8f, 0.8f, 1.0f);

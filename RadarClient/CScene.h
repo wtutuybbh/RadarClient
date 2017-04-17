@@ -68,7 +68,7 @@ public:
 
 	// the next variables should be placed in each's class:
 
-	float rayWidth, minE, maxE, minDist, maxDist, minA, maxA;
+	float rayWidth, minE, maxE, minA, maxA;
 	int rayDensity, rayArraySize;
 
 	float AxisGridShift{ 50.0f };
@@ -82,14 +82,6 @@ public:
 	int vertexCount_Info, infoWidth, infoHeight;
 
 	int numCircles, marksPerCircle, segmentsPerCircle;
-
-	glm::vec3 *AxisGrid{ nullptr }, *Ray{ nullptr };
-	CColorRGBA *AxisGridColor{ nullptr }, *RayColor{ nullptr };
-
-
-
-	unsigned int AxisGrid_VBOName, AxisGrid_VBOName_c;
-	unsigned int Ray_VBOName, Ray_VBOName_c;
 
 	unsigned short vertexCount, markCount;
 
@@ -148,9 +140,6 @@ public:
 	bool PrepareRayVBO();
 
 	bool MiniMapPrepareAndBuildVBO();
-
-	bool BuildVBOs();
-	bool BuildRayVBO();
 
 	void RefreshSector(RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init);
 	void ClearSectors();

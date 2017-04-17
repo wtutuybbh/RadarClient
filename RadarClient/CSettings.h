@@ -68,7 +68,9 @@ enum Settings
 	FloatCRImageMaxAmp,
 	FloatCSectorMinAmp,
 	FloatCSectorMaxAmp,
-	IntConnectionTimeout
+	IntConnectionTimeout,
+	FloatMarkDistance,
+	FloatMaxDist
 };
 
 

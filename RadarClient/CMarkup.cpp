@@ -174,4 +174,63 @@ void CMarkup::BindUniforms(CViewPortControl* vpControl)
 void CMarkup::Draw(CViewPortControl* vpControl, GLenum mode)
 {
 	C3DObjectModel::Draw(vpControl, mode);
+	if (show_labels)
+	{
+		DrawBitmaps();
+	}
+}
+
+void CMarkup::DrawBitmaps() const
+{
+	float y_0 = 0;// Mesh->GetCenterHeight() / MPPv;
+	glm::vec2 position = glm::vec2(CSettings::GetFloat(FloatPositionLon), CSettings::GetFloat(FloatPositionLat));
+	float MPPh = CSettings::GetFloat(FloatMPPh);
+	float MPPv = CSettings::GetFloat(FloatMPPv);
+	float markDistance = CSettings::GetFloat(FloatMarkDistance);
+	float maxDist = CSettings::GetFloat(FloatMaxDist);
+
+	BitmapString(0, y_0, 0, "(" + cnvrt::float2str(position.x) + "; " + cnvrt::float2str(position.y) + ")");
+	auto color = CSettings::GetColor(ColorNumbers);
+	glColor4f(color.r, color.g, color.b, color.a);
+	BitmapString(-10 * markDistance / MPPh, y_0 + 1, 0, "1km");
+	BitmapString(10 * markDistance / MPPh, y_0 + 1, 0, "1km");
+	BitmapString(0, y_0 + 1, -10 * markDistance / MPPh, "1km");
+	BitmapString(0, y_0 + 1, 10 * markDistance / MPPh, "1km");
+	BitmapString(0, y_0 + 10 * markDistance / MPPv, 0, "1km");
+
+	BitmapString(-20 * markDistance / MPPh, y_0 + 1, 0, "2km");
+	BitmapString(20 * markDistance / MPPh, y_0 + 1, 0, "2km");
+	BitmapString(0, y_0 + 1, -20 * markDistance / MPPh, "2km");
+	BitmapString(0, y_0 + 1, 20 * markDistance / MPPh, "2km");
+	BitmapString(0, y_0 + 20 * markDistance / MPPv, 0, "2km");
+
+	BitmapString(-30 * markDistance / MPPh, y_0 + 1, 0, "3km");
+	BitmapString(30 * markDistance / MPPh, y_0 + 1, 0, "3km");
+	BitmapString(0, y_0 + 1, -30 * markDistance / MPPh, "3km");
+	BitmapString(0, y_0 + 1, 30 * markDistance / MPPh, "3km");
+	BitmapString(0, y_0 + 30 * markDistance / MPPv, 0, "3km");
+
+	BitmapString(-40 * markDistance / MPPh, y_0 + 1, 0, "4km");
+	BitmapString(40 * markDistance / MPPh, y_0 + 1, 0, "4km");
+	BitmapString(0, y_0 + 1, -40 * markDistance / MPPh, "4km");
+	BitmapString(0, y_0 + 1, 40 * markDistance / MPPh, "4km");
+	BitmapString(0, y_0 + 40 * markDistance / MPPv, 0, "4km");
+
+	BitmapString(-50 * markDistance / MPPh, y_0 + 1, 0, "5km");
+	BitmapString(50 * markDistance / MPPh, y_0 + 1, 0, "5km");
+	BitmapString(0, y_0 + 1, -50 * markDistance / MPPh, "5km");
+	BitmapString(0, y_0 + 1, 50 * markDistance / MPPh, "5km");
+	BitmapString(0, y_0 + 50 * markDistance / MPPv, 0, "5km");
+
+	for (int a = 0; a < 360; a += 10) {
+		BitmapString(-(maxDist + 50 * MPPh) * sin(cnvrt::dg2rad(a)) / MPPh, y_0, (maxDist + 50 * MPPh) * cos(cnvrt::dg2rad(a)) / MPPh, cnvrt::float2str(a) + "°");
+	}
+
+	glColor3f(0.8f, 0.8f, 1.0f);
+	BitmapString(0, y_0 + markDistance, 60 * markDistance / MPPh, "N");
+	glColor3f(1.0f, 0.8f, 0.8f);
+	BitmapString(0, y_0 + markDistance, -60 * markDistance / MPPh, "S");
+	glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
+	BitmapString(60 * markDistance / MPPh, y_0 + markDistance, 0, "W");
+	BitmapString(-60 * markDistance / MPPh, y_0 + markDistance, 0, "E");
 }
