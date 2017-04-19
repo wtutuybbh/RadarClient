@@ -67,6 +67,7 @@ public:
 	int DisplayPoints, DisplaySeries, DisplayRLIs, DisplayMap, DisplayLandscape, DisplayBlindZones;
 
 	C3DObjectModel* Get3DObject(int x, int y);
+	void GetP0P1(int x, int y, glm::vec3 &p0, glm::vec3 &p1) const;
 
 	bool MakeCurrent() const;
 

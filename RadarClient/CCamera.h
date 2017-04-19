@@ -16,13 +16,13 @@ public:
 	
 	glm::vec3 Direction;
 	glm::vec3 Up;
-	glm::vec2 startPosition, newPosition;
+	glm::vec2 startPosition, newPosition; //for dragging
 	float fovy;
 	float aspect;
 	float zNear;
 	float zFar;
 	float Speed;
-	glm::vec3 RadarPosition;
+	glm::vec3 RadarPosition {glm::vec3(0,0,0)};
 	glm::vec3 MeshSize;
 	bool FixViewOnRadar = false;
 	

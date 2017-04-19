@@ -49,6 +49,9 @@ class CScene {
 	//float y_0 {0};
 	std::mutex mtxTracks;
 public:
+	std::vector<glm::vec3> MeasurePoints;
+	void AddMeasurePoint(glm::vec3 p0, glm::vec3 p1);
+
 	CLine *begAzmLine{ nullptr };
 
 	float maxAmp = 0;
@@ -86,12 +89,6 @@ public:
 	unsigned short vertexCount, markCount;
 
 	float viewAngle;
-
-	///arrays for different VBO objects:
-	unsigned short *markup{ nullptr };
-	unsigned short **circles{ nullptr };
-	unsigned short *ray{ nullptr };
-	unsigned short *info{ nullptr };
 
 	int zeroLevel = ZEROLEVEL_ACTUALHEIGHT;
 	//float y_0;
@@ -135,11 +132,7 @@ public:
 
 	bool DrawScene(CViewPortControl * vpControl);
 	bool MiniMapDraw(CViewPortControl * vpControl);
-	
-	bool PrepareVBOs();
-	bool PrepareRayVBO();
 
-	bool MiniMapPrepareAndBuildVBO();
 
 	void RefreshSector(RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init);
 	void ClearSectors();
@@ -158,7 +151,7 @@ public:
 	C3DObjectModel *GetObjectAtMiniMapPosition(int vpId, glm::vec3 p0, glm::vec3 p1) const;
 	C3DObjectModel *GetSectorPoint(CViewPortControl *vpControl, glm::vec2 screenPoint, int& index);
 	C3DObjectModel *GetFirstTrackBetweenPoints(CViewPortControl *vpControl, glm::vec2 screenPoint, int& index); //returns point from track under cursor
-	C3DObjectModel *GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const;
+	
 
 	glm::vec2 CameraXYForMiniMap() const;
 

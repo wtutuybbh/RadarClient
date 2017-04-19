@@ -113,25 +113,36 @@ LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wPara
 		/*std::string context = "CViewPortControl::ViewPortControlProc:WM_LBUTTONDOWN";
 		LOG_INFO(requestID, context, (boost::format("Start... hwnd=%1%, uMsg=%2%, wParam=%3%, lParam=%4%; x=LOWORD(lParam)=%5%, y=HIWORD(lParam)=%6%") 
 			% hwnd % uMsg % wParam % lParam % LOWORD(lParam) % HIWORD(lParam)).str());*/
+		int x = LOWORD(lParam);
+		int y = HIWORD(lParam);
 		SetFocus(hwnd);
-		if (Camera) {
-			Camera->startPosition.x = LOWORD(lParam);
-			Camera->startPosition.y = HIWORD(lParam);
-			C3DObjectModel* o = Get3DObject(LOWORD(lParam), HIWORD(lParam));
-			
-				if (Scene && UI)
+		if (Scene && Camera && UI) {
+			Camera->startPosition.x = x;
+			Camera->startPosition.y = y;
+
+			if (UI->MeasureDistance())
+			{
+				glm::vec3 p0, p1;
+				GetP0P1(x, y, p0, p1);
+				LOG_INFO("MeasureDistance", "CViewPortControl::ViewPortControlProc", "x=%d, y=%d, p0=(%f, %f, %f), p1=(%f, %f, %f)", x, y, p0.x, p0.y, p0.z, p1.x, p1.y, p1.z);
+
+				Scene->AddMeasurePoint(p0, p1);
+			}
+			else
+			{
+				C3DObjectModel* o = Get3DObject(LOWORD(lParam), HIWORD(lParam));
+
+				if (o)
 				{
-					if (o)
-					{
-						o->SetGeoCoords(Scene->GetGeographicCoordinates(o->GetCartesianCoords()));
-						Scene->PushSelection(o);
-					}
-					else
-					{
-						Scene->ClearSelection();
-					}
-					UI->FillInfoGrid(Scene);
-				}									
+					o->SetGeoCoords(Scene->GetGeographicCoordinates(o->GetCartesianCoords()));
+					Scene->PushSelection(o);
+				}
+				else
+				{
+					Scene->ClearSelection();
+				}
+			}
+			UI->FillInfoGrid(Scene);									
 		}
 
 		break;
@@ -223,11 +234,6 @@ C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 	glm::vec3 p0 = glm::unProject(glm::vec3(x, height - y - 1, 0.0f), Camera->GetView(), Camera->GetProjection(), viewport);
 	glm::vec3 p1 = glm::unProject(glm::vec3(x, height - y - 1, 1.0f), Camera->GetView(), Camera->GetProjection(), viewport);
 
-	if(UI->MeasureDistance())
-	{
-		LOG_INFO(requestID, context, "Measure distance option is on, calling Scene->GetPointOnSurface(p0, p1)...");
-		Scene->GetPointOnSurface(p0, p1);
-	}
 	int index;
 	C3DObjectModel *o = Scene->GetSectorPoint(this, glm::vec2(x, y), index);
 	if (o)
@@ -264,6 +270,13 @@ C3DObjectModel* CViewPortControl::Get3DObject(int x, int y)
 		}
 	}
 	return o;
+}
+
+void CViewPortControl::GetP0P1(int x, int y, glm::vec3& p0, glm::vec3& p1) const
+{
+	glm::vec4 viewport = glm::vec4(0, 0, width, height);
+	p0 = glm::unProject(glm::vec3(x, height - y - 1, 0.0f), Camera->GetView(), Camera->GetProjection(), viewport);
+	p1 = glm::unProject(glm::vec3(x, height - y - 1, 1.0f), Camera->GetView(), Camera->GetProjection(), viewport);
 }
 
 bool CViewPortControl::MakeCurrent() const

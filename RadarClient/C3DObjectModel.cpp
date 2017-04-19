@@ -115,14 +115,21 @@ void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)
 	if (vbo.find(vpControl->Id) == vbo.end()) {
 		return;
 	}
-
 	C3DObjectVBO *vbo_= vbo.at(vpControl->Id);
-	
-
 	if (!vbo_)	return;
 
+
+	if (prog.find(vpControl->Id) == prog.end()) {
+		return;
+	}
 	C3DObjectProgram *prog_ = prog.at(vpControl->Id);
-	C3DObjectTexture *tex_ = tex.at(vpControl->Id);
+	if (!prog_)	return;
+
+	C3DObjectTexture *tex_ = nullptr;
+	if (tex.find(vpControl->Id) != tex.end()) {
+		tex_ = tex.at(vpControl->Id);
+	}
+
 	bool can_be_reloaded = true;
 	if(vbo_ && !vbo_->Ready())
 	{

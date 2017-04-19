@@ -55,7 +55,8 @@ CScene::CScene()
 
 	SectorsCount = 0;
 
-	this->Camera = new CCamera();
+	Camera = new CCamera();
+	Camera->Move(glm::vec3(0, 235, -310), false);
 
 	position.x = CSettings::GetFloat(FloatPositionLon);
 	position.y = CSettings::GetFloat(FloatPositionLat);
@@ -73,7 +74,9 @@ CScene::CScene()
 
 	mmPointer = new CMiniMapPointer(this);	
 
-		
+	
+	Markup = new CMarkup(glm::vec4(0, 0, 0, 1));
+	
 
 	numCircles = 7;
 	marksPerCircle = 10;
@@ -111,52 +114,21 @@ CScene::CScene()
 
 	RotatingSpeed = 120;	
 
-	AxisGrid = nullptr;
-	AxisGridColor = nullptr;
-	Ray = nullptr;
-	RayColor = nullptr;
-	Ray_VBOName = 0;
-	Ray_VBOName_c = 0;
-
 	RayVBOisBuilt = VBOisBuilt = MiniMapVBOisBuilt = false;
 
-	circles = nullptr;
-	markup = nullptr;
-	info = nullptr;
-	ray = nullptr;
 }
 CScene::~CScene() {
 	ClearSelection();
-	if (circles) {
-		for (int c = 0; c < numCircles; c++)
-			delete [] circles[c];
-		delete[] circles;
-	}
-	if(markup)
-		delete [] markup;
 	if (Markup)
 		delete Markup;
 
 	if (mmPointer)
 		delete mmPointer;
 
-	if (ray)
-		delete[] ray;
-	if (AxisGrid)
-		delete[] AxisGrid;
-	if (AxisGridColor)
-		delete[] AxisGridColor;
-	if (Ray)
-		delete[] Ray;
-	if (RayColor)
-		delete[] RayColor;
+
 	if (Camera)
 		delete Camera;
 
-	if (info)
-	{
-		delete[] info;
-	}
 
 	for (auto it = begin(Sectors); it != end(Sectors); ++it)
 	{
@@ -191,12 +163,6 @@ CScene::~CScene() {
 
 bool CScene::DrawScene(CViewPortControl * vpControl)
 {
-	//glEnable(GL_MULTISAMPLE);
-	if (MeshReady()) {
-		PrepareVBOs();
-		Camera->Move(glm::vec3(0, 235, -310), false);
-		Camera->RadarPosition = glm::vec3(0, GetY0(), 0);
-	}
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -326,44 +292,6 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	glDisable(GL_PROGRAM_POINT_SIZE);
 
 	return true;
-}
-
-bool CScene::PrepareVBOs()
-{	
-	if (!Mesh || !Mesh->Ready()) {
-		return false;
-	}
-	
-	if (!Markup) {
-		Markup = new CMarkup(glm::vec4(0, 0, 0, 1));
-	}
-
-	return true;
-}
-
-bool CScene::PrepareRayVBO()
-{
-	if (!Mesh || !Mesh->Ready()) {
-		return false;
-	}
-	//float y_0 = Mesh->GetCenterHeight() / MPPv;
-
-
-		if (!RayObj)
-		{
-			//RayObj = new C3DObjectModel()
-			RayObj = new CRay(rayWidth, CSettings::GetFloat(FloatMaxDist), 0);
-			return true;
-		}
-
-		
-	return false;
-}
-
-bool CScene::MiniMapPrepareAndBuildVBO()
-{
-
-	return false;
 }
 
 
@@ -553,7 +481,9 @@ void CScene::Init(RDR_INITCL* init)
 	{
 		minE = maxE = CSettings::GetFloat(FloatZeroElevation);
 	}
+
 	rayWidth = init->dAzm * init->ViewStep;
+	RayObj = new CRay(rayWidth, CSettings::GetFloat(FloatMaxDist), 0);
 
 	CSettings::SetFloat(FloatMaxDist, init->dR * init->maxR);
 
@@ -697,20 +627,22 @@ C3DObjectModel* CScene::GetFirstTrackBetweenPoints(CViewPortControl *vpControl, 
 	return nullptr;
 }
 
-C3DObjectModel* CScene::GetPointOnSurface(glm::vec3 p0, glm::vec3 p1) const
+void CScene::AddMeasurePoint(glm::vec3 p0, glm::vec3 p1)
 {
 	if (!Mesh || !Mesh->Ready()) {
-		return nullptr;
+		return;
 	}
 
-	std::string context = "CScene::GetPointOnSurface";
+	std::string context = "CScene::AddMeasurePoint";
+
 	LOG_INFO(requestID, context, (boost::format("Start... p0=(%1%, %2%, %3%), p1=(%4%, %5%, %6%)")
 		% p0.x % p0.y % p0.z % p1.x % p1.y % p1.z).str().c_str());
-	glm::vec3 dir = p1 - p0, position;
-	Mesh->IntersectLine(Main, p0, dir, position);
-	
-	LOG_ERROR(requestID, context, "Not implemented!");
-	return nullptr;
+
+	glm::vec3 dir = p1 - p0, pos;
+	if(Mesh->IntersectLine(Main, p0, dir, pos))
+	{
+		MeasurePoints.push_back(pos);
+	}
 }
 
 glm::vec2 CScene::CameraXYForMiniMap() const

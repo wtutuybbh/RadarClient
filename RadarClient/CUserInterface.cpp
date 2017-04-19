@@ -640,9 +640,16 @@ LRESULT CUserInterface::Checkbox_FixViewToRadar(HWND hwnd, UINT uMsg, WPARAM wPa
 
 LRESULT CUserInterface::Checkbox_MeasureDistance(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	int ButtonID = LOWORD(wParam);
-	HWND hWnd = GetDlgItem(hwnd, ButtonID);
-
+	if (Scene) 
+	{
+		int ButtonID = LOWORD(wParam);
+		HWND hWnd = GetDlgItem(hwnd, ButtonID);
+		if (!Button_GetCheck(hWnd))
+		{
+			Scene->MeasurePoints.clear();
+			FillInfoGrid(Scene);
+		}
+	}
 	return LRESULT();
 }
 
@@ -1185,7 +1192,7 @@ void CUserInterface::FillInfoGrid(CScene* scene)
 
 bool CUserInterface::MeasureDistance() const
 {
-	HWND hWnd = GetDlgItem(ParentHWND, MeasureDistance_ID);
+	HWND hWnd = GetDlgItem(ToolboxHWND, IDC_CHECK2);
 	return Button_GetCheck(hWnd);
 }
 
