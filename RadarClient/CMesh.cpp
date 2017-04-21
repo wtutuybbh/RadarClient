@@ -371,30 +371,31 @@ glm::vec3 CMesh::GetSize() {
 
 bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)
 {
-	return false;
+	
 
-	//if (!Ready()) {
-	//	return false;
-	//}
+	if (!Ready()) {
+		return false;
+	}
 
-	//string context = "CMesh::IntersectLine";
-	//LOG_INFO(requestID, context, (boost::format("Start... vpId=%1%, orig_=(%2%, %3%, %4%), dir_=(%5%, %6%, %7%")
-	//	% vpId
-	//	% orig_.x
-	//	% orig_.y
-	//	% orig_.z
-	//	% dir_.x
-	//	% dir_.y
-	//	% dir_.z).str().c_str());
+	string context = "CMesh::IntersectLine";
+	LOG_INFO(requestID, context, (boost::format("Start... vpId=%1%, orig_=(%2%, %3%, %4%), dir_=(%5%, %6%, %7%")
+		% vpId
+		% orig_.x
+		% orig_.y
+		% orig_.z
+		% dir_.x
+		% dir_.y
+		% dir_.z).str().c_str());
 
-	//glm::vec4 planeOrig(0, averageHeight, 0, 1), planeNormal(0, 1, 0, 0);
-	//float distance;
-	//glm::vec4 orig(orig_, 1);
-	//glm::vec4 dir(dir_, 0);
-	//glm::vec4 position;
+	glm::vec4 planeOrig(0, 0, 0, 1), planeNormal(0, 1, 0, 0);
 
-	//bool planeResult = glm::intersectRayPlane(orig, dir, planeOrig, planeNormal, distance);
-	//glm::vec4 approxPoint = orig + distance * dir;
+	float distance;
+	glm::vec4 orig(orig_, 1);
+	glm::vec4 dir(dir_, 0);
+	glm::vec4 position;
+
+	bool planeResult = glm::intersectRayPlane(orig, dir, planeOrig, planeNormal, distance);
+	glm::vec4 approxPoint = orig + distance * dir;
 	//CMesh *m;
 	//glm::vec3 *b = GetBounds(); 
 	//if (b) {		
@@ -499,6 +500,8 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 	position_.y = position.y;
 	position_.z = position.z;
 	return found;*/
+
+	return false;
 }
 
 void CMesh::BindUniforms(CViewPortControl* vpControl)
