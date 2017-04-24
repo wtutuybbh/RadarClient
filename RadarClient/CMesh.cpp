@@ -21,6 +21,10 @@
 
 void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures, bool reload_altitudes, bool rescan_folder_for_altitudes, bool recalculate_blindzones)
 {
+	float MPPh = CSettings::GetFloat(FloatMPPh);
+	float MPPv = CSettings::GetFloat(FloatMPPv);
+
+
 	std::lock_guard<std::mutex> lock(m);
 
 	string context = "CMesh::LoadHeightmap(int vpId)";
@@ -340,8 +344,7 @@ CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize,
 	this->resolution = resolution;
 	this->max_range = max_range;
 	this->clearAfter = clearAfter;
-	this->MPPh = MPPh;
-	this->MPPv = MPPv;
+
 	
 	UseTexture = 1;
 
@@ -355,9 +358,7 @@ void CMesh::Refresh()
 	position.x = CSettings::GetFloat(FloatPositionLon);
 	position.y = CSettings::GetFloat(FloatPositionLat);
 	max_range = CSettings::GetFloat(FloatMaxDistance);
-	resolution = CSettings::GetInt(IntResolution);
-	MPPv = CSettings::GetFloat(FloatMPPv);
-	MPPh = CSettings::GetFloat(FloatMPPh);
+	resolution = CSettings::GetInt(IntResolution);	
 	texsize = CSettings::GetInt(IntTexSize);
 
 	LoadHeightmap(true, true, true, true, true);
@@ -396,6 +397,16 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 
 	bool planeResult = glm::intersectRayPlane(orig, dir, planeOrig, planeNormal, distance);
 	glm::vec4 approxPoint = orig + distance * dir;
+
+	/*XYZ*/
+	auto orig_lon = altitude->Lon0() + (altitude->Lon1() - altitude->Lon0()) * (bounds[1].x - orig.x) / (bounds[1].x - bounds[0].x);
+	auto orig_lat = altitude->Lat0() + (altitude->Lat1() - altitude->Lat0()) * (orig.y - bounds[0].y) / (bounds[1].y - bounds[0].y);
+	auto approxPoint_lon = altitude->Lon0() + (altitude->Lon1() - altitude->Lon0()) * (bounds[1].x - approxPoint.x) / (bounds[1].x - bounds[0].x);
+	auto approxPoint_lat = altitude->Lat0() + (altitude->Lat1() - altitude->Lat0()) * (approxPoint.y - bounds[0].y) / (bounds[1].y - bounds[0].y);
+
+	auto hOrig = altitude->ValueAtLL(orig_lon, orig_lat) - centerHeight;
+
+
 	//CMesh *m;
 	//glm::vec3 *b = GetBounds(); 
 	//if (b) {		
@@ -616,6 +627,10 @@ CRCAltitudeDataFile * CMesh::GetAltitudeDataFile()
 float CMesh::GetHeightAtLL(float lon, float lat)
 {
 	return altitude->ValueAtLL(lon, lat);
+}
+
+glm::vec2 CMesh::XY2LL(glm::vec2 xy)
+{
 }
 
 float CMesh::GetCenterHeight() {

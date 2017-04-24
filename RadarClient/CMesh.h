@@ -48,7 +48,7 @@ class CMesh : public C3DObjectModel
 	double max_range;
 	double h0 {1.5};
 	double e {0};
-	float MPPh, MPPv;
+	//float MPPh, MPPv;
 	float maxh{ FLT_MIN }, minh{ FLT_MAX };
 	float maxbz{ FLT_MIN }, minbz{ FLT_MAX };
 
@@ -78,4 +78,5 @@ public:
 	int GetResolution();
 	CRCAltitudeDataFile * GetAltitudeDataFile();
 	float GetHeightAtLL(float lon, float lat);
+	glm::vec2 XY2LL(glm::vec2 xy);
 };

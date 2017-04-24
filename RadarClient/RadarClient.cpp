@@ -1,4 +1,6 @@
-﻿#include "stdafx.h"
+﻿/*XYZ*/ //code to refactor to change the coordinate system
+
+#include "stdafx.h"
 #include "RadarClient.h"
 #include "CRCSocket.h"
 #include "CMesh.h"
