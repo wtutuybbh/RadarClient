@@ -214,6 +214,7 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 void ApplyPositionBounds(float &x, float &y, float &z)
 {
+	/* don't let the camera go underground */
 	if (g_vpControl && g_vpControl->Scene && g_vpControl->Scene->MeshReady())
 	{
 		auto v = g_vpControl->Scene->Mesh->vertices;
@@ -223,7 +224,6 @@ void ApplyPositionBounds(float &x, float &y, float &z)
 		
 		if (v && b && a)
 		{
-
 			auto dlat = a->DLat();
 			auto dlon = a->DLon();
 

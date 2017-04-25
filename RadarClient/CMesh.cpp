@@ -313,6 +313,27 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 
 }
 
+glm::vec4 CMesh::p(glm::vec4 orig, glm::vec4 approxPoint, float t)
+{
+	return orig + (approxPoint - orig) * t;
+}
+
+bool CMesh::is_visible(glm::vec4 p)
+{
+	auto llh = XYZT2LLH(p);
+	auto h = altitude->ValueAtLL(glm::vec2(llh)) - centerHeight;
+	if (llh.z > h)
+		return true;
+	return false;
+}
+
+bool CMesh::in_bounds(glm::vec4 p) const
+{
+	if (p.x < bounds[0].x || p.x > bounds[1].x || p.y < bounds[0].y || p.y > bounds[1].y || p.z < bounds[0].z || p.z > bounds[1].z)
+		return false;
+	return true;
+}
+
 CMesh::~CMesh()
 {
 	if (heightMapLoader) {
@@ -379,34 +400,79 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 	}
 
 	string context = "CMesh::IntersectLine";
-	LOG_INFO(requestID, context, (boost::format("Start... vpId=%1%, orig_=(%2%, %3%, %4%), dir_=(%5%, %6%, %7%")
-		% vpId
-		% orig_.x
-		% orig_.y
-		% orig_.z
-		% dir_.x
-		% dir_.y
-		% dir_.z).str().c_str());
+	if (CMesh_IntersectLine_Log)
+		LOG_INFO(requestID, context, (boost::format("Start... vpId=%1%, orig_=(%2%, %3%, %4%), dir_=(%5%, %6%, %7%")
+			% vpId
+			% orig_.x
+			% orig_.y
+			% orig_.z
+			% dir_.x
+			% dir_.y
+			% dir_.z).str().c_str());
 
 	glm::vec4 planeOrig(0, 0, 0, 1), planeNormal(0, 1, 0, 0);
 
 	float distance;
 	glm::vec4 orig(orig_, 1);
+
+	MPPv = CSettings::GetFloat(FloatMPPv);
+	MPPh = CSettings::GetFloat(FloatMPPh);
+
+	if (!is_visible(orig))
+	{
+		if (CMesh_IntersectLine_Log) LOG_ERROR__("orig invisible!");
+		return false;
+	}
+
 	glm::vec4 dir(dir_, 0);
 	glm::vec4 position;
 
 	bool planeResult = glm::intersectRayPlane(orig, dir, planeOrig, planeNormal, distance);
 	glm::vec4 approxPoint = orig + distance * dir;
 
-	/*XYZ*/
-	auto orig_lon = altitude->Lon0() + (altitude->Lon1() - altitude->Lon0()) * (bounds[1].x - orig.x) / (bounds[1].x - bounds[0].x);
-	auto orig_lat = altitude->Lat0() + (altitude->Lat1() - altitude->Lat0()) * (orig.y - bounds[0].y) / (bounds[1].y - bounds[0].y);
-	auto approxPoint_lon = altitude->Lon0() + (altitude->Lon1() - altitude->Lon0()) * (bounds[1].x - approxPoint.x) / (bounds[1].x - bounds[0].x);
-	auto approxPoint_lat = altitude->Lat0() + (altitude->Lat1() - altitude->Lat0()) * (approxPoint.y - bounds[0].y) / (bounds[1].y - bounds[0].y);
+	float t = 0;
+	if (is_visible(approxPoint))
+	{
+		t = 1;
+	}
+	
+	bool prev_visible = true;
+	bool d = true;
+	
+	/**/
 
-	auto hOrig = altitude->ValueAtLL(orig_lon, orig_lat) - centerHeight;
+	auto dt0 = CSettings::GetFloat(FloatDT0);
+	auto dt = dt0;
+	auto DTMin = CSettings::GetFloat(FloatDTMin);
 
-
+	auto pt = p(orig, approxPoint, t);
+	if (CMesh_IntersectLine_Log) 
+	{
+		auto dpt = pt - p(orig, approxPoint, t + dt);
+		/*XYZ*/
+		dpt.x *= MPPh;
+		dpt.y *= MPPv;
+		dpt.z *= MPPh;
+		LOG_INFO__("dpt0 length = %f", glm::length(dpt));
+	}
+	while (dt > DTMin && in_bounds(pt))
+	{
+		if(is_visible(pt) != prev_visible)
+		{
+			d = !d;
+			dt /= 2.;
+			prev_visible = !prev_visible;
+		}
+		t = d ? t + dt : t - dt;
+		pt = p(orig, approxPoint, t);
+	}
+	if (dt == dt0)
+	{
+		LOG_INFO__("out of mesh");
+		return false;
+	}
+	position_ = glm::vec3(pt);
+	LOG_INFO__("position: (%f, %f, %f)", position_.x, position_.y, position_.z);
 	//CMesh *m;
 	//glm::vec3 *b = GetBounds(); 
 	//if (b) {		
@@ -512,7 +578,7 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 	position_.z = position.z;
 	return found;*/
 
-	return false;
+	return true;
 }
 
 void CMesh::BindUniforms(CViewPortControl* vpControl)
@@ -629,8 +695,16 @@ float CMesh::GetHeightAtLL(float lon, float lat)
 	return altitude->ValueAtLL(lon, lat);
 }
 
-glm::vec2 CMesh::XY2LL(glm::vec2 xy)
+
+glm::vec3 CMesh::XYZT2LLH(glm::vec4 xyzt)
 {
+	/*XYZ*/
+	return glm::vec3(altitude->Lon0() + (altitude->Lon1() - altitude->Lon0()) * (bounds[1].x - xyzt.x) / (bounds[1].x - bounds[0].x), altitude->Lat0() + (altitude->Lat1() - altitude->Lat0()) * (xyzt.z - bounds[0].z) / (bounds[1].z - bounds[0].z), xyzt.y * MPPv);
+}
+
+glm::vec4 CMesh::LLH2XYZT(glm::vec3 llh)
+{
+	return glm::vec4(bounds[1].x - (bounds[1].x - bounds[0].x)*(llh.x - altitude->Lon0()) / (altitude->Lon1() - altitude->Lon0()), llh.z / MPPv, bounds[0].z + (bounds[1].z - bounds[0].z)*(llh.y - altitude->Lat0()) / (altitude->Lat1() - altitude->Lat0()), 1);
 }
 
 float CMesh::GetCenterHeight() {

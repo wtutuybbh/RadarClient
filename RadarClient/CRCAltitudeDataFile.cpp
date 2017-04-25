@@ -453,6 +453,11 @@ short CRCAltitudeDataFile::ValueAtLL(double lon, double lat)
 	return 0;
 }
 
+short CRCAltitudeDataFile::ValueAtLL(glm::vec2 LL)
+{
+	return ValueAtLL(LL.x, LL.y);
+}
+
 short CRCAltitudeDataFile::ValueAtLL_max(double lon, double lat)
 {
 	if (LOG_ENABLED && CRCAltitudeDataFile_ValueAt_v2_LOG)

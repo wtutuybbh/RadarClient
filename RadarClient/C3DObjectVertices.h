@@ -3,6 +3,8 @@
 class C3DObjectVertices
 {
 	void Clear();
+	void ClearIdxArrays();
+	static void TestVertexCount(unsigned int vertexCount);
 public:
 	float *vbuffer {nullptr};
 	std::vector<unsigned short *> idxArrays;
@@ -14,57 +16,27 @@ public:
 	bool needsReload{ false };
 	int usesCount{ 0 };
 
-	explicit C3DObjectVertices(int vertexCount)
-	{
-		if (vertexCount > USHRT_MAX)
-			throw std::exception("vertexCount must be less than USHRT_MAX (65535)");
-		if (vertexCount <= 0)
-			throw std::exception("vertexCount must be greater than 0");
+	explicit C3DObjectVertices(int vertexCount);
 
-		this->vertexCount = vertexCount;
-		vbuffer = new float[vertexCount * this->vertexSize];		
-	}
-	C3DObjectVertices(int vertexCount, int vertexSize)
-	{
-		if (vertexCount <= 0)
-			throw std::exception("vertexCount must be greater than 0");
-		if (vertexSize <= 0)
-			throw std::exception("vertexSize must be greater than 0");
+	C3DObjectVertices(int vertexCount, int vertexSize);
 
-		this->vertexCount = vertexCount;
-		this->vertexSize = vertexSize;
-		vbuffer = new float[vertexCount * vertexSize];
-	}
-	~C3DObjectVertices()
-	{
-		Clear();
-	}
+	~C3DObjectVertices();
 	void SetValues(int offset, float vx, float vy, float vz, float vt, float nx, float ny, float nz, float cr, float cg, float cb, float ca, float tu, float tv) const;
 	void SetValues(int offset, glm::vec4 v, glm::vec3 n, glm::vec4 c, glm::vec2 t) const;
 	void SetValues(int offset, glm::vec4 v, glm::vec3 n, glm::vec4 c, glm::vec4 c2, glm::vec2 t) const;
 
 	unsigned short * AddIndexArray(int length, GLenum mode);
+	unsigned short * GetIndexArray(int i, int &length);
+	int GetIndexArrayCount() const;
+
 	void SetIndex(int a, int i, int v);
 
 	float * GetBuffer() const;
 	glm::vec4 *getv(int offset);	
 	void Translate(glm::vec3 vshift, int place);
-	void ReCreate(int vertexCount)
-	{
-		if (vertexCount > USHRT_MAX)
-			throw std::exception("vertexCount must be less than USHRT_MAX (65535)");
-		if (vertexCount <= 0)
-			throw std::exception("vertexCount must be greater than 0");
+	void ReCreate(int vertexCount);
 
-		this->vertexCount = vertexCount;
-		
-		Clear();
-
-		vbuffer = new float[vertexCount * this->vertexSize];
-
-		
-	}
-
+	void ReCreate(int vertexCount, bool preserve);
 	boost::property_tree::ptree GetPropertyTree(int i_from, int i_to) const;
 };
 

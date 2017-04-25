@@ -171,7 +171,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	{
 		Mesh->UseTexture = vpControl->DisplayMap;
 		Mesh->UseY0Loc = !vpControl->DisplayLandscape;
-		Mesh->Draw(vpControl, GL_TRIANGLES);
+		//Mesh->Draw(vpControl, GL_TRIANGLES);
 	}
 	glDisable(GL_DEPTH_TEST);
 	if (Markup && UI && UI->GetCheckboxState_MarkupLines())
@@ -221,6 +221,10 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	{
 		if (ImageSet)
 			ImageSet->Draw(vpControl, GL_POINTS);
+	}
+	if (MeasurePath)
+	{
+		MeasurePath->Draw(vpControl, GL_POINTS);
 	}
 	glDisable(GL_PROGRAM_POINT_SIZE);
 
@@ -642,6 +646,11 @@ void CScene::AddMeasurePoint(glm::vec3 p0, glm::vec3 p1)
 	if(Mesh->IntersectLine(Main, p0, dir, pos))
 	{
 		MeasurePoints.push_back(pos);
+		if (!MeasurePath)
+		{
+			MeasurePath = new CPath();
+		}
+		MeasurePath->AddPoint(glm::vec4(pos, 1));
 	}
 }
 
@@ -663,14 +672,6 @@ float CScene::GetY0() {
 	return 0;
 }
 
-glm::vec3 CScene::XYZ2LLH(glm::vec3 xyz)
-{
-	if (!MeshReady())
-	{
-		return glm::vec3(0);
-	}
-
-}
 
 void CScene::DrawBitmaps() const
 {

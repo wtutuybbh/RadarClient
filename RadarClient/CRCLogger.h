@@ -31,6 +31,8 @@
 
 #define CSettings_Change_Log true
 
+#define CMesh_IntersectLine_Log true
+
 #ifndef _DEBUG
 
 #define LOG(severity, requestID, context, text, ...)

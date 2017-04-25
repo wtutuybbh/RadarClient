@@ -5,6 +5,11 @@ void C3DObjectVertices::Clear()
 {
 	if (vbuffer)
 		delete[] vbuffer;
+	ClearIdxArrays();
+}
+
+void C3DObjectVertices::ClearIdxArrays()
+{
 	if (idxArrays.size()>0)
 	{
 		for (auto it = idxArrays.begin(); it != idxArrays.end(); ++it)
@@ -13,6 +18,36 @@ void C3DObjectVertices::Clear()
 				delete[] * it;
 		}
 	}
+}
+
+void C3DObjectVertices::TestVertexCount(unsigned vertexCount)
+{
+	if (vertexCount > USHRT_MAX)
+		throw std::exception("vertexCount must be less than USHRT_MAX (65535)");
+	if (vertexCount <= 0)
+		throw std::exception("vertexCount must be greater than 0");
+}
+
+C3DObjectVertices::C3DObjectVertices(int vertexCount)
+{
+	TestVertexCount(vertexCount);
+
+	this->vertexCount = vertexCount;
+	vbuffer = new float[vertexCount * this->vertexSize];		
+}
+
+C3DObjectVertices::C3DObjectVertices(int vertexCount, int vertexSize)
+{
+	TestVertexCount(vertexCount);
+
+	this->vertexCount = vertexCount;
+	this->vertexSize = vertexSize;
+	vbuffer = new float[vertexCount * vertexSize];
+}
+
+C3DObjectVertices::~C3DObjectVertices()
+{
+	Clear();
 }
 
 void C3DObjectVertices::SetValues(int offset, float vx, float vy, float vz, float vt, float nx, float ny, float nz, float cr, float cg, float cb, float ca, float tu, float tv) const
@@ -99,6 +134,21 @@ unsigned short * C3DObjectVertices::AddIndexArray(int length, GLenum mode)
 	return arr;
 }
 
+unsigned short* C3DObjectVertices::GetIndexArray(int i, int &length)
+{
+	if (i<idxArrays.size())
+	{
+		length = idxLengths[i];
+		return idxArrays[i];
+	}
+	return nullptr;
+}
+
+int C3DObjectVertices::GetIndexArrayCount() const
+{
+	return idxArrays.size();
+}
+
 void C3DObjectVertices::SetIndex(int a, int i, int v)
 {
 	idxArrays[a][i] = v;
@@ -125,6 +175,57 @@ void C3DObjectVertices::Translate(glm::vec3 vshift, int place)
 		vbuffer[i * vertexSize + place + 2] += vshift.z;
 	}
 	needsReload = true;
+}
+
+void C3DObjectVertices::ReCreate(int vertexCount)
+{
+	TestVertexCount(vertexCount);
+
+	this->vertexCount = vertexCount;
+		
+	Clear();
+
+	vbuffer = new float[vertexCount * this->vertexSize];
+
+		
+}
+
+void C3DObjectVertices::ReCreate(int vertexCount, bool preserve)
+{
+	if (!preserve)
+	{
+		ReCreate(vertexCount);
+	}
+	else
+	{
+		TestVertexCount(vertexCount);
+
+		if (vbuffer) {
+			auto vbuffer_tmp = vbuffer;
+			vbuffer = new float[vertexCount * this->vertexSize];
+			memcpy(vbuffer, vbuffer_tmp, this->vertexCount * vertexSize);			
+			delete[] vbuffer_tmp;
+		}
+		else
+		{
+			vbuffer = new float[vertexCount * this->vertexSize];
+		}
+
+		auto dvc = vertexCount - this->vertexCount;
+		for (auto i = 0; i < idxArrays.size(); i++)
+		{
+			if (idxArrays[i])
+			{
+				auto array_tmp = idxArrays[i];
+				idxArrays[i] = new unsigned short[idxLengths[i] + dvc];
+				memcpy(idxArrays[i], array_tmp, dvc > 0 ? idxLengths[i] : idxLengths[i] + dvc);
+				idxLengths[i] += dvc;
+				delete[] array_tmp;
+			}
+		}
+		
+		this->vertexCount = vertexCount;
+	}
 }
 
 boost::property_tree::ptree C3DObjectVertices::GetPropertyTree(int i_from, int i_to) const

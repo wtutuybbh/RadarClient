@@ -129,6 +129,9 @@
     <ClCompile Include="CRay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CPath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CMesh.h">
@@ -256,6 +259,9 @@
     </ClInclude>
     <ClInclude Include="CRay.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CPath.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -151,7 +151,9 @@ bool CSettings::Init()
 	InitFloat(FloatMarkDistance, TEXT("FloatMarkDistance"), 100);
 	
 	InitFloat(FloatMaxDist, TEXT("FloatMaxDist"), 5000);
-
+		
+	InitFloat(FloatDT0, TEXT("FloatDT0"), 0.01);
+	InitFloat(FloatDTMin, TEXT("FloatDTMin"), 0.001);
 
 	return true;
 	

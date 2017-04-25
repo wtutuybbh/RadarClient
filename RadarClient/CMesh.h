@@ -48,7 +48,7 @@ class CMesh : public C3DObjectModel
 	double max_range;
 	double h0 {1.5};
 	double e {0};
-	//float MPPh, MPPv;
+	float MPPh, MPPv;
 	float maxh{ FLT_MIN }, minh{ FLT_MAX };
 	float maxbz{ FLT_MIN }, minbz{ FLT_MAX };
 
@@ -61,6 +61,11 @@ class CMesh : public C3DObjectModel
 	bool ready{ false };
 
 	std::thread * heightMapLoader{ nullptr };
+
+	/* for point on surface algorithm */
+	glm::vec4 p(glm::vec4 orig, glm::vec4 approxPoint, float t);
+	bool is_visible(glm::vec4 p);
+	bool in_bounds(glm::vec4 p) const;
 public:
 	//glm::vec3 Size;
 	~CMesh();
@@ -78,5 +83,6 @@ public:
 	int GetResolution();
 	CRCAltitudeDataFile * GetAltitudeDataFile();
 	float GetHeightAtLL(float lon, float lat);
-	glm::vec2 XY2LL(glm::vec2 xy);
+	glm::vec3 XYZT2LLH(glm::vec4 xyzt);
+	glm::vec4 LLH2XYZT(glm::vec3 llh);
 };

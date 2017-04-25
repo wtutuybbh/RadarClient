@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "CPath.h"
 
 struct RIMAGE;
 struct RPOINTS;
@@ -50,6 +51,7 @@ class CScene {
 	std::mutex mtxTracks;
 public:
 	std::vector<glm::vec3> MeasurePoints;
+	CPath *MeasurePath {nullptr};
 	void AddMeasurePoint(glm::vec3 p0, glm::vec3 p1);
 
 	CLine *begAzmLine{ nullptr };
@@ -167,6 +169,4 @@ public:
 	bool MeshReady() const;
 
 	float GetY0();
-
-	glm::vec3 XYZ2LLH(glm::vec3 xyz);
 };

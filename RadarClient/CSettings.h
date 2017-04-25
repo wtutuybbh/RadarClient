@@ -70,7 +70,9 @@ enum Settings
 	FloatCSectorMaxAmp,
 	IntConnectionTimeout,
 	FloatMarkDistance,
-	FloatMaxDist
+	FloatMaxDist,
+	FloatDT0,
+	FloatDTMin
 };
 
 
