@@ -686,13 +686,14 @@ float CScene::GetMeasureLength()
 	float MPPv = CSettings::GetFloat(FloatMPPv);
 
 	/*XYZ*/
-	
-	for (auto i =0; i<MeasurePoints.size()-1; i++)
-	{
+	if (MeasurePoints.size() >= 2) {
+		for (auto i = 0; i < MeasurePoints.size() - 1; i++)
+		{
 
-		auto p0 = glm::vec3(MeasurePoints[i].x * MPPh, MeasurePoints[i].y * MPPv, MeasurePoints[i].z * MPPh);
-		auto p1 = glm::vec3(MeasurePoints[i+1].x * MPPh, MeasurePoints[i+1].y * MPPv, MeasurePoints[i+1].z * MPPh);
-		res += glm::length(p1 - p0);
+			auto p0 = glm::vec3(MeasurePoints[i].x * MPPh, MeasurePoints[i].y * MPPv, MeasurePoints[i].z * MPPh);
+			auto p1 = glm::vec3(MeasurePoints[i + 1].x * MPPh, MeasurePoints[i + 1].y * MPPv, MeasurePoints[i + 1].z * MPPh);
+			res += glm::length(p1 - p0);
+		}
 	}
 	return res;
 }
