@@ -8,7 +8,7 @@ using boost::property_tree::write_json;
 enum Settings
 {
 	ColorBackground,
-	ColorAxis,
+	ColorMarkup,
 	ColorNumbers,
 	ColorPointLowLevel,
 	ColorPointHighLevel,
@@ -72,7 +72,9 @@ enum Settings
 	FloatMarkDistance,
 	FloatMaxDist,
 	FloatDT0,
-	FloatDTMin
+	FloatDTMin,
+	ColorMarkupInvisible,
+	ColorMeasureLineInvisible
 };
 
 

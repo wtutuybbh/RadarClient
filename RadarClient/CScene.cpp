@@ -171,11 +171,14 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	{
 		Mesh->UseTexture = vpControl->DisplayMap;
 		Mesh->UseY0Loc = !vpControl->DisplayLandscape;
-		//Mesh->Draw(vpControl, GL_TRIANGLES);
+		//glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		Mesh->Draw(vpControl, GL_TRIANGLES);
+		//glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	}
 	glDisable(GL_DEPTH_TEST);
 	if (Markup && UI && UI->GetCheckboxState_MarkupLines())
 	{
+		Markup->UseUniColor(1.0);
 		Markup->Draw(vpControl, 0);
 	}
 
@@ -192,6 +195,12 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	if (RayObj)
 	{
 		RayObj->Draw(vpControl, GL_TRIANGLES);
+	}
+	
+	if (MeasurePath)
+	{
+		MeasurePath->UseUniColor(1.0f);
+		MeasurePath->Draw(vpControl, GL_POINTS);
 	}
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_PROGRAM_POINT_SIZE);
@@ -224,7 +233,13 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	}
 	if (MeasurePath)
 	{
+		MeasurePath->UseUniColor(0.0f);
 		MeasurePath->Draw(vpControl, GL_POINTS);
+	}
+	if (Markup && UI && UI->GetCheckboxState_MarkupLines())
+	{
+		Markup->UseUniColor(0.0);
+		Markup->Draw(vpControl, 0);
 	}
 	glDisable(GL_PROGRAM_POINT_SIZE);
 
@@ -652,6 +667,34 @@ void CScene::AddMeasurePoint(glm::vec3 p0, glm::vec3 p1)
 		}
 		MeasurePath->AddPoint(glm::vec4(pos, 1));
 	}
+}
+
+void CScene::ClearMeasure()
+{
+	if (MeasurePath) {
+		auto tmp = MeasurePath;
+		MeasurePath = nullptr;
+		delete tmp;
+	}
+	MeasurePoints.clear();
+}
+
+float CScene::GetMeasureLength()
+{
+	float res = 0.0f;
+	float MPPh = CSettings::GetFloat(FloatMPPh);
+	float MPPv = CSettings::GetFloat(FloatMPPv);
+
+	/*XYZ*/
+	
+	for (auto i =0; i<MeasurePoints.size()-1; i++)
+	{
+
+		auto p0 = glm::vec3(MeasurePoints[i].x * MPPh, MeasurePoints[i].y * MPPv, MeasurePoints[i].z * MPPh);
+		auto p1 = glm::vec3(MeasurePoints[i+1].x * MPPh, MeasurePoints[i+1].y * MPPv, MeasurePoints[i+1].z * MPPh);
+		res += glm::length(p1 - p0);
+	}
+	return res;
 }
 
 glm::vec2 CScene::CameraXYForMiniMap() const

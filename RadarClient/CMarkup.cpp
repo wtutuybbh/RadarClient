@@ -45,7 +45,7 @@ CMarkup::CMarkup(glm::vec4 origin)
 
 	vertices = std::make_shared<C3DObjectVertices>(vertexCount);
 
-	Color = CSettings::GetColor(ColorAxis);
+	Color = CSettings::GetColor(ColorMarkup);
 
 	glm::vec4 colorBlankZones = CSettings::GetColor(ColorBlankZones);
 	
@@ -145,6 +145,7 @@ CMarkup::CMarkup(glm::vec4 origin)
 	}
 	outfile.close();*/
 
+	uniColor = glm::vec4(0.3, 0.3, 0.3, 1);
 }
 
 void CMarkup::ShowLabels(bool show_labels)
@@ -154,18 +155,15 @@ void CMarkup::ShowLabels(bool show_labels)
 
 void CMarkup::BindUniforms(CViewPortControl* vpControl)
 {
-	glm::mat4 m = GetModelMatrix(vpControl->Id);
-	glm::mat4 v = vpControl->GetViewMatrix();
-	glm::mat4 p = vpControl->GetProjMatrix();
-	glm::mat4 mvp = p*v*m;
-	int mvp_loc = prog.at(vpControl->Id)->GetUniformLocation("mvp");
-	glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
+	uniColor = CSettings::GetColor(ColorMarkupInvisible);
+
+	C3DObjectModel::BindUniforms(vpControl);
 
 	int unicolor2_loc = prog.at(vpControl->Id)->GetUniformLocation("unicolor2");
 	glUniform4fv(unicolor2_loc, 1, glm::value_ptr(CSettings::GetColor(ColorBlankZones)));
 	
 	int unicolor_loc = prog.at(vpControl->Id)->GetUniformLocation("unicolor");
-	glUniform4fv(unicolor_loc, 1, glm::value_ptr(CSettings::GetColor(ColorAxis)));
+	glUniform4fv(unicolor_loc, 1, glm::value_ptr(CSettings::GetColor(ColorMarkup)));
 
 	int uniweight_loc = prog.at(vpControl->Id)->GetUniformLocation("uniweight");
 	glUniform1f(uniweight_loc, uniweight);

@@ -24,6 +24,8 @@ protected:
 	glm::vec3 cartesianCoords, sphericalCoords, geoCoords;	
 	std::string c3DObjectModel_TypeName {"C3DObjectModel"};
 	std::string name{ "" };
+	float useUniColor{ 0.0f };
+	glm::vec4 uniColor{ glm::vec4(0.5, 0.5, 0.5, 1) };
 public:
 	std::shared_ptr<C3DObjectVertices> vertices{ std::shared_ptr<C3DObjectVertices>(nullptr) };
 	static int _id, _testid;
@@ -75,4 +77,6 @@ public:
 
 	std::string GetName();
 	void SetName(std::string name);
+	void UseUniColor(float useUniColor);
+
 };

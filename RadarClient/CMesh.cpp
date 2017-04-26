@@ -441,9 +441,13 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 	
 	/**/
 
-	auto dt0 = CSettings::GetFloat(FloatDT0);
+	/*auto dt0 = CSettings::GetFloat(FloatDT0);
 	auto dt = dt0;
-	auto DTMin = CSettings::GetFloat(FloatDTMin);
+	auto DTMin = CSettings::GetFloat(FloatDTMin);*/
+
+	auto dt0 = 1 / glm::length(orig - approxPoint);
+	auto dt = dt0;
+	auto DTMin = dt / 128;
 
 	auto pt = p(orig, approxPoint, t);
 	if (CMesh_IntersectLine_Log) 
@@ -461,7 +465,7 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 		{
 			d = !d;
 			dt /= 2.;
-			prev_visible = !prev_visible;
+			prev_visible = !prev_visible;	
 		}
 		t = d ? t + dt : t - dt;
 		pt = p(orig, approxPoint, t);
@@ -586,13 +590,8 @@ void CMesh::BindUniforms(CViewPortControl* vpControl)
 	if (!Ready()) {
 		return;
 	}
-	auto mm = GetModelMatrix(vpControl->Id);
-	glm::mat4 v = vpControl->GetViewMatrix();
-	glm::mat4 p = vpControl->GetProjMatrix();
-	glm::mat4 mvp = p*v*mm;
-	int mvp_loc = prog.at(vpControl->Id)->GetUniformLocation("mvp");
-
-	glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
+	
+	C3DObjectModel::BindUniforms(vpControl);
 
 	if (vpControl->Id == Main) {		
 		int useTexture_loc = prog.at(vpControl->Id)->GetUniformLocation("useTexture");

@@ -27,6 +27,7 @@ public:
 
 	unsigned short * AddIndexArray(int length, GLenum mode);
 	unsigned short * GetIndexArray(int i, int &length);
+	void SetArrayLength(int i, int length);
 	int GetIndexArrayCount() const;
 
 	void SetIndex(int a, int i, int v);

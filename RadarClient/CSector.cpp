@@ -32,6 +32,8 @@ CSector::CSector(int index) : C3DObjectModel()
 	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 
 	c3DObjectModel_TypeName = "CSector";
+
+	
 }
 
 void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init)
@@ -111,15 +113,12 @@ void CSector::Dump(CViewPortControl* vpControl, std::ofstream *outfile)
 
 void CSector::BindUniforms(CViewPortControl* vpControl)
 {
-	glm::mat4 m = GetModelMatrix(vpControl->Id);
-	glm::mat4 v = vpControl->GetViewMatrix();
-	glm::mat4 p = vpControl->GetProjMatrix();
-	glm::mat4 mvp = p*v*m;
-	int mvp_loc = prog.at(vpControl->Id)->GetUniformLocation("mvp");
-	glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
+	C3DObjectModel::BindUniforms(vpControl);
 
 	int ps_loc = prog.at(vpControl->Id)->GetUniformLocation("pointSize");
 	glUniform1fv(ps_loc, 1, &PointSize);
+
+	
 }
 
 

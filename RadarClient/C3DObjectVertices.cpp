@@ -144,6 +144,11 @@ unsigned short* C3DObjectVertices::GetIndexArray(int i, int &length)
 	return nullptr;
 }
 
+void C3DObjectVertices::SetArrayLength(int i, int length)
+{
+	idxLengths[i] = length;
+}
+
 int C3DObjectVertices::GetIndexArrayCount() const
 {
 	return idxArrays.size();
@@ -203,7 +208,7 @@ void C3DObjectVertices::ReCreate(int vertexCount, bool preserve)
 		if (vbuffer) {
 			auto vbuffer_tmp = vbuffer;
 			vbuffer = new float[vertexCount * this->vertexSize];
-			memcpy(vbuffer, vbuffer_tmp, this->vertexCount * vertexSize);			
+			memcpy(vbuffer, vbuffer_tmp, this->vertexCount * vertexSize * sizeof(float));			
 			delete[] vbuffer_tmp;
 		}
 		else
@@ -218,7 +223,7 @@ void C3DObjectVertices::ReCreate(int vertexCount, bool preserve)
 			{
 				auto array_tmp = idxArrays[i];
 				idxArrays[i] = new unsigned short[idxLengths[i] + dvc];
-				memcpy(idxArrays[i], array_tmp, dvc > 0 ? idxLengths[i] : idxLengths[i] + dvc);
+				memcpy(idxArrays[i], array_tmp, sizeof(unsigned short) * (dvc > 0 ? idxLengths[i] : idxLengths[i] + dvc));
 				idxLengths[i] += dvc;
 				delete[] array_tmp;
 			}

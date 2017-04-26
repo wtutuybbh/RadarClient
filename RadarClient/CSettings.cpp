@@ -28,7 +28,7 @@ ptree CSettings::pt;
 bool CSettings::Init()
 {
 	InitColor(ColorBackground,			TEXT("ColorBackground"),	glm::vec4(0.0, 0.0, 0.0, 1));
-	InitColor(ColorAxis,				TEXT("ColorAxis"),			glm::vec4(0.5, 0.5, 0.5, 0.5));
+	InitColor(ColorMarkup,				TEXT("ColorMarkup"),			glm::vec4(0.5, 0.5, 0.5, 0.5));
 	InitColor(ColorNumbers,				TEXT("ColorNumbers"),		glm::vec4(0.7, 0.7, 0.7, 0.5));
 	InitColor(ColorPointLowLevel,		TEXT("ColorPointLowLevel"), glm::vec4(0.4, 0.4, 0.4, 1));
 	InitColor(ColorPointHighLevel, TEXT("ColorPointHighLevel"),glm::vec4(1, 1, 1, 1));
@@ -154,6 +154,9 @@ bool CSettings::Init()
 		
 	InitFloat(FloatDT0, TEXT("FloatDT0"), 0.01);
 	InitFloat(FloatDTMin, TEXT("FloatDTMin"), 0.001);
+
+	InitColor(ColorMarkupInvisible, TEXT("ColorMarkupInvisible"), glm::vec4(0.3, 0.3, 0.3, 1));
+	InitColor(ColorMeasureLineInvisible, TEXT("ColorMeasureLineInvisible"), glm::vec4(0.0, 1.0, 0.0, 1));
 
 	return true;
 	

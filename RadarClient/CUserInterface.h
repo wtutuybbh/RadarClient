@@ -126,6 +126,8 @@ private:
 
 
 	virtual LRESULT IDD_DIALOG1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	static std::vector<tstring> colorSettings;
 public:
 	int MinimapSize;
 	static HWND ParentHWND;

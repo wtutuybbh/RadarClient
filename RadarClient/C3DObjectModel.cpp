@@ -174,13 +174,26 @@ void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)
 void C3DObjectModel::BindUniforms(CViewPortControl* vpControl)
 {
 	if (prog.at(vpControl->Id)) {
-		int mvpUniformLoc = prog.at(vpControl->Id)->GetUniformLocation("mvp");
-		auto p = vpControl->GetProjMatrix();
-		auto v = vpControl->GetViewMatrix();
-		auto m = GetModelMatrix(vpControl->Id);
-		glm::mat4 mvp = p * v * m;
-		glUniformMatrix4fv(mvpUniformLoc, 1, GL_FALSE, glm::value_ptr(mvp));
+		auto mvpUniformLoc = prog.at(vpControl->Id)->GetUniformLocation("mvp");
+		if (mvpUniformLoc >= 0) {
+			auto p = vpControl->GetProjMatrix();
+			auto v = vpControl->GetViewMatrix();
+			auto m = GetModelMatrix(vpControl->Id);
+			auto mvp = p * v * m;
+			glUniformMatrix4fv(mvpUniformLoc, 1, GL_FALSE, glm::value_ptr(mvp));
+		}
+
+		
+		auto useUniColor_loc = prog.at(vpControl->Id)->GetUniformLocation("useUniColor");
+		if (useUniColor_loc >= 0)
+			glUniform1fv(useUniColor_loc, 1, &useUniColor);
+
+		auto uniColor_loc = prog.at(vpControl->Id)->GetUniformLocation("uniColor");
+		if (uniColor_loc >= 0)
+			glUniform4fv(uniColor_loc, 1, glm::value_ptr(uniColor));
 	}
+
+
 }
 
 glm::mat4 C3DObjectModel::GetModelMatrix(int vpId)
@@ -319,6 +332,11 @@ std::string C3DObjectModel::GetName()
 void C3DObjectModel::SetName(std::string name)
 {
 	this->name = name;
+}
+
+void C3DObjectModel::UseUniColor(float useUniColor)
+{
+	this->useUniColor = useUniColor;
 }
 
 void C3DObjectModel::SetColor(glm::vec4 color)

@@ -7,4 +7,5 @@ class CPath : public CTrack
 public:
 	CPath();
 	void AddPoint(glm::vec4 point);
+	void BindUniforms(CViewPortControl* vpControl) override;
 };

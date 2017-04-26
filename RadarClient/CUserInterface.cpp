@@ -174,7 +174,7 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 
 		auto hwndListView = GetDlgItem(hDlg, IDC_LIST1);
 
-		CRCListView::InitListView(hwndListView, 12, InitColorListViewColumns);
+		CRCListView::InitListView(hwndListView, 15, InitColorListViewColumns);
 		RECT rect;
 		GetClientRect(hwndListView, &rect);
 		ListView_SetExtendedListViewStyle(hwndListView, LVS_EX_FULLROWSELECT);
@@ -183,7 +183,7 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		ListView_SetColumnWidth(hwndListView, 2, rect.right - 220);
 		//s = GetWStringFromResourceID(IDS_STRING109);
 		
-		//auto color = CSettings::GetColorString(ColorAxis);
+		//auto color = CSettings::GetColorString(ColorMarkup);
 
 		return true;
 	}
@@ -405,35 +405,9 @@ std::wstring CUserInterface::GetWStringFromResourceID(int ID)
 
 tstring CUserInterface::GetColorForSettingsDialog(int index)
 {
-	switch (index)
-	{
-	case 0:
-		return TEXT("ColorBackground");
-	case 1:
-		return  TEXT("ColorAxis");
-	case 2:
-		return  TEXT("ColorNumbers");
-	case 3:
-		return  TEXT("ColorPointLowLevel");
-	case 4:
-		return  TEXT("ColorPointHighLevel");
-	case 5:
-		return  TEXT("ColorPointSelected");
-	case 6:
-		return  TEXT("ColorTrack");
-	case 7:
-		return  TEXT("ColorTrackSelected");
-	case 8:
-		return  TEXT("ColorMeasureLine");
-	case 9:
-		return  TEXT("ColorAltitudeLowest");
-	case 10:
-		return  TEXT("ColorAltitudeHighest");
-	case 11:
-		return  TEXT("ColorBlankZones");
-	default:
-		return  TEXT("");
-	}
+	if (index < colorSettings.size())
+		return colorSettings[index];	
+	return  TEXT("");
 }
 
 tstring CUserInterface::GetColorListViewCellText(int iItem, int iSubItem)
@@ -646,7 +620,7 @@ LRESULT CUserInterface::Checkbox_MeasureDistance(HWND hwnd, UINT uMsg, WPARAM wP
 		HWND hWnd = GetDlgItem(hwnd, ButtonID);
 		if (!Button_GetCheck(hWnd))
 		{
-			Scene->MeasurePoints.clear();
+			Scene->ClearMeasure();
 			FillInfoGrid(Scene);
 		}
 	}
@@ -775,8 +749,28 @@ void CUserInterface::Trackbar_ZeroElevation_SetText(HWND hwnd, int labelID)
 }
 
 //TRACKBAR_CLASS
+std::vector<tstring> CUserInterface::colorSettings;
 CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
 {
+	colorSettings.push_back(TEXT("ColorBackground"));
+	colorSettings.push_back(TEXT("ColorMarkup"));
+	colorSettings.push_back(TEXT("ColorMarkupInvisible"));
+	colorSettings.push_back(TEXT("ColorNumbers"));
+	colorSettings.push_back(TEXT("ColorPointLowLevel"));
+	colorSettings.push_back(TEXT("ColorPointHighLevel"));
+	colorSettings.push_back(TEXT("ColorPointSelected"));
+	colorSettings.push_back(TEXT("ColorTrack"));
+	colorSettings.push_back(TEXT("ColorTrackSelected"));
+	colorSettings.push_back(TEXT("ColorMeasureLine"));
+	colorSettings.push_back(TEXT("ColorMeasureLineInvisible"));
+	colorSettings.push_back(TEXT("ColorAltitudeLowest"));
+	colorSettings.push_back(TEXT("ColorAltitudeHighest"));
+	colorSettings.push_back(TEXT("ColorBlindzoneLowest"));
+	colorSettings.push_back(TEXT("ColorBlindzoneHighest"));
+	 
+	
+		
+
 	string context = "CUserInterface::CUserInterface";
 	LOG_INFO(requestID, context, (boost::format("Start... parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%...") % parentHWND % vpControl % socket % panelWidth).str().c_str());
 
@@ -1184,6 +1178,15 @@ void CUserInterface::FillInfoGrid(CScene* scene)
 		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 1, (LPARAM)"Точка ");
 		ss.str(std::string());
 		ss << std::fixed << std::setprecision(4) << geoCoords.x << ", " << geoCoords.y;
+		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, (LPARAM)ss.str().c_str());
+	}
+
+	if (MeasureDistance() && Scene)
+	{
+		r++;
+		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 1, (LPARAM)"Distance (m)");
+		ss.str(std::string());
+		ss << std::fixed << std::setprecision(2) << Scene->GetMeasureLength();
 		SendMessage(InfoGridHWND, ZGM_SETCELLTEXT, ncols * r + 2, (LPARAM)ss.str().c_str());
 	}
 

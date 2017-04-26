@@ -53,6 +53,8 @@ public:
 	std::vector<glm::vec3> MeasurePoints;
 	CPath *MeasurePath {nullptr};
 	void AddMeasurePoint(glm::vec3 p0, glm::vec3 p1);
+	void ClearMeasure();
+	float GetMeasureLength();
 
 	CLine *begAzmLine{ nullptr };
 

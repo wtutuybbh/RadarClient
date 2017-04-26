@@ -1,6 +1,8 @@
 ﻿#include "stdafx.h"
 #include "CPath.h"
 #include "CSettings.h"
+#include "CMinimap.h"
+#include "C3DObjectVBO.h"
 
 CPath::CPath(): CTrack(0, false)
 {
@@ -30,9 +32,22 @@ void CPath::AddPoint(glm::vec4 point)
 		int length;
 		if(arr[0] = vertices.get()->GetIndexArray(0, length))
 			arr[0][vertices.get()->vertexCount - 1] = vertices.get()->vertexCount - 1;
+
+
 		
 		if (arr[1] = vertices.get()->GetIndexArray(1, length))
 			arr[1][vertices.get()->vertexCount - 1] = vertices.get()->vertexCount - 1;
 	}
+	if (!vbo.at(Main)->vertices)
+		vbo.at(Main)->vertices = vertices;
+	if (!vbo.at(MiniMap)->vertices)
+		vbo.at(MiniMap)->vertices = vertices;
+
 	vertices.get()->needsReload = true;
+}
+
+void CPath::BindUniforms(CViewPortControl* vpControl)
+{
+	uniColor = CSettings::GetColor(ColorMeasureLineInvisible);
+	CSector::BindUniforms(vpControl);
 }
