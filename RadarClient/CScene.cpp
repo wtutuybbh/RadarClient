@@ -166,7 +166,9 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		
+	
+	glDepthFunc(GL_LEQUAL);
+
 	if (MeshReady())
 	{
 		Mesh->UseTexture = vpControl->DisplayMap;
@@ -178,8 +180,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	glDisable(GL_DEPTH_TEST);
 	if (Markup && UI && UI->GetCheckboxState_MarkupLines())
 	{
-		Markup->UseUniColor(1.0);
-		Markup->Draw(vpControl, 0);
+		
 	}
 
 	if (begAzmLine) {
@@ -199,8 +200,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	
 	if (MeasurePath)
 	{
-		MeasurePath->UseUniColor(1.0f);
-		MeasurePath->Draw(vpControl, GL_POINTS);
+		
 	}
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_PROGRAM_POINT_SIZE);
@@ -233,11 +233,20 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	}
 	if (MeasurePath)
 	{
+		glDepthFunc(GL_GEQUAL);
+		MeasurePath->UseUniColor(1.0f);
+		MeasurePath->Draw(vpControl, GL_POINTS);
+		glDepthFunc(GL_LESS);
 		MeasurePath->UseUniColor(0.0f);
 		MeasurePath->Draw(vpControl, GL_POINTS);
 	}
 	if (Markup && UI && UI->GetCheckboxState_MarkupLines())
 	{
+		//glDepthFunc(GL_GEQUAL);
+		glDepthFunc(GL_GEQUAL);
+		Markup->UseUniColor(1.0);
+		Markup->Draw(vpControl, 0);
+		glDepthFunc(GL_LESS);
 		Markup->UseUniColor(0.0);
 		Markup->Draw(vpControl, 0);
 	}
@@ -689,7 +698,6 @@ float CScene::GetMeasureLength()
 	if (MeasurePoints.size() >= 2) {
 		for (auto i = 0; i < MeasurePoints.size() - 1; i++)
 		{
-
 			auto p0 = glm::vec3(MeasurePoints[i].x * MPPh, MeasurePoints[i].y * MPPv, MeasurePoints[i].z * MPPh);
 			auto p1 = glm::vec3(MeasurePoints[i + 1].x * MPPh, MeasurePoints[i + 1].y * MPPv, MeasurePoints[i + 1].z * MPPh);
 			res += glm::length(p1 - p0);
