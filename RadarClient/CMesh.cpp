@@ -161,8 +161,7 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 	int H = altitude->Height();
 	int W = altitude->Width();
 
-	int N = ((W - 3) * 2 + 6 + 1)*(H - 1) - 1;
-	index_length = N;
+	
 
 	//std::vector<VBOData> * buffer = new std::vector<VBOData>((alt_.Width() - 1) * (alt_.Height() - 1) * 6);
 	bool make_index = false;
@@ -232,11 +231,34 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 		rcutils::takeminmax(_z, &(bounds[0].z), &(bounds[1].z));
 	}
 	averageHeight /= H * W;
+	//int N = ((W - 3) * 2 + 6 + 1)*(H - 1) - 1;
+	int N = (H - 1)*(W - 1) * 6;
+	index_length = N;
+
 	if (make_index) {
-		idxArray = v->AddIndexArray(N, GL_TRIANGLE_STRIP); //new unsigned short[N];
-		//idxArray2 = vertices.get()->AddIndexArray(N, GL_LINE_STRIP); //new unsigned short[N];
+		//idxArray = v->AddIndexArray(N, GL_TRIANGLE_STRIP); //new unsigned short[N];
+		idxArray = v->AddIndexArray(N, GL_TRIANGLES); //new unsigned short[N];
 		// SEE GL_LINE_STRIP.xlsx for details
-		for (int i = 0; i < N; i++)
+		auto i = 0;
+		for (x=0; x< W-1; x++)
+		{
+			for (auto y=0; y<H-1; y++)
+			{
+				auto idx = y * W + x;
+				idxArray[i] = idx;
+				idxArray[i + 1] = idx + W;
+				idxArray[i + 2] = idx + 1;
+
+				idxArray[i + 3] = idx + 1;
+				idxArray[i + 4] = idx + W;
+				idxArray[i + 5] = idx + W + 1;
+
+				i += 6;
+
+			}
+		}
+
+		/*for (int i = 0; i < N; i++)
 		{
 			x_before_change = x;
 			change_mode = (int)(next_step == i);
@@ -256,14 +278,12 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 			dYtone = dYCounter == 3 ? dYtone ^ 1 : dYtone;
 			Y = Ybase + (next_step_Ybase_change_prev == 0 ? !(dXtone^dYtone) : 0);
 
-			//outfile << i << ";" << change_mode << ";" << next_big_length << ";" << special_mode_id << ";" << mode_id << ";" << step_length << ";" << next_step << ";" << sign << ";" << x << ";" << dXtone << ";" << X << std::endl;
-			//outfile << i << ";" << dYCounter << ";" << dYtone << ";" << next_step_Ybase_change << ";" << Ybase << ";" << Y << std::endl;
+			
 
 			idxArray[i] = Y * W + X;
-			//idxArray2[i] = Y * W + X;
 
 			dXtone ^= 1;
-		}
+		}*/
 
 	}
 	
