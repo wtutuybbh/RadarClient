@@ -74,7 +74,11 @@ enum Settings
 	FloatDT0,
 	FloatDTMin,
 	ColorMarkupInvisible,
-	ColorMeasureLineInvisible
+	ColorMeasureLineInvisible,
+	FloatFovy, 
+	FloatAspect, 
+	FloatZNear, 
+	FloatZFar
 };
 
 

@@ -909,7 +909,7 @@ BOOL Initialize()					// Any GL Init Code & User Initialiazation Goes Here
 	
 	if (g_vpControl) {
 		g_vpControl->Camera->SetAll(0, 0, 0, 0, 0, 1, 0, 1, 0,
-			60.0f, 4.0f / 3.0f, 1.0f, 10000.0f,
+			CSettings::GetFloat(FloatFovy), CSettings::GetFloat(FloatAspect), CSettings::GetFloat(FloatZNear), CSettings::GetFloat(FloatZFar),
 			0.01, LookAtCallback_);
 	}
 

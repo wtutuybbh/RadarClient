@@ -158,6 +158,10 @@ bool CSettings::Init()
 	InitColor(ColorMarkupInvisible, TEXT("ColorMarkupInvisible"), glm::vec4(0.3, 0.3, 0.3, 1));
 	InitColor(ColorMeasureLineInvisible, TEXT("ColorMeasureLineInvisible"), glm::vec4(0.0, 1.0, 0.0, 1));
 
+	InitFloat(FloatFovy, TEXT("FloatFovy"), 60.0f);
+	InitFloat(FloatAspect, TEXT("FloatAspect"), 1.333333373f);
+	InitFloat(FloatZNear, TEXT("FloatZNear"), 100.0f);
+	InitFloat(FloatZFar, TEXT("FloatZFar"), 10000.0f);
 	return true;
 	
 }

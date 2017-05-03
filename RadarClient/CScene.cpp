@@ -163,11 +163,16 @@ CScene::~CScene() {
 
 bool CScene::DrawScene(CViewPortControl * vpControl)
 {
+	if (Camera)
+	{
+		Camera->SetProjection(CSettings::GetFloat(FloatFovy), CSettings::GetFloat(FloatAspect), CSettings::GetFloat(FloatZNear), CSettings::GetFloat(FloatZFar));
+	}
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	glDepthFunc(GL_LEQUAL);
+	glDepthFunc(GL_LESS);
 
 	if (MeshReady())
 	{
@@ -188,10 +193,10 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	}
 
 
-	if (UI->GetCheckboxState_MarkupLabels())
+	/*if (UI->GetCheckboxState_MarkupLabels())
 	{
 		DrawBitmaps();
-	}
+	}*/
 
 	if (RayObj)
 	{
@@ -234,9 +239,14 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	if (MeasurePath)
 	{
 		glDepthFunc(GL_GEQUAL);
+		glDepthMask(GL_FALSE);
+		glLineStipple(1, 0xAAAA);
+		glEnable(GL_LINE_STIPPLE);
 		MeasurePath->UseUniColor(1.0f);
 		MeasurePath->Draw(vpControl, GL_POINTS);
 		glDepthFunc(GL_LESS);
+		glDepthMask(GL_TRUE);
+		glDisable(GL_LINE_STIPPLE);
 		MeasurePath->UseUniColor(0.0f);
 		MeasurePath->Draw(vpControl, GL_POINTS);
 	}
@@ -244,9 +254,14 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	{
 		//glDepthFunc(GL_GEQUAL);
 		glDepthFunc(GL_GEQUAL);
+		glDepthMask(GL_FALSE);
+		glLineStipple(1, 0xAAAA);
+		glEnable(GL_LINE_STIPPLE);
 		Markup->UseUniColor(1.0);
 		Markup->Draw(vpControl, 0);
 		glDepthFunc(GL_LESS);
+		glDepthMask(GL_TRUE);
+		glDisable(GL_LINE_STIPPLE);
 		Markup->UseUniColor(0.0);
 		Markup->Draw(vpControl, 0);
 	}

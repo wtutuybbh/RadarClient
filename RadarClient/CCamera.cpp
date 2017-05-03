@@ -17,7 +17,7 @@ CCamera::CCamera() //empty constructor. camera depends on scene, scene depends o
 	bottom = -1;
 	top = 1;
 	znear = -1;
-	zfar = 15000;
+	zfar = 5000;
 	mmPosition = glm::vec3(0.0f, 1000.0f, 0.0f);
 	mmTo = glm::vec3(0.0f, 0.0f, 0.0f);
 	mmUp = glm::vec3(0.0f, 0.0f, 1.0f);
