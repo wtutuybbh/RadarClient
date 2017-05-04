@@ -32,9 +32,9 @@ public:
 	int id;
 	void SetCartesianCoordinates(glm::vec4 c);
 	void SetCartesianCoordinates(glm::vec3 c);
-	glm::vec3 GetCartesianCoords();
+	glm::vec3 GetCartesianCoords() const;
 	void SetGeoCoords(glm::vec3 c);
-	glm::vec3 GetGeoCoords();
+	glm::vec3 GetGeoCoords() const;
 	void SetCartesianCoordinates(float x, float y, float z);
 	
 
@@ -69,13 +69,13 @@ public:
 
 	virtual glm::vec3 * GetBounds();
 
-	std::string GetTypeName();
+	std::string GetTypeName() const;
 	void SetVBO(int vpId, C3DObjectVBO *_vbo);
 
 	void SetRotateMatrix(int vpId, glm::mat4 rotate);
 	void SetRotateMatrix(glm::mat4 rotate);
 
-	std::string GetName();
+	std::string GetName() const;
 	void SetName(std::string name);
 	void UseUniColor(float useUniColor);
 

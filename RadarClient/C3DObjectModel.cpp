@@ -20,7 +20,7 @@ void C3DObjectModel::SetCartesianCoordinates(glm::vec3 c)
 	cartesianCoords = c;
 }
 
-glm::vec3 C3DObjectModel::GetCartesianCoords()
+glm::vec3 C3DObjectModel::GetCartesianCoords() const
 {
 	return cartesianCoords;
 }
@@ -30,7 +30,7 @@ void C3DObjectModel::SetGeoCoords(glm::vec3 c)
 	geoCoords = c;
 }
 
-glm::vec3 C3DObjectModel::GetGeoCoords()
+glm::vec3 C3DObjectModel::GetGeoCoords() const
 {
 	return geoCoords;
 }
@@ -300,7 +300,7 @@ glm::vec3* C3DObjectModel::GetBounds()
 	return nullptr;
 }
 
-std::string C3DObjectModel::GetTypeName()
+std::string C3DObjectModel::GetTypeName() const
 {
 	return c3DObjectModel_TypeName;
 }
@@ -324,7 +324,7 @@ void C3DObjectModel::SetRotateMatrix(glm::mat4 rotate)
 	}
 }
 
-std::string C3DObjectModel::GetName()
+std::string C3DObjectModel::GetName() const
 {
 	return name;
 }
