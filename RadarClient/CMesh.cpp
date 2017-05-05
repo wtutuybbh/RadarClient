@@ -232,8 +232,7 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 	}
 	averageHeight /= H * W;
 	//int N = ((W - 3) * 2 + 6 + 1)*(H - 1) - 1;
-	int N = (H - 1)*(W - 1) * 6;
-	index_length = N;
+	int N =  (H - 1)*(W - 1) * 6;
 
 	if (make_index) {
 		//idxArray = v->AddIndexArray(N, GL_TRIANGLE_STRIP); //new unsigned short[N];
@@ -434,9 +433,28 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 
 	float distance;
 	glm::vec4 orig(orig_, 1);
+	glm::vec4 dir(dir_, 0);
 
 	MPPv = CSettings::GetFloat(FloatMPPv);
 	MPPh = CSettings::GetFloat(FloatMPPh);
+
+	if (dir.z != 0)
+	{
+		auto x0 = orig.x + dir.x * (bounds[0].z - orig.z) / dir.z;
+		auto x1 = orig.x + dir.x * (bounds[1].z - orig.z) / dir.z;
+		
+		for(auto j=0; j<altitude->Height(); j++)
+		{
+			
+		}
+		LOG_INFO__("x0=%f, x1=%f", x0, x1);
+	}
+	else
+	{
+		LOG_INFO__("orig.x=%f", orig.x);
+	}
+
+	/*******/
 
 	if (!is_visible(orig))
 	{
@@ -444,8 +462,7 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 		return false;
 	}
 
-	glm::vec4 dir(dir_, 0);
-	glm::vec4 position;
+	
 
 	bool planeResult = glm::intersectRayPlane(orig, dir, planeOrig, planeNormal, distance);
 	glm::vec4 approxPoint = orig + distance * dir;
