@@ -165,15 +165,15 @@ int CUserInterface::iItem_ColorListView = -1;
 glm::vec4 CUserInterface::oldColor_ColorListView = glm::vec4(0, 0, 0, 0);
 LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	std::string context("Dialog_Settings");
 	switch (uMsg)
 	{
 	case WM_INITDIALOG: {
 
 				
-		auto s = GetWStringFromResourceID(IDS_STRING108);
+		//colors:
 
 		auto hwndListView = GetDlgItem(hDlg, IDC_LIST1);
-
 		CRCListView::InitListView(hwndListView, 15, InitColorListViewColumns);
 		RECT rect;
 		GetClientRect(hwndListView, &rect);
@@ -181,9 +181,16 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		ListView_SetColumnWidth(hwndListView, 0, 150);
 		ListView_SetColumnWidth(hwndListView, 1, 70);
 		ListView_SetColumnWidth(hwndListView, 2, rect.right - 220);
-		//s = GetWStringFromResourceID(IDS_STRING109);
 		
-		//auto color = CSettings::GetColorString(ColorMarkup);
+
+		//distances:
+		hwndListView = GetDlgItem(hDlg, IDC_LIST2);
+		CRCListView::InitListView(hwndListView, 15, InitDistanceListViewColumns);
+		GetClientRect(hwndListView, &rect);
+		ListView_SetExtendedListViewStyle(hwndListView, LVS_EX_FULLROWSELECT);
+		ListView_SetColumnWidth(hwndListView, 0, 50);
+		ListView_SetColumnWidth(hwndListView, 1, rect.right - 50);
+
 
 		return true;
 	}
@@ -236,7 +243,13 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 			}
 			return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST1, GetColorListViewCellText);
 		}
+		if (((LPNMHDR)lParam)->idFrom == IDC_LIST2) // distances
+		{
+			return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST2, GetDistanceListViewCellText);
+		}
 	}
+	case WM_MOUSEMOVE:
+		LOG_INFO__("WM_MOUSEMOVE");
 	break;
 	}
 	return false;
@@ -301,6 +314,32 @@ LRESULT CUserInterface::ProcessColorListViewCustomDraw(LPARAM lParam) {
 		break;
 	}
 	return CDRF_DODEFAULT;
+}
+
+tstring CUserInterface::GetDistanceForSettingsDialog(int index)
+{
+	if (index < distancesSettings.size())
+		return distancesSettings[index];
+	return  TEXT("");
+}
+
+tstring CUserInterface::GetDistanceListViewCellText(int iItem, int iSubItem)
+{
+	if (iSubItem == 0)
+		return GetDistanceForSettingsDialog(iItem);
+	if (iSubItem == 1)
+		return to_tstring(to_string( CSettings::GetFloat(CSettings::GetIndex(GetDistanceForSettingsDialog(iItem)))));
+	return TEXT("");
+}
+
+void CUserInterface::InitDistanceListViewColumns(HWND hwndListView, LVCOLUMNW lvColumn)
+{
+	TCHAR       szString[2][20] = { TEXT("Параметр"), TEXT("Значение") };
+	for (auto i = 0; i < 2; i++)
+	{
+		lvColumn.pszText = szString[i];
+		ListView_InsertColumn(hwndListView, i, &lvColumn);
+	}
 }
 
 LRESULT CUserInterface::Button_Reload(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -750,6 +789,8 @@ void CUserInterface::Trackbar_ZeroElevation_SetText(HWND hwnd, int labelID)
 
 //TRACKBAR_CLASS
 std::vector<tstring> CUserInterface::colorSettings;
+std::vector<tstring> CUserInterface::distancesSettings;
+std::vector<tstring> CUserInterface::anglesSettings;
 CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
 {
 	colorSettings.push_back(TEXT("ColorBackground"));
@@ -766,10 +807,20 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	colorSettings.push_back(TEXT("ColorAltitudeLowest"));
 	colorSettings.push_back(TEXT("ColorAltitudeHighest"));
 	colorSettings.push_back(TEXT("ColorBlindzoneLowest"));
-	colorSettings.push_back(TEXT("ColorBlindzoneHighest"));
-	 
+	colorSettings.push_back(TEXT("ColorBlindzoneHighest"));	 		
+
+	distancesSettings.push_back(TEXT("FloatMaxDistance"));
+	distancesSettings.push_back(TEXT("FloatBlankR1"));
+	distancesSettings.push_back(TEXT("FloatBlankR2"));
+	distancesSettings.push_back(TEXT("FloatPositionRadarHeight"));
+	distancesSettings.push_back(TEXT("FloatMarkDistance"));
+	distancesSettings.push_back(TEXT("FloatMaxDist"));
 	
-		
+	anglesSettings.push_back(TEXT("FloatZeroElevation"));
+	anglesSettings.push_back(TEXT("FloatMinZeroElevation"));
+	anglesSettings.push_back(TEXT("FloatMaxZeroElevation"));
+	anglesSettings.push_back(TEXT("FloatMinBegAzm"));
+	anglesSettings.push_back(TEXT("FloatMaxBegAzm"));
 
 	string context = "CUserInterface::CUserInterface";
 	LOG_INFO(requestID, context, (boost::format("Start... parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%...") % parentHWND % vpControl % socket % panelWidth).str().c_str());

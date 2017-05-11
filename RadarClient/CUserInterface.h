@@ -96,6 +96,10 @@ private:
 	static void InitColorListViewColumns(HWND hwndListView, LV_COLUMN lvColumn);
 	static LRESULT CALLBACK ProcessColorListViewCustomDraw(LPARAM lParam);
 
+	static tstring GetDistanceForSettingsDialog(int index);
+	static tstring GetDistanceListViewCellText(int iItem, int iSubItem);
+	static void InitDistanceListViewColumns(HWND hwndListView, LV_COLUMN lvColumn);
+
 	virtual LRESULT Button_Reload(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 
@@ -128,6 +132,8 @@ private:
 	virtual LRESULT IDD_DIALOG1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	static std::vector<tstring> colorSettings;
+	static std::vector<tstring> distancesSettings;
+	static std::vector<tstring> anglesSettings;
 public:
 	int MinimapSize;
 	static HWND ParentHWND;

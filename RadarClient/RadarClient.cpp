@@ -623,7 +623,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 	
 	
-	std::ifstream settings_txt(TEXT("settings.txt"));
+	/*std::ifstream settings_txt(TEXT("settings.txt"));
 	
 	if (!settings_txt) {
 		LOG_ERROR__("settings.txt not found.");
@@ -687,7 +687,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 	}
 
-	settings_txt.close();
+	settings_txt.close();*/
 	CSettings::Load();
 	LOG_INFO(requestID, context, "Settings loaded.");
 

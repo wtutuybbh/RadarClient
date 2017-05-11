@@ -51,10 +51,6 @@ bool CSettings::Init()
 
 	InitColor(ColorBlankZones, TEXT("ColorBlankZones"), glm::vec4(1.0, 0.3, 0.3, 1));
 
-	InitFloat(FloatMinAltitude, TEXT("FloatMinAltitude"), 50);
-
-	InitFloat(FloatMaxAltitude, TEXT("FloatMaxAltitude"), 250);
-
 	InitFloat(FloatMaxDistance, TEXT("FloatMaxDistance"), 7000);
 
 	InitFloat(FloatBlankR1, TEXT("FloatBlankR1"), 120);

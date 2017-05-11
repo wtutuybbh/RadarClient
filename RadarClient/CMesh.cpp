@@ -410,7 +410,7 @@ glm::vec3 CMesh::GetSize() {
 	return glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
-bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3& position_)
+bool CMesh::IntersectLine(int vpId, glm::vec3& orig, glm::vec3& dir, glm::vec3& pos)
 {
 	
 
@@ -420,20 +420,19 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 
 	string context = "CMesh::IntersectLine";
 	if (CMesh_IntersectLine_Log)
-		LOG_INFO(requestID, context, (boost::format("Start... vpId=%1%, orig_=(%2%, %3%, %4%), dir_=(%5%, %6%, %7%")
+		LOG_INFO(requestID, context, (boost::format("Start... vpId=%1%, orig=(%2%, %3%, %4%), dir=(%5%, %6%, %7%")
 			% vpId
-			% orig_.x
-			% orig_.y
-			% orig_.z
-			% dir_.x
-			% dir_.y
-			% dir_.z).str().c_str());
+			% orig.x
+			% orig.y
+			% orig.z
+
+			% dir.x
+			% dir.y
+			% dir.z).str().c_str());
 
 	glm::vec4 planeOrig(0, 0, 0, 1), planeNormal(0, 1, 0, 0);
 
 	float distance;
-	glm::vec4 orig(orig_, 1);
-	glm::vec4 dir(dir_, 0);
 
 	MPPv = CSettings::GetFloat(FloatMPPv);
 	MPPh = CSettings::GetFloat(FloatMPPh);
@@ -443,9 +442,37 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 		auto x0 = orig.x + dir.x * (bounds[0].z - orig.z) / dir.z;
 		auto x1 = orig.x + dir.x * (bounds[1].z - orig.z) / dir.z;
 		
-		for(auto j=0; j<altitude->Height(); j++)
-		{
-			
+		auto dxj = (x1 - x0) / altitude->Height();
+		auto dz = (bounds[1].z - bounds[0].z) / altitude->Height();
+		auto dx = (bounds[1].x - bounds[0].x) / altitude->Width();
+		auto x = x0;
+		auto z = bounds[0].z;
+
+		for(auto j=0; j<altitude->Height()-1; j++)
+		{					
+			auto i = int(floor(altitude->Width() * (x - bounds[0].x) / (bounds[1].x - bounds[0].x)));
+			auto ix = bounds[0].x + i * dx;
+
+			glm::vec3 vert0(ix, altitude->ValueAt(i, j), z);
+			glm::vec3 vert1(ix, altitude->ValueAt(i, j + 1), z + dz);
+			glm::vec3 vert2(ix + dx, altitude->ValueAt(i + 1, j), z);
+			if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, pos)) {
+				if (CMesh_IntersectLine_Log)
+					LOG_INFO__("pos type A: (%f, %f, %f)", pos.x, pos.y, pos.z);
+				return true;
+			}
+
+			vert0 = glm::vec3 (ix, altitude->ValueAt(i, j + 1), z + dz);
+			vert1 = glm::vec3 (ix + dx, altitude->ValueAt(i + 1, j + 1), z + dz);
+			vert2 = glm::vec3 (ix + dx, altitude->ValueAt(i + 1, j), z);
+			if (glm::intersectLineTriangle(orig, dir, vert0, vert1, vert2, pos)) {
+				if (CMesh_IntersectLine_Log)
+					LOG_INFO__("pos type B: (%f, %f, %f)", pos.x, pos.y, pos.z);
+				return true;
+			}
+
+			x += dxj;
+			z += dz;
 		}
 		LOG_INFO__("x0=%f, x1=%f", x0, x1);
 	}
@@ -456,7 +483,7 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 
 	/*******/
 
-	if (!is_visible(orig))
+	if (!is_visible(glm::vec4(orig, 1)))
 	{
 		if (CMesh_IntersectLine_Log) LOG_ERROR__("orig invisible!");
 		return false;
@@ -464,8 +491,8 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 
 	
 
-	bool planeResult = glm::intersectRayPlane(orig, dir, planeOrig, planeNormal, distance);
-	glm::vec4 approxPoint = orig + distance * dir;
+	bool planeResult = glm::intersectRayPlane(glm::vec4(orig, 1), glm::vec4(dir, 0), planeOrig, planeNormal, distance);
+	glm::vec4 approxPoint = glm::vec4(orig + distance * dir, 1);
 
 	float t = 0;
 	if (is_visible(approxPoint))
@@ -482,14 +509,14 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 	auto dt = dt0;
 	auto DTMin = CSettings::GetFloat(FloatDTMin);*/
 
-	auto dt0 = 1 / glm::length(orig - approxPoint);
+	auto dt0 = 1 / glm::length(glm::vec4(orig, 1) - approxPoint);
 	auto dt = dt0;
 	auto DTMin = dt / 128;
 
-	auto pt = p(orig, approxPoint, t);
+	auto pt = p(glm::vec4(orig, 1), approxPoint, t);
 	if (CMesh_IntersectLine_Log) 
 	{
-		auto dpt = pt - p(orig, approxPoint, t + dt);
+		auto dpt = pt - p(glm::vec4(orig, 1), approxPoint, t + dt);
 		/*XYZ*/
 		dpt.x *= MPPh;
 		dpt.y *= MPPv;
@@ -505,15 +532,15 @@ bool CMesh::IntersectLine(int vpId, glm::vec3& orig_, glm::vec3& dir_, glm::vec3
 			prev_visible = !prev_visible;	
 		}
 		t = d ? t + dt : t - dt;
-		pt = p(orig, approxPoint, t);
+		pt = p(glm::vec4(orig, 1), approxPoint, t);
 	}
 	if (dt == dt0)
 	{
 		LOG_INFO__("out of mesh");
 		return false;
 	}
-	position_ = glm::vec3(pt);
-	LOG_INFO__("position: (%f, %f, %f)", position_.x, position_.y, position_.z);
+	pos = glm::vec3(pt);
+	LOG_INFO__("pos type C: (%f, %f, %f)", pos.x, pos.y, pos.z);
 	//CMesh *m;
 	//glm::vec3 *b = GetBounds(); 
 	//if (b) {		
