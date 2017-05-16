@@ -264,7 +264,7 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 				auto ret = DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG3), hDlg, DLGPROC(&CUserInterface::Dialog_SelectColor));
 				if (LOWORD(ret) == IDCANCEL)
 				{
-					CSettings::SetColor(CSettings::GetIndex(GetColorForSettingsDialog(iItem_ColorListView)), oldColor_ColorListView);					
+					CSettings::SetColor((Settings)CSettings::GetIndex(GetColorForSettingsDialog(iItem_ColorListView)), oldColor_ColorListView);					
 				}
 				CSettings::Save();
 				return LRESULT();
@@ -309,7 +309,7 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 			
 
 			auto d_value = - rclick_value * (p.y - rclick_point.y) / (settings_dialog_rect_.bottom - settings_dialog_rect_.top);
-			CSettings::SetFloat(CSettings::GetIndex(GetDistanceForSettingsDialog(iItem_DistancesListView)), rclick_value + d_value);
+			CSettings::SetFloat((Settings)CSettings::GetIndex(GetDistanceForSettingsDialog(iItem_DistancesListView)), rclick_value + d_value);
 			//LOG_INFO__("WM_MOUSEMOVE d_value=%f", d_value);
 
 			prev_point = p;
@@ -450,7 +450,7 @@ LRESULT CUserInterface::Dialog_SelectColor(HWND hDlg, UINT uMsg, WPARAM wParam, 
 
 		SetWindowText(hEditHSL, (to_wstring(h) + TEXT(", ") + to_wstring(s) + TEXT(", ") + to_wstring(l)).c_str());
 
-		CSettings::SetColor(CSettings::GetIndex(GetColorForSettingsDialog(iItem_ColorListView)), glm::vec4(GetRValue(rgb) / 255.0, GetGValue(rgb) / 255.0, GetBValue(rgb) / 255.0, a / 255.0));
+		CSettings::SetColor((Settings)CSettings::GetIndex(GetColorForSettingsDialog(iItem_ColorListView)), glm::vec4(GetRValue(rgb) / 255.0, GetGValue(rgb) / 255.0, GetBValue(rgb) / 255.0, a / 255.0));
 
 		if (uMsg == WM_XCOLORPICKER_SELENDOK)
 		{

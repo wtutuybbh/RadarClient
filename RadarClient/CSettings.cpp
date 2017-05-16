@@ -341,9 +341,11 @@ void CSettings::InitString(Settings key, tstring name, std::string value)
 	SetString(key, value);
 }
 
-Settings CSettings::GetIndex(tstring name)
+int CSettings::GetIndex(tstring name)
 {
-	return stringmap.at(name);
+	if (stringmap.find(name) != stringmap.end())
+		return stringmap.at(name);
+	return -1;
 }
 
 tstring CSettings::GetName(Settings index)

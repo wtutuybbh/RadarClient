@@ -134,7 +134,7 @@ public:
 	static void SetString(Settings key, std::string value);
 	static void InitString(Settings key, tstring name, std::string value);
 
-	static Settings GetIndex(tstring name);
+	static int GetIndex(tstring name);
 	static tstring GetName(Settings index);
 	static void Save();
 	static void Load();
