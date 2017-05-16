@@ -158,6 +158,10 @@ bool CSettings::Init()
 	InitFloat(FloatAspect, TEXT("FloatAspect"), 1.333333373f);
 	InitFloat(FloatZNear, TEXT("FloatZNear"), 100.0f);
 	InitFloat(FloatZFar, TEXT("FloatZFar"), 10000.0f);
+
+	
+	InitInt(IntLoadMesh, TEXT("IntLoadMesh"), 1);
+
 	return true;
 	
 }

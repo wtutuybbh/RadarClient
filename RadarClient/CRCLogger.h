@@ -12,24 +12,24 @@
 #define CSectorRefreshLogEnabled false
 #define CSector_GetPoint_LogInfo false
 
-#define CRImageSetRefreshLogEnabled false
+#define CRImageSetRefreshLogEnabled true
 
 //(experimental method of log management)
 //Errors are always logged!
-#define LOG_ENABLED true
+#define LOG_ENABLED false
 #define CRCAltitudeDataFile_v1_LOG false // constructor CRCAltitudeDataFile(const std::string& dt2FileName);
 #define CRCAltitudeDataFile_v2_LOG false // constructor CRCAltitudeDataFile(double lon0, double lat0, double lon1, double lat1, int width, int height);
 #define CRCAltitudeDataFile_DESTRUCTOR_LOG true // destructor info log
 #define CRCAltitudeDataFile_ApplyIntersection_LOG false
-#define CRCAltitudeDataFile_Open_LOG false
-#define CRCAltitudeDataFile_Close_LOG false
+#define CRCAltitudeDataFile_Open_LOG true
+#define CRCAltitudeDataFile_Close_LOG true
 #define CRCAltitudeDataFile_ValueAt_v1_LOG false
 #define CRCAltitudeDataFile_ValueAt_v2_LOG false
-#define CRCAltitudeDataFile_size_set_max_LOG false
-#define CRCAltitudeDataFile_size_set_LOG false
+#define CRCAltitudeDataFile_size_set_max_LOG true
+#define CRCAltitudeDataFile_size_set_LOG true
 #define CRCAltitudeDataFile_CalculateBlindZone_LOG false
 
-#define CSettings_Change_Log true
+#define CSettings_Change_Log false
 
 #define CMesh_IntersectLine_Log true
 

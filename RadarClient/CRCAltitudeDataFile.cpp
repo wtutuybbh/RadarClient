@@ -549,13 +549,12 @@ void CRCAltitudeDataFile::ApplyIntersection(CRCDataFile *src)
 	}	
 	
 
-	int this_x0, this_x1, this_y0, this_y1, src_x0, src_x1, src_y0, src_y1;
+	int this_x0=0, this_x1=0, this_y0=0, this_y1=0, src_x0=0, src_x1=0, src_y0=0, src_y1=0;
 	CRCAltitudeDataFile *asrc = static_cast<CRCAltitudeDataFile *>(src);
 	
 	if (!GetIntersection(src, this_x0, this_y0, this_x1, this_y1) || !src->GetIntersection(this, src_x0, src_y0, src_x1, src_y1))
 	{
-		LOG_WARN(requestID, context, (boost::format("Intersection not found. src.Filename=%1%, this_x0=%2%, this_y0=%3%, this_x1=%4%, this_y1=%5%.") 
-			% src->GetName() % this_x0 % this_y0 % this_x1 % this_y1).str().c_str());
+		LOG_WARN(requestID, context, "Intersection not found. src.Filename=%s, this_x0=%d, this_y0=%d, this_x1=%d, this_y1=%d, src_x0=%d, src_y0=%d, src_x1=%d, src_y1=%d", src->GetName().c_str(), this_x0, this_y0, this_x1, this_y1, src_x0, src_y0, src_x1, src_y1);
 		return;
 	}
 	if (LOG_ENABLED && CRCAltitudeDataFile_ApplyIntersection_LOG)

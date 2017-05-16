@@ -162,7 +162,13 @@ LRESULT CUserInterface::Button_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 }
 
 int CUserInterface::iItem_ColorListView = -1;
+int CUserInterface::iItem_DistancesListView = -1;
 glm::vec4 CUserInterface::oldColor_ColorListView = glm::vec4(0, 0, 0, 0);
+POINT CUserInterface::rclick_point;
+float CUserInterface::rclick_value;
+int CUserInterface::rclick = 0;
+POINT CUserInterface::prev_point;
+RECT CUserInterface::settings_dialog_rect_;
 LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	std::string context("Dialog_Settings");
@@ -170,7 +176,8 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 	{
 	case WM_INITDIALOG: {
 
-				
+		GetWindowRect(hDlg, &settings_dialog_rect_);
+
 		//colors:
 
 		auto hwndListView = GetDlgItem(hDlg, IDC_LIST1);
@@ -191,6 +198,28 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		ListView_SetColumnWidth(hwndListView, 0, 50);
 		ListView_SetColumnWidth(hwndListView, 1, rect.right - 50);
 
+		//URL combobox:
+		auto hWndComboBox = GetDlgItem(hDlg, IDC_COMBO1);
+		TCHAR urls[2][16] =
+		{
+			TEXT("localhost"), TEXT("192.168.0.222")
+		};
+
+		TCHAR A[16];
+		int  k = 0;
+
+		memset(&A, 0, sizeof(A));
+		for (k = 0; k < 2; k ++)
+		{
+			wcscpy_s(A, sizeof(A) / sizeof(TCHAR), (TCHAR*)urls[k]);
+
+			// Add string to combobox.
+			SendMessage(hWndComboBox, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)A);
+		}
+
+		// Send the CB_SETCURSEL message to display an initial item 
+		//  in the selection field  
+		SendMessage(hWndComboBox, CB_SETCURSEL, (WPARAM)2, (LPARAM)0);
 
 		return true;
 	}
@@ -226,7 +255,6 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 			}
 			if (((LPNMHDR)lParam)->code == NM_DBLCLK)
 			{
-		
 				LPNMITEMACTIVATE item = LPNMITEMACTIVATE(lParam);
 
 				iItem_ColorListView = item->iItem;
@@ -245,12 +273,62 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		}
 		if (((LPNMHDR)lParam)->idFrom == IDC_LIST2) // distances
 		{
+			auto tmp = LPNMHDR(lParam);			
+			
+			//LOG_INFO__("IDC_LIST2 %d %d %d %d", NM_RDOWN, tmp->code, tmp->idFrom, tmp->hwndFrom);
+
+			if (((LPNMHDR)lParam)->code == LVN_BEGINRDRAG)
+			{
+				LPNMITEMACTIVATE item = LPNMITEMACTIVATE(lParam);				
+				iItem_DistancesListView = item->iItem;
+				if (GetCursorPos(&rclick_point))
+				{
+					prev_point = rclick_point;
+					rclick_value = CSettings::GetFloat(CSettings::GetIndex(GetDistanceForSettingsDialog(iItem_DistancesListView)));
+					rclick = 1;
+					//LOG_INFO__("IDC_LIST2 LVN_BEGINRDRAG code=%d, iItem=%d, rclick_point=(%d, %d)", ((LPNMHDR)lParam)->code, iItem_DistancesListView, rclick_point.x, rclick_point.y);
+					//cursor position now in p.x and p.y
+				}
+				SetCapture(hDlg);
+			}
+			if (((LPNMHDR)lParam)->code == NM_CLICK)
+			{
+				LPNMITEMACTIVATE item = LPNMITEMACTIVATE(lParam);
+				iItem_DistancesListView = item->iItem;
+				LOG_INFO__("IDC_LIST2 LVN_ITEMACTIVATE iItem=%d", iItem_DistancesListView);
+			}
+			
 			return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST2, GetDistanceListViewCellText);
 		}
 	}
 	case WM_MOUSEMOVE:
-		LOG_INFO__("WM_MOUSEMOVE");
+		POINT p;
+		GetCursorPos(&p);
+		if (rclick && iItem_DistancesListView>=0)
+		{
+			
+
+			auto d_value = - rclick_value * (p.y - rclick_point.y) / (settings_dialog_rect_.bottom - settings_dialog_rect_.top);
+			CSettings::SetFloat(CSettings::GetIndex(GetDistanceForSettingsDialog(iItem_DistancesListView)), rclick_value + d_value);
+			//LOG_INFO__("WM_MOUSEMOVE d_value=%f", d_value);
+
+			prev_point = p;
+
+			auto hwndListView = GetDlgItem(hDlg, IDC_LIST2);
+			ListView_RedrawItems(hwndListView, iItem_DistancesListView, iItem_DistancesListView);
+			//return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST2, GetDistanceListViewCellText);
+		}
 	break;
+	case WM_RBUTTONDOWN:
+		//LOG_INFO__("WM_RBUTTONDOWN");
+
+		break;
+	case WM_CONTEXTMENU:
+		//LOG_INFO__("WM_CONTEXTMENU");
+		iItem_DistancesListView = -1;
+		rclick = 0;
+		ReleaseCapture();
+		break;
 	}
 	return false;
 }

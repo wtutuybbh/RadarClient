@@ -44,6 +44,7 @@ enum Settings
 	IntTexSize,
 	IntNazm,
 	IntConnectionTimeout,
+	IntLoadMesh,
 
 	
 	FloatMaxDistance,

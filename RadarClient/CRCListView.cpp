@@ -1,6 +1,8 @@
 ﻿#include "stdafx.h"
 
 #include "CRCListView.h"
+#include "Util.h"
+#include "CRCLogger.h"
 
 
 /*
@@ -121,6 +123,13 @@ LRESULT CRCListView::ListViewNotify(HWND hWnd, LPARAM lParam, int ID_LISTVIEW, C
 {
 	LPNMHDR  lpnmh = (LPNMHDR)lParam;
 	HWND     hwndListView = GetDlgItem(hWnd, ID_LISTVIEW);
+
+	//LOG_INFO("CRCListView", "ListViewNotify", "lParam=%d, lpnmh->code=%d", lParam, lpnmh->code);
+
+	if (!lpnmh)
+	{
+		return 0;
+	}
 
 	switch (lpnmh->code)
 	{

@@ -818,9 +818,12 @@ glm::vec3 CScene::GetGeographicCoordinates(glm::vec3 glCoords)
 
 void CScene::LoadMesh()
 {
-	CMesh *mesh = new CMesh(false, position, max_range, texsize, resolution, MPPh, MPPv);	
-	waitingForMesh = true;
-	Mesh = mesh;
+	if (CSettings::GetInt(IntLoadMesh) == 1) 
+	{
+		CMesh *mesh = new CMesh(false, position, max_range, texsize, resolution, MPPh, MPPv);
+		waitingForMesh = true;
+		Mesh = mesh;
+	}
 }
 
 glm::vec3 CScene::GetMeshSize() {

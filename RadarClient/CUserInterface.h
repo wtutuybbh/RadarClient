@@ -107,7 +107,16 @@ private:
 	static CXColorSpectrumCtrl m_ColorSpectrum;
 
 	static int iItem_ColorListView;
+	static int iItem_DistancesListView;
+	static int rclick;
 	static glm::vec4 oldColor_ColorListView;
+	static POINT rclick_point;
+	static POINT prev_point;
+	static int dy;
+	static RECT settings_dialog_rect_;
+	static float rclick_value;
+
+
 
 	virtual LRESULT Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

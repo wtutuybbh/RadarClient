@@ -95,18 +95,20 @@ void CRCSocket::Init()
 		MessageBox(hWnd, L"WSAAsyncSelect failed", L"Critical Error", MB_ICONERROR);
 		SendMessage(hWnd, WM_DESTROY, NULL, NULL);
 	}
+	SockAddr.sin_port = htons(CSettings::GetInt(IntPort));
+	SockAddr.sin_family = AF_INET;
 	// Resolve IP address for hostname	
 	if ((host = gethostbyname(CSettings::GetString(StringHostName).c_str())) == nullptr)
 	{
 		ErrorText = "Failed to resolve hostname!";
 		LOG_ERROR__(ErrorText.c_str());
 		WSACleanup();
+		return;
 	}
 
 	// Setup our socket address structure
 
-	SockAddr.sin_port = htons(CSettings::GetInt(IntPort));
-	SockAddr.sin_family = AF_INET;
+	
 	SockAddr.sin_addr.s_addr = *((unsigned long*)host->h_addr);
 
 	if (!client)
@@ -115,7 +117,12 @@ void CRCSocket::Init()
 	}
 	client->Socket = &Socket;
 
-	client->buff = new char[TXRXBUFSIZE];
+	if (!client->buff)
+	{
+		client->buff = new char[TXRXBUFSIZE];
+	}
+
+	
 
 	ErrorText = "";
 
