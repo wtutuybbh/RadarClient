@@ -175,7 +175,7 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 	switch (uMsg)
 	{
 	case WM_INITDIALOG: {
-
+		if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_INITDIALOG");
 		GetWindowRect(hDlg, &settings_dialog_rect_);
 
 		//colors:
@@ -226,8 +226,10 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		break;
 
 	case WM_CTLCOLORSTATIC:
+		if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_CTLCOLORSTATIC");
 		break;
 	case WM_COMMAND:
+		if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_COMMAND");
 		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
 		{
 			EndDialog(hDlg, LOWORD(wParam));
@@ -242,10 +244,12 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		}
 		break;
 	case WM_SIZE:
+		if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_SIZE");
 		CRCListView::ResizeListView(GetDlgItem(hDlg, IDC_LIST1), hDlg);
 		break;
 	case WM_NOTIFY:
 	{
+		if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_NOTIFY");
 		if (((LPNMHDR)lParam)->idFrom == IDC_LIST1) // Colors
 		{
 			if (((LPNMHDR)lParam)->code == NM_CUSTOMDRAW) {
@@ -302,6 +306,7 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		}
 	}
 	case WM_MOUSEMOVE:
+		if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_MOUSEMOVE");
 		POINT p;
 		GetCursorPos(&p);
 		if (rclick && iItem_DistancesListView>=0)
@@ -320,10 +325,12 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		}
 	break;
 	case WM_RBUTTONDOWN:
+		if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_RBUTTONDOWN");
 		//LOG_INFO__("WM_RBUTTONDOWN");
 
 		break;
 	case WM_CONTEXTMENU:
+		if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_CONTEXTMENU");
 		//LOG_INFO__("WM_CONTEXTMENU");
 		iItem_DistancesListView = -1;
 		rclick = 0;
@@ -412,6 +419,7 @@ tstring CUserInterface::GetDistanceListViewCellText(int iItem, int iSubItem)
 
 void CUserInterface::InitDistanceListViewColumns(HWND hwndListView, LVCOLUMNW lvColumn)
 {
+	if (CUserInterface_InitDistanceListViewColumns_Log) LOG_INFO_("InitDistanceListViewColumns", "WM_CONTEXTMENU");
 	TCHAR       szString[2][20] = { TEXT("Параметр"), TEXT("Значение") };
 	for (auto i = 0; i < 2; i++)
 	{
@@ -569,6 +577,7 @@ void CUserInterface::SetColorListViewItemColor(LPARAM lParam, int iItem, int iSu
 
 void CUserInterface::InitColorListViewColumns(HWND hwndListView, LV_COLUMN lvColumn)
 {
+	if (CUserInterface_InitColorListViewColumns_Log) LOG_INFO_("InitColorListViewColumns", "WM_CONTEXTMENU");
 	TCHAR       szString[3][20] = { TEXT("Параметр"), TEXT("Значение"), TEXT("Цвет") };
 	for (auto i = 0; i < 3; i++)
 	{

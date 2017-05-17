@@ -33,6 +33,11 @@
 
 #define CMesh_IntersectLine_Log true
 
+
+#define CUserInterface_Dialog_Settings_Log true
+#define CUserInterface_InitColorListViewColumns_Log true
+#define CUserInterface_InitDistanceListViewColumns_Log true
+
 #ifndef _DEBUG
 
 #define LOG(severity, requestID, context, text, ...)
