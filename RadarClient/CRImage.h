@@ -11,6 +11,9 @@ class CRImage :
 	static const std::string requestID;
 	static FIBITMAP *palette;
 	static int paletteWidth;
+	DWORD		start_tick_ {0};
+	int lifetime{ 6 };
+	float residual_alpha_{ 0.03f };
 public:
 	int d1{ 0 };
 	int d2{ 0 };

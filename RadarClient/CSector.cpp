@@ -114,11 +114,18 @@ void CSector::Dump(CViewPortControl* vpControl, std::ofstream *outfile)
 void CSector::BindUniforms(CViewPortControl* vpControl)
 {
 	C3DObjectModel::BindUniforms(vpControl);
+	
+	if (vpControl->Id == Main)
+	{
+		PointSize = 3;
+	}
+	if (vpControl->Id == MiniMap)
+	{
+		PointSize = 1;
+	}
 
 	int ps_loc = prog.at(vpControl->Id)->GetUniformLocation("pointSize");
-	glUniform1fv(ps_loc, 1, &PointSize);
-
-	
+	glUniform1fv(ps_loc, 1, &PointSize);	
 }
 
 

@@ -157,8 +157,8 @@ public:
 	CViewPortControl *VPControl { nullptr };
 	CRCSocket *Socket { nullptr };
 
-	double GetDoubleValue(HWND hw);
-	void SetDoubleValue(HWND hw, double val);
+	static double GetDoubleValue(HWND hw);
+	static void SetDoubleValue(HWND hw, double val);
 
 	int InsertElement(DWORD xStyle, LPCWSTR Class, LPCWSTR Text, DWORD Style, int X, int Y, int Width, int Height, UIWndProc Action);
 	void InsertHandlerElement(int ID, UIWndProc Action);

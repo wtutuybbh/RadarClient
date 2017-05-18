@@ -172,6 +172,21 @@ RECT CUserInterface::settings_dialog_rect_;
 LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	std::string context("Dialog_Settings");
+
+	if ((HIWORD(wParam) == EN_CHANGE) && //notification
+		(LOWORD(wParam) == IDC_EDIT3))   //your edit control ID
+	{
+		auto hw = GetDlgItem(hDlg, IDC_EDIT3);
+		auto val = float(GetDoubleValue(hw));
+		auto index = CSettings::GetIndex(GetDistanceForSettingsDialog(iItem_DistancesListView));
+		if (val != CSettings::GetFloat(index))
+		{
+			CSettings::SetFloat(Settings(index), val);
+			auto hwndListView = GetDlgItem(hDlg, IDC_LIST2);
+			ListView_RedrawItems(hwndListView, iItem_DistancesListView, iItem_DistancesListView);
+		}
+	}
+
 	switch (uMsg)
 	{
 	case WM_INITDIALOG: {
@@ -232,6 +247,10 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_COMMAND");
 		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
 		{
+			if (LOWORD(wParam) == IDOK)
+			{
+				CSettings::Save();
+			}			
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		}
@@ -249,7 +268,7 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		break;
 	case WM_NOTIFY:
 	{
-		if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_NOTIFY");
+		//if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_NOTIFY");
 		if (((LPNMHDR)lParam)->idFrom == IDC_LIST1) // Colors
 		{
 			if (((LPNMHDR)lParam)->code == NM_CUSTOMDRAW) {
@@ -300,13 +319,15 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 				LPNMITEMACTIVATE item = LPNMITEMACTIVATE(lParam);
 				iItem_DistancesListView = item->iItem;
 				LOG_INFO__("IDC_LIST2 LVN_ITEMACTIVATE iItem=%d", iItem_DistancesListView);
+				auto editHwnd = GetDlgItem(hDlg, IDC_EDIT3);
+				SetDoubleValue(editHwnd, CSettings::GetFloat(CSettings::GetIndex(GetDistanceForSettingsDialog(iItem_DistancesListView))));
 			}
 			
 			return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST2, GetDistanceListViewCellText);
 		}
 	}
 	case WM_MOUSEMOVE:
-		if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_MOUSEMOVE");
+		//if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_MOUSEMOVE");
 		POINT p;
 		GetCursorPos(&p);
 		if (rclick && iItem_DistancesListView>=0)

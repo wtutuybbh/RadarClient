@@ -20,34 +20,41 @@ void C3DObjectTexture::InitBits()
 
 void C3DObjectTexture::LoadToGPU()
 {
-	if (!ready && (useBits && bits || !useBits && image)) {
-		if (textureId > 0)
-		{
-			glDeleteTextures(1, &textureId);
-		}
-		glGenTextures(1, &textureId);
-		glBindTexture(GL_TEXTURE_2D, textureId);
-		
-		if (!useBits && image && FreeImage_GetBPP(image) != 32)
-		{
-			FIBITMAP* tempImage = image;
-			image = FreeImage_ConvertTo32Bits(tempImage);
-		}
+	switch (dim)
+	{
+	case 1:
+		break;
+	case 2:
+		if (!ready && (useBits && bits || !useBits && image)) {
+			if (textureId > 0)
+			{
+				glDeleteTextures(1, &textureId);
+			}
+			glGenTextures(1, &textureId);
+			glBindTexture(GL_TEXTURE_2D, textureId);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sizeX, sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, useBits ? bits : (void*)FreeImage_GetBits(image));
+			if (!useBits && image && FreeImage_GetBPP(image) != 32)
+			{
+				FIBITMAP* tempImage = image;
+				image = FreeImage_ConvertTo32Bits(tempImage);
+			}
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		ready = true;
-		if (useBits && bits)
-		{
-			delete[] bits;
-			bits = nullptr;
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sizeX, sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, useBits ? bits : (void*)FreeImage_GetBits(image));
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			ready = true;
+			if (useBits && bits)
+			{
+				delete[] bits;
+				bits = nullptr;
+			}
+			if (clearAfter && image) {
+				FreeImage_Unload(image);
+				image = nullptr;
+			}
 		}
-		if (clearAfter && image) {
-			FreeImage_Unload(image);
-			image = nullptr;
-		}
+		break;
 	}
 }
 
@@ -72,8 +79,14 @@ C3DObjectTexture::~C3DObjectTexture()
 		FreeImage_Unload(image);
 }
 
+C3DObjectTexture::C3DObjectTexture(const char *textureUniformName, float* data, int size)
+{
+	this->textureUniformName = (char *)textureUniformName;
+	Reload(data, size);
+}
+
 C3DObjectTexture::C3DObjectTexture(const char* imgFile, const char *textureUniformName)
-{	
+{		
 	this->imgFile = imgFile?string(imgFile):string();
 	try {
 		image = FreeImage_Load(FreeImage_GetFileType(imgFile, 0), imgFile);
@@ -121,13 +134,30 @@ void C3DObjectTexture::Reload(FIBITMAP* image)
 	ready = false;
 }
 
+void C3DObjectTexture::Reload(float* data, int size)
+{
+	dim = 1;
+	floatData = data;
+	sizeX = size;
+	sizeY = 1;
+	clearAfter = false;
+	ready = false;
+}
+
 void C3DObjectTexture::Bind(unsigned int programId) const
 {
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textureId);
+	switch (dim)
+	{
+	case 1:
+		break;
+	case 2:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textureId);
 
-	int iSamplerLoc = glGetUniformLocation(programId, textureUniformName);
-	glUniform1i(iSamplerLoc, 0);
+		int iSamplerLoc = glGetUniformLocation(programId, textureUniformName);
+		glUniform1i(iSamplerLoc, 0);
+		break;
+	}
 }
 
 void C3DObjectTexture::UnloadImage()

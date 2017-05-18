@@ -38,6 +38,7 @@ bool CRImage::InitPalette(std::string fileName)
 
 void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL* rdrinit, RIMAGE* info, void* pixels)
 {
+	start_tick_ = GetTickCount();
 	Azemuth = azemuth;
 	float *px = (float *)pixels;
 
@@ -108,6 +109,9 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 
 void CRImage::BindUniforms(CViewPortControl* vpControl)
 {
+
+	CSector::BindUniforms(vpControl);
+
 	glm::mat4 m = GetModelMatrix(vpControl->Id);
 	glm::mat4 v = vpControl->GetViewMatrix();
 	glm::mat4 p = vpControl->GetProjMatrix();
@@ -117,4 +121,9 @@ void CRImage::BindUniforms(CViewPortControl* vpControl)
 
 	int ps_loc = prog.at(vpControl->Id)->GetUniformLocation("pointSize");
 	glUniform1fv(ps_loc, 1, &PointSize);
+
+	float alpha = min(max(1 - (1 - residual_alpha_) * (GetTickCount() - start_tick_) / 1000 / lifetime, residual_alpha_), 1);
+	int alpha_loc = prog.at(vpControl->Id)->GetUniformLocation("alpha");
+	glUniform1fv(alpha_loc, 1, &alpha);
+
 }
