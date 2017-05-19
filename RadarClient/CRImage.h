@@ -14,9 +14,9 @@ class CRImage :
 	DWORD		start_tick_ {0};
 	int lifetime{ 6 };
 	float residual_alpha_{ 0.03f };
-	float *texData{ nullptr };
+	unsigned char *texData{ nullptr };
 	int texSize{ 0 };
-
+	glm::vec4 GetColor(float amp) const;
 public:
 	int d1{ 0 };
 	int d2{ 0 };

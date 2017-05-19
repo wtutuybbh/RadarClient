@@ -23,7 +23,7 @@ void C3DObjectTexture::LoadToGPU()
 	switch (dim)
 	{
 	case 1:
-		if (!ready && floatData)
+		if (!ready)
 		{
 			if (textureId > 0)
 			{
@@ -32,7 +32,7 @@ void C3DObjectTexture::LoadToGPU()
 			glGenTextures(1, &textureId);
 			glBindTexture(GL_TEXTURE_1D, textureId);
 
-			glTexImage1D(GL_TEXTURE_1D, 0, internalFormat, sizeX, 0, pdformat, type, floatData);
+			glTexImage1D(GL_TEXTURE_1D, 0, internalFormat, sizeX, 0, pdformat, type, useBits ? bits : nullptr);
 
 			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -63,7 +63,7 @@ void C3DObjectTexture::LoadToGPU()
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			ready = true;
-			if (useBits && bits)
+			if (useBits && bits && deleteBits)
 			{
 				delete[] bits;
 				bits = nullptr;
@@ -117,7 +117,7 @@ void C3DObjectTexture::SetFormatsAndType(GLint internalFormat, GLenum pdformat, 
 
 C3DObjectTexture::~C3DObjectTexture()
 {
-	if (bits)
+	if (bits && deleteBits)
 		delete[] bits;
 	if (image)
 		FreeImage_Unload(image);
@@ -182,12 +182,14 @@ void C3DObjectTexture::Reload(FIBITMAP* image)
 	ready = false;
 }
 
-void C3DObjectTexture::Reload(float* data, int sizeX, int sizeY)
+void C3DObjectTexture::Reload(unsigned char* data, int sizeX, int sizeY)
 {
-	floatData = data;
-	sizeX = sizeX;
-	sizeY = sizeY;
+	bits = data;
+	useBits = true;
+	this->sizeX = sizeX;
+	this->sizeY = sizeY;
 	clearAfter = false;
+	deleteBits = false;
 	ready = false;
 }
 

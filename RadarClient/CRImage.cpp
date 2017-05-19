@@ -12,6 +12,12 @@ float CRImage::maxAmp = 70;
 float CRImage::minAmp = 0;
 const std::string CRImage::requestID = "C3DObjectModel";
 
+glm::vec4 CRImage::GetColor(float amp) const
+{
+	float maxamp = 255;
+	return glm::vec4(amp / maxamp, 0, 0, 1);
+}
+
 CRImage::~CRImage()
 {
 	if (texData)
@@ -23,11 +29,11 @@ CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_IN
 	this->index = index;
 
 	tex.insert_or_assign(Main, new C3DObjectTexture("tex"));
-	tex.at(Main)->SetFormatsAndType(GL_R16F, GL_RED, GL_FLOAT);
+	//tex.at(Main)->SetFormatsAndType(GL_R16F, GL_RED, GL_FLOAT);
 	prog.at(Main)->SetNames("CRImage.v.glsl", "CRImage.f.glsl", "vertex", "texcoor", nullptr, "color");
 
 	tex.insert_or_assign(MiniMap, new C3DObjectTexture("tex"));
-	tex.at(MiniMap)->SetFormatsAndType(GL_R16F, GL_RED, GL_FLOAT);
+	//tex.at(MiniMap)->SetFormatsAndType(GL_R16F, GL_RED, GL_FLOAT);
 	prog.at(MiniMap)->SetNames("CRImage.v.glsl", "CRImage.f.glsl", "vertex", "texcoor", nullptr, "color");
 
 
@@ -83,7 +89,7 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 		glm::vec4 color;
 
 		texSize = info->N * (info->NR - 1);
-		texData = new float[texSize];
+		texData = new unsigned char[texSize * 4];
 		
 
 		auto rmin = rdrinit->minR;
@@ -98,9 +104,18 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 		{
 			
 			
-			memcpy(&(texData[i * (info->NR-1)]), &(px[i * info->NR + 1]), (info->NR - 1)*sizeof(float));
+			//memcpy(&(texData[i * (info->NR-1)]), &(px[i * info->NR + 1]), (info->NR - 1)*sizeof(float));
+
+			for (auto j=0; j<info->NR - 1; j++)
+			{
+				color = GetColor(px[i * info->NR + 1 + j]);
+				texData[i * (info->NR - 1) + j] = color.r * 255;
+				texData[i * (info->NR - 1) + j+1] = color.g * 255;
+				texData[i * (info->NR - 1) + j+2] = color.b * 255;
+				texData[i * (info->NR - 1) + j+3] = color.a * 255;
+			}
 			
-			a = rdrinit->begAzm + rdrinit->dAzm *(info->d1 + (i-0.5) * (info->d2 - info->d1) / info->N);
+			a = rdrinit->begAzm + rdrinit->dAzm *(info->d1 + (i) * (info->d2 - info->d1) / info->N);
 			tmppoint = glm::vec3(origin) + glm::vec3(-rmin * sin(a) * cos(e) / mpph, rmin * sin(e) / mppv, rmin * cos(a) * cos(e) / mpph); 
 			vrt->SetValues(i * 6, glm::vec4(tmppoint, 1), glm::vec3(0, 0, 0), glm::vec4(0, 0, 0, 0), glm::vec2(0, i / info->N));
 			
@@ -108,7 +123,7 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 			vrt->SetValues(i * 6 + 1, glm::vec4(tmppoint, 1), glm::vec3(0, 0, 0), glm::vec4(0, 0, 0, 0), glm::vec2(1, i / info->N));
 			vrt->SetValues(i * 6 + 4, glm::vec4(tmppoint, 1), glm::vec3(0, 0, 0), glm::vec4(0, 0, 0, 0), glm::vec2(1, i / info->N));
 			
-			a = rdrinit->begAzm + rdrinit->dAzm *(info->d1 + (i + 0.5) * (info->d2 - info->d1) / info->N);
+			a = rdrinit->begAzm + rdrinit->dAzm *(info->d1 + (i + 1) * (info->d2 - info->d1) / info->N);
 			tmppoint = glm::vec3(origin) + glm::vec3(-rmin * sin(a) * cos(e) / mpph, rmin * sin(e) / mppv, rmin * cos(a) * cos(e) / mpph);
 			vrt->SetValues(i * 6 + 2, glm::vec4(tmppoint, 1), glm::vec3(0, 0, 0), glm::vec4(0, 0, 0, 0), glm::vec2(0, (i + 1) / info->N));
 			vrt->SetValues(i * 6 + 3, glm::vec4(tmppoint, 1), glm::vec3(0, 0, 0), glm::vec4(0, 0, 0, 0), glm::vec2(0, (i + 1) / info->N));
@@ -119,10 +134,7 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 
 			
 		}
-		for (auto f=0; f<texSize; f++)
-		{
-			texData[f] = 1;
-		}
+		
 		tex.at(Main)->Reload(texData, info->NR - 1, info->N);
 		tex.at(MiniMap)->Reload(texData, info->NR - 1, info->N);
 
