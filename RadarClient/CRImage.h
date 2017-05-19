@@ -14,10 +14,14 @@ class CRImage :
 	DWORD		start_tick_ {0};
 	int lifetime{ 6 };
 	float residual_alpha_{ 0.03f };
+	float *texData{ nullptr };
+	int texSize{ 0 };
+
 public:
 	int d1{ 0 };
 	int d2{ 0 };
 	float Azemuth;
+	~CRImage();
 	CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels);
 	static bool InitPalette(std::string fileName);
 	void Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels);

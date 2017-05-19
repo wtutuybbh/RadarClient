@@ -15,6 +15,9 @@ public:
 	C3DObjectProgram(const char* vShaderFile, const char* fShaderFile, const char* vertexAttribName, const char * textureAttribName, const char * normalAttribName, const char * colorAttribName);
 
 	void SetPlaces(int elementSize, int vertexPlace, int texcoorPlace, int normalPlace, int colorPlace, int color2Place);
+	void SetNames(const char* vShaderFile, const char* fShaderFile, const char* vertexAttribName, const char * textureAttribName, const char * normalAttribName, const char * colorAttribName, const char *  color2AttribName);
+	void SetNames(const char* vShaderFile, const char* fShaderFile, const char* vertexAttribName, const char * textureAttribName, const char * normalAttribName, const char * colorAttribName);
+
 	int GetUniformLocation(const char* uniformName) const;
 	void UseProgram();
 	void CreateProgram();

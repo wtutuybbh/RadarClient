@@ -4,17 +4,36 @@
 #include "CSettings.h"
 #include "C3DObjectVBO.h"
 #include "C3DObjectProgram.h"
+#include "C3DObjectTexture.h"
 #include "CViewPortControl.h"
 #include "CRCLogger.h"
 
 float CRImage::maxAmp = 70;
 float CRImage::minAmp = 0;
 const std::string CRImage::requestID = "C3DObjectModel";
+
+CRImage::~CRImage()
+{
+	if (texData)
+		delete[] texData;
+}
+
 CRImage::CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels): CSector(azemuth)
 {
+	this->index = index;
+
+	tex.insert_or_assign(Main, new C3DObjectTexture("tex"));
+	tex.at(Main)->SetFormatsAndType(GL_R16F, GL_RED, GL_FLOAT);
+	prog.at(Main)->SetNames("CRImage.v.glsl", "CRImage.f.glsl", "vertex", "texcoor", nullptr, "color");
+
+	tex.insert_or_assign(MiniMap, new C3DObjectTexture("tex"));
+	tex.at(MiniMap)->SetFormatsAndType(GL_R16F, GL_RED, GL_FLOAT);
+	prog.at(MiniMap)->SetNames("CRImage.v.glsl", "CRImage.f.glsl", "vertex", "texcoor", nullptr, "color");
+
+
 	c3DObjectModel_TypeName = "CRImage";
 
-	PointSize = 5;
+	PointSize = 1;
 
 	Refresh(azemuth, origin, mpph, mppv, rdrinit, info, pixels);
 }
@@ -54,7 +73,7 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 	else // 2D
 	{
 		if (!vertices)
-			vertices = std::make_shared<C3DObjectVertices>(info->N * info->NR);
+			vertices = std::make_shared<C3DObjectVertices>(info->N * 6);
 
 		int v = 0;
 
@@ -62,41 +81,51 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 		int paletteIndex;
 		RGBQUAD pixelcolor;
 		glm::vec4 color;
+
+		texSize = info->N * (info->NR - 1);
+		texData = new float[texSize];
+		
+
+		auto rmin = rdrinit->minR;
+		auto rmax = rdrinit->maxR;
+
+		auto pxstep = rdrinit->dAzm;
+		auto vrt = vertices.get();
+
+		glm::vec3 tmppoint;
+		float a;
 		for (int i = 0; i < info->N; i++) //i - номер массива сканов по дальности
 		{
-			float a = rdrinit->begAzm + rdrinit->dAzm *(info->d1 + i * (info->d2 - info->d1) / info->N);
-			for (int j = 1; j < info->NR; j++) //j - номер отсчёта по дальности
-			{
-				paletteIndex = min((int)(paletteWidth * ((px[i * info->NR + j] - minAmp) / (maxAmp - minAmp))), paletteWidth - 1);
+			
+			
+			memcpy(&(texData[i * (info->NR-1)]), &(px[i * info->NR + 1]), (info->NR - 1)*sizeof(float));
+			
+			a = rdrinit->begAzm + rdrinit->dAzm *(info->d1 + (i-0.5) * (info->d2 - info->d1) / info->N);
+			tmppoint = glm::vec3(origin) + glm::vec3(-rmin * sin(a) * cos(e) / mpph, rmin * sin(e) / mppv, rmin * cos(a) * cos(e) / mpph); 
+			vrt->SetValues(i * 6, glm::vec4(tmppoint, 1), glm::vec3(0, 0, 0), glm::vec4(0, 0, 0, 0), glm::vec2(0, i / info->N));
+			
+			tmppoint = glm::vec3(origin) + glm::vec3(-rmax * sin(a) * cos(e) / mpph, rmax * sin(e) / mppv, rmax * cos(a) * cos(e) / mpph);
+			vrt->SetValues(i * 6 + 1, glm::vec4(tmppoint, 1), glm::vec3(0, 0, 0), glm::vec4(0, 0, 0, 0), glm::vec2(1, i / info->N));
+			vrt->SetValues(i * 6 + 4, glm::vec4(tmppoint, 1), glm::vec3(0, 0, 0), glm::vec4(0, 0, 0, 0), glm::vec2(1, i / info->N));
+			
+			a = rdrinit->begAzm + rdrinit->dAzm *(info->d1 + (i + 0.5) * (info->d2 - info->d1) / info->N);
+			tmppoint = glm::vec3(origin) + glm::vec3(-rmin * sin(a) * cos(e) / mpph, rmin * sin(e) / mppv, rmin * cos(a) * cos(e) / mpph);
+			vrt->SetValues(i * 6 + 2, glm::vec4(tmppoint, 1), glm::vec3(0, 0, 0), glm::vec4(0, 0, 0, 0), glm::vec2(0, (i + 1) / info->N));
+			vrt->SetValues(i * 6 + 3, glm::vec4(tmppoint, 1), glm::vec3(0, 0, 0), glm::vec4(0, 0, 0, 0), glm::vec2(0, (i + 1) / info->N));
 
-				if (px[i * info->NR + j] > maxAmp)
-				{
-					maxAmp = px[i * info->NR + j];
-				}
-				if (px[i * info->NR + j] < minAmp)
-				{
-					minAmp = px[i * info->NR + j];
-				}
-				FreeImage_GetPixelColor(palette, paletteIndex, 0, &pixelcolor);
-				color.x = pixelcolor.rgbRed / 255.0;
-				color.y = pixelcolor.rgbGreen / 255.0;
-				color.z = pixelcolor.rgbBlue / 255.0;
-				color.w = 1;
-				float r = (rdrinit->minR + j*(rdrinit->maxR - rdrinit->minR) / info->NR) * rdrinit->dR;
-#if defined(CRCPOINT_CONSTRUCTOR_USES_RADIANS)
+			tmppoint = glm::vec3(origin) + glm::vec3(-rmax * sin(a) * cos(e) / mpph, rmax * sin(e) / mppv, rmax * cos(a) * cos(e) / mpph);
+			vrt->SetValues(i * 6 + 5, glm::vec4(tmppoint, 1), glm::vec3(0, 0, 0), glm::vec4(0, 0, 0, 0), glm::vec2(1, (i + 1) / info->N));
 
-				cartesianCoords = glm::vec3(origin) + glm::vec3(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph); //we always add y_0 (height of the radar relative to sea level) to all cartesian coordinates 
 
-				vertices.get()->SetValues(v, glm::vec4(cartesianCoords, 1), glm::vec3(0, 0, 0), color, glm::vec2(0, 0));
-
-				v++;
-#else
-				float re = glm::radians(e);
-				float ra = glm::radians(a);
-				CartesianCoords = glm::vec3(-r * sin(ra) * cos(re) / mpph, y_0 + r * sin(re) / mppv, r * cos(ra) * cos(re) / mpph);
-#endif
-			}
+			
 		}
+		for (auto f=0; f<texSize; f++)
+		{
+			texData[f] = 1;
+		}
+		tex.at(Main)->Reload(texData, info->NR - 1, info->N);
+		tex.at(MiniMap)->Reload(texData, info->NR - 1, info->N);
+
 		if (!vbo.at(Main)->vertices)
 			vbo.at(Main)->vertices = vertices;
 		if (!vbo.at(MiniMap)->vertices)

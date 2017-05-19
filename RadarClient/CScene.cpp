@@ -234,7 +234,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	if (UI->GetCheckboxState_Images())
 	{
 		if (ImageSet)
-			ImageSet->Draw(vpControl, GL_POINTS);
+			ImageSet->Draw(vpControl, GL_TRIANGLES);
 	}
 	if (MeasurePath)
 	{
@@ -329,7 +329,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	{
 		if (ImageSet)
 		{
-			ImageSet->Draw(vpControl, GL_POINTS);
+			ImageSet->Draw(vpControl, GL_TRIANGLES);
 		}
 	}
 	glDisable(GL_PROGRAM_POINT_SIZE);

@@ -11,11 +11,12 @@ class CSector :
 {
 	static float maxAmp;
 	static float minAmp;
-	float index {-1.0f};
+	
 	static FIBITMAP *palette;
 	static int paletteWidth;
 protected:
 	static const std::string requestID;
+	float index {-1.0f};
 public:
 	float PointSize {3};
 	explicit CSector(int index);

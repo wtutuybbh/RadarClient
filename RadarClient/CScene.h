@@ -129,6 +129,9 @@ public:
 
 	C3DObjectModel *RayObj{ nullptr };
 
+	//C3DObjectModel *texcoortest{ nullptr };
+
+
 	//glm::vec3 MeshSize;
 	
 	CScene();

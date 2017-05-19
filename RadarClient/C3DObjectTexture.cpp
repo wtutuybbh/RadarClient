@@ -23,6 +23,25 @@ void C3DObjectTexture::LoadToGPU()
 	switch (dim)
 	{
 	case 1:
+		if (!ready && floatData)
+		{
+			if (textureId > 0)
+			{
+				glDeleteTextures(1, &textureId);
+			}
+			glGenTextures(1, &textureId);
+			glBindTexture(GL_TEXTURE_1D, textureId);
+
+			glTexImage1D(GL_TEXTURE_1D, 0, internalFormat, sizeX, 0, pdformat, type, floatData);
+
+			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			if (clearAfter)
+			{
+				
+			}
+		}
 		break;
 	case 2:
 		if (!ready && (useBits && bits || !useBits && image)) {
@@ -39,7 +58,7 @@ void C3DObjectTexture::LoadToGPU()
 				image = FreeImage_ConvertTo32Bits(tempImage);
 			}
 
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sizeX, sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, useBits ? bits : (void*)FreeImage_GetBits(image));
+			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, sizeX, sizeY, 0, pdformat, type, useBits ? bits : (void*)FreeImage_GetBits(image));
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -55,12 +74,25 @@ void C3DObjectTexture::LoadToGPU()
 			}
 		}
 		break;
+		default:
+			break;
 	}
 }
 
-void C3DObjectTexture::UnBind()
+void C3DObjectTexture::UnBind() const
 {
-	glBindTexture(GL_TEXTURE_2D, 0);
+	switch (dim)
+	{
+	case 1:
+		glBindTexture(GL_TEXTURE_1D, 0);
+		break;
+	case 2:
+		glBindTexture(GL_TEXTURE_2D, 0);
+		break;
+	default:
+		break;
+	}
+	
 }
 
 C3DObjectTexture* C3DObjectTexture::Clone()
@@ -71,6 +103,18 @@ C3DObjectTexture* C3DObjectTexture::Clone()
 	return new C3DObjectTexture(image, textureUniformName, clearAfter, useBits);
 }
 
+void C3DObjectTexture::SetDim(int dim)
+{
+	this->dim = dim;
+}
+
+void C3DObjectTexture::SetFormatsAndType(GLint internalFormat, GLenum pdformat, GLenum type)
+{
+	this->internalFormat = internalFormat;
+	this->pdformat = pdformat;
+	this->type = type;
+}
+
 C3DObjectTexture::~C3DObjectTexture()
 {
 	if (bits)
@@ -79,11 +123,15 @@ C3DObjectTexture::~C3DObjectTexture()
 		FreeImage_Unload(image);
 }
 
-C3DObjectTexture::C3DObjectTexture(const char *textureUniformName, float* data, int size)
+C3DObjectTexture::C3DObjectTexture()
+{
+}
+
+C3DObjectTexture::C3DObjectTexture(const char* textureUniformName)
 {
 	this->textureUniformName = (char *)textureUniformName;
-	Reload(data, size);
 }
+
 
 C3DObjectTexture::C3DObjectTexture(const char* imgFile, const char *textureUniformName)
 {		
@@ -134,28 +182,33 @@ void C3DObjectTexture::Reload(FIBITMAP* image)
 	ready = false;
 }
 
-void C3DObjectTexture::Reload(float* data, int size)
+void C3DObjectTexture::Reload(float* data, int sizeX, int sizeY)
 {
-	dim = 1;
 	floatData = data;
-	sizeX = size;
-	sizeY = 1;
+	sizeX = sizeX;
+	sizeY = sizeY;
 	clearAfter = false;
 	ready = false;
 }
 
 void C3DObjectTexture::Bind(unsigned int programId) const
 {
+	int iSamplerLoc;
 	switch (dim)
 	{
 	case 1:
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_1D, textureId);
+		iSamplerLoc = glGetUniformLocation(programId, textureUniformName);
+		glUniform1i(iSamplerLoc, 0);
 		break;
 	case 2:
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureId);
-
-		int iSamplerLoc = glGetUniformLocation(programId, textureUniformName);
+		iSamplerLoc = glGetUniformLocation(programId, textureUniformName);
 		glUniform1i(iSamplerLoc, 0);
+		break;
+	default:
 		break;
 	}
 }
