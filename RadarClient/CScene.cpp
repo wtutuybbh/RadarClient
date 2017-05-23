@@ -253,12 +253,19 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	if (Markup && UI && UI->GetCheckboxState_MarkupLines())
 	{
 		//glDepthFunc(GL_GEQUAL);
-		glDepthFunc(GL_GEQUAL);
-		glDepthMask(GL_FALSE);
-		glLineStipple(1, 0xAAAA);
-		glEnable(GL_LINE_STIPPLE);
-		Markup->UseUniColor(1.0);
-		Markup->Draw(vpControl, 0);
+		if (CUserInterface::GetCheckboxState_AltitudeMap()) 
+		{
+			glDepthFunc(GL_GEQUAL);
+			glDepthMask(GL_FALSE);
+			glLineStipple(1, 0xAAAA);
+			glEnable(GL_LINE_STIPPLE);
+			Markup->UseUniColor(1.0);
+			Markup->Draw(vpControl, 0);
+		}
+		else
+		{
+			glDisable(GL_DEPTH_TEST);
+		}
 		glDepthFunc(GL_LESS);
 		glDepthMask(GL_TRUE);
 		glDisable(GL_LINE_STIPPLE);
