@@ -127,9 +127,9 @@ bool CSettings::Init()
 
 	InitInt(IntNazm, TEXT("IntNazm"), 8192);
 
-	InitString(StringCSectorPaletteFileName, TEXT("StringCSectorPaletteFileName"), "rimagecolor.png");
+	InitString(StringCSectorPaletteFileName, TEXT("StringCSectorPaletteFileName"), "rpointcolor.png");
 
-	InitString(StringCRImagePaletteFileName, TEXT("StringCRImagePaletteFileName"), "rpointcolor.png");
+	InitString(StringCRImagePaletteFileName, TEXT("StringCRImagePaletteFileName"), "rimagecolor.png");
 
 		
 	InitFloat(FloatCRImageMinAmp, TEXT("FloatCRImageMinAmp"), 0.0);
@@ -161,6 +161,8 @@ bool CSettings::Init()
 
 	
 	InitInt(IntLoadMesh, TEXT("IntLoadMesh"), 1);
+	
+	InitInt(IntPointLifetime, TEXT("IntPointLifetime"), 5);
 
 	return true;
 	

@@ -16,6 +16,10 @@ class CSector :
 	static int paletteWidth;
 protected:
 	static const std::string requestID;
+	DWORD		start_tick_{ 0 };
+	int lifetime{ 6 };
+	float residual_alpha_{ 0.03f };
+	
 public:
 	float PointSize {3};
 	explicit CSector(int index);
@@ -27,6 +31,7 @@ public:
 	void SelectPoint(int vpId, int pointIndex);
 	void UnselectAll(int vpId);
 	static glm::vec4 GetColor(float level);
-	static bool InitPalette(std::string fileName);
+	static bool InitPalette(std::string fileName);	
+	int life_counter{ 0 };
 };
 

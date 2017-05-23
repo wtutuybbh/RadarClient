@@ -68,7 +68,8 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 			for (int j = 1; j < info->NR; j++) //j - номер отсчёта по дальности
 			{
 				paletteIndex = min((int)(paletteWidth * ((px[i * info->NR + j] - minAmp) / (maxAmp - minAmp))), paletteWidth - 1);
-
+				
+					
 				if (px[i * info->NR + j] > maxAmp)
 				{
 					maxAmp = px[i * info->NR + j];
@@ -83,6 +84,8 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 				color.z = pixelcolor.rgbBlue / 255.0;
 				color.w = 1;
 				float r = (rdrinit->minR + j*(rdrinit->maxR - rdrinit->minR) / info->NR) * rdrinit->dR;
+				/*if (px[i * info->NR + j] == 0)
+					r = 0;*/
 #if defined(CRCPOINT_CONSTRUCTOR_USES_RADIANS)
 
 				cartesianCoords = glm::vec3(origin) + glm::vec3(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph); //we always add y_0 (height of the radar relative to sea level) to all cartesian coordinates 
@@ -111,19 +114,5 @@ void CRImage::BindUniforms(CViewPortControl* vpControl)
 {
 
 	CSector::BindUniforms(vpControl);
-
-	glm::mat4 m = GetModelMatrix(vpControl->Id);
-	glm::mat4 v = vpControl->GetViewMatrix();
-	glm::mat4 p = vpControl->GetProjMatrix();
-	glm::mat4 mvp = p*v*m;
-	int mvp_loc = prog.at(vpControl->Id)->GetUniformLocation("mvp");
-	glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(mvp));
-
-	int ps_loc = prog.at(vpControl->Id)->GetUniformLocation("pointSize");
-	glUniform1fv(ps_loc, 1, &PointSize);
-
-	float alpha = min(max(1 - (1 - residual_alpha_) * (GetTickCount() - start_tick_) / 1000 / lifetime, residual_alpha_), 1);
-	int alpha_loc = prog.at(vpControl->Id)->GetUniformLocation("alpha");
-	glUniform1fv(alpha_loc, 1, &alpha);
 
 }

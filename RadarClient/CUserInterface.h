@@ -173,13 +173,20 @@ public:
 	void ConnectionStateChanged(bool IsConnected) const;
 
 	static bool GetCheckboxState_Points();
+	static bool GetCheckboxState_PointsFadeout();
+
 	static bool GetCheckboxState_Tracks();
+	static bool GetCheckboxState_TracksFadeout();
+
 	static bool GetCheckboxState_Images();
+	static bool GetCheckboxState_ImagesFadeout();
+
 	static bool GetCheckboxState_Map();
 	static bool GetCheckboxState_BlindZones();
 	static bool GetCheckboxState_AltitudeMap();
 	static bool GetCheckboxState_MarkupLines();
 	static bool GetCheckboxState_MarkupLabels();
+	static bool GetCheckboxState(int id);
 
 	int GetTrackbarValue_VTilt();
 	int GetTrackbarValue_Turn();

@@ -45,6 +45,7 @@ enum Settings
 	IntNazm,
 	IntConnectionTimeout,
 	IntLoadMesh,
+	IntPointLifetime,
 
 	
 	FloatMaxDistance,

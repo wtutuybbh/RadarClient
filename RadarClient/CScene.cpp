@@ -179,7 +179,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		Mesh->UseTexture = vpControl->DisplayMap;
 		Mesh->UseY0Loc = !vpControl->DisplayLandscape;
 		//glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-		Mesh->Draw(vpControl, GL_TRIANGLES);
+		//Mesh->Draw(vpControl, GL_TRIANGLES);
 		//glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	}
 	glDisable(GL_DEPTH_TEST);
@@ -212,7 +212,18 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	if (UI->GetCheckboxState_Points()) {
 		for (int i = 0; i < Sectors.size(); i++) {
 			if (Sectors[i] != nullptr)
+			{
+				if (UI->GetCheckboxState_PointsFadeout())
+				{
+					Sectors[i]->SetAlphaBehaviour(FadeOut);
+				}
+				else
+				{
+					Sectors[i]->SetAlphaBehaviour(Constant);
+				}
 				Sectors[i]->Draw(vpControl, GL_POINTS);
+			}
+				
 		}
 	}
 
@@ -220,6 +231,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		std::lock_guard<std::mutex> lock(mtxTracks);
 		for (auto it = Tracks.begin(); it != Tracks.end(); ++it)
 		{
+
 			it->second->Draw(vpControl, GL_POINTS);
 			it->second->Draw(vpControl, GL_LINE_STRIP);
 			glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
@@ -234,7 +246,17 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	if (UI->GetCheckboxState_Images())
 	{
 		if (ImageSet)
+		{
+			if (UI->GetCheckboxState_ImagesFadeout())
+			{
+				ImageSet->SetAlphaBehaviour(FadeOut);
+			}
+			else
+			{
+				ImageSet->SetAlphaBehaviour(Constant);
+			}
 			ImageSet->Draw(vpControl, GL_POINTS);
+		}
 	}
 	if (MeasurePath)
 	{
@@ -295,7 +317,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 			Camera->MeshSize = Mesh->GetSize();
 			waitingForMesh = false;
 		}
-		Mesh->Draw(vpControl, GL_TRIANGLES);
+		//Mesh->Draw(vpControl, GL_TRIANGLES);
 	}
 	glDisable(GL_DEPTH_BUFFER);
 	if (Markup)
@@ -379,10 +401,32 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 	
 	int currentSector = SectorsCount * (min_ / init->MaxNAzm);
 
-	if (Sectors[currentSector] == nullptr)
+	MPPh = CSettings::GetFloat(FloatMPPh);
+	MPPv = CSettings::GetFloat(FloatMPPv);
+	auto lifeTime = CSettings::GetInt(IntPointLifetime);
+	for(auto i=0; i<lifeTime; i++)
 	{
-		Sectors[currentSector] = new CSector(currentSector);
+		if (Sectors[SectorsCount * i + currentSector] == nullptr)
+		{
+			Sectors[SectorsCount * i + currentSector] = new CSector(currentSector);
+			if (CSceneRefreshSector_Log) LOG_INFO("CSceneRefreshSector_Log", "RefreshSector", "new CSector %d %d", i, currentSector);
+			break;
+		}
+		Sectors[SectorsCount * i + currentSector]->life_counter++;
+		if (CSceneRefreshSector_Log) LOG_INFO("CSceneRefreshSector_Log", "RefreshSector", "CSector %d %d, life_counter++ : %d -> %d", i, currentSector,
+			Sectors[SectorsCount * i + currentSector]->life_counter-1,
+			Sectors[SectorsCount * i + currentSector]->life_counter);
+
+		if (Sectors[SectorsCount * i + currentSector]->life_counter == lifeTime)
+		{
+			Sectors[SectorsCount * i + currentSector]->Refresh(glm::vec4(0, y_0, 0, 1), MPPh, MPPv, info_p, pts, init);
+			if (CSceneRefreshSector_Log) LOG_INFO("CSceneRefreshSector_Log", "RefreshSector", "CSector %d %d, Refresh", i, currentSector);
+			Sectors[SectorsCount * i + currentSector]->life_counter = 0;
+		}
+				
 	}
+
+	
 
 	//LOG_INFO_("CScene::RefreshSector", "currentSector=%d", currentSector);
 	if (RayObj) 
@@ -390,9 +434,8 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 		RayObj->SetRotateMatrix(glm::rotate((float)(- 2.0f * M_PI * (currentSector + 0.5) / SectorsCount), glm::vec3(0, 1, 0)));
 	}
 
-	MPPh = CSettings::GetFloat(FloatMPPh);
-	MPPv = CSettings::GetFloat(FloatMPPv);
-	Sectors[currentSector]->Refresh(glm::vec4(0, y_0, 0, 1), MPPh, MPPv, info_p, pts, init);	
+
+		
 	
 	UI->FillInfoGrid(this);
 }
@@ -538,7 +581,7 @@ void CScene::Init(RDR_INITCL* init)
 	CSettings::SetFloat(FloatMaxDist, init->dR * init->maxR);
 
 	SectorsCount = init->MaxNAzm / init->ViewStep;
-	Sectors.resize(SectorsCount);
+	Sectors.resize(SectorsCount * CSettings::GetInt(IntPointLifetime));
 	for (int i = 0; i < Sectors.size(); i++)
 	{
 		Sectors[i] = nullptr;

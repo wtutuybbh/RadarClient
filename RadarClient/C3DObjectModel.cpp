@@ -10,6 +10,11 @@
 
 const std::string C3DObjectModel::requestID = "C3DObjectModel";
 
+void C3DObjectModel::SetAlphaBehaviour(AlphaBehaviour ab)
+{
+	alpha_behaviour = ab;
+}
+
 void C3DObjectModel::SetCartesianCoordinates(glm::vec4 c)
 {
 	cartesianCoords = glm::vec3(c);
@@ -101,6 +106,10 @@ C3DObjectModel::~C3DObjectModel()
 		for (auto it = begin(tex); it != end(tex); ++it)
 			if (it->second)
 				delete it->second;
+	}
+	if (vertices)
+	{
+		vertices.reset();
 	}
 }
 void C3DObjectModel::CreateBuffer(C3DObjectVBO *vbo_) {

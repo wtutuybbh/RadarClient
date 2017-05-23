@@ -137,7 +137,6 @@ public:
 	bool DrawScene(CViewPortControl * vpControl);
 	bool MiniMapDraw(CViewPortControl * vpControl);
 
-
 	void RefreshSector(RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init);
 	void ClearSectors();
 	void Dump() const;

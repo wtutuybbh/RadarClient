@@ -11,6 +11,12 @@ class CScene;
 class CUserInterface;
 class CViewPortControl;
 
+enum AlphaBehaviour
+{
+	Constant,
+	FadeOut
+};
+
 class C3DObjectModel
 {	
 protected:
@@ -25,8 +31,12 @@ protected:
 	std::string c3DObjectModel_TypeName {"C3DObjectModel"};
 	std::string name{ "" };
 	float useUniColor{ 0.0f };
-	glm::vec4 uniColor{ glm::vec4(0.5, 0.5, 0.5, 1) };
+	glm::vec4 uniColor{ glm::vec4(1.0, 0.0, 0.0, 1) };
+
+	float alpha{ 1.0f };
+	AlphaBehaviour alpha_behaviour{ Constant };
 public:
+	virtual void SetAlphaBehaviour(AlphaBehaviour ab);
 	std::shared_ptr<C3DObjectVertices> vertices{ std::shared_ptr<C3DObjectVertices>(nullptr) };
 	static int _id, _testid;
 	int id;

@@ -38,6 +38,7 @@ CSector::CSector(int index) : C3DObjectModel()
 
 void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init)
 {
+	start_tick_ = GetTickCount();
 	std::lock_guard<std::mutex> lock(m);
 	std::string context = "CSector::Refresh";
 
@@ -78,6 +79,9 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 		return;
 	float zeroElevation = glm::radians(CSettings::GetFloat(FloatZeroElevation));
 	float maxDistance = CSettings::GetFloat(FloatMaxDistance);
+
+	if (CSectorRefreshLogEnabled) LOG_INFO__(".index= %f, N= %d", index, info_p->N);
+
 	for (int i = 0; i < info_p->N; i++) 
 	{
 		//here we calculate point spherical coordinates
@@ -85,10 +89,11 @@ void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p,
 		if (r>=0 && r <= maxDistance) {
 			a = init->begAzm + pts[i].B * init->dAzm;
 			e = zeroElevation + init->begElv + pts[i].E * init->dElv;
+			auto c = GetColor(pts[i].Amp);
+			//auto c = glm::vec4(1,0,0,1);
+			vertices.get()->SetValues(i, origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0), glm::vec3(pts[i].Amp, 0, 0), c, glm::vec2(0, 0));
 
-			vertices.get()->SetValues(i, origin + glm::vec4(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph, 0), glm::vec3(pts[i].Amp, 0, 0), GetColor(pts[i].Amp), glm::vec2(0, 0));
-
-			if (CSectorRefreshLogEnabled) LOG_INFO__(".index= %f, i= %d, R= %d, b= %d, E= %d, Amp= %f", index, i, pts[i].R, pts[i].B, pts[i].E, pts[i].Amp);
+			//if (CSectorRefreshLogEnabled) LOG_INFO__(".index= %f, i= %d, R= %d, b= %d, E= %d, Amp= %f", index, i, pts[i].R, pts[i].B, pts[i].E, pts[i].Amp);
 		}
 		else
 		{
@@ -126,6 +131,33 @@ void CSector::BindUniforms(CViewPortControl* vpControl)
 
 	int ps_loc = prog.at(vpControl->Id)->GetUniformLocation("pointSize");
 	glUniform1fv(ps_loc, 1, &PointSize);	
+
+	int alpha_loc = prog.at(vpControl->Id)->GetUniformLocation("alpha");
+	
+	float a;
+	
+	switch (alpha_behaviour)
+	{
+	case Constant:
+		a = alpha;
+		break;
+	case FadeOut:
+		a = min(max(1 - (1 - residual_alpha_) * (GetTickCount() - start_tick_) / 1000 / lifetime, residual_alpha_), 1);
+		break;
+	default:
+		break;
+	}
+	
+	
+	glUniform1fv(alpha_loc, 1, &a);
+
+	/*int useUniColor_loc = prog.at(vpControl->Id)->GetUniformLocation("useUniColor");
+	float useUniColor = 0.0f;
+	glUniform1fv(ps_loc, 1, &useUniColor);
+
+	int useUniColor_loc = prog.at(vpControl->Id)->GetUniformLocation("useUniColor");
+	float useUniColor = 0.0f;
+	glUniform1fv(ps_loc, 1, &useUniColor);*/
 }
 
 
@@ -157,6 +189,8 @@ int CSector::GetPoint(CViewPortControl* vpControl, glm::vec2 screenPoint)
 	}
 
 	glm::mat4 proj = vpControl->GetProjMatrix();
+	if (!vertices)
+		return -1;
 	for (int i = 0; i < vertices.get()->vertexCount; i++)
 	{
 		glm::vec4 p = vpControl->GetProjMatrix() * vpControl->GetViewMatrix() * GetModelMatrix(vpControl->Id) * *vertices.get()->getv(i);

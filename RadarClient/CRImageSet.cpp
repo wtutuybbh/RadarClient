@@ -33,6 +33,18 @@ void CRImageSet::Draw(CViewPortControl* vpControl, GLenum mode)
 		}
 	}
 }
+
+void CRImageSet::SetAlphaBehaviour(AlphaBehaviour ab)
+{
+	std::lock_guard<std::mutex> lock(m);
+	if (Images) {
+		for (auto it = Images->begin(); it != Images->end(); ++it)
+		{
+			(*it)->SetAlphaBehaviour(ab);
+		}
+	}
+}
+
 void CRImageSet::Refresh(glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels)
 {
 	std::lock_guard<std::mutex> lock(m);

@@ -7,6 +7,10 @@ const std::string C3DObjectVBO::requestID = "C3DObjectVBO";
 
 C3DObjectVBO::~C3DObjectVBO()
 {
+	if (vertices)
+	{
+		vertices.reset();
+	}
 }
 
 C3DObjectVBO::C3DObjectVBO(bool clearAfter)

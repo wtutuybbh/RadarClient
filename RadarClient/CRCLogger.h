@@ -6,13 +6,15 @@
 
 #include "stdafx.h"
 
+#define CSceneRefreshSector_Log true
+
 #define CRCSocketReadLogEnabled  false
 #define CRCSocketPostDataLogEnabled  false
 
-#define CSectorRefreshLogEnabled false
+#define CSectorRefreshLogEnabled true
 #define CSector_GetPoint_LogInfo false
 
-#define CRImageSetRefreshLogEnabled true
+#define CRImageSetRefreshLogEnabled false
 
 //(experimental method of log management)
 //Errors are always logged!

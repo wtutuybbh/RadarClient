@@ -111,7 +111,7 @@ struct RPOINTS  // ОБЩАЯ СТРУКТУРА НА НАБОР ОТМЕТОК.
 	short d1;
 	short d2;
 	short D;
-	short resv1;
+	unsigned short resv1;
 	unsigned int ObserveCount;
 };
 //---------------------------------------------------------------------------
@@ -127,7 +127,7 @@ struct RIMAGE  // РАДИОИЗОБРАЖЕНИЕ
 				  // uint16 scan[N][NR],   uint16  scan[i][0] - положение по B, 
 				  // ugol= INIT.begAzm+B*INIT.dAzm,[рад]
 				  // Или угол места соотв.
-	short resv1[1];
+	unsigned short resv1[1];
 };
 
 

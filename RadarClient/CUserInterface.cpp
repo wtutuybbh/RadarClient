@@ -1083,9 +1083,19 @@ bool CUserInterface::GetCheckboxState_MarkupLabels()
 	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK10));
 }
 
+bool CUserInterface::GetCheckboxState(int id)
+{
+	return Button_GetCheck(GetDlgItem(ToolboxHWND, id));
+}
+
 bool CUserInterface::GetCheckboxState_Points()
 {
 	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK3));
+}
+
+bool CUserInterface::GetCheckboxState_PointsFadeout()
+{
+	return GetCheckboxState(IDC_CHECK_RPOINT_FADEOUT);
 }
 
 bool CUserInterface::GetCheckboxState_Tracks()
@@ -1093,9 +1103,19 @@ bool CUserInterface::GetCheckboxState_Tracks()
 	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK4));
 }
 
+bool CUserInterface::GetCheckboxState_TracksFadeout()
+{
+	return GetCheckboxState(IDC_CHECK_RDRTRACK_FADEOUT);
+}
+
 bool CUserInterface::GetCheckboxState_Images()
 {
 	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK5));
+}
+
+bool CUserInterface::GetCheckboxState_ImagesFadeout()
+{
+	return GetCheckboxState(IDC_CHECK_RIMAGE_FADEOUT);
 }
 
 int CUserInterface::GetTrackbarValue_VTilt()

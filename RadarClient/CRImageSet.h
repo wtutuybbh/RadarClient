@@ -14,5 +14,6 @@ public:
 	~CRImageSet();
 	void Refresh(glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels);
 	void Draw(CViewPortControl *vpControl, GLenum mode) override;
+	void SetAlphaBehaviour(AlphaBehaviour ab) override;
 };
 
