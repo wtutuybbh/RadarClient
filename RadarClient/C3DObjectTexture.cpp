@@ -77,6 +77,10 @@ C3DObjectTexture::~C3DObjectTexture()
 		delete[] bits;
 	if (image)
 		FreeImage_Unload(image);
+	if (textureId > 0)
+	{
+		glDeleteTextures(1, &textureId);
+	}
 }
 
 C3DObjectTexture::C3DObjectTexture(const char *textureUniformName, float* data, int size)

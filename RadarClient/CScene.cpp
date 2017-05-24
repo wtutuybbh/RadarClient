@@ -179,7 +179,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		Mesh->UseTexture = vpControl->DisplayMap;
 		Mesh->UseY0Loc = !vpControl->DisplayLandscape;
 		//glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-		//Mesh->Draw(vpControl, GL_TRIANGLES);
+		Mesh->Draw(vpControl, GL_TRIANGLES);
 		//glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	}
 	glDisable(GL_DEPTH_TEST);
@@ -210,6 +210,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	if (UI->GetCheckboxState_Points()) {
+		std::lock_guard<std::mutex> lock(mtxSectors);
 		for (int i = 0; i < Sectors.size(); i++) {
 			if (Sectors[i] != nullptr)
 			{
@@ -320,18 +321,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 		//Mesh->Draw(vpControl, GL_TRIANGLES);
 	}
 	glDisable(GL_DEPTH_BUFFER);
-	if (Markup)
-	{
-		Markup->Draw(vpControl, 0);
-	}
-	if (begAzmLine)
-	{
-		begAzmLine->Draw(vpControl, GL_LINES);
-	}
-	if (mmPointer)
-	{
-		mmPointer->Draw(vpControl, GL_TRIANGLES);
-	}
+	
 	if (RayObj)
 	{
 		RayObj->Draw(vpControl, GL_TRIANGLES);
@@ -363,6 +353,18 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	}
 	glDisable(GL_PROGRAM_POINT_SIZE);
 
+	if (Markup)
+	{
+		Markup->Draw(vpControl, 0);
+	}
+	if (begAzmLine)
+	{
+		begAzmLine->Draw(vpControl, GL_LINES);
+	}
+	if (mmPointer)
+	{
+		mmPointer->Draw(vpControl, GL_TRIANGLES);
+	}
 	return true;
 }
 
@@ -438,6 +440,20 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 		
 	
 	UI->FillInfoGrid(this);
+}
+
+void CScene::RefreshSectorAsync(RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init, char* delete_after)
+{
+	std::thread t( [this](RPOINTS* info_p_, RPOINT* pts_, RDR_INITCL* init_, char* delete_after_)
+	{
+		std::lock_guard<std::mutex> lock(mtxSectors);
+		if (delete_after_)
+		{
+			RefreshSector(info_p_, pts_, init_);
+			delete[] delete_after_;
+		}
+	}, info_p, pts, init, delete_after );
+	t.detach();
 }
 
 void CScene::ClearSectors()

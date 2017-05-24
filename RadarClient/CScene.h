@@ -49,6 +49,7 @@ class CScene {
 	bool waitingForMesh{ false };
 	//float y_0 {0};
 	std::mutex mtxTracks;
+	std::mutex mtxSectors;
 public:
 	std::vector<glm::vec3> MeasurePoints;
 	CPath *MeasurePath {nullptr};
@@ -138,6 +139,8 @@ public:
 	bool MiniMapDraw(CViewPortControl * vpControl);
 
 	void RefreshSector(RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init);
+	void RefreshSectorAsync(RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init, char *delete_after);
+
 	void ClearSectors();
 	void Dump() const;
 

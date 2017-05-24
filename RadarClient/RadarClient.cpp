@@ -483,17 +483,19 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				case MSG_RPOINTS: 
 				{
-					g_vpControl->Scene->RefreshSector(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit);
+					g_vpControl->Scene->RefreshSectorAsync(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit, (char *)wParam);
 				}
 				break;
 				case MSG_OBJTRK:
 				{
 					g_vpControl->Scene->RefreshTracks(&g_Socket->Tracks);
+					g_Socket->FreeMemory((char *)wParam);
 				}
 				break;
 				case MSG_RIMAGE:
 				{
 					g_vpControl->Scene->RefreshImages(g_Socket->info_i, g_Socket->pixels);
+					g_Socket->FreeMemory((char *)wParam);
 				}
 				break;
 				case MSG_INIT:
@@ -509,7 +511,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			g_UI->FillGrid(&g_Socket->Tracks);
 		}
 
-		g_Socket->FreeMemory((char *)wParam);
+		
 	}
 	break;
 	case CM_CONNECT: {
