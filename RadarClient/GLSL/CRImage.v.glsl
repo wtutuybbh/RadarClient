@@ -11,5 +11,5 @@ void main(void) {
 	gl_Position = mvp * vertex;
 	gl_PointSize = pointSize;
 	c = color;
-	c.a = alpha;
+	c.a = min(c.a, alpha);
 }

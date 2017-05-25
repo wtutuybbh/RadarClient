@@ -164,6 +164,13 @@ bool CSettings::Init()
 	
 	InitInt(IntPointLifetime, TEXT("IntPointLifetime"), 5);
 
+	InitFloat(FloatAmp_00, TEXT("FloatAmp_00"), 0.0f);
+	InitFloat(FloatAmp_01, TEXT("FloatAmp_01"), 4000.0f);
+	InitFloat(FloatAmp_02, TEXT("FloatAmp_02"), 100000.0f);
+	InitFloat(FloatAmpPalettePosition_00, TEXT("FloatAmpPalettePosition_00"), 0.25f);
+	InitFloat(FloatAmpPalettePosition_01, TEXT("FloatAmpPalettePosition_01"), 0.45f);
+	InitFloat(FloatAmpPalettePosition_02, TEXT("FloatAmpPalettePosition_02"), 0.85f);
+
 	return true;
 	
 }

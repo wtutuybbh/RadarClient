@@ -20,7 +20,11 @@ protected:
 	int lifetime{ 6 };
 	float residual_alpha_{ 0.03f };
 	
+	static float x0, x1, x2, f0, f1, f2;
+
+	
 public:
+	static void RefreshColorSettings();
 	float PointSize {3};
 	explicit CSector(int index);
 	virtual void Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init);
@@ -33,5 +37,6 @@ public:
 	static glm::vec4 GetColor(float level);
 	static bool InitPalette(std::string fileName);	
 	int life_counter{ 0 };
+
 };
 

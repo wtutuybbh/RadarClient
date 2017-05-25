@@ -100,6 +100,10 @@ private:
 	static tstring GetDistanceListViewCellText(int iItem, int iSubItem);
 	static void InitDistanceListViewColumns(HWND hwndListView, LV_COLUMN lvColumn);
 
+	static tstring GetCRImageColorForSettingsDialog(int index);
+	static tstring GetCRImageColorListViewCellText(int iItem, int iSubItem);
+	static void InitCRImageColorListViewColumns(HWND hwndListView, LV_COLUMN lvColumn);
+
 	virtual LRESULT Button_Reload(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 
@@ -108,6 +112,8 @@ private:
 
 	static int iItem_ColorListView;
 	static int iItem_DistancesListView;
+	static int iItem_RImageColorListView;
+
 	static int rclick;
 	static glm::vec4 oldColor_ColorListView;
 	static POINT rclick_point;
@@ -143,6 +149,7 @@ private:
 	static std::vector<tstring> colorSettings;
 	static std::vector<tstring> distancesSettings;
 	static std::vector<tstring> anglesSettings;
+	static std::vector<tstring> crimagecolorSettings;
 public:
 	int MinimapSize;
 	static HWND ParentHWND;

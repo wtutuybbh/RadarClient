@@ -35,6 +35,8 @@ protected:
 
 	float alpha{ 1.0f };
 	AlphaBehaviour alpha_behaviour{ Constant };
+
+
 public:
 	virtual void SetAlphaBehaviour(AlphaBehaviour ab);
 	std::shared_ptr<C3DObjectVertices> vertices{ std::shared_ptr<C3DObjectVertices>(nullptr) };

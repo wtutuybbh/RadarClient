@@ -87,6 +87,15 @@ enum Settings
 	FloatZNear, 
 	FloatZFar,
 
+	FloatAmp_00,
+	FloatAmp_01,
+	FloatAmp_02,
+
+	FloatAmpPalettePosition_00,
+	FloatAmpPalettePosition_01,
+	FloatAmpPalettePosition_02,
+
+
 	StringHostName,
 	StringCSectorPaletteFileName,
 	StringCRImagePaletteFileName
@@ -109,7 +118,11 @@ class CSettings
 
 	
 public:
+	/*static ptree timing;
+	static std::map<tstring, Settings> stringmap;*/
+
 	static ptree pt;
+	
 	CSettings();
 	~CSettings();
 	static bool Init();

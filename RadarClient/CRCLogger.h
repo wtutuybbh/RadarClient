@@ -7,14 +7,16 @@
 #include "stdafx.h"
 
 #define CSceneRefreshSector_Log true
+#define CScene_Destructor_Log true
 
-#define CRCSocketReadLogEnabled  false
+#define CRCSocketReadLogEnabled  true
 #define CRCSocketPostDataLogEnabled  false
 
 #define CSectorRefreshLogEnabled true
 #define CSector_GetPoint_LogInfo false
 
 #define CRImageSetRefreshLogEnabled false
+#define CRImage_Refresh_Log false
 
 //(experimental method of log management)
 //Errors are always logged!
@@ -34,11 +36,15 @@
 #define CSettings_Change_Log false
 
 #define CMesh_IntersectLine_Log true
+#define CMesh_Destructor_Log true
 
 
 #define CUserInterface_Dialog_Settings_Log true
 #define CUserInterface_InitColorListViewColumns_Log true
 #define CUserInterface_InitDistanceListViewColumns_Log true
+#define CUserInterface_InitRImageColorListViewColumns_Log true
+
+#define WsaAsyncEvents_Log true
 
 #ifndef _DEBUG
 

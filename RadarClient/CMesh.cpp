@@ -355,22 +355,38 @@ bool CMesh::in_bounds(glm::vec4 p) const
 
 CMesh::~CMesh()
 {
+	if (CMesh_Destructor_Log) LOG_INFO_("CMesh DESTRUCTOR", "ololo");
 	if (heightMapLoader) {
 		if (heightMapLoader->joinable())
 			heightMapLoader->join();
 		//heightMapLoader->detach();
+		//auto tmp 
 		delete heightMapLoader;
 	}
 	if (bounds)
+	{
 		delete bounds;
+		bounds = nullptr;
+	}
 	if (altitude)
+	{
 		delete altitude;
+	}
 	if (maptexture)
+	{
 		delete maptexture;
+	}
+		
 	if (altitudes_set)
+	{
 		delete altitudes_set;
+	}
+		
 	if (textures_set)
+	{
 		delete textures_set;
+	}
+		
 }
 
 CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize, int resolution, float MPPh, float MPPv) : C3DObjectModel()

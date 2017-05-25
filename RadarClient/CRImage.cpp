@@ -67,22 +67,27 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 			float a = rdrinit->begAzm + rdrinit->dAzm *(info->d1 + i * (info->d2 - info->d1) / info->N);
 			for (int j = 1; j < info->NR; j++) //j - номер отсчёта по дальности
 			{
-				paletteIndex = min((int)(paletteWidth * ((px[i * info->NR + j] - minAmp) / (maxAmp - minAmp))), paletteWidth - 1);
-				
+				//paletteIndex = min((int)(paletteWidth * ((px[i * info->NR + j] - minAmp) / (maxAmp - minAmp))), paletteWidth - 1);
 					
 				if (px[i * info->NR + j] > maxAmp)
 				{
 					maxAmp = px[i * info->NR + j];
+					if (maxAmp > 4095) maxAmp = 4095;
 				}
 				if (px[i * info->NR + j] < minAmp)
 				{
 					minAmp = px[i * info->NR + j];
 				}
-				FreeImage_GetPixelColor(palette, paletteIndex, 0, &pixelcolor);
-				color.x = pixelcolor.rgbRed / 255.0;
-				color.y = pixelcolor.rgbGreen / 255.0;
-				color.z = pixelcolor.rgbBlue / 255.0;
-				color.w = 1;
+				/*FreeImage_GetPixelColor(palette, paletteIndex, 0, &pixelcolor);
+				color.r = pixelcolor.rgbRed / 255.0;
+				color.g = pixelcolor.rgbGreen / 255.0;
+				color.b = pixelcolor.rgbBlue / 255.0;
+				color.a =  5 * float(paletteIndex) / paletteWidth;*/
+
+				color = GetColor(px[i * info->NR + j]);
+
+				if (color.a > 1) color.a = 1;
+				if (CRImage_Refresh_Log) LOG_INFO_("CRImage_Refresh_Log", "color.a=%f", color.a);
 				float r = (rdrinit->minR + j*(rdrinit->maxR - rdrinit->minR) / info->NR) * rdrinit->dR;
 				/*if (px[i * info->NR + j] == 0)
 					r = 0;*/

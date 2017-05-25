@@ -14,6 +14,7 @@ CRImageSet::~CRImageSet()
 			delete (*it);
 		Images->clear();
 		delete Images;
+		Images = nullptr;
 	}
 }
 
@@ -47,6 +48,10 @@ void CRImageSet::SetAlphaBehaviour(AlphaBehaviour ab)
 
 void CRImageSet::Refresh(glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels)
 {
+	if (!Images)
+	{
+		return;
+	}
 	std::lock_guard<std::mutex> lock(m);
 	std::string context = "CRImageSet::Refresh";
 	if (rdrinit->ScanMode == 3) // 3D

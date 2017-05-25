@@ -308,32 +308,32 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			TerminateApplication(window);
 		}
 		
+
 		g_Socket = new CRCSocket(hWnd);
 		
 		g_Socket->Connect();
 				
 		g_UI = new CUserInterface(hWnd, g_vpControl, g_Socket, PANEL_WIDTH);
-
-		//return 0;
 		g_Minimap->Add(hWnd, 0, 0, g_UI->MinimapSize, g_UI->MinimapSize);
 		g_Minimap->Id = MiniMap;
 
 		if (!g_Minimap->InitGL()) {
 			TerminateApplication(window);
-		}
+		}		
+
+		//return 0;
+		
 
 		HRSRC       hrsrc;
-		HGLOBAL     hglobal;
+		//HGLOBAL     hglobal;
 		HINSTANCE hInstance = (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE);
 		hrsrc = FindResource(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), RT_DIALOG);
 
-		hglobal = ::LoadResource(hInstance, hrsrc);
+		//hglobal = ::LoadResource(hInstance, hrsrc);
 
 		HWND hwnd1 = RCDialog(hInstance, IDD_DIALOG1, hWnd, DLGPROC(DlgProc));
 
 		CUserInterface::ToolboxHWND = hwnd1;
-		//HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)(LoadResource(hInstance, FindResource(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), RT_DIALOG))), hWnd, (DLGPROC)DlgProc);
-		//HWND hwnd1 = CreateDialogIndirect(hInstance, (LPCDLGTEMPLATE)hglobal, hWnd, (DLGPROC)DlgProc);
 
 		ShowWindow(hwnd1, g_nCmdShow);
 
@@ -433,6 +433,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 						break;
 	case WM_SOCKET: {
+		if (WsaAsyncEvents_Log) LOG_INFO("WsaAsyncEvents_Log", "WM_SOCKET", "lParam=%d, wParam=%d");
 		if (WSAGETSELECTERROR(lParam))
 		{
 			/*MessageBox(hWnd,
@@ -446,7 +447,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (WSAGETSELECTEVENT(lParam)) 
 		{
 		case FD_READ:
-			if (g_Socket) 
+			if (g_Socket && g_isMessagePumpActive) //g_isMessagePumpActive - workaround because of crash
 			{
 				g_Socket->Read();
 			}
@@ -479,31 +480,34 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				g_vpControl->Scene->Init(g_Socket->s_rdrinit);
 			}
+			auto tmpbuf = (char *)wParam;
 			switch (msg) 
 			{
+				
 				case MSG_RPOINTS: 
 				{
-					g_vpControl->Scene->RefreshSectorAsync(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit, (char *)wParam);
+					g_vpControl->Scene->RefreshSectorAsync(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit, tmpbuf);
 				}
 				break;
 				case MSG_OBJTRK:
 				{
 					g_vpControl->Scene->RefreshTracks(&g_Socket->Tracks);
-					g_Socket->FreeMemory((char *)wParam);
+					tmpbuf ? delete tmpbuf : 0;
 				}
 				break;
 				case MSG_RIMAGE:
 				{
 					g_vpControl->Scene->RefreshImages(g_Socket->info_i, g_Socket->pixels);
-					g_Socket->FreeMemory((char *)wParam);
+					tmpbuf ? delete tmpbuf : 0;
 				}
 				break;
 				case MSG_INIT:
 				{
-					
+					tmpbuf ? delete tmpbuf : 0;
 				}
 				break;
 				default:
+					tmpbuf ? delete tmpbuf : 0;
 					break;
 			}
 		}
@@ -561,6 +565,7 @@ public:
 };
 
 // Program Entry (WinMain)
+//BOOL				g_isMessagePumpActive;							// Message Pump Active?
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {	
 	CUserInterface::ToolboxHWND = nullptr;
@@ -613,7 +618,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	Application			application;									// Application Structure
 	GL_Window			window;											// Window Structure
 	Keys				keys;											// Key Structure
-	BOOL				isMessagePumpActive;							// Message Pump Active?
+	
 	DWORD				tickCount;										// Used For The Tick Counter
 #ifdef _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -778,9 +783,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		if (winCreated == TRUE)							// Was Window Creation Successful?
 		{
 			
-				isMessagePumpActive = TRUE;								// Set isMessagePumpActive To TRUE
+			g_isMessagePumpActive = TRUE;								// Set isMessagePumpActive To TRUE
 				
-				while (g_window && isMessagePumpActive == TRUE)						// While The Message Pump Is Active
+				while (g_window && g_isMessagePumpActive == TRUE)						// While The Message Pump Is Active
 				{
 					if (!g_Initialized && hasVBO && hasVAO) {
 						Initialize();
@@ -808,7 +813,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						}
 						else											// Otherwise (If Message Is WM_QUIT)
 						{
-							isMessagePumpActive = FALSE;				// Terminate The Message Pump
+							g_isMessagePumpActive = FALSE;				// Terminate The Message Pump
 						}
 					}
 					else												// If There Are No Messages
@@ -841,7 +846,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						}
 					}
 				}														// Loop While isMessagePumpActive == TRUE
-				LOG_INFO__("g_window && isMessagePumpActive == FALSE");
+				LOG_INFO__("g_window && g_isMessagePumpActive == FALSE");
 			//}															// If (Initialize (...
 
 			DestroyWindowGL(g_vpControl->hWnd, g_vpControl->hDC, g_vpControl->hRC);															// Application Is Finished

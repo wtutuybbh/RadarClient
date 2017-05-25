@@ -161,8 +161,9 @@ LRESULT CUserInterface::Button_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 	return LRESULT();
 }
 
-int CUserInterface::iItem_ColorListView = -1;
+int CUserInterface::iItem_ColorListView = -1; 
 int CUserInterface::iItem_DistancesListView = -1;
+int CUserInterface::iItem_RImageColorListView = -1;
 glm::vec4 CUserInterface::oldColor_ColorListView = glm::vec4(0, 0, 0, 0);
 POINT CUserInterface::rclick_point;
 float CUserInterface::rclick_value;
@@ -187,6 +188,20 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		}
 	}
 
+	if ((HIWORD(wParam) == EN_CHANGE) && //notification
+		(LOWORD(wParam) == IDC_EDIT_RIMAGE_COLOR))   //your edit control ID
+	{
+		auto hw = GetDlgItem(hDlg, IDC_EDIT_RIMAGE_COLOR);
+		auto val = float(GetDoubleValue(hw));
+		auto index = CSettings::GetIndex(GetCRImageColorForSettingsDialog(iItem_RImageColorListView));
+		if (val != CSettings::GetFloat(index))
+		{
+			CSettings::SetFloat(Settings(index), val);
+			CSector::RefreshColorSettings();
+			auto hwndListView = GetDlgItem(hDlg, IDC_LIST_RIMAGE_COLOR);
+			ListView_RedrawItems(hwndListView, iItem_RImageColorListView, iItem_RImageColorListView);
+		}
+	}
 	switch (uMsg)
 	{
 	case WM_INITDIALOG: {
@@ -213,11 +228,19 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		ListView_SetColumnWidth(hwndListView, 0, 50);
 		ListView_SetColumnWidth(hwndListView, 1, rect.right - 50);
 
+		//rimage colors:
+		hwndListView = GetDlgItem(hDlg, IDC_LIST_RIMAGE_COLOR);
+		CRCListView::InitListView(hwndListView, 15, InitCRImageColorListViewColumns);
+		GetClientRect(hwndListView, &rect);
+		ListView_SetExtendedListViewStyle(hwndListView, LVS_EX_FULLROWSELECT);
+		ListView_SetColumnWidth(hwndListView, 0, 50);
+		ListView_SetColumnWidth(hwndListView, 1, rect.right - 50);
+
 		//URL combobox:
 		auto hWndComboBox = GetDlgItem(hDlg, IDC_COMBO1);
 		TCHAR urls[2][16] =
 		{
-			TEXT("localhost"), TEXT("192.168.0.222")
+			TEXT("localhost"), TEXT("rloc")
 		};
 
 		TCHAR A[16];
@@ -325,6 +348,37 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 			
 			return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST2, GetDistanceListViewCellText);
 		}
+		if (((LPNMHDR)lParam)->idFrom == IDC_LIST_RIMAGE_COLOR) // 
+		{
+			auto tmp = LPNMHDR(lParam);
+
+			//LOG_INFO__("IDC_LIST2 %d %d %d %d", NM_RDOWN, tmp->code, tmp->idFrom, tmp->hwndFrom);
+
+			if (((LPNMHDR)lParam)->code == LVN_BEGINRDRAG)
+			{
+				LPNMITEMACTIVATE item = LPNMITEMACTIVATE(lParam);
+				iItem_RImageColorListView = item->iItem;
+				if (GetCursorPos(&rclick_point))
+				{
+					prev_point = rclick_point;
+					rclick_value = CSettings::GetFloat(CSettings::GetIndex(GetCRImageColorForSettingsDialog(iItem_RImageColorListView)));
+					rclick = 1;
+					//LOG_INFO__("IDC_LIST2 LVN_BEGINRDRAG code=%d, iItem=%d, rclick_point=(%d, %d)", ((LPNMHDR)lParam)->code, iItem_DistancesListView, rclick_point.x, rclick_point.y);
+					//cursor position now in p.x and p.y
+				}
+				SetCapture(hDlg);
+			}
+			if (((LPNMHDR)lParam)->code == NM_CLICK)
+			{
+				LPNMITEMACTIVATE item = LPNMITEMACTIVATE(lParam);
+				iItem_RImageColorListView = item->iItem;
+				LOG_INFO__("IDC_LIST_RIMAGE_COLOR LVN_ITEMACTIVATE iItem=%d", iItem_RImageColorListView);
+				auto editHwnd = GetDlgItem(hDlg, IDC_EDIT_RIMAGE_COLOR);
+				SetDoubleValue(editHwnd, CSettings::GetFloat(CSettings::GetIndex(GetCRImageColorForSettingsDialog(iItem_RImageColorListView))));
+			}
+
+			return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST_RIMAGE_COLOR, GetCRImageColorListViewCellText);
+		}
 	}
 	case WM_MOUSEMOVE:
 		//if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_MOUSEMOVE");
@@ -332,17 +386,18 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		GetCursorPos(&p);
 		if (rclick && iItem_DistancesListView>=0)
 		{
-			
-
 			auto d_value = - rclick_value * (p.y - rclick_point.y) / (settings_dialog_rect_.bottom - settings_dialog_rect_.top);
 			CSettings::SetFloat((Settings)CSettings::GetIndex(GetDistanceForSettingsDialog(iItem_DistancesListView)), rclick_value + d_value);
-			//LOG_INFO__("WM_MOUSEMOVE d_value=%f", d_value);
-
 			prev_point = p;
-
-			auto hwndListView = GetDlgItem(hDlg, IDC_LIST2);
-			ListView_RedrawItems(hwndListView, iItem_DistancesListView, iItem_DistancesListView);
-			//return CRCListView::ListViewNotify(hDlg, lParam, IDC_LIST2, GetDistanceListViewCellText);
+			ListView_RedrawItems(GetDlgItem(hDlg, IDC_LIST2), iItem_DistancesListView, iItem_DistancesListView);
+		}
+		if (rclick && iItem_RImageColorListView >= 0)
+		{
+			auto d_value = -rclick_value * (p.y - rclick_point.y) / (settings_dialog_rect_.bottom - settings_dialog_rect_.top);
+			CSettings::SetFloat((Settings)CSettings::GetIndex(GetCRImageColorForSettingsDialog(iItem_RImageColorListView)), rclick_value + d_value);
+			CSector::RefreshColorSettings();
+			prev_point = p;
+			ListView_RedrawItems(GetDlgItem(hDlg, IDC_LIST_RIMAGE_COLOR), iItem_RImageColorListView, iItem_RImageColorListView);
 		}
 	break;
 	case WM_RBUTTONDOWN:
@@ -354,6 +409,7 @@ LRESULT CALLBACK CUserInterface::Dialog_Settings(HWND hDlg, UINT uMsg, WPARAM wP
 		if (CUserInterface_Dialog_Settings_Log) LOG_INFO__("WM_CONTEXTMENU");
 		//LOG_INFO__("WM_CONTEXTMENU");
 		iItem_DistancesListView = -1;
+		iItem_RImageColorListView = -1;
 		rclick = 0;
 		ReleaseCapture();
 		break;
@@ -441,6 +497,33 @@ tstring CUserInterface::GetDistanceListViewCellText(int iItem, int iSubItem)
 void CUserInterface::InitDistanceListViewColumns(HWND hwndListView, LVCOLUMNW lvColumn)
 {
 	if (CUserInterface_InitDistanceListViewColumns_Log) LOG_INFO_("InitDistanceListViewColumns", "WM_CONTEXTMENU");
+	TCHAR       szString[2][20] = { TEXT("Параметр"), TEXT("Значение") };
+	for (auto i = 0; i < 2; i++)
+	{
+		lvColumn.pszText = szString[i];
+		ListView_InsertColumn(hwndListView, i, &lvColumn);
+	}
+}
+
+tstring CUserInterface::GetCRImageColorForSettingsDialog(int index)
+{
+	if (index < crimagecolorSettings.size())
+		return crimagecolorSettings[index];
+	return  TEXT("");
+}
+
+tstring CUserInterface::GetCRImageColorListViewCellText(int iItem, int iSubItem)
+{
+	if (iSubItem == 0)
+		return GetCRImageColorForSettingsDialog(iItem);
+	if (iSubItem == 1)
+		return to_tstring(to_string(CSettings::GetFloat(CSettings::GetIndex(GetCRImageColorForSettingsDialog(iItem)))));
+	return TEXT("");
+}
+
+void CUserInterface::InitCRImageColorListViewColumns(HWND hwndListView, LVCOLUMNW lvColumn)
+{
+	if (CUserInterface_InitRImageColorListViewColumns_Log) LOG_INFO_("InitCRImageColorListViewColumns", "WM_CONTEXTMENU");
 	TCHAR       szString[2][20] = { TEXT("Параметр"), TEXT("Значение") };
 	for (auto i = 0; i < 2; i++)
 	{
@@ -898,7 +981,8 @@ void CUserInterface::Trackbar_ZeroElevation_SetText(HWND hwnd, int labelID)
 //TRACKBAR_CLASS
 std::vector<tstring> CUserInterface::colorSettings;
 std::vector<tstring> CUserInterface::distancesSettings;
-std::vector<tstring> CUserInterface::anglesSettings;
+std::vector<tstring> CUserInterface::crimagecolorSettings;
+std::vector<tstring> CUserInterface::anglesSettings; 
 CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRCSocket *socket, int panelWidth)
 {
 	colorSettings.push_back(TEXT("ColorBackground"));
@@ -929,6 +1013,17 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	anglesSettings.push_back(TEXT("FloatMaxZeroElevation"));
 	anglesSettings.push_back(TEXT("FloatMinBegAzm"));
 	anglesSettings.push_back(TEXT("FloatMaxBegAzm"));
+
+	
+	crimagecolorSettings.push_back(TEXT("FloatAmp_00"));
+	crimagecolorSettings.push_back(TEXT("FloatAmpPalettePosition_00"));
+	crimagecolorSettings.push_back(TEXT("FloatAmp_01"));
+	crimagecolorSettings.push_back(TEXT("FloatAmpPalettePosition_01"));
+	crimagecolorSettings.push_back(TEXT("FloatAmp_02"));
+	crimagecolorSettings.push_back(TEXT("FloatAmpPalettePosition_02"));
+
+
+
 
 	string context = "CUserInterface::CUserInterface";
 	LOG_INFO(requestID, context, (boost::format("Start... parentHWND=%1%, vpControl=%2%, socket=%3%, panelWidth=%4%...") % parentHWND % vpControl % socket % panelWidth).str().c_str());

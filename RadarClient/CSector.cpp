@@ -13,6 +13,23 @@ const std::string CSector::requestID = "CSector";
 float CSector::maxAmp = 70;
 float CSector::minAmp = 0;
 
+float CSector::x0 = 0;
+float CSector::f0 = 0;
+float CSector::x1 = 0;
+float CSector::f1 = 0;
+float CSector::x2 = 0;
+float CSector::f2 = 0;
+
+void CSector::RefreshColorSettings()
+{
+	x0 = CSettings::GetFloat(FloatAmp_00);
+	f0 = CSettings::GetFloat(FloatAmpPalettePosition_00);
+	x1 = CSettings::GetFloat(FloatAmp_01);
+	f1 = CSettings::GetFloat(FloatAmpPalettePosition_01);
+	x2 = CSettings::GetFloat(FloatAmp_02);
+	f2 = CSettings::GetFloat(FloatAmpPalettePosition_02);
+}
+
 CSector::CSector(int index) : C3DObjectModel()
 {
 	this->index = index;
@@ -33,7 +50,7 @@ CSector::CSector(int index) : C3DObjectModel()
 
 	c3DObjectModel_TypeName = "CSector";
 
-	
+	RefreshColorSettings();
 }
 
 void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init)
@@ -264,14 +281,28 @@ glm::vec4 CSector::GetColor(float level)
 	RGBQUAD pixelcolor;
 	glm::vec4 color;
 
-	int paletteIndex = min((int)(paletteWidth * ((level - minAmp) / (maxAmp - minAmp))), paletteWidth-1);
+	float b0, b1, b2;
+	
+	
+
+	b0 = f0;
+
+	b1 = (f1 - f0) / (x1 - x0);
+
+	b2 = (((f2 - f1) / (x2 - x1)) - ((f1 - f0) / (x1 - x0))) / (x2 - x0);
+
+	auto f = b0 + b1*(level - x0) + b2*(level - x0)*(level - x1);
+
+
+	int paletteIndex = min((int)(paletteWidth * ((f - 0) / (1 - 0))), paletteWidth-1);
 
 	FreeImage_GetPixelColor(palette, paletteIndex, 0, &pixelcolor);
-	color.x = pixelcolor.rgbRed / 255.0;
-	color.y = pixelcolor.rgbGreen / 255.0;
-	color.z = pixelcolor.rgbBlue / 255.0;
-	color.w = 1;
-
+	color.r = pixelcolor.rgbRed / 255.0;
+	color.g = pixelcolor.rgbGreen / 255.0;
+	color.b = pixelcolor.rgbBlue / 255.0;
+	color.a = 5 * float(paletteIndex) / paletteWidth;
+	if (color.a > 1) color.a = 1;
+	if (color.a < 0) color.a = 0;
 	return color;
 }
 

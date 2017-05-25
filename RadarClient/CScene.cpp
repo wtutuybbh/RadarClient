@@ -118,16 +118,25 @@ CScene::CScene()
 
 }
 CScene::~CScene() {
+	if (CScene_Destructor_Log) LOG_INFO_("CScene DESTRUCTOR", "ololo");
 	ClearSelection();
 	if (Markup)
+	{
 		delete Markup;
+		Markup = nullptr;
+	}
 
 	if (mmPointer)
+	{
 		delete mmPointer;
+		mmPointer = nullptr;
+	}
 
-
-	if (Camera)
+	if (Camera) 
+	{
 		delete Camera;
+		Camera = nullptr;
+	}
 
 
 	for (auto it = begin(Sectors); it != end(Sectors); ++it)
@@ -145,19 +154,23 @@ CScene::~CScene() {
 	if (begAzmLine)
 	{
 		delete begAzmLine;
+		begAzmLine = nullptr;
 	}
 
 	if (ImageSet)
 	{
 		delete ImageSet;
+		ImageSet = nullptr;
 	}
 
 	if (RayObj)
 	{
 		delete RayObj;
+		RayObj = nullptr;
 	}
 	if (Mesh) {
 		delete Mesh;
+		Mesh = nullptr;
 	}
 }
 
