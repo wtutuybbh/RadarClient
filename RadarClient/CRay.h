@@ -1,7 +1,8 @@
 #pragma once
-#include "C3DObjectModel.h"
+#include "CMarkup.h"
+
 class CRay :
-	public C3DObjectModel
+	public CMarkup
 {
 	float rayWidth, maxDist, y_0, MPPh, MPPv;
 public:

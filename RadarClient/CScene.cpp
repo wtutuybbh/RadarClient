@@ -178,7 +178,8 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 {
 	if (Camera)
 	{
-		Camera->SetProjection(CSettings::GetFloat(FloatFovy), CSettings::GetFloat(FloatAspect), CSettings::GetFloat(FloatZNear), CSettings::GetFloat(FloatZFar));
+		Camera->SetFovy(CSettings::GetFloat(FloatFovy));
+		Camera->SetZPlanes(CSettings::GetFloat(FloatZNear), CSettings::GetFloat(FloatZFar));
 	}
 	//glLineWidth(3);
 	glEnable(GL_DEPTH_TEST);
@@ -384,15 +385,16 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 
 void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 {
-	if (!Mesh || !Mesh->Ready()) {
-		return;
-	}
-	float y_0 = GetY0();
 
 	if (!info_p || !pts || !init)
 		return; //do nothing if no RPOINTS structure provided
 	if (init->MaxNAzm <= 0 || info_p->N<=0) //TODO: full defence against bad data need to be there
 		return;
+	if (Sectors.size() == 0)
+	{
+		LOG_ERROR("CScene", "RefreshSector", "Sectors.size() == 0");
+		return;
+	}
 
 	//Init = init;
 	if (!Initialized)
@@ -434,7 +436,7 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 
 		if (Sectors[SectorsCount * i + currentSector]->life_counter == lifeTime)
 		{
-			Sectors[SectorsCount * i + currentSector]->Refresh(glm::vec4(0, y_0, 0, 1), MPPh, MPPv, info_p, pts, init);
+			Sectors[SectorsCount * i + currentSector]->Refresh(glm::vec4(0, 0, 0, 1), MPPh, MPPv, info_p, pts, init);
 			if (CSceneRefreshSector_Log) LOG_INFO("CSceneRefreshSector_Log", "RefreshSector", "CSector %d %d, Refresh", i, currentSector);
 			Sectors[SectorsCount * i + currentSector]->life_counter = 0;
 		}
@@ -446,7 +448,7 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 	//LOG_INFO_("CScene::RefreshSector", "currentSector=%d", currentSector);
 	if (RayObj) 
 	{
-		RayObj->SetRotateMatrix(glm::rotate((float)(- 2.0f * M_PI * (currentSector + 0.5) / SectorsCount), glm::vec3(0, 1, 0)));
+		//RayObj->SetRotateMatrix(glm::rotate((float)(- 2.0f * M_PI * (currentSector + 0.5) / SectorsCount), glm::vec3(0, 1, 0)));
 	}
 
 
@@ -456,7 +458,7 @@ void CScene::RefreshSector(RPOINTS * info_p, RPOINT * pts, RDR_INITCL* init)
 }
 
 void CScene::RefreshSectorAsync(RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init, char* delete_after)
-{
+{	
 	std::thread t( [this](RPOINTS* info_p_, RPOINT* pts_, RDR_INITCL* init_, char* delete_after_)
 	{
 		std::lock_guard<std::mutex> lock(mtxSectors);
@@ -540,7 +542,7 @@ void CScene::RefreshTracks(vector<TRK*>* tracks)
 	}
 }
 
-void CScene::RefreshImages(RIMAGE* info, void* pixels)
+void CScene::RefreshImages(RIMAGE* info, void* pixels, RDR_INITCL* init)
 {
 	if (!Mesh || !Mesh->Ready()) {
 		return;
@@ -549,6 +551,10 @@ void CScene::RefreshImages(RIMAGE* info, void* pixels)
 	if (ImageSet)
 	{
 		ImageSet->Refresh(glm::vec4(0, y_0, 0, 1), MPPh, MPPv, rdrinit, info, pixels);
+	}
+	if (RayObj)
+	{
+		RayObj->SetRotateMatrix(glm::rotate((float)(- M_PI * (float(info->d1 + info->d2) / init->MaxNAzm)), glm::vec3(0, 1, 0)));
 	}
 }
 

@@ -9,7 +9,7 @@
 #define CSceneRefreshSector_Log true
 #define CScene_Destructor_Log true
 
-#define CRCSocketReadLogEnabled  true
+#define CRCSocketReadLogEnabled  false
 #define CRCSocketPostDataLogEnabled  false
 
 #define CSectorRefreshLogEnabled true
@@ -44,7 +44,7 @@
 #define CUserInterface_InitDistanceListViewColumns_Log true
 #define CUserInterface_InitRImageColorListViewColumns_Log true
 
-#define WsaAsyncEvents_Log true
+#define WsaAsyncEvents_Log false
 
 #ifndef _DEBUG
 

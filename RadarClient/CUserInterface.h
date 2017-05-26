@@ -85,6 +85,7 @@ private:
 	virtual LRESULT Button_Colors(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Button_Load(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Button_CameraReset(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	virtual LRESULT Button_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);	
 	static LRESULT CALLBACK Dialog_Settings(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -128,6 +129,7 @@ private:
 	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MarkupOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_FixViewToRadar(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_ViewFromTop(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MeasureDistance(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapType(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -193,6 +195,7 @@ public:
 	static bool GetCheckboxState_AltitudeMap();
 	static bool GetCheckboxState_MarkupLines();
 	static bool GetCheckboxState_MarkupLabels();
+	static bool GetCheckboxState_ViewFromTop();
 	static bool GetCheckboxState(int id);
 
 	int GetTrackbarValue_VTilt();

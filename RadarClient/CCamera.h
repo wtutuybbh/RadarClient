@@ -25,7 +25,6 @@ public:
 	glm::vec3 RadarPosition {glm::vec3(0,0,0)};
 	glm::vec3 MeshSize;
 	bool FixViewOnRadar = false;
-	
 
 	CCamera();
 	~CCamera();
@@ -39,7 +38,13 @@ public:
 
 	void SetProjection(float fovy, float aspect, float zNear, float zFar);
 	void SetPosition(float x, float y, float z);
+	void SetDirection(float x, float y, float z);
+	void SetUp(float x, float y, float z);
+	void Reset();
 	void SetPositionXZ(float x, float z);
+	void SetAspect(float aspect);
+	void SetFovy(float fovy);
+	void SetZPlanes(float zNear, float zFar);
 	void LookAt();
 	void MoveByView(double shift);
 	void Rotate(float amount, glm::vec3& axis);
@@ -53,13 +58,19 @@ public:
 	glm::mat4 GetMiniMapProjection();
 
 	glm::vec3 GetPosition();
+	glm::vec3 GetUp();
+
+	float GetFovy();
+	float GetAspect();
+	float GetZNear();
+	float GetZFar();
 
 	float GetAzimut();
 
 	glm::vec3 GetDirection();
 
 	int flag0;
-	float left, right, top, bottom, znear, zfar;
+	float left, right, top, bottom, znear, zfar; //ortho projection
 	glm::vec3 mmPosition, mmTo, mmUp;
 
 	void ApplyPositionBounds(ApplyPositionBoundsCallback apb);

@@ -5,7 +5,7 @@
 #include "C3DObjectProgram.h"
 #include "CSettings.h"
 
-CRay::CRay(float rayWidth, float maxDist, float y_0)
+CRay::CRay(float rayWidth, float maxDist, float y_0) : CMarkup(glm::vec4(0, y_0, 0, 1))
 {
 	this->rayWidth = rayWidth;
 	this->maxDist = maxDist;

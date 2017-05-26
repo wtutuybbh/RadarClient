@@ -146,7 +146,7 @@ public:
 
 	void RefreshTracks(std::vector<TRK*> *tracks);
 
-	void RefreshImages(RIMAGE* info, void* pixels);
+	void RefreshImages(RIMAGE* info, void* pixels, RDR_INITCL* init);
 
 	void Init(RDR_INITCL* init);
 

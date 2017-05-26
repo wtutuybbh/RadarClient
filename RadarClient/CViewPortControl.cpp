@@ -41,10 +41,10 @@ void CViewPortControl::Draw()
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();													// Reset The Projection Matrix
-	gluPerspective(60.0f, 4.0f/3.0f,			// Calculate The Aspect Ratio Of The Window
-		1.0f, 10000.0f);
+	
 	if (Camera) {
-		Camera->LookAt();
+		gluPerspective(Camera->GetFovy(), Camera->GetAspect(), Camera->GetZNear(), Camera->GetZFar());
+		Camera->LookAt();		
 	}
 
 	glMatrixMode(GL_MODELVIEW);
@@ -91,16 +91,24 @@ LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wPara
 			Camera->newPosition.x = LOWORD(lParam);
 			Camera->newPosition.y = HIWORD(lParam);
 			if (wParam == MK_LBUTTON) {
-				Camera->Rotate(Camera->newPosition.x - Camera->startPosition.x, glm::vec3(0, -1, 0));
-				Camera->Rotate(Camera->newPosition.y - Camera->startPosition.y, glm::cross(glm::vec3(0, 1, 0), Camera->GetDirection()));
-
 				if (UI) {
-					float r = glm::length(Camera->GetDirection());
-					float e = acos(Camera->GetDirection().y / r);
+					if (!UI->GetCheckboxState_ViewFromTop())
+					{
+						Camera->Rotate(Camera->newPosition.x - Camera->startPosition.x, glm::vec3(0, -1, 0));
+						Camera->Rotate(Camera->newPosition.y - Camera->startPosition.y, glm::cross(glm::vec3(0, 1, 0), Camera->GetDirection()));
 
-					float a = Camera->GetAzimut();
 
-					UI->SetTrackbarValue_Turn(50 * a / M_PI + 50);
+						float r = glm::length(Camera->GetDirection());
+						float e = acos(Camera->GetDirection().y / r);
+
+						float a = Camera->GetAzimut();
+
+						UI->SetTrackbarValue_Turn(50 * a / M_PI + 50);
+					}
+					else
+					{
+						
+					}
 					//UI->SetTrackbarValue_VTilt(100 * e / M_PI);
 				}
 			}

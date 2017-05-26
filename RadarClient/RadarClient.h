@@ -36,7 +36,7 @@ typedef struct {									// Contains Information Vital To A Window
 
 										// GL_Window
 
-void TerminateApplication(GL_Window* window);		// Terminate The Application
+void TerminateApplication();		// Terminate The Application
 
 void ToggleFullscreen(GL_Window* window);			// Toggle Fullscreen / Windowed Mode
 

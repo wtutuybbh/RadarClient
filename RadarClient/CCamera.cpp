@@ -70,9 +70,42 @@ void CCamera::SetPosition(float x, float y, float z)
 	Position = glm::vec3(x, y, z);	
 }
 
+void CCamera::SetDirection(float x, float y, float z)
+{
+	Direction = glm::vec3(x, y, z);
+}
+
+void CCamera::SetUp(float x, float y, float z)
+{
+	Up = glm::vec3(x, y, z);
+}
+
+void CCamera::Reset()
+{
+	Position = RadarPosition;
+	Direction = glm::vec3(0, 0, 1);
+	Up = glm::vec3(0, 1, 0);
+}
+
 void CCamera::SetPositionXZ(float x, float z)
 {
 	SetPosition(x, Position.y, z);
+}
+
+void CCamera::SetAspect(float aspect)
+{
+	this->aspect = aspect;
+}
+
+void CCamera::SetFovy(float fovy)
+{
+	this->fovy = fovy;
+}
+
+void CCamera::SetZPlanes(float zNear, float zFar)
+{
+	this->zNear = zNear;
+	this->zFar = zFar;
 }
 
 void CCamera::LookAt() {
@@ -194,6 +227,31 @@ glm::mat4 CCamera::GetMiniMapProjection()
 glm::vec3 CCamera::GetPosition()
 {
 	return Position;
+}
+
+glm::vec3 CCamera::GetUp()
+{
+	return Up;
+}
+
+float CCamera::GetFovy()
+{
+	return fovy;
+}
+
+float CCamera::GetAspect()
+{
+	return aspect;
+}
+
+float CCamera::GetZNear()
+{
+	return zNear;
+}
+
+float CCamera::GetZFar()
+{
+	return zFar;
 }
 
 float CCamera::GetAzimut()

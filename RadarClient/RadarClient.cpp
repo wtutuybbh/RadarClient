@@ -25,35 +25,21 @@
 
 #define WM_TOGGLEFULLSCREEN (WM_USER+1)									// Application Define Message For Toggling
 
-/*
-#pragma comment(linker,"\"/manifestdependency:type='win32' \
-name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
-processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-*/
 
 #pragma comment(lib, "ComCtl32.lib")
 
 bool g_isProgramLooping = true;	
-bool g_isMessagePumpActive = true;
-
 bool g_InsaneLogMode = false;
-
 bool gl_isProgramLooping = true;
-bool gl_isMessagePumpActive = true;
-// Window Creation Loop, For FullScreen/Windowed Toggle																		// Between Fullscreen / Windowed Mode
-static BOOL g_createFullScreen;											// If TRUE, Then Create Fullscreen
-
+																
 float		g_flYRot = 0.0f;									// Rotation
 int			g_nFPS = 0, g_nFrames = 0;							// FPS and FPS Counter
 DWORD		g_dwLastFPS = 0;									// Last FPS Check Time	
 float g_mpph, g_mppv, g_lon, g_lat;
 int g_texsize;
 std::string g_altFile, g_imgFile, g_datFile;
-
 HWND g_ViewPortControl_hWnd;
-
 HANDLE g_hIcon;
-
 CViewPortControl *g_vpControl = nullptr;
 CMinimap *g_Minimap = nullptr;
 CUserInterface *g_UI = nullptr;
@@ -62,11 +48,7 @@ CRCSocket *g_Socket = nullptr;
 DebugWindowInfo g_dwi;
 #endif
 
-
-//std::mutex m;
-
 bool g_Initialized = false;
-
 bool g_AltPressed = false;
 
 GL_Window*	g_window = nullptr;
@@ -80,16 +62,13 @@ bool hasVAO = true;
 
 int g_nCmdShow;
 
-std::thread *g_gl_thread = nullptr;
+std::thread *gl_thread = nullptr;
 
-//HWND CUserInterface::ToolboxHWND;
-
-void TerminateApplication(GL_Window* window)							// Terminate The Application
+void TerminateApplication()							// Terminate The Application
 {
-	gl_isProgramLooping = false;
-	gl_isMessagePumpActive = false;										// Stop Looping Of The Program
-
+	gl_isProgramLooping = false;	
 	
+		
 }
 
 void ToggleFullscreen(GL_Window* window)								// Toggle Fullscreen/Windowed
@@ -305,7 +284,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		g_vpControl->Id = Main;
 
 		if (!g_vpControl->InitGL()) {
-			TerminateApplication(window);
+			TerminateApplication();
 		}
 		
 
@@ -318,7 +297,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		g_Minimap->Id = MiniMap;
 
 		if (!g_Minimap->InitGL()) {
-			TerminateApplication(window);
+			TerminateApplication();
 		}		
 
 		//return 0;
@@ -346,22 +325,26 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 #endif // _DEBUG
 
 		wglMakeCurrent(nullptr, nullptr);
-		g_gl_thread = new std::thread(GLProc);
+		
 
 		LOG_INFO(requestID, context, "WM_CREATE: End");
 	}
 	return 0;														// Return
 
-	case WM_CLOSE: {												// Closing The Window
-		TerminateApplication(window);								// Terminate The Application
+	case WM_CLOSE: {												// Closing The Window		
+		TerminateApplication();								// Terminate The Application
 	}
 				   return 0;														// Return
 
 	case WM_SIZE: {												// Size Action Has Taken Place
 		RECT clientRect;
 		GetClientRect(hWnd, &clientRect);
-		g_vpControl->SetPosition(PANEL_WIDTH, 0, (clientRect.right - clientRect.left) - PANEL_WIDTH, clientRect.bottom - clientRect.top - INFO_HEIGHT);
-		g_UI->Resize();
+		if (g_vpControl)
+			g_vpControl->SetPosition(PANEL_WIDTH, 0, (clientRect.right - clientRect.left) - PANEL_WIDTH, clientRect.bottom - clientRect.top - INFO_HEIGHT);
+		if (g_vpControl->Camera)
+			g_vpControl->Camera->SetAspect(float((clientRect.right - clientRect.left) - PANEL_WIDTH) / (clientRect.bottom - clientRect.top - INFO_HEIGHT));
+		if (g_UI)
+			g_UI->Resize();
 		switch (wParam)												// Evaluate Size Action
 		{
 		case SIZE_MINIMIZED:									// Was Window Minimized?
@@ -428,7 +411,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEWHEEL: {
 		double zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 		if (g_vpControl->Camera) {
-			g_vpControl->Camera->MoveByView(zDelta);
+			g_vpControl->Camera->MoveByView(zDelta/10);
 		}
 	}
 						break;
@@ -447,7 +430,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (WSAGETSELECTEVENT(lParam)) 
 		{
 		case FD_READ:
-			if (g_Socket && g_isMessagePumpActive) //g_isMessagePumpActive - workaround because of crash
+			if (g_Socket && g_isProgramLooping) //g_isMessagePumpActive - workaround because of crash
 			{
 				g_Socket->Read();
 			}
@@ -497,7 +480,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				break;
 				case MSG_RIMAGE:
 				{
-					g_vpControl->Scene->RefreshImages(g_Socket->info_i, g_Socket->pixels);
+					g_vpControl->Scene->RefreshImages(g_Socket->info_i, g_Socket->pixels, g_Socket->s_rdrinit);
 					tmpbuf ? delete tmpbuf : 0;
 				}
 				break;
@@ -629,72 +612,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 #endif
 	
-	
-	/*std::ifstream settings_txt(TEXT("settings.txt"));
-	
-	if (!settings_txt) {
-		LOG_ERROR__("settings.txt not found.");
-		return 0;
-	}
-	std::getline(settings_txt, g_altFile);
-	std::getline(settings_txt, g_imgFile);
-	std::getline(settings_txt, g_datFile);
-	string s;
-	while (settings_txt.good()) {
-		std::getline(settings_txt, s);
-		std::vector<std::string> strparts = rcutils::split(s, '=');
-		string settingName = strparts.at(0);
-		if (settingName.substr(0, 6) == "String")
-		{
-			std::string settingValue(strparts.at(1).c_str());
-			CSettings::SetString(CSettings::GetIndex(to_tstring(settingName)), settingValue);
-		}
-		if(settingName.substr(0, 5) == "Float")
-		{
-			float settingValue = ::atof(strparts.at(1).c_str());
-			CSettings::SetFloat(CSettings::GetIndex(to_tstring(settingName)), settingValue);
-		}
-		if (settingName.substr(0, 3) == "Int")
-		{
-			int settingValue = ::_atoi64(strparts.at(1).c_str());
-			CSettings::SetInt(CSettings::GetIndex(to_tstring(settingName)), settingValue);
-		}
-		if (settingName.substr(0, 5) == "Color")
-		{
-			unsigned short shift=0;
-			if (strparts.at(1).substr(0, 1) == "#")
-			{
-				shift = 1;
-			}
-			glm::vec4 settingValue;
-			unsigned short v;
-			std::stringstream ss, ss1, ss2, ss3;
-
-			string str_r = strparts.at(1).substr(shift, 2);						
-			ss << std::hex << str_r;
-			ss >> v;
-			settingValue.r = (float)v / 255.0;
-
-			str_r = strparts.at(1).substr(shift+2, 2);
-			ss1 << std::hex << str_r;
-			ss1 >> v;
-			settingValue.g = (float)v / 255.0;
-
-			str_r = strparts.at(1).substr(shift + 4, 2);
-			ss2 << std::hex << str_r;
-			ss2 >> v;
-			settingValue.b = (float)v / 255.0;
-
-			str_r = strparts.at(1).substr(shift + 6, 2);
-			ss3 << std::hex << str_r;
-			ss3 >> v;
-			settingValue.a = (float)v / 255.0;
-
-			CSettings::SetColor(CSettings::GetIndex(to_tstring(settingName)), settingValue);
-		}
-	}
-
-	settings_txt.close();*/
 	CSettings::Load();
 	LOG_INFO(requestID, context, "Settings loaded.");
 
@@ -715,27 +632,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	else {
 		std::string strCmdLine(lpCmdLine);
 		std::vector<std::string> v = rcutils::split(strCmdLine, ' ');
-
 		g_lon = std::stof(v[0]);
 		g_lat = std::stof(v[1]);
 		g_mpph= std::stof(v[2]);
 		g_mppv = std::stof(v[3]);
 		g_texsize = std::stoi(v[4]);
-		
 		LOG_INFO(requestID, context, (boost::format("Parameters set from command line: lon=%1%, lat=%2%, mpph=%3%, mppv=%4%, texsize=%5%") % g_lon % g_lat % g_mpph % g_mppv % g_texsize).str().c_str());
 	}
-	
-	//CSettings::SetFloat(FloatMPPh, g_mpph);
-	//CSettings::SetFloat(FloatMPPv, g_mppv);
-
 	g_vpControl = new CViewPortControl(L"VP3D");
-	g_Minimap = new CMinimap(L"VPMiniMap");
-
-																	
+	g_Minimap = new CMinimap(L"VPMiniMap");															
 	application.className = L"OpenGL";									// Application Class Name
 	application.hInstance = hInstance;									// Application Instance
-
-																		
+																
 	ZeroMemory(&window, sizeof(GL_Window));							// Make Sure Memory Is Zeroed
 	window.keys = &keys;								// Window Key Structure
 	window.init.application = &application;							// Window Application
@@ -743,7 +651,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	window.init.width = 1366;									// Window Width
 	window.init.height = 768;									// Window Height
 	window.init.bitsPerPixel = 16;									// Bits Per Pixel
-
 	ZeroMemory(&keys, sizeof(Keys));									// Zero keys Structure
 
 
@@ -761,7 +668,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	
 	glutInit(&myargc, myargv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	//glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
 
 	free(myargv[0]);
 
@@ -771,21 +677,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	g_window = &window;
 	g_keys = &keys;
 
-	
-	
-
-	
-
-	
-	//LOG_INFO(requestID, context, (boost::format("-=point before message loop=-")).str());
 	while (g_isProgramLooping)											// Loop Until WM_QUIT Is Received
 	{
 		if (winCreated == TRUE)							// Was Window Creation Successful?
 		{
 			
-			g_isMessagePumpActive = TRUE;								// Set isMessagePumpActive To TRUE
-				
-				while (g_window && g_isMessagePumpActive == TRUE)						// While The Message Pump Is Active
+			gl_thread = new std::thread(GLProc);
+			
+				while (g_window && g_isProgramLooping == TRUE)						// While The Message Pump Is Active
 				{
 					if (!g_Initialized && hasVBO && hasVAO) {
 						Initialize();
@@ -813,7 +712,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						}
 						else											// Otherwise (If Message Is WM_QUIT)
 						{
-							g_isMessagePumpActive = FALSE;				// Terminate The Message Pump
+							TerminateApplication();				// Terminate The Message Pump
 						}
 					}
 					else												// If There Are No Messages
@@ -823,36 +722,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							WaitMessage();								// Application Is Minimized Wait For A Message
 						}
 						else											// If Window Is Visible
-						{
-							
-							// Process Application Loop
-							/*tickCount = GetTickCount();				// Get The Tick Count
-							Update(tickCount - window.lastTickCount);	// Update The Counter
-							window.lastTickCount = tickCount;*/			// Set Last Count To Current Count
-							
-							/*Draw();							
-
-							if (g_vpControl->hRC) {
-								g_vpControl->MakeCurrent();
-								g_vpControl->Draw();
-								SwapBuffers(g_vpControl->hDC);					// Swap Buffers (Double Buffering)
-							}
-							if (g_Minimap->hRC) {
-								g_Minimap->MakeCurrent();
-								g_Minimap->Draw();
-								SwapBuffers(g_Minimap->hDC);
-							}*/
-							
+						{	
 						}
 					}
-				}														// Loop While isMessagePumpActive == TRUE
+				}		
+				if (gl_thread)
+				{
+					if (gl_thread->joinable())
+					{
+						gl_thread->join();
+					}
+					delete gl_thread;
+				}// Loop While isMessagePumpActive == TRUE
 				LOG_INFO__("g_window && g_isMessagePumpActive == FALSE");
 			//}															// If (Initialize (...
 
 			DestroyWindowGL(g_vpControl->hWnd, g_vpControl->hDC, g_vpControl->hRC);															// Application Is Finished
 			DestroyWindowGL(g_Minimap->hWnd, g_Minimap->hDC, g_Minimap->hRC);
 			//Deinitialize();											// User Defined DeInitialization
-
+			
 												// Destroy The Active Window
 		}
 		else															// If Window Creation Failed
@@ -865,14 +753,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	LOG_INFO__("Before Deinitialize()");
 	Deinitialize();
+#ifdef _DEBUG
+	DestroyWindow(console);
+#endif
 	UnregisterClass(application.className, application.hInstance);		// UnRegister Window Class
 	
 
 	/*g_isProgramLooping = false;*/
-	if (g_gl_thread) {
-		g_gl_thread->detach();
-		delete g_gl_thread;
-	}
+	
 
 
 	return 0;	
@@ -992,14 +880,14 @@ void GLProc()
 	{
 		//g_isMessagePumpActive = TRUE;								// Set isMessagePumpActive To TRUE
 
-			while (g_window && gl_isMessagePumpActive)						// While The Message Pump Is Active
+			if (g_window)						// While The Message Pump Is Active
 			{
 				// Success Creating Window.  Check For Window Messages
-					if (g_InsaneLogMode)
-					{
-						LOG_INFO__("!!!");
-					}
-					if (g_window->isVisible)					// If Window Is Not Visible
+					//if (g_InsaneLogMode)
+					//{
+					//	LOG_INFO__("!!!");
+					//}
+					if (g_window->isVisible && g_isProgramLooping)					// If Window Is Not Visible
 					{						
 						Draw();
 
@@ -1018,13 +906,15 @@ void GLProc()
 				
 			}														// Loop While isMessagePumpActive == TRUE
 																	//}															// If (Initialize (...
-			LOG_INFO__("g_window && gl_isMessagePumpActive == false");
+			
 			//DestroyWindowGL(g_vpControl->hWnd, g_vpControl->hDC, g_vpControl->hRC);															// Application Is Finished
 			//DestroyWindowGL(g_Minimap->hWnd, g_Minimap->hDC, g_Minimap->hRC);
 
 	}																	// While (isProgramLooping)
 
 	LOG_INFO__("gl_isProgramLooping is false, GLProc() exit");
+	g_isProgramLooping = false;
+	return;
 	if (g_window)
 	{
 		g_isProgramLooping = false;

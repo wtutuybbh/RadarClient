@@ -134,6 +134,16 @@ LRESULT CUserInterface::Button_Load(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 	return LRESULT();
 }
 
+LRESULT CUserInterface::Button_CameraReset(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if (VPControl && VPControl->Camera)
+	{
+		VPControl->Camera->Reset();
+	}
+
+	return LRESULT();
+}
+
 LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	const clock_t begin_time = clock();
@@ -833,6 +843,23 @@ LRESULT CUserInterface::Checkbox_MarkupOptions(HWND hwnd, UINT uMsg, WPARAM wPar
 	return LRESULT();
 }
 
+LRESULT CUserInterface::Checkbox_ViewFromTop(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	int ButtonID = LOWORD(wParam);
+	HWND hWnd = GetDlgItem(hwnd, ButtonID);
+	if (VPControl && VPControl->Camera)
+	{
+		if (Button_GetCheck(hWnd)) 
+		{
+			VPControl->Camera->SetPosition(0, 500, 0);		
+			auto dir = VPControl->Camera->GetDirection();
+			VPControl->Camera->SetDirection(0, -1, 0);
+			VPControl->Camera->SetUp(dir.x, dir.y, dir.z);
+		}
+	}
+	return LRESULT();
+}
+
 LRESULT CUserInterface::Checkbox_FixViewToRadar(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int ButtonID = LOWORD(wParam);
@@ -1086,9 +1113,13 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	}
 
 	Elements.insert({ IDD_DIALOG1, new InterfaceElement{ IDD_DIALOG1, NULL, _T("IDD_DIALOG1"), _T("IDD_DIALOG1"), DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::IDD_DIALOG1_Proc } });
-	Elements.insert({ IDC_CHECK1, new InterfaceElement{ IDC_CHECK1, NULL, _T("IDC_CHECK1"), _T("IDC_CHECK1"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_FixViewToRadar } });		
+	Elements.insert({ IDC_CHECK1, new InterfaceElement{ IDC_CHECK1, NULL, _T("IDC_CHECK1"), _T("IDC_CHECK1"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_FixViewToRadar } });
+	Elements.insert({ IDC_CHECK_VIEW_FROM_TOP, new InterfaceElement{ IDC_CHECK_VIEW_FROM_TOP, NULL, _T("IDC_CHECK_VIEW_FROM_TOP"), _T("IDC_CHECK_VIEW_FROM_TOP"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_ViewFromTop } });
 	Elements.insert({ IDC_CHECK2, new InterfaceElement{ IDC_CHECK2, NULL, _T("IDC_CHECK2"), _T("IDC_CHECK2"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_MeasureDistance } });
-	Elements.insert({ IDC_BUTTON_CONNECT, new InterfaceElement{ IDC_BUTTON_CONNECT, NULL, _T("IDC_BUTTON_CONNECT"), _T("IDC_BUTTON_CONNECT"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Button_Connect } });
+
+	
+		Elements.insert({ IDC_BUTTON_CONNECT, new InterfaceElement{ IDC_BUTTON_CONNECT, NULL, _T("IDC_BUTTON_CONNECT"), _T("IDC_BUTTON_CONNECT"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Button_Connect } });
+	Elements.insert({ IDC_BUTTON_CAMERA_RESET, new InterfaceElement{ IDC_BUTTON_CAMERA_RESET, NULL, _T("IDC_BUTTON_CAMERA_RESET"), _T("IDC_BUTTON_CAMERA_RESET"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Button_CameraReset } });
 	/*BtnColors_ID = InsertElement(NULL, _T("BUTTON"), _T("Цвета"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X, CurrentY, ControlWidth / 2, ButtonHeight, &CUserInterface::Button_Colors);
 	BtnLoad_ID = InsertElement(NULL, _T("BUTTON"), _T("Загр. карту"), WS_TABSTOP | WS_VISIBLE | WS_CHILD, Column3X + ControlWidth / 2 + Column1X / 2, CurrentY, ControlWidth / 4 * 3, ButtonHeight, &CUserInterface::Button_Load);
 	*/
@@ -1175,7 +1206,12 @@ bool CUserInterface::GetCheckboxState_MarkupLines()
 
 bool CUserInterface::GetCheckboxState_MarkupLabels()
 {
-	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK10));
+	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK10)); 
+}
+
+bool CUserInterface::GetCheckboxState_ViewFromTop()
+{
+	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK_VIEW_FROM_TOP));
 }
 
 bool CUserInterface::GetCheckboxState(int id)
