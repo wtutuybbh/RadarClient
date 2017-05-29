@@ -9,6 +9,7 @@
 #define CSceneRefreshSector_Log true
 #define CScene_Destructor_Log true
 
+#define CRCSocket_Constructor_Log false
 #define CRCSocketReadLogEnabled  false
 #define CRCSocketPostDataLogEnabled  false
 

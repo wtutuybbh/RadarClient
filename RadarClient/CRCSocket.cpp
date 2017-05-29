@@ -11,31 +11,11 @@
 
 const std::string CRCSocket::requestID = "CRCSocket";
 
-CRCSocket::CRCSocket(HWND hWnd)
+CRCSocket::CRCSocket()
 {
-	string context = "CRCSocket::CRCSocket";
-	LOG_INFO(requestID, context, (boost::format("Start... hWnd=%1%") % hWnd).str().c_str());
-
-	this->hWnd = hWnd;
-	OnceClosed = false;
-
-
-	this->info_p = nullptr;
-	this->info_i = nullptr;
-
-	this->pts = nullptr;
-	this->s_rdrinit = nullptr;
+	if (CRCSocket_Constructor_Log) LOG_INFO("CRCSocket", "CRCSocket", (boost::format("Start... hWnd=%1%") % hWnd).str().c_str());
 
 	hole = new char[TXRXBUFSIZE];
-
-
-	s_rdrinit = nullptr;
-
-	client = nullptr;
-
-	PointOK = TrackOK = ImageOK = false;
-
-	Init();
 }
 
 
@@ -67,8 +47,9 @@ CRCSocket::~CRCSocket()
 		delete CurrentPosition;
 }
 
-void CRCSocket::Init()
+void CRCSocket::Init(HWND hwnd)
 {
+	hWnd = hwnd;
 	string context = "CRCSocket::Init()";
 	LOG_INFO(requestID, context, "Start");
 
@@ -138,7 +119,7 @@ int CRCSocket::Connect()
 	// Attempt to connect to server
 	if (OnceClosed) {
 		LOG_INFO(requestID, context, "Socket was once closed, need to run Init()...");
-		Init();
+		Init(hWnd);
 		OnceClosed = false;
 	}
 

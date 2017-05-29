@@ -63,6 +63,7 @@ bool hasVAO = true;
 int g_nCmdShow;
 
 std::thread *gl_thread = nullptr;
+std::thread *so_thread = nullptr;
 
 void TerminateApplication()							// Terminate The Application
 {
@@ -288,12 +289,14 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		
 
-		g_Socket = new CRCSocket(hWnd);
+		g_Socket = new CRCSocket();
 		
-		g_Socket->Connect();
+		
+
+		
 				
 		g_UI = new CUserInterface(hWnd, g_vpControl, g_Socket, PANEL_WIDTH);
-		g_Minimap->Add(hWnd, 0, 0, g_UI->MinimapSize, g_UI->MinimapSize);
+		g_Minimap->Add(hWnd, 0, 0, PANEL_WIDTH - 30, PANEL_WIDTH - 30);
 		g_Minimap->Id = MiniMap;
 
 		if (!g_Minimap->InitGL()) {
@@ -320,12 +323,13 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 #ifdef _DEBUG
 		g_Minimap->dwi = &g_dwi;
-		g_UI->dwi = &g_dwi;
-		g_Socket->dwi = &g_dwi;
+		//g_UI->dwi = &g_dwi;
+		//g_Socket->dwi = &g_dwi;
 #endif // _DEBUG
 
 		wglMakeCurrent(nullptr, nullptr);
-		
+
+		so_thread = new std::thread(SocketMain);
 
 		LOG_INFO(requestID, context, "WM_CREATE: End");
 	}
@@ -415,99 +419,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 	}
 						break;
-	case WM_SOCKET: {
-		if (WsaAsyncEvents_Log) LOG_INFO("WsaAsyncEvents_Log", "WM_SOCKET", "lParam=%d, wParam=%d");
-		if (WSAGETSELECTERROR(lParam))
-		{
-			/*MessageBox(hWnd,
-				"Connection to server failed",
-				"Error",
-				MB_OK | MB_ICONERROR);
-			SendMessage(hWnd, WM_DESTROY, NULL, NULL);*/
-			LOG_ERROR__("Connection to server failed");
-			break;
-		}
-		switch (WSAGETSELECTEVENT(lParam)) 
-		{
-		case FD_READ:
-			if (g_Socket && g_isProgramLooping) //g_isMessagePumpActive - workaround because of crash
-			{
-				g_Socket->Read();
-			}
-			break;
 
-		case FD_CLOSE:
-			if (g_Socket)
-			{
-				g_Socket->Close();
-			}
-			break;
-		case FD_CONNECT:
-			if (g_Socket)
-			{
-				LOG_INFO__("CONNECT OK");
-			}
-			break;
-		}
-
-	}
-		break;
-	case CM_POSTDATA: {
-		unsigned int msg=-1;
-		if (g_Socket)
-			msg = g_Socket->PostData(wParam, lParam);
-		//g_vpControl->MakeCurrent();
-		
-		if (g_vpControl && g_vpControl->Scene) {
-			if (g_vpControl->Scene && !g_vpControl->Scene->Initialized && g_Socket->s_rdrinit)
-			{
-				g_vpControl->Scene->Init(g_Socket->s_rdrinit);
-			}
-			auto tmpbuf = (char *)wParam;
-			switch (msg) 
-			{
-				
-				case MSG_RPOINTS: 
-				{
-					g_vpControl->Scene->RefreshSectorAsync(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit, tmpbuf);
-				}
-				break;
-				case MSG_OBJTRK:
-				{
-					g_vpControl->Scene->RefreshTracks(&g_Socket->Tracks);
-					tmpbuf ? delete tmpbuf : 0;
-				}
-				break;
-				case MSG_RIMAGE:
-				{
-					g_vpControl->Scene->RefreshImages(g_Socket->info_i, g_Socket->pixels, g_Socket->s_rdrinit);
-					tmpbuf ? delete tmpbuf : 0;
-				}
-				break;
-				case MSG_INIT:
-				{
-					tmpbuf ? delete tmpbuf : 0;
-				}
-				break;
-				default:
-					tmpbuf ? delete tmpbuf : 0;
-					break;
-			}
-		}
-		if (g_UI) {
-			g_UI->FillGrid(&g_Socket->Tracks);
-		}
-
-		
-	}
-	break;
-	case CM_CONNECT: {
-		if (g_UI) {
-			g_UI->ConnectionStateChanged(wParam);
-			g_UI->FillInfoGrid(g_vpControl->Scene);
-		}
-	}
-	break;
 	}
 
 
@@ -733,7 +645,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						gl_thread->join();
 					}
 					delete gl_thread;
-				}// Loop While isMessagePumpActive == TRUE
+				}
+				if (so_thread)
+				{
+					if (so_thread->joinable())
+					{
+						so_thread->join();
+					}
+					delete so_thread;
+				}
 				LOG_INFO__("g_window && g_isMessagePumpActive == FALSE");
 			//}															// If (Initialize (...
 
@@ -922,6 +842,172 @@ void GLProc()
 	}
 	//LOG_INFO__("gl_isProgramLooping is false, GLProc() exit, thread::id=%d", std::this_thread::get_id());
 	//Deinitialize();
+}
+LRESULT CALLBACK SocketProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	//LOG_INFO("SocketProc", "SocketProc", "hWnd=%d, uMsg=%d, wParam=%d, lParam=%d", hWnd, uMsg, wParam, lParam);
+	switch (uMsg)														// Evaluate Window Message
+	{
+	case WM_CREATE:
+		g_Socket->Init(hWnd);
+		g_Socket->Connect();
+		break;
+	case WM_SOCKET: {
+		if (WsaAsyncEvents_Log) LOG_INFO("WsaAsyncEvents_Log", "WM_SOCKET", "lParam=%d, wParam=%d");
+		if (WSAGETSELECTERROR(lParam))
+		{
+			LOG_ERROR("SocketProc", "WM_SOCKET", "WSAGETSELECTERROR(lParam)=%d", WSAGETSELECTERROR(lParam));
+			break;
+		}
+		switch (WSAGETSELECTEVENT(lParam))
+		{
+		case FD_READ:
+			if (g_Socket && g_isProgramLooping) //g_isMessagePumpActive - workaround because of crash
+			{
+				g_Socket->Read();
+			}
+			break;
+
+		case FD_CLOSE:
+			if (g_Socket)
+			{
+				g_Socket->Close();
+			}
+			break;
+		case FD_CONNECT:
+			if (g_Socket)
+			{
+				LOG_INFO("SocketProc", "WM_SOCKET", "FD_CONNECT");
+			}
+			break;
+		}
+
+	}
+					break;
+	case CM_POSTDATA: {
+		unsigned int msg = -1;
+		if (g_Socket)
+			msg = g_Socket->PostData(wParam, lParam);
+		//g_vpControl->MakeCurrent();
+
+		if (g_vpControl && g_vpControl->Scene) {
+			if (g_vpControl->Scene && !g_vpControl->Scene->Initialized && g_Socket->s_rdrinit)
+			{
+				g_vpControl->Scene->Init(g_Socket->s_rdrinit);
+			}
+			auto tmpbuf = (char *)wParam;
+			switch (msg)
+			{
+
+			case MSG_RPOINTS:
+			{
+				g_vpControl->Scene->RefreshSectorAsync(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit, tmpbuf);
+			}
+			break;
+			case MSG_OBJTRK:
+			{
+				g_vpControl->Scene->RefreshTracks(&g_Socket->Tracks);
+				tmpbuf ? delete tmpbuf : 0;
+			}
+			break;
+			case MSG_RIMAGE:
+			{
+				g_vpControl->Scene->RefreshImages(g_Socket->info_i, g_Socket->pixels, g_Socket->s_rdrinit);
+				tmpbuf ? delete tmpbuf : 0;
+			}
+			break;
+			case MSG_INIT:
+			{
+				tmpbuf ? delete tmpbuf : 0;
+			}
+			break;
+			default:
+				tmpbuf ? delete tmpbuf : 0;
+				break;
+			}
+		}
+		if (g_UI) {
+			g_UI->FillGrid(&g_Socket->Tracks);
+		}
+
+
+	}
+					  break;
+	case CM_CONNECT: {
+		if (g_UI) {
+			g_UI->ConnectionStateChanged(wParam);
+			g_UI->FillInfoGrid(g_vpControl->Scene);
+		}
+	}
+					 break;
+	}
+	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+void SocketMain()
+{
+	MSG msg;
+	BOOL bRet;
+	WNDCLASS wc;
+	
+
+	// Register the window class for the main window. 
+
+
+		wc.style = 0;
+		wc.lpfnWndProc = (WNDPROC)SocketProc;
+		wc.cbClsExtra = 0;
+		wc.cbWndExtra = 0;
+		wc.hInstance = GetModuleHandle(NULL);
+		wc.hIcon = LoadIcon((HINSTANCE)NULL,
+			IDI_APPLICATION);
+		wc.hCursor = LoadCursor((HINSTANCE)NULL,
+			IDC_ARROW);
+		wc.hbrBackground = (HBRUSH)(COLOR_MENU + 1);
+		wc.lpszMenuName = TEXT("SocketMainMenu");
+		wc.lpszClassName = TEXT("SocketMainWndClass");
+
+		if (!RegisterClass(&wc))
+			return;
+
+
+	auto hinst = GetModuleHandle(NULL);  // save instance handle 
+
+						// Create the main window. 
+
+	auto hwndMain = CreateWindow(TEXT("SocketMainWndClass"), TEXT("Sample"),
+		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+		CW_USEDEFAULT, CW_USEDEFAULT, (HWND)NULL,
+		(HMENU)NULL, hinst, (LPVOID)NULL);
+
+	// If the main window cannot be created, terminate 
+	// the application. 
+
+	if (!hwndMain)
+		return;
+
+	// Show the window and paint its contents. 
+
+	//ShowWindow(hwndMain, true);
+	//UpdateWindow(hwndMain);
+
+	// Start the message loop. 
+
+	while ((bRet = GetMessage(&msg, NULL, 0, 0)) != 0 && gl_isProgramLooping)
+	{
+		if (bRet == -1)
+		{
+			// handle the error and possibly exit
+		}
+		else
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+
+	// Return the exit code to the system. 
+
+	return;
 }
 
 void LookAtCallback_(double eyex, double eyey, double eyez, double centerx, double centery, double centerz, double upx, double upy, double upz)

@@ -123,7 +123,7 @@ private:
 	static RECT settings_dialog_rect_;
 	static float rclick_value;
 
-
+	virtual LRESULT Checkbox_Points(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	virtual LRESULT Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -131,6 +131,7 @@ private:
 	virtual LRESULT Checkbox_FixViewToRadar(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_ViewFromTop(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MeasureDistance(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	
 	virtual LRESULT RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapType(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_BlindZones(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -152,6 +153,22 @@ private:
 	static std::vector<tstring> distancesSettings;
 	static std::vector<tstring> anglesSettings;
 	static std::vector<tstring> crimagecolorSettings;
+
+	static bool _checkboxState_Points;
+	static bool _checkboxState_PointsFadeout;
+
+	static bool _checkboxState_Tracks;
+	static bool _checkboxState_TracksFadeout;
+
+	static bool _checkboxState_Images;
+	static bool _checkboxState_ImagesFadeout;
+
+	static bool _checkboxState_Map;
+	static bool _checkboxState_BlindZones;
+	static bool _checkboxState_AltitudeMap;
+	static bool _checkboxState_MarkupLines;
+	static bool _checkboxState_MarkupLabels;
+	static bool _checkboxState_ViewFromTop;
 public:
 	int MinimapSize;
 	static HWND ParentHWND;

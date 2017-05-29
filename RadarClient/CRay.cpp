@@ -14,11 +14,11 @@ CRay::CRay(float rayWidth, float maxDist, float y_0) : CMarkup(glm::vec4(0, y_0,
 	MPPh = CSettings::GetFloat(FloatMPPh);
 	MPPv = CSettings::GetFloat(FloatMPPv);
 
-	vbo.insert_or_assign(Main, new C3DObjectVBO(false));
-	vbo.insert_or_assign(MiniMap, new C3DObjectVBO(false));
+	//vbo.insert_or_assign(Main, new C3DObjectVBO(false));
+	//vbo.insert_or_assign(MiniMap, new C3DObjectVBO(false));
 
-	prog.insert_or_assign(Main, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
-	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
+	//prog.insert_or_assign(Main, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
+	//prog.insert_or_assign(MiniMap, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
 
 	vertices = std::make_shared<C3DObjectVertices>(3);
 	vertices.get()->SetValues(0, glm::vec4(0, y_0, 0, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 1), glm::vec2(1, 0));

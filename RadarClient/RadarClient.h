@@ -50,6 +50,7 @@ void Update(DWORD milliseconds);					// Perform Motion Updates
 void Draw(void);									// Perform All Your Scene Drawing
 
 void GLProc();
+void SocketMain();
 //typedef glm::tvec3<GLdouble, glm::precision::defaultp> 
 
 void LookAtCallback_(double eyex, double eyey, double eyez, double centerx, double centery, double centerz, double upx, double upy, double upz);

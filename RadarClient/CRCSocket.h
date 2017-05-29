@@ -233,7 +233,7 @@ class CRCSocket
 {
 
 
-	bool OnceClosed;
+	bool OnceClosed{ false };
 	char *hole{ nullptr };
 	int LENDATAOTOBR{ 1 };
 	bool test_sh(struct _sh *ptr);
@@ -241,13 +241,13 @@ public:
 	static const std::string requestID;
 
 	bool Initialized{ false };
-	bool PointOK, TrackOK, ImageOK;
+	bool PointOK{ false }, TrackOK{ false }, ImageOK{ false };
 	vector<TRK*> Tracks;
 	vector<TRK*> trak;
-	float MMAXP;
-	int IDX, NumViewSct;
+	float MMAXP {0.0f};
+	int IDX{ 0 }, NumViewSct{0};
 	//used when receiving data:
-	std::string ErrorText;
+	std::string ErrorText {std::string()};
 	WSADATA WsaDat;
 	SOCKET Socket;
 	struct hostent *host{ nullptr };
@@ -276,12 +276,12 @@ public:
 	float Max_Amp, Min_Amp;
 	int b1, b2;
 
-	CRCSocket(HWND hWnd);
+	CRCSocket();
 	~CRCSocket();
 
 	bool IsConnected;
 
-	void Init();
+	void Init(HWND hWnd);
 	int Connect();
 
 
