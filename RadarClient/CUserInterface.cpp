@@ -43,6 +43,7 @@ bool CUserInterface::_checkboxState_AltitudeMap = false;
 bool CUserInterface::_checkboxState_MarkupLines = true;
 bool CUserInterface::_checkboxState_MarkupLabels = true;
 bool CUserInterface::_checkboxState_ViewFromTop = false;
+bool CUserInterface::_checkboxState_MeasureDistance = false;
 
 LRESULT Button1_Proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	return 0;
@@ -849,6 +850,48 @@ LRESULT CUserInterface::Checkbox_Points(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 	return LRESULT();
 }
 
+LRESULT CUserInterface::Checkbox_PointsFadeout(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	_checkboxState_PointsFadeout = GetCheckboxState(LOWORD(wParam));
+	return LRESULT();
+}
+
+LRESULT CUserInterface::Checkbox_Tracks(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	_checkboxState_Tracks = GetCheckboxState(LOWORD(wParam));
+	return LRESULT();
+}
+
+LRESULT CUserInterface::Checkbox_TracksFadeout(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	_checkboxState_TracksFadeout = GetCheckboxState(LOWORD(wParam));
+	return LRESULT();
+}
+
+LRESULT CUserInterface::Checkbox_Images(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	_checkboxState_Images = GetCheckboxState(LOWORD(wParam));
+	return LRESULT();
+}
+
+LRESULT CUserInterface::Checkbox_ImagesFadeout(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	_checkboxState_ImagesFadeout = GetCheckboxState(LOWORD(wParam));
+	return LRESULT();
+}
+
+LRESULT CUserInterface::Checkbox_AltitudeMap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	_checkboxState_AltitudeMap = GetCheckboxState(LOWORD(wParam));
+	return LRESULT();
+}
+
+LRESULT CUserInterface::Checkbox_Map(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	_checkboxState_Map = GetCheckboxState(LOWORD(wParam));
+	return LRESULT();
+}
+
 LRESULT CUserInterface::Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// points, tracks, rli's...
@@ -893,11 +936,11 @@ LRESULT CUserInterface::Checkbox_FixViewToRadar(HWND hwnd, UINT uMsg, WPARAM wPa
 
 LRESULT CUserInterface::Checkbox_MeasureDistance(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	_checkboxState_MeasureDistance = GetCheckboxState(LOWORD(wParam));
 	if (Scene) 
 	{
-		int ButtonID = LOWORD(wParam);
-		HWND hWnd = GetDlgItem(hwnd, ButtonID);
-		if (!Button_GetCheck(hWnd))
+		
+		if (!_checkboxState_MeasureDistance)
 		{
 			Scene->ClearMeasure();
 			FillInfoGrid(Scene);
@@ -942,17 +985,19 @@ LRESULT CUserInterface::Checkbox_MapType(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 
 LRESULT CUserInterface::Checkbox_BlindZones(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	int ButtonID = LOWORD(wParam);
-	HWND hWnd = GetDlgItem(hwnd, ButtonID);
-	int Checked = !Button_GetCheck(hWnd);
-	SendMessage(hWnd, BM_SETCHECK, Checked, 0);
-	if (VPControl && VPControl->Camera)
-	{
-		if (ButtonID == MapType_ID[0]) { // Map
-			VPControl->DisplayMap = Checked;
-		}
-	}
+	_checkboxState_BlindZones = GetCheckboxState(LOWORD(wParam));
 	return LRESULT();
+}
+
+LRESULT CUserInterface::Checkbox_MarkupLines(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	_checkboxState_MarkupLines = GetCheckboxState(LOWORD(wParam));
+	return LRESULT();
+}
+
+LRESULT CUserInterface::Checkbox_MarkupLabels(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	_checkboxState_MarkupLabels = GetCheckboxState(LOWORD(wParam));
 	return LRESULT();
 }
 
@@ -1140,6 +1185,19 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	Elements.insert({ IDC_CHECK2, new InterfaceElement{ IDC_CHECK2, NULL, _T("IDC_CHECK2"), _T("IDC_CHECK2"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_MeasureDistance } });
 	
 	Elements.insert({ IDC_CHECK3, new InterfaceElement{ IDC_CHECK3, NULL, _T("IDC_CHECK3"), _T("IDC_CHECK3"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_Points } });
+	Elements.insert({ IDC_CHECK_RPOINT_FADEOUT, new InterfaceElement{ IDC_CHECK_RPOINT_FADEOUT, NULL, _T("IDC_CHECK_RPOINT_FADEOUT"), _T("IDC_CHECK_RPOINT_FADEOUT"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_PointsFadeout } });
+
+	Elements.insert({ IDC_CHECK4, new InterfaceElement{ IDC_CHECK4, NULL, _T("IDC_CHECK4"), _T("IDC_CHECK4"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_Tracks } });
+	Elements.insert({ IDC_CHECK_RDRTRACK_FADEOUT, new InterfaceElement{ IDC_CHECK_RDRTRACK_FADEOUT, NULL, _T("IDC_CHECK_RDRTRACK_FADEOUT"), _T("IDC_CHECK_RDRTRACK_FADEOUT"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_TracksFadeout } });
+
+	Elements.insert({ IDC_CHECK5, new InterfaceElement{ IDC_CHECK5, NULL, _T("IDC_CHECK5"), _T("IDC_CHECK5"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_Images} });
+	Elements.insert({ IDC_CHECK_RIMAGE_FADEOUT, new InterfaceElement{ IDC_CHECK_RIMAGE_FADEOUT, NULL, _T("IDC_CHECK_RIMAGE_FADEOUT"), _T("IDC_CHECK_RIMAGE_FADEOUT"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_ImagesFadeout } });
+
+	Elements.insert({ IDC_CHECK6, new InterfaceElement{ IDC_CHECK6, NULL, _T("IDC_CHECK6"), _T("IDC_CHECK6"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_AltitudeMap } });
+	Elements.insert({ IDC_CHECK7, new InterfaceElement{ IDC_CHECK7, NULL, _T("IDC_CHECK7"), _T("IDC_CHECK7"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_Map } });
+	Elements.insert({ IDC_CHECK8, new InterfaceElement{ IDC_CHECK8, NULL, _T("IDC_CHECK8"), _T("IDC_CHECK8"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_BlindZones } });
+	Elements.insert({ IDC_CHECK9, new InterfaceElement{ IDC_CHECK9, NULL, _T("IDC_CHECK9"), _T("IDC_CHECK9"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_MarkupLines } });
+	Elements.insert({ IDC_CHECK10, new InterfaceElement{ IDC_CHECK10, NULL, _T("IDC_CHECK10"), _T("IDC_CHECK10"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Checkbox_MarkupLabels } });
 
 	Elements.insert({ IDC_BUTTON_CONNECT, new InterfaceElement{ IDC_BUTTON_CONNECT, NULL, _T("IDC_BUTTON_CONNECT"), _T("IDC_BUTTON_CONNECT"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Button_Connect } });
 	Elements.insert({ IDC_BUTTON_CAMERA_RESET, new InterfaceElement{ IDC_BUTTON_CAMERA_RESET, NULL, _T("IDC_BUTTON_CAMERA_RESET"), _T("IDC_BUTTON_CAMERA_RESET"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Button_CameraReset } });
@@ -1209,32 +1267,32 @@ void CUserInterface::ConnectionStateChanged(bool IsConnected) const
 
 bool CUserInterface::GetCheckboxState_Map()
 {
-	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK7));
+	return _checkboxState_Map;
 }
 
 bool CUserInterface::GetCheckboxState_BlindZones()
 {
-	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK8));
+	return _checkboxState_BlindZones;
 }
 
 bool CUserInterface::GetCheckboxState_AltitudeMap()
 {
-	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK6));
+	return _checkboxState_AltitudeMap;
 }
 
 bool CUserInterface::GetCheckboxState_MarkupLines()
 {
-	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK9));
+	return _checkboxState_MarkupLines;
 }
 
 bool CUserInterface::GetCheckboxState_MarkupLabels()
 {
-	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK10)); 
+	return _checkboxState_MarkupLabels; 
 }
 
 bool CUserInterface::GetCheckboxState_ViewFromTop()
 {
-	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK_VIEW_FROM_TOP));
+	return _checkboxState_ViewFromTop;
 }
 
 bool CUserInterface::GetCheckboxState(int id)
@@ -1249,27 +1307,27 @@ bool CUserInterface::GetCheckboxState_Points()
 
 bool CUserInterface::GetCheckboxState_PointsFadeout()
 {
-	return GetCheckboxState(IDC_CHECK_RPOINT_FADEOUT);
+	return _checkboxState_PointsFadeout;
 }
 
 bool CUserInterface::GetCheckboxState_Tracks()
 {
-	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK4));
+	return _checkboxState_Tracks;
 }
 
 bool CUserInterface::GetCheckboxState_TracksFadeout()
 {
-	return GetCheckboxState(IDC_CHECK_RDRTRACK_FADEOUT);
+	return _checkboxState_TracksFadeout;
 }
 
 bool CUserInterface::GetCheckboxState_Images()
 {
-	return Button_GetCheck(GetDlgItem(ToolboxHWND, IDC_CHECK5));
+	return _checkboxState_Images;
 }
 
 bool CUserInterface::GetCheckboxState_ImagesFadeout()
 {
-	return GetCheckboxState(IDC_CHECK_RIMAGE_FADEOUT);
+	return _checkboxState_ImagesFadeout;
 }
 
 int CUserInterface::GetTrackbarValue_VTilt()
@@ -1300,7 +1358,7 @@ void CUserInterface::SetTrackbarValue_VTilt(int val)
 
 void CUserInterface::SetTrackbarValue_Turn(int val)
 {
-	SendMessage(GetDlgItem(ParentHWND, CameraDirection_ID[1]), TBM_SETPOS, 1, val);
+	PostMessage(GetDlgItem(ParentHWND, CameraDirection_ID[1]), TBM_SETPOS, 1, val);
 }
 
 void CUserInterface::SetTrackbarValue(int id, int val) const
@@ -1528,8 +1586,7 @@ void CUserInterface::FillInfoGrid(CScene* scene)
 
 bool CUserInterface::MeasureDistance() const
 {
-	HWND hWnd = GetDlgItem(ToolboxHWND, IDC_CHECK2);
-	return Button_GetCheck(hWnd);
+	return _checkboxState_MeasureDistance;
 }
 
 int CUserInterface::GetMainTableMode() const
@@ -1548,13 +1605,15 @@ void CUserInterface::OnInitDialog()
 	Trackbar_BegAzm_SetText(ToolboxHWND, IDC_STATIC6);
 	Trackbar_ZeroElevation_SetText(ToolboxHWND, IDC_STATIC7);
 
-	SetChecked(ToolboxHWND, IDC_CHECK3, _checkboxState_Points);
+	SetChecked(ToolboxHWND, IDC_CHECK2, _checkboxState_MeasureDistance);
+	SetChecked(ToolboxHWND, IDC_CHECK3, _checkboxState_Points);	
 	SetChecked(ToolboxHWND, IDC_CHECK4, _checkboxState_Tracks);
 	SetChecked(ToolboxHWND, IDC_CHECK5, _checkboxState_Images);
 	SetChecked(ToolboxHWND, IDC_CHECK6, _checkboxState_AltitudeMap);
-	SetChecked(ToolboxHWND, IDC_CHECK7, true);
-	SetChecked(ToolboxHWND, IDC_CHECK9, true);
-	SetChecked(ToolboxHWND, IDC_CHECK10, true);
+	SetChecked(ToolboxHWND, IDC_CHECK7, _checkboxState_Map);
+	SetChecked(ToolboxHWND, IDC_CHECK8, _checkboxState_BlindZones);
+	SetChecked(ToolboxHWND, IDC_CHECK9, _checkboxState_MarkupLines);
+	SetChecked(ToolboxHWND, IDC_CHECK10, _checkboxState_MarkupLabels);
 
 	SetDoubleValue(GetDlgItem(ToolboxHWND, IDC_EDIT_LON), CSettings::GetFloat(FloatPositionLon));
 	SetDoubleValue(GetDlgItem(ToolboxHWND, IDC_EDIT_LAT), CSettings::GetFloat(FloatPositionLat));

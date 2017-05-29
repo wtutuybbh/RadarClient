@@ -124,6 +124,19 @@ private:
 	static float rclick_value;
 
 	virtual LRESULT Checkbox_Points(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_PointsFadeout(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_Tracks(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_TracksFadeout(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_Images(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_ImagesFadeout(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	virtual LRESULT Checkbox_AltitudeMap(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_Map(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_BlindZones(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	virtual LRESULT Checkbox_MarkupLines(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT Checkbox_MarkupLabels(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
 
 	virtual LRESULT Checkbox_ObjOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapOptions(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -134,7 +147,6 @@ private:
 	
 	virtual LRESULT RadioGroup_CameraPosition(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Checkbox_MapType(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual LRESULT Checkbox_BlindZones(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Trackbar_CameraDirection_VTilt(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Trackbar_CameraDirection_Turn(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT Trackbar_BegAzm(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -169,6 +181,8 @@ private:
 	static bool _checkboxState_MarkupLines;
 	static bool _checkboxState_MarkupLabels;
 	static bool _checkboxState_ViewFromTop;
+
+	static bool _checkboxState_MeasureDistance;
 public:
 	int MinimapSize;
 	static HWND ParentHWND;

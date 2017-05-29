@@ -60,7 +60,7 @@ void CViewPortControl::Draw()
 LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	short fwKeys, zDelta;
-
+	int x, y;
 	switch (uMsg) {
 
 	case WM_PAINT:
@@ -121,8 +121,8 @@ LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wPara
 		/*std::string context = "CViewPortControl::ViewPortControlProc:WM_LBUTTONDOWN";
 		LOG_INFO(requestID, context, (boost::format("Start... hwnd=%1%, uMsg=%2%, wParam=%3%, lParam=%4%; x=LOWORD(lParam)=%5%, y=HIWORD(lParam)=%6%") 
 			% hwnd % uMsg % wParam % lParam % LOWORD(lParam) % HIWORD(lParam)).str());*/
-		int x = LOWORD(lParam);
-		int y = HIWORD(lParam);
+		x = LOWORD(lParam);
+		y = HIWORD(lParam);
 		SetFocus(hwnd);
 		if (Scene && Camera && UI) {
 			Camera->startPosition.x = x;
@@ -138,21 +138,27 @@ LRESULT CViewPortControl::ViewPortControlProc(HWND hwnd, UINT uMsg, WPARAM wPara
 			}
 			else
 			{
-				C3DObjectModel* o = Get3DObject(LOWORD(lParam), HIWORD(lParam));
-
-				if (o)
-				{
-					o->SetGeoCoords(Scene->GetGeographicCoordinates(o->GetCartesianCoords()));
-					Scene->PushSelection(o);
-				}
-				else
-				{
-					Scene->ClearSelection();
-				}
+				
 			}
 			UI->FillInfoGrid(Scene);									
 		}
 
+		break;
+	case BM_CLICK: 
+		if (Scene && Camera && UI && !UI->MeasureDistance())
+		{
+			C3DObjectModel* o = Get3DObject(LOWORD(lParam), HIWORD(lParam));
+
+			if (o)
+			{
+				o->SetGeoCoords(Scene->GetGeographicCoordinates(o->GetCartesianCoords()));
+				Scene->PushSelection(o);
+			}
+			else
+			{
+				Scene->ClearSelection();
+			}
+		}
 		break;
 	}
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
