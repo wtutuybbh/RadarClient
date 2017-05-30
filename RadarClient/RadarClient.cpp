@@ -845,7 +845,7 @@ void GLProc()
 }
 LRESULT CALLBACK SocketProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	//LOG_INFO("SocketProc", "SocketProc", "hWnd=%d, uMsg=%d, wParam=%d, lParam=%d", hWnd, uMsg, wParam, lParam);
+	LOG_INFO("SocketProc", "SocketProc", "hWnd=%d, uMsg=%d, wParam=%d, lParam=%d", hWnd, uMsg, wParam, lParam);
 	switch (uMsg)														// Evaluate Window Message
 	{
 	case WM_CREATE:
@@ -901,7 +901,8 @@ LRESULT CALLBACK SocketProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			case MSG_RPOINTS:
 			{
-				g_vpControl->Scene->RefreshSectorAsync(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit, tmpbuf);
+				g_vpControl->Scene->RefreshSector(g_Socket->info_p, g_Socket->pts, g_Socket->s_rdrinit);
+				tmpbuf ? delete tmpbuf : 0;
 			}
 			break;
 			case MSG_OBJTRK:
@@ -992,8 +993,11 @@ void SocketMain()
 
 	// Start the message loop. 
 
+	//
+	if (SocketWindow_Log) LOG_INFO("SocketWindow_Log", "SocketMain", "START");
 	while ((bRet = GetMessage(&msg, NULL, 0, 0)) != 0 && gl_isProgramLooping)
 	{
+		if (SocketWindow_Log) LOG_INFO("SocketWindow_Log", "SocketMain", "lParam=%d, wParam=%d", msg.lParam, msg.wParam);
 		if (bRet == -1)
 		{
 			// handle the error and possibly exit
@@ -1004,6 +1008,7 @@ void SocketMain()
 			DispatchMessage(&msg);
 		}
 	}
+	if (SocketWindow_Log) LOG_INFO("SocketWindow_Log", "SocketMain", "END");
 
 	// Return the exit code to the system. 
 

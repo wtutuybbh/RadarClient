@@ -46,6 +46,16 @@ void CRImageSet::SetAlphaBehaviour(AlphaBehaviour ab)
 	}
 }
 
+void CRImageSet::SetRotateMatrix(glm::mat4 m)
+{
+	if (Images) {
+		for (auto it = Images->begin(); it != Images->end(); ++it)
+		{
+			(*it)->SetRotateMatrix(m);
+		}
+	}
+}
+
 void CRImageSet::Refresh(glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels)
 {
 	if (!Images)

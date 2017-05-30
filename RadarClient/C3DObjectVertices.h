@@ -13,7 +13,7 @@ public:
 	std::vector<unsigned int> idxIds;
 	unsigned short vertexSize{ 13 };	
 	unsigned int vertexCount{ 0 };
-	bool needsReload{ false };
+	int needsReload{ 0 };
 	int usesCount{ 0 };
 
 	explicit C3DObjectVertices(int vertexCount);

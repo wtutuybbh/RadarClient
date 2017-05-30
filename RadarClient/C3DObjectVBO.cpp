@@ -2,6 +2,7 @@
 #include "C3DObjectVBO.h"
 #include "CRCLogger.h"
 #include "C3DObjectVertices.h"
+#include "Util.h"
 
 const std::string C3DObjectVBO::requestID = "C3DObjectVBO";
 
@@ -66,10 +67,26 @@ void C3DObjectVBO::LoadToGPU()
 
 void C3DObjectVBO::Reload()
 {
+	
+
 	//if (vbuffer == nullptr || vbuffer->size() == 0)
 	if (!vertices || vertices.get()->vertexCount==0)
 	{
 		return;
+	}
+	
+	/// TODO: REMOVE
+	if (id == 1 && vertices->vertexCount == 2)
+	{
+		LOG_INFO("CLineDebug", "C3DObjectVBO::Reload", "id=%d, p0=(%f, %f, %f), p1=(%f, %f, %f)"
+			, id
+			, vertices->vbuffer[0]
+			, vertices->vbuffer[1]
+			, vertices->vbuffer[2]
+			, vertices->vbuffer[13]
+			, vertices->vbuffer[14]
+			, vertices->vbuffer[15]
+		);
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, vboId);
 	glBufferData(GL_ARRAY_BUFFER, vertices.get()->vertexCount * vertices.get()->vertexSize * sizeof(float), vertices.get()->vbuffer, GL_STATIC_DRAW);
@@ -83,7 +100,7 @@ void C3DObjectVBO::Reload()
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertices.get()->idxLengths.at(i) * sizeof(unsigned short), vertices.get()->idxArrays.at(i), GL_STATIC_DRAW);
 		}
 	}
-	vertices.get()->needsReload = false;
+	vertices.get()->needsReload--;
 }
 
 bool C3DObjectVBO::Ready() const

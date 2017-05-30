@@ -43,7 +43,7 @@ void CPath::AddPoint(glm::vec4 point)
 	if (!vbo.at(MiniMap)->vertices)
 		vbo.at(MiniMap)->vertices = vertices;
 
-	vertices.get()->needsReload = true;
+	vertices.get()->needsReload = 2;
 }
 
 void CPath::BindUniforms(CViewPortControl* vpControl)

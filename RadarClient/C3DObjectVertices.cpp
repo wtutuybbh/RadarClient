@@ -179,7 +179,7 @@ void C3DObjectVertices::Translate(glm::vec3 vshift, int place)
 		vbuffer[i * vertexSize + place + 1] += vshift.y;
 		vbuffer[i * vertexSize + place + 2] += vshift.z;
 	}
-	needsReload = true;
+	needsReload = usesCount;
 }
 
 void C3DObjectVertices::ReCreate(int vertexCount)

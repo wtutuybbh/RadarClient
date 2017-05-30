@@ -47,6 +47,8 @@
 
 #define WsaAsyncEvents_Log false
 
+#define SocketWindow_Log true
+
 #ifndef _DEBUG
 
 #define LOG(severity, requestID, context, text, ...)

@@ -80,7 +80,7 @@ void CTrack::Refresh(glm::vec4 origin, float mpph, float mppv, vector<RDRTRACK*>
 		vbuffer[i * vertexSize + 10] = Color.a;
 	}
 
-	vertices.get()->needsReload = true;
+	vertices.get()->needsReload = 2;
 
 	if (!vbo.at(Main)->vertices)
 		vbo.at(Main)->vertices = vertices;
@@ -110,5 +110,5 @@ void CTrack::SelectTrack(int vpId, bool selectState)
 		vbuffer[i * vertexSize + 9] = color.b;
 		vbuffer[i * vertexSize + 10] = color.a;
 	}
-	vertices.get()->needsReload = true;
+	vertices.get()->needsReload = 2;
 }

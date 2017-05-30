@@ -320,13 +320,15 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 		vbo.insert_or_assign(Main, new C3DObjectVBO(clearAfter));
 	}
 	
-	vertices->needsReload = true;
+	
 
 	vbo.at(Main)->vertices = vertices;
 
 	vertices.get()->usesCount++;
 
 	InitMiniMap();
+	
+	vertices->needsReload = 1;
 
 	ready = true;
 
@@ -722,7 +724,7 @@ void CMesh::InitMiniMap()
 
 		v->usesCount = 1;
 	
-		v->needsReload = true;
+		v->needsReload = 1;
 		
 		if (prog.find(MiniMap) == prog.end() || !prog.at(MiniMap)) {
 			C3DObjectProgram *newprog = new C3DObjectProgram("Minimap.v.glsl", "Minimap.f.glsl", "vertex", "texcoor", nullptr, nullptr);

@@ -8,14 +8,14 @@ CLine::CLine(int vpId, glm::vec4 a, glm::vec4 b, LineStyle style)
 {
 	vbo.insert_or_assign(Main, new C3DObjectVBO(false));
 	tex.insert_or_assign(Main, nullptr);
-	prog.insert_or_assign(Main, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
+	prog.insert_or_assign(Main, new C3DObjectProgram("CLine.v.glsl", "CLine.f.glsl", "vertex", nullptr, nullptr, "color"));
 	translateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
 	scaleMatrix.insert_or_assign(Main, glm::mat4(1.0f));
 	rotateMatrix.insert_or_assign(Main, glm::mat4(1.0f));
 
 	vbo.insert_or_assign(MiniMap, new C3DObjectVBO(false));
 	tex.insert_or_assign(MiniMap, nullptr);
-	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CMarkup.v.glsl", "CMarkup.f.glsl", "vertex", nullptr, nullptr, "color"));
+	prog.insert_or_assign(MiniMap, new C3DObjectProgram("CLine.v.glsl", "CLine.f.glsl", "vertex", nullptr, nullptr, "color"));
 	translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 	scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 	rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
@@ -36,6 +36,9 @@ CLine::CLine(int vpId, glm::vec4 a, glm::vec4 b, LineStyle style)
 	vertices.get()->usesCount = 2;
 
 	c3DObjectModel_TypeName = "CLine";
+
+	vbo.at(Main)->id = 1;
+	vbo.at(MiniMap)->id = 2;
 }
 
 void CLine::SetPoints(glm::vec4 a, glm::vec4 b, LineStyle style)
@@ -44,6 +47,6 @@ void CLine::SetPoints(glm::vec4 a, glm::vec4 b, LineStyle style)
 	{
 		vertices.get()->SetValues(0, a, glm::vec3(0, 0, 1), glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
 		vertices.get()->SetValues(1, b, glm::vec3(0, 0, 1), glm::vec4(1, 0, 0, 1), glm::vec2(0, 1));
-		vertices.get()->needsReload = true;
+		vertices.get()->needsReload = vertices.get()->usesCount;
 	}	
 }

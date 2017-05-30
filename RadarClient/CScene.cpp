@@ -116,6 +116,10 @@ CScene::CScene()
 
 	RayVBOisBuilt = VBOisBuilt = MiniMapVBOisBuilt = false;
 
+	auto r = max_range / MPPh;
+	begAzmLine = new CLine(Main, glm::vec4(0, 0, 0, 1), glm::vec4(-r * sin(0), 0, r * cos(0), 1), Simple);
+	begAzmLine->SetName("begAzmLine");
+
 }
 CScene::~CScene() {
 	if (CScene_Destructor_Log) LOG_INFO_("CScene DESTRUCTOR", "ololo");
@@ -600,8 +604,7 @@ void CScene::Init(RDR_INITCL* init)
 	int marksPerCircle = CSettings::GetInt(IntMarkupMarksPerCircle);
 	int r = markDistance * numCircles * marksPerCircle;
 	
-	begAzmLine = new CLine(Main, glm::vec4(0, y_0, 0, 1), glm::vec4(-r * sin(init->begAzm), y_0, r * cos(init->begAzm), 1), Simple);
-	begAzmLine->SetName("begAzmLine");
+	
 
 	minE = init->begElv;
 	maxE = init->begElv + init->dElv * init->Nelv;
@@ -880,19 +883,24 @@ void CScene::DrawBitmaps() const
 
 void CScene::SetBegAzm(double begAzm)
 {
-	if (rdrinit && MeshReady())
+	/*if (rdrinit)
 	{
 		rdrinit->begAzm = begAzm;
-		
-		int markDistance = CSettings::GetInt(IntMarkupMarkDistance);
-		int numCircles = CSettings::GetInt(IntMarkupNumCircles);
-		int marksPerCircle = CSettings::GetInt(IntMarkupMarksPerCircle);
-		int r = markDistance * numCircles * marksPerCircle;
+	}*/
+	auto markDistance = CSettings::GetInt(IntMarkupMarkDistance);
+	auto numCircles = CSettings::GetInt(IntMarkupNumCircles);
+	auto marksPerCircle = CSettings::GetInt(IntMarkupMarksPerCircle);
+	auto mpph = CSettings::GetFloat(FloatMPPh);
+	auto r = float(markDistance * numCircles * marksPerCircle) / mpph;
 
-		if (begAzmLine)
-			begAzmLine->SetPoints(glm::vec4(0, GetY0(), 0, 1), glm::vec4(- r * sin(rdrinit->begAzm), GetY0(), r * cos(rdrinit->begAzm), 1), Simple);
-		else 
-			begAzmLine = new CLine(Main, glm::vec4(0, GetY0(), 0, 1), glm::vec4(- r * sin(rdrinit->begAzm), GetY0(), r * cos(rdrinit->begAzm), 1), Simple);
+	if (begAzmLine) 
+	{
+		begAzmLine->SetPoints(glm::vec4(0, 0, 0, 1), glm::vec4(-r * sin(begAzm), 0, r * cos(begAzm), 1), Simple);
+	}
+	
+	if (ImageSet)
+	{
+		ImageSet->SetRotateMatrix(glm::rotate(float(begAzm), glm::vec3(0, 1, 0)));
 	}
 }
 

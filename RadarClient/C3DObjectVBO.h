@@ -14,8 +14,9 @@ class C3DObjectVBO
 	std::vector<unsigned int> idxIds;
 
 	
-
+	
 public:
+	int id {0};
 	std::shared_ptr<C3DObjectVertices> vertices{ std::shared_ptr<C3DObjectVertices>(nullptr) };
 
 	~C3DObjectVBO();
