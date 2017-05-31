@@ -218,7 +218,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 
 	if (RayObj)
 	{
-		RayObj->Draw(vpControl, GL_TRIANGLES);
+		RayObj->Draw(vpControl, GL_LINES);
 	}
 	
 	if (MeasurePath)
@@ -342,7 +342,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 	
 	if (RayObj)
 	{
-		RayObj->Draw(vpControl, GL_TRIANGLES);
+		RayObj->Draw(vpControl, GL_LINES);
 	}
 	glEnable(GL_PROGRAM_POINT_SIZE);
 
@@ -900,7 +900,15 @@ void CScene::SetBegAzm(double begAzm)
 	
 	if (ImageSet)
 	{
-		ImageSet->SetRotateMatrix(glm::rotate(float(begAzm), glm::vec3(0, 1, 0)));
+		auto rotate = glm::rotate(-float(begAzm), glm::vec3(0, 1, 0));
+		ImageSet->SetRotateMatrix(rotate);
+		for(auto i=0; i< Sectors.size(); i++)
+		{
+			if (Sectors[i])
+			{
+				Sectors[i]->SetRotateMatrix(rotate);
+			}
+		}
 	}
 }
 

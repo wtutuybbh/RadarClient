@@ -55,6 +55,7 @@ CSector::CSector(int index) : C3DObjectModel()
 
 void CSector::Refresh(glm::vec4 origin, float mpph, float mppv, RPOINTS* info_p, RPOINT* pts, RDR_INITCL* init)
 {
+
 	start_tick_ = GetTickCount();
 	std::lock_guard<std::mutex> lock(m);
 	std::string context = "CSector::Refresh";

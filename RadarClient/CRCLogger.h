@@ -16,7 +16,7 @@
 #define CSectorRefreshLogEnabled true
 #define CSector_GetPoint_LogInfo false
 
-#define CRImageSetRefreshLogEnabled false
+#define CRImageSetRefreshLogEnabled true
 #define CRImage_Refresh_Log false
 
 //(experimental method of log management)

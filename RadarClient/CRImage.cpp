@@ -55,6 +55,8 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 	{
 		if (!vertices)
 			vertices = std::make_shared<C3DObjectVertices>(info->N * info->NR);
+		else
+			vertices->ReCreate(info->N * info->NR);
 
 		int v = 0;
 

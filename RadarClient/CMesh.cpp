@@ -724,7 +724,7 @@ void CMesh::InitMiniMap()
 
 		v->usesCount = 1;
 	
-		v->needsReload = 1;
+		
 		
 		if (prog.find(MiniMap) == prog.end() || !prog.at(MiniMap)) {
 			C3DObjectProgram *newprog = new C3DObjectProgram("Minimap.v.glsl", "Minimap.f.glsl", "vertex", "texcoor", nullptr, nullptr);
@@ -753,6 +753,7 @@ void CMesh::InitMiniMap()
 		rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 		translateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 
+		v->needsReload = 1;
 		/*delete maptexture;
 		maptexture = nullptr;		*/
 	}

@@ -99,6 +99,7 @@ public:
 	//float y_0;
 
 	std::vector<CSector*> Sectors; //points
+	std::mutex mtx_Sectors;
 
 	std::unordered_map<int, CTrack*> Tracks;
 	std::vector<int> SelectedTracksIds;
