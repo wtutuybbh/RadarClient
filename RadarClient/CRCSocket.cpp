@@ -133,11 +133,18 @@ int CRCSocket::Connect()
 			nullptr, error,
 			MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
 			(LPWSTR)&s, 0, nullptr);
-		wstring ws(s);
+		if (s) 
+		{
+			wstring ws(s);
 
-		string str(ws.begin(), ws.end());
-		str = str.substr(0, str.length() - 1);
-		LOG_ERROR__("cResult == SOCKET_ERROR: WSAGetLastError returned %d, %s", error, str.c_str());
+			string str(ws.begin(), ws.end());
+			str = str.substr(0, str.length() - 1);
+			LOG_ERROR__("cResult == SOCKET_ERROR: WSAGetLastError returned %d, %s", error, str.c_str());
+		}
+		else
+		{
+			LOG_ERROR__("cResult == SOCKET_ERROR: WSAGetLastError returned %d, FormatMessageW returned null pointer to error string", error);
+		}
 	}
 	//int errorCode = WSAGetLastError();
 	LOG_INFO(requestID, context, (boost::format("End: return %1%") % cResult).str().c_str());

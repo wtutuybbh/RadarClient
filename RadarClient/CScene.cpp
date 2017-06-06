@@ -558,7 +558,8 @@ void CScene::RefreshImages(RIMAGE* info, void* pixels, RDR_INITCL* init)
 	}
 	if (RayObj)
 	{
-		RayObj->SetRotateMatrix(glm::rotate((float)(- M_PI * (float(info->d1 + info->d2) / init->MaxNAzm)), glm::vec3(0, 1, 0)));
+		//RayObj->SetRotateMatrix(glm::rotate((float)(- M_PI * (float(info->d1 + info->d2) / init->MaxNAzm)), glm::vec3(0, 1, 0)));
+		
 	}
 }
 

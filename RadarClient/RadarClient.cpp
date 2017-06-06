@@ -16,6 +16,7 @@
 #include "CRCLogger.h"
 
 #include "resource1.h"
+#include <eh.h>
 
 #define VIEW_PORT_CONTROL_ID     100
 
@@ -64,6 +65,13 @@ int g_nCmdShow;
 
 std::thread *gl_thread = nullptr;
 std::thread *so_thread = nullptr;
+
+HWND g_SocketHwnd = nullptr;
+
+
+
+
+
 
 void TerminateApplication()							// Terminate The Application
 {
@@ -256,6 +264,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:													// Window Creation
 	{
 		LOG_INFO(requestID, context, "WM_CREATE");
+
+		
+
 		CREATESTRUCT* creation = (CREATESTRUCT*)(lParam);			// Store Window Structure Pointer
 		window = (GL_Window*)(creation->lpCreateParams);
 		SetWindowLong(hWnd, GWL_USERDATA, (LONG)(window));
@@ -308,7 +319,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		HRSRC       hrsrc;
 		//HGLOBAL     hglobal;
-		HINSTANCE hInstance = (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE);
+		auto hInstance = HINSTANCE(GetWindowLong(hWnd, GWL_HINSTANCE));
 		hrsrc = FindResource(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), RT_DIALOG);
 
 		//hglobal = ::LoadResource(hInstance, hrsrc);
@@ -463,6 +474,8 @@ public:
 //BOOL				g_isMessagePumpActive;							// Message Pump Active?
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {	
+	//asioTcpServer();
+
 	CUserInterface::ToolboxHWND = nullptr;
 	g_nCmdShow = nCmdShow;
 	MSG msg;
@@ -648,6 +661,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				}
 				if (so_thread)
 				{
+					if (g_SocketHwnd)
+					{
+						PostMessage(g_SocketHwnd, WM_QUIT, 0, 0);
+					}
 					if (so_thread->joinable())
 					{
 						so_thread->join();
@@ -979,7 +996,8 @@ void SocketMain()
 		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
 		CW_USEDEFAULT, CW_USEDEFAULT, (HWND)NULL,
 		(HMENU)NULL, hinst, (LPVOID)NULL);
-
+	
+	g_SocketHwnd = hwndMain;
 	// If the main window cannot be created, terminate 
 	// the application. 
 

@@ -916,10 +916,16 @@ LRESULT CUserInterface::Checkbox_ViewFromTop(HWND hwnd, UINT uMsg, WPARAM wParam
 	{
 		if (Button_GetCheck(hWnd)) 
 		{
+			Button_CameraReset(hwnd, uMsg, wParam, lParam);
 			VPControl->Camera->SetPosition(0, 500, 0);		
 			auto dir = VPControl->Camera->GetDirection();
 			VPControl->Camera->SetDirection(0, -1, 0);
 			VPControl->Camera->SetUp(dir.x, dir.y, dir.z);
+			_checkboxState_ViewFromTop = true;
+		}
+		else
+		{
+			_checkboxState_ViewFromTop = false;
 		}
 	}
 	return LRESULT();

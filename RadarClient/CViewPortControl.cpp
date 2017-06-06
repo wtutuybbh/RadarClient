@@ -402,7 +402,7 @@ bool CViewPortControl::InitGL()
 		PFD_SUPPORT_OPENGL |			// Format must support OpenGL
 		PFD_DOUBLEBUFFER,			// Must support double buffering
 		PFD_TYPE_RGBA,				// Request an RGBA format
-		32,					// Select our color depth
+		16,					// Select our color depth
 		0, 0, 0, 0, 0, 0,			// Color bits ignored
 		0,					// No alpha buffer
 		0,					// Shift bit ignored

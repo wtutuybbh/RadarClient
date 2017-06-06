@@ -34,3 +34,13 @@ CRay::CRay(float rayWidth, float maxDist, float y_0) : CMarkup(glm::vec4(0, y_0,
 CRay::~CRay()
 {
 }
+
+void CRay::Refresh(float angle)
+{
+	if (vertices)
+	{
+		vertices.get()->SetValues(1, glm::vec4(maxDist * sin(angle) / MPPh, y_0, maxDist * cos(-angle) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 1), glm::vec2(1, 1));
+		vertices.get()->SetValues(2, glm::vec4(maxDist * sin(angle) / MPPh, y_0, maxDist * cos(angle) / MPPh, 1), glm::vec3(0, 1, 0), glm::vec4(1, 0, 0, 1), glm::vec2(0, 1));
+		vertices->needsReload = 2;
+	}
+}

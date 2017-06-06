@@ -112,8 +112,8 @@ void CRImage::Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, R
 		if (!vbo.at(MiniMap)->vertices)
 			vbo.at(MiniMap)->vertices = vertices;
 		vertices.get()->usesCount = 2;
-		/*vbo.at(Main)->NeedsReload = true;
-		vbo.at(MiniMap)->NeedsReload = true;*/
+		vertices->needsReload = 2;
+		/*vbo.at(MiniMap)->NeedsReload = true;*/
 	}
 }
 
