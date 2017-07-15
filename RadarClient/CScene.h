@@ -42,6 +42,7 @@ class CMesh;
 class CRCSocket;
 class CUserInterface;
 class CViewPortControl;
+class CRay;
 
 class CScene {
 	unsigned long mainDrawCount{ 0 };
@@ -129,7 +130,7 @@ public:
 
 	CMarkup *Markup { nullptr };
 
-	C3DObjectModel *RayObj{ nullptr };
+	CRay *RayObj{ nullptr };
 
 	//glm::vec3 MeshSize;
 	

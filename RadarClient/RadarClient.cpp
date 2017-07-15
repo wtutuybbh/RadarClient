@@ -16,6 +16,9 @@
 #include "CRCLogger.h"
 
 #include "resource1.h"
+
+#include "CSector.h"
+
 #include <eh.h>
 
 #define VIEW_PORT_CONTROL_ID     100
@@ -330,7 +333,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		ShowWindow(hwnd1, g_nCmdShow);
 
-		SetWindowPos(hwnd1, HWND_TOP, 0, PANEL_WIDTH + 30, 0, 0, SWP_NOSIZE);
+		SetWindowPos(hwnd1, HWND_TOP, 0, PANEL_WIDTH + 10, 0, 0, SWP_NOSIZE);
 
 #ifdef _DEBUG
 		g_Minimap->dwi = &g_dwi;
@@ -471,10 +474,221 @@ public:
 };
 
 // Program Entry (WinMain)
-//BOOL				g_isMessagePumpActive;							// Message Pump Active?
+
+DWORD CSector::flight_start_;
+std::vector<CFlightPoint> CSector::flight_points_;
+
+void fill_flight_points()
+{
+	CSector::flight_points_.push_back(CFlightPoint(51.96722, 55.609722, 270, 0));
+	CSector::flight_points_.push_back(CFlightPoint(51.930828, 55.609955, 270, 15));
+	CSector::flight_points_.push_back(CFlightPoint(51.897614, 55.610138, 270, 30));
+	CSector::flight_points_.push_back(CFlightPoint(51.864956, 55.610413, 270, 45));
+	CSector::flight_points_.push_back(CFlightPoint(51.842506, 55.610558, 270, 56));
+	CSector::flight_points_.push_back(CFlightPoint(51.80706, 55.61084, 270, 70));
+	CSector::flight_points_.push_back(CFlightPoint(51.772324, 55.611099, 270, 85));
+	CSector::flight_points_.push_back(CFlightPoint(51.735119, 55.61142, 270, 100));
+	CSector::flight_points_.push_back(CFlightPoint(51.695652, 55.611721, 270, 115));
+	CSector::flight_points_.push_back(CFlightPoint(51.656216, 55.612015, 270, 130));
+	CSector::flight_points_.push_back(CFlightPoint(51.5769, 55.612564, 270, 161));
+	CSector::flight_points_.push_back(CFlightPoint(51.483433, 55.613113, 270, 195));
+	CSector::flight_points_.push_back(CFlightPoint(51.387302, 55.614716, 275, 230));
+	CSector::flight_points_.push_back(CFlightPoint(51.305153, 55.621902, 280, 261));
+	CSector::flight_points_.push_back(CFlightPoint(51.210354, 55.632385, 281, 295));
+	CSector::flight_points_.push_back(CFlightPoint(51.032326, 55.65239, 281, 360));
+	CSector::flight_points_.push_back(CFlightPoint(50.846889, 55.67276, 281, 425));
+	CSector::flight_points_.push_back(CFlightPoint(50.659538, 55.69313, 280, 490));
+	CSector::flight_points_.push_back(CFlightPoint(50.463207, 55.713997, 280, 556));
+	CSector::flight_points_.push_back(CFlightPoint(50.264034, 55.734879, 280, 620));
+	CSector::flight_points_.push_back(CFlightPoint(50.055874, 55.756302, 280, 685));
+	CSector::flight_points_.push_back(CFlightPoint(49.853458, 55.776855, 280, 746));
+	CSector::flight_points_.push_back(CFlightPoint(49.64888, 55.797272, 279, 807));
+	CSector::flight_points_.push_back(CFlightPoint(49.430069, 55.818741, 279, 870));
+	CSector::flight_points_.push_back(CFlightPoint(49.219582, 55.838928, 279, 932));
+	CSector::flight_points_.push_back(CFlightPoint(49.000187, 55.859482, 279, 996));
+	CSector::flight_points_.push_back(CFlightPoint(48.775864, 55.880096, 279, 1060));
+	CSector::flight_points_.push_back(CFlightPoint(48.55442, 55.900021, 279, 1123));
+	CSector::flight_points_.push_back(CFlightPoint(48.344391, 55.918453, 278, 1184));
+	CSector::flight_points_.push_back(CFlightPoint(48.13435, 55.936569, 278, 1245));
+	CSector::flight_points_.push_back(CFlightPoint(47.91404, 55.955185, 278, 1308));
+	CSector::flight_points_.push_back(CFlightPoint(47.691566, 55.973511, 278, 1372));
+	CSector::flight_points_.push_back(CFlightPoint(47.468262, 55.991501, 278, 1435));
+	CSector::flight_points_.push_back(CFlightPoint(47.256317, 56.008209, 277, 1496));
+	CSector::flight_points_.push_back(CFlightPoint(47.032814, 56.025433, 277, 1560));
+	CSector::flight_points_.push_back(CFlightPoint(46.819351, 56.041447, 277, 1621));
+	CSector::flight_points_.push_back(CFlightPoint(46.594391, 56.057972, 277, 1684));
+	CSector::flight_points_.push_back(CFlightPoint(46.380367, 56.059021, 266, 1745));
+	CSector::flight_points_.push_back(CFlightPoint(46.15451, 56.051407, 266, 1808));
+	CSector::flight_points_.push_back(CFlightPoint(45.939247, 56.043777, 266, 1869));
+	CSector::flight_points_.push_back(CFlightPoint(45.713779, 56.035355, 266, 1933));
+	CSector::flight_points_.push_back(CFlightPoint(45.48872, 56.02655, 265, 1996));
+	CSector::flight_points_.push_back(CFlightPoint(45.27174, 56.017612, 265, 2057));
+	CSector::flight_points_.push_back(CFlightPoint(45.04686, 56.009171, 269, 2120));
+	CSector::flight_points_.push_back(CFlightPoint(44.82988, 56.021988, 277, 2182));
+	CSector::flight_points_.push_back(CFlightPoint(44.605076, 56.038513, 277, 2245));
+	CSector::flight_points_.push_back(CFlightPoint(44.381351, 56.054581, 277, 2308));
+	CSector::flight_points_.push_back(CFlightPoint(44.156883, 56.0704, 277, 2372));
+	CSector::flight_points_.push_back(CFlightPoint(43.933296, 56.08567, 276, 2435));
+	CSector::flight_points_.push_back(CFlightPoint(43.719921, 56.099869, 276, 2496));
+	CSector::flight_points_.push_back(CFlightPoint(43.492626, 56.114594, 276, 2559));
+	CSector::flight_points_.push_back(CFlightPoint(43.279476, 56.128006, 276, 2620));
+	CSector::flight_points_.push_back(CFlightPoint(43.058769, 56.141441, 276, 2682));
+	CSector::flight_points_.push_back(CFlightPoint(42.842388, 56.154194, 276, 2743));
+	CSector::flight_points_.push_back(CFlightPoint(42.618214, 56.167007, 275, 2806));
+	CSector::flight_points_.push_back(CFlightPoint(42.395908, 56.179321, 275, 2869));
+	CSector::flight_points_.push_back(CFlightPoint(42.187252, 56.190491, 275, 2930));
+	CSector::flight_points_.push_back(CFlightPoint(41.956871, 56.202377, 275, 2993));
+	CSector::flight_points_.push_back(CFlightPoint(41.742886, 56.213058, 275, 3054));
+	CSector::flight_points_.push_back(CFlightPoint(41.519478, 56.223789, 274, 3117));
+	CSector::flight_points_.push_back(CFlightPoint(41.294613, 56.234207, 274, 3180));
+	CSector::flight_points_.push_back(CFlightPoint(41.080627, 56.243729, 274, 3241));
+	CSector::flight_points_.push_back(CFlightPoint(40.855324, 56.253304, 274, 3304));
+	CSector::flight_points_.push_back(CFlightPoint(40.590652, 56.256729, 260, 3378));
+	CSector::flight_points_.push_back(CFlightPoint(40.56839, 56.253864, 255, 3384));
+	CSector::flight_points_.push_back(CFlightPoint(40.516464, 56.2439, 247, 3400));
+	CSector::flight_points_.push_back(CFlightPoint(40.482388, 56.235477, 245, 3408));
+	CSector::flight_points_.push_back(CFlightPoint(40.273132, 56.184402, 246, 3470));
+	CSector::flight_points_.push_back(CFlightPoint(40.032463, 56.125195, 246, 3539));
+	CSector::flight_points_.push_back(CFlightPoint(39.830433, 56.075089, 245, 3600));
+	CSector::flight_points_.push_back(CFlightPoint(39.626022, 56.025284, 249, 3662));
+	CSector::flight_points_.push_back(CFlightPoint(39.558605, 56.014435, 257, 3684));
+	CSector::flight_points_.push_back(CFlightPoint(39.539795, 56.012352, 260, 3690));
+	CSector::flight_points_.push_back(CFlightPoint(39.522068, 56.010818, 262, 3696));
+	CSector::flight_points_.push_back(CFlightPoint(39.501011, 56.009399, 263, 3702));
+	CSector::flight_points_.push_back(CFlightPoint(39.481514, 56.008255, 264, 3708));
+	CSector::flight_points_.push_back(CFlightPoint(39.283531, 55.998962, 265, 3771));
+	CSector::flight_points_.push_back(CFlightPoint(39.102402, 55.990517, 265, 3832));
+	CSector::flight_points_.push_back(CFlightPoint(38.924561, 55.981705, 264, 3895));
+	CSector::flight_points_.push_back(CFlightPoint(38.824139, 55.976646, 264, 3928));
+	CSector::flight_points_.push_back(CFlightPoint(38.733673, 55.971989, 264, 3961));
+	CSector::flight_points_.push_back(CFlightPoint(38.657726, 55.967972, 264, 3992));
+	CSector::flight_points_.push_back(CFlightPoint(38.578751, 55.963844, 264, 4025));
+	CSector::flight_points_.push_back(CFlightPoint(38.549393, 55.962261, 264, 4037));
+	CSector::flight_points_.push_back(CFlightPoint(38.522812, 55.960876, 264, 4049));
+	CSector::flight_points_.push_back(CFlightPoint(38.494461, 55.959373, 264, 4061));
+	CSector::flight_points_.push_back(CFlightPoint(38.467297, 55.957901, 264, 4073));
+	CSector::flight_points_.push_back(CFlightPoint(38.440662, 55.956528, 264, 4085));
+	CSector::flight_points_.push_back(CFlightPoint(38.412323, 55.954998, 264, 4097));
+	CSector::flight_points_.push_back(CFlightPoint(38.384983, 55.952637, 258, 4109));
+	CSector::flight_points_.push_back(CFlightPoint(38.358681, 55.948837, 253, 4121));
+	CSector::flight_points_.push_back(CFlightPoint(38.344448, 55.946411, 253, 4127));
+	CSector::flight_points_.push_back(CFlightPoint(38.310783, 55.940708, 253, 4142));
+	CSector::flight_points_.push_back(CFlightPoint(38.285023, 55.936295, 252, 4154));
+	CSector::flight_points_.push_back(CFlightPoint(38.259804, 55.931946, 252, 4166));
+	CSector::flight_points_.push_back(CFlightPoint(38.2355, 55.927689, 252, 4178));
+	CSector::flight_points_.push_back(CFlightPoint(38.209534, 55.923157, 252, 4190));
+	CSector::flight_points_.push_back(CFlightPoint(38.183411, 55.918594, 252, 4202));
+	CSector::flight_points_.push_back(CFlightPoint(38.159122, 55.914406, 252, 4214));
+	CSector::flight_points_.push_back(CFlightPoint(38.132797, 55.909882, 253, 4227));
+	CSector::flight_points_.push_back(CFlightPoint(38.108494, 55.905762, 253, 4239));
+	CSector::flight_points_.push_back(CFlightPoint(38.083336, 55.901604, 253, 4251));
+	CSector::flight_points_.push_back(CFlightPoint(38.058971, 55.897568, 253, 4264));
+	CSector::flight_points_.push_back(CFlightPoint(38.033504, 55.893311, 253, 4275));
+	CSector::flight_points_.push_back(CFlightPoint(38.003208, 55.888184, 253, 4290));
+	CSector::flight_points_.push_back(CFlightPoint(37.97982, 55.884247, 253, 4302));
+	CSector::flight_points_.push_back(CFlightPoint(37.955849, 55.880219, 253, 4314));
+	CSector::flight_points_.push_back(CFlightPoint(37.934959, 55.876648, 253, 4326));
+	CSector::flight_points_.push_back(CFlightPoint(37.910072, 55.872437, 253, 4338));
+	CSector::flight_points_.push_back(CFlightPoint(37.882061, 55.868877, 263, 4353));
+	CSector::flight_points_.push_back(CFlightPoint(37.869701, 55.869156, 276, 4360));
+	CSector::flight_points_.push_back(CFlightPoint(37.859573, 55.870365, 284, 4366));
+	CSector::flight_points_.push_back(CFlightPoint(37.850647, 55.872227, 290, 4372));
+	CSector::flight_points_.push_back(CFlightPoint(37.840775, 55.875488, 304, 4378));
+	CSector::flight_points_.push_back(CFlightPoint(37.832878, 55.878887, 307, 4384));
+	CSector::flight_points_.push_back(CFlightPoint(37.824265, 55.882462, 306, 4390));
+	CSector::flight_points_.push_back(CFlightPoint(37.81786, 55.885078, 305, 4396));
+	CSector::flight_points_.push_back(CFlightPoint(37.808846, 55.888802, 306, 4402));
+	CSector::flight_points_.push_back(CFlightPoint(37.794052, 55.894867, 306, 4414));
+	CSector::flight_points_.push_back(CFlightPoint(37.779663, 55.90081, 306, 4426));
+	CSector::flight_points_.push_back(CFlightPoint(37.764256, 55.907272, 307, 4438));
+	CSector::flight_points_.push_back(CFlightPoint(37.750938, 55.913681, 314, 4450));
+	CSector::flight_points_.push_back(CFlightPoint(37.745361, 55.917068, 319, 4456));
+	CSector::flight_points_.push_back(CFlightPoint(37.740013, 55.921154, 325, 4462));
+	CSector::flight_points_.push_back(CFlightPoint(37.735458, 55.925446, 330, 4468));
+	CSector::flight_points_.push_back(CFlightPoint(37.731941, 55.929489, 335, 4474));
+	CSector::flight_points_.push_back(CFlightPoint(37.728634, 55.934143, 339, 4480));
+	CSector::flight_points_.push_back(CFlightPoint(37.726135, 55.938446, 342, 4486));
+	CSector::flight_points_.push_back(CFlightPoint(37.723789, 55.943035, 344, 4492));
+	CSector::flight_points_.push_back(CFlightPoint(37.722057, 55.947052, 346, 4498));
+	CSector::flight_points_.push_back(CFlightPoint(37.720394, 55.951447, 348, 4505));
+	CSector::flight_points_.push_back(CFlightPoint(37.718227, 55.958084, 350, 4514));
+	CSector::flight_points_.push_back(CFlightPoint(37.717094, 55.962166, 351, 4520));
+	CSector::flight_points_.push_back(CFlightPoint(37.716148, 55.966404, 354, 4526));
+	CSector::flight_points_.push_back(CFlightPoint(37.719059, 55.984131, 8, 4550));
+	CSector::flight_points_.push_back(CFlightPoint(37.720612, 55.990425, 7, 4559));
+	CSector::flight_points_.push_back(CFlightPoint(37.721558, 55.994892, 6, 4565));
+	CSector::flight_points_.push_back(CFlightPoint(37.722073, 55.999317, 3, 4571));
+	CSector::flight_points_.push_back(CFlightPoint(37.710739, 56.013931, 302, 4596));
+	CSector::flight_points_.push_back(CFlightPoint(37.704163, 56.015625, 292, 4602));
+	CSector::flight_points_.push_back(CFlightPoint(37.696323, 56.016308, 269, 4608));
+	CSector::flight_points_.push_back(CFlightPoint(37.689114, 56.015423, 254, 4614));
+	CSector::flight_points_.push_back(CFlightPoint(37.681648, 56.014072, 251, 4621));
+	CSector::flight_points_.push_back(CFlightPoint(37.67062, 56.012009, 252, 4629));
+	CSector::flight_points_.push_back(CFlightPoint(37.66259, 56.010628, 253, 4636));
+	CSector::flight_points_.push_back(CFlightPoint(37.655472, 56.009537, 255, 4642));
+	CSector::flight_points_.push_back(CFlightPoint(37.648067, 56.008484, 255, 4648));
+	CSector::flight_points_.push_back(CFlightPoint(37.640491, 56.007385, 255, 4654));
+	CSector::flight_points_.push_back(CFlightPoint(37.633083, 56.006332, 255, 4660));
+	CSector::flight_points_.push_back(CFlightPoint(37.625843, 56.00528, 255, 4666));
+	CSector::flight_points_.push_back(CFlightPoint(37.618301, 56.004204, 255, 4673));
+	CSector::flight_points_.push_back(CFlightPoint(37.610695, 56.003036, 255, 4680));
+	CSector::flight_points_.push_back(CFlightPoint(37.599506, 56.001366, 255, 4688));
+	CSector::flight_points_.push_back(CFlightPoint(37.5928, 56.000381, 255, 4694));
+	CSector::flight_points_.push_back(CFlightPoint(37.585392, 55.999329, 255, 4700));
+	CSector::flight_points_.push_back(CFlightPoint(37.578049, 55.998199, 255, 4706));
+	CSector::flight_points_.push_back(CFlightPoint(37.57058, 55.997131, 255, 4712));
+	CSector::flight_points_.push_back(CFlightPoint(37.563629, 55.996105, 255, 4718));
+	CSector::flight_points_.push_back(CFlightPoint(37.556679, 55.995079, 255, 4725));
+	CSector::flight_points_.push_back(CFlightPoint(37.548866, 55.993916, 255, 4731));
+	CSector::flight_points_.push_back(CFlightPoint(37.541199, 55.992783, 254, 4737));
+	CSector::flight_points_.push_back(CFlightPoint(37.534042, 55.991684, 255, 4743));
+	CSector::flight_points_.push_back(CFlightPoint(37.526634, 55.990612, 255, 4749));
+	CSector::flight_points_.push_back(CFlightPoint(37.51931, 55.989532, 255, 4756));
+	CSector::flight_points_.push_back(CFlightPoint(37.508907, 55.987976, 255, 4765));
+	CSector::flight_points_.push_back(CFlightPoint(37.500584, 55.98674, 255, 4771));
+	CSector::flight_points_.push_back(CFlightPoint(37.493076, 55.98563, 255, 4777));
+	CSector::flight_points_.push_back(CFlightPoint(37.488358, 55.984932, 255, 4783));
+	CSector::flight_points_.push_back(CFlightPoint(37.478569, 55.98349, 255, 4789));
+	CSector::flight_points_.push_back(CFlightPoint(37.468704, 55.981979, 254, 4798));
+	CSector::flight_points_.push_back(CFlightPoint(37.448147, 55.978912, 255, 4814));
+	CSector::flight_points_.push_back(CFlightPoint(37.440407, 55.977768, 255, 4821));
+	CSector::flight_points_.push_back(CFlightPoint(37.430004, 55.976257, 254, 4829));
+	CSector::flight_points_.push_back(CFlightPoint(37.424667, 55.97546, 255, 4835));
+	CSector::flight_points_.push_back(CFlightPoint(37.419037, 55.974598, 255, 4841));
+	CSector::flight_points_.push_back(CFlightPoint(37.416386, 55.974201, 255, 4848));
+	CSector::flight_points_.push_back(CFlightPoint(37.414478, 55.973911, 255, 4856));
+	CSector::flight_points_.push_back(CFlightPoint(37.414005, 55.97385, 255, 4862));
+	CSector::flight_points_.push_back(CFlightPoint(37.413464, 55.973808, 255, 4868));
+	CSector::flight_points_.push_back(CFlightPoint(37.413017, 55.973839, 255, 4874));
+	CSector::flight_points_.push_back(CFlightPoint(37.412567, 55.973934, 255, 4880));
+	CSector::flight_points_.push_back(CFlightPoint(37.412247, 55.974144, 255, 4886));
+	CSector::flight_points_.push_back(CFlightPoint(37.412094, 55.974422, 255, 4892));
+	CSector::flight_points_.push_back(CFlightPoint(37.411922, 55.974773, 255, 4902));
+	CSector::flight_points_.push_back(CFlightPoint(37.411816, 55.974991, 334, 4910));
+	CSector::flight_points_.push_back(CFlightPoint(37.411686, 55.975307, 334, 4920));
+	CSector::flight_points_.push_back(CFlightPoint(37.411472, 55.975773, 334, 4932));
+	CSector::flight_points_.push_back(CFlightPoint(37.411324, 55.976063, 334, 4938));
+	CSector::flight_points_.push_back(CFlightPoint(37.411213, 55.976292, 334, 4944));
+	CSector::flight_points_.push_back(CFlightPoint(37.411022, 55.976715, 334, 4956));
+	CSector::flight_points_.push_back(CFlightPoint(37.410873, 55.976982, 334, 4965));
+	CSector::flight_points_.push_back(CFlightPoint(37.410656, 55.97752, 334, 4974));
+	CSector::flight_points_.push_back(CFlightPoint(37.410591, 55.977768, 334, 4980));
+	CSector::flight_points_.push_back(CFlightPoint(37.410549, 55.978031, 334, 4986));
+	CSector::flight_points_.push_back(CFlightPoint(37.410446, 55.978283, 334, 4992));
+	CSector::flight_points_.push_back(CFlightPoint(37.410336, 55.978542, 334, 4998));
+	CSector::flight_points_.push_back(CFlightPoint(37.410194, 55.978821, 334, 5004));
+	CSector::flight_points_.push_back(CFlightPoint(37.41003, 55.979187, 334, 5016));
+	CSector::flight_points_.push_back(CFlightPoint(37.409904, 55.979473, 334, 5028));
+	CSector::flight_points_.push_back(CFlightPoint(37.409779, 55.979702, 334, 5040));
+
+	CSector::flight_time0 = 4505;
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {	
 	//asioTcpServer();
+
+	fill_flight_points();
 
 	CUserInterface::ToolboxHWND = nullptr;
 	g_nCmdShow = nCmdShow;

@@ -6,6 +6,16 @@ struct RDR_INITCL;
 
 class CViewPortControl;
 
+class CFlightPoint
+{
+public :
+	CFlightPoint(double lon, double lat, int dir, int time);
+	double lon;
+	double lat;
+	int dir;
+	int time;
+};
+
 class CSector :
 	public C3DObjectModel
 {
@@ -17,6 +27,9 @@ class CSector :
 protected:
 	static const std::string requestID;
 	DWORD		start_tick_{ 0 };
+
+	
+
 	int lifetime{ 6 };
 	float residual_alpha_{ 0.03f };
 	
@@ -24,6 +37,13 @@ protected:
 
 	
 public:
+
+	static DWORD		flight_start_;
+	static std::vector<CFlightPoint> flight_points_;
+	static int flight_time0;
+	void get_flight_point(DWORD t, double &lon, double &lat);
+
+
 	static void RefreshColorSettings();
 	float PointSize {3};
 	explicit CSector(int index);

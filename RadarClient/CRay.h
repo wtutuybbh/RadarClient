@@ -8,6 +8,6 @@ class CRay :
 public:
 	CRay(float rayWidth, float maxDist, float y_0);
 	~CRay();
-	void Refresh(float angle);
+	void Refresh(float angle) const;
 };
 

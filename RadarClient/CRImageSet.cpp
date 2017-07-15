@@ -30,7 +30,11 @@ void CRImageSet::Draw(CViewPortControl* vpControl, GLenum mode)
 	if (Images) {
 		for (auto it = Images->begin(); it != Images->end(); ++it)
 		{
-			(*it)->Draw(vpControl, mode);
+			if ((*it)) 
+			{
+				(*it)->Draw(vpControl);
+			}
+			//break;
 		}
 	}
 }

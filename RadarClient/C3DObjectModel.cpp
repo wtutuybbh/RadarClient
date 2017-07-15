@@ -162,11 +162,21 @@ void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)
 	if (vbo_) {
 		vbo_->Bind();
 		if (can_be_reloaded && vbo_->vertices && vbo_->vertices.get()->needsReload)
+		{
 			vbo_->Reload();
+			if (tex_ && tex_->needsReload)
+			{
+				tex_->Reload();
+			}
+		}
+			
 	}
 
 	if (tex_)
+	{
+
 		tex_->Bind(prog_->ProgramId);
+	}
 
 	BindUniforms(vpControl);
 	
@@ -178,6 +188,11 @@ void C3DObjectModel::Draw(CViewPortControl* vpControl, GLenum mode)
 	
 	if (prog_)
 		prog_->DoNotUseProgram();
+}
+
+void C3DObjectModel::Draw(CViewPortControl* vpControl)
+{
+	Draw(vpControl, DrawMode);
 }
 
 void C3DObjectModel::BindUniforms(CViewPortControl* vpControl)

@@ -28,6 +28,7 @@ CRay::CRay(float rayWidth, float maxDist, float y_0) : CMarkup(glm::vec4(0, y_0,
 	vbo.at(Main)->vertices = vertices;
 	vbo.at(MiniMap)->vertices = vertices;
 	vertices.get()->usesCount = 2;
+	vbo.at(Main)->id = 3;
 }
 
 
@@ -35,7 +36,7 @@ CRay::~CRay()
 {
 }
 
-void CRay::Refresh(float angle)
+void CRay::Refresh(float angle) const
 {
 	if (vertices)
 	{

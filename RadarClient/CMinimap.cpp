@@ -4,6 +4,7 @@
 #include "CScene.h"
 #include "CCamera.h"
 #include "CUserInterface.h"
+#include "CSettings.h"
 
 bool CMinimap::IsCameraHere(int x, int y) const
 {
@@ -23,9 +24,18 @@ bool CMinimap::IsCameraHere(int x, int y) const
 
 void CMinimap::Draw()
 {
+	if (needs_resize)
+	{
+		ReshapeGL();
+	}
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (Scene) {
+	glm::vec4 bgColor = CSettings::GetColor(ColorBackground);
+	glClearColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+
+	if (Scene) 
+	{
 		Scene->MiniMapDraw(this);
 	}
 }

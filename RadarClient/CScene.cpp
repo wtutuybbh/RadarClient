@@ -186,11 +186,11 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		Camera->SetZPlanes(CSettings::GetFloat(FloatZNear), CSettings::GetFloat(FloatZFar));
 	}
 	//glLineWidth(3);
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_BUFFER);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
 	glDepthFunc(GL_LESS);
+	//
 
 	if (MeshReady())
 	{
@@ -200,11 +200,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		Mesh->Draw(vpControl, GL_TRIANGLES);
 		//glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	}
-	glDisable(GL_DEPTH_TEST);
-	if (Markup && UI && UI->GetCheckboxState_MarkupLines())
-	{
-		
-	}
+	glDisable(GL_DEPTH_BUFFER);
 
 	if (begAzmLine) {
 		begAzmLine->Draw(vpControl, GL_LINES);
@@ -221,11 +217,7 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 		RayObj->Draw(vpControl, GL_LINES);
 	}
 	
-	if (MeasurePath)
-	{
-		
-	}
-	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_DEPTH_TEST);
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	if (UI->GetCheckboxState_Points()) {
 		std::lock_guard<std::mutex> lock(mtxSectors);
@@ -262,6 +254,8 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 			}							
 		}
 	}
+
+	
 	if (UI->GetCheckboxState_Images())
 	{
 		if (ImageSet)
@@ -277,6 +271,8 @@ bool CScene::DrawScene(CViewPortControl * vpControl)
 			ImageSet->Draw(vpControl, GL_POINTS);
 		}
 	}
+
+	//glDisable(GL_PROGRAM_POINT_SIZE);
 	if (MeasurePath)
 	{
 		glDepthFunc(GL_GEQUAL);
@@ -336,7 +332,7 @@ bool CScene::MiniMapDraw(CViewPortControl * vpControl)
 			Camera->MeshSize = Mesh->GetSize();
 			waitingForMesh = false;
 		}
-		//Mesh->Draw(vpControl, GL_TRIANGLES);
+		Mesh->Draw(vpControl, GL_TRIANGLES);
 	}
 	glDisable(GL_DEPTH_BUFFER);
 	
@@ -559,7 +555,7 @@ void CScene::RefreshImages(RIMAGE* info, void* pixels, RDR_INITCL* init)
 	if (RayObj)
 	{
 		//RayObj->SetRotateMatrix(glm::rotate((float)(- M_PI * (float(info->d1 + info->d2) / init->MaxNAzm)), glm::vec3(0, 1, 0)));
-		
+		RayObj->Refresh((float)(-M_PI * (float(info->d1 + info->d2) / init->MaxNAzm)));
 	}
 }
 
@@ -894,14 +890,11 @@ void CScene::SetBegAzm(double begAzm)
 	auto mpph = CSettings::GetFloat(FloatMPPh);
 	auto r = float(markDistance * numCircles * marksPerCircle) / mpph;
 
-	if (begAzmLine) 
-	{
-		begAzmLine->SetPoints(glm::vec4(0, 0, 0, 1), glm::vec4(-r * sin(begAzm), 0, r * cos(begAzm), 1), Simple);
-	}
 	
+	
+	auto rotate = glm::rotate(-float(begAzm), glm::vec3(0, 1, 0));
 	if (ImageSet)
-	{
-		auto rotate = glm::rotate(-float(begAzm), glm::vec3(0, 1, 0));
+	{		
 		ImageSet->SetRotateMatrix(rotate);
 		for(auto i=0; i< Sectors.size(); i++)
 		{
@@ -910,6 +903,15 @@ void CScene::SetBegAzm(double begAzm)
 				Sectors[i]->SetRotateMatrix(rotate);
 			}
 		}
+	}
+	if (RayObj)
+	{
+		RayObj->SetRotateMatrix(rotate);
+	}
+	
+	if (begAzmLine) 
+	{
+		begAzmLine->SetRotateMatrix(rotate);
 	}
 }
 

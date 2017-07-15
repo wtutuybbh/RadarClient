@@ -11,26 +11,16 @@ C3DObjectProgram::~C3DObjectProgram()
 C3DObjectProgram::C3DObjectProgram(const char* vShaderFile, const char* fShaderFile, const char* vertexAttribName, 
 	const char * textureAttribName, const char * normalAttribName, const char * colorAttribName, const char *  color2AttribName)
 {
-	this->vShaderFile = vShaderFile?string(vShaderFile):string();
-	this->fShaderFile = fShaderFile?string(fShaderFile):string();
-	this->vertexAttribName = vertexAttribName?string(vertexAttribName):string();
-	this->textureAttribName = textureAttribName?string(textureAttribName):string();
-	this->normalAttribName = normalAttribName?string(normalAttribName):string();
-	this->colorAttribName = colorAttribName ? string(colorAttribName) : string();
-	this->color2AttribName = color2AttribName ? string(color2AttribName): string();
+	SetNames(vShaderFile, fShaderFile, vertexAttribName, textureAttribName, normalAttribName, colorAttribName, color2AttribName);
+	
 	this->ready = false;
 	SetPlaces(17 * sizeof(float), 0, 15, 4, 7, 11);
 }
 
 C3DObjectProgram::C3DObjectProgram(const char* vShaderFile, const char* fShaderFile, const char* vertexAttribName, const char* textureAttribName, const char* normalAttribName, const char* colorAttribName)
 {
-	this->vShaderFile = vShaderFile ? string(vShaderFile) : string();
-	this->fShaderFile = fShaderFile ? string(fShaderFile) : string();
-	this->vertexAttribName = vertexAttribName ? string(vertexAttribName) : string();
-	this->textureAttribName = textureAttribName ? string(textureAttribName) : string();
-	this->normalAttribName = normalAttribName ? string(normalAttribName) : string();
-	this->colorAttribName = colorAttribName ? string(colorAttribName) : string();
-	this->color2AttribName = string();
+	SetNames(vShaderFile, fShaderFile, vertexAttribName, textureAttribName, normalAttribName, colorAttribName, string().c_str());
+
 	this->ready = false;
 	SetPlaces(13 * sizeof(float), 0, 11, 4, 7, 0);
 }
@@ -44,6 +34,17 @@ void C3DObjectProgram::SetPlaces(int elementSize, int vertexPlace, int texcoorPl
 	this->normalPlace = normalPlace;
 	this->colorPlace = colorPlace;
 	this->color2Place = color2Place;
+}
+
+void C3DObjectProgram::SetNames(const char* vShaderFile, const char* fShaderFile, const char* vertexAttribName, const char* textureAttribName, const char* normalAttribName, const char* colorAttribName, const char* color2AttribName)
+{
+	this->vShaderFile = vShaderFile ? string(vShaderFile) : string();
+	this->fShaderFile = fShaderFile ? string(fShaderFile) : string();
+	this->vertexAttribName = vertexAttribName ? string(vertexAttribName) : string();
+	this->textureAttribName = textureAttribName ? string(textureAttribName) : string();
+	this->normalAttribName = normalAttribName ? string(normalAttribName) : string();
+	this->colorAttribName = colorAttribName ? string(colorAttribName) : string();
+	this->color2AttribName = color2AttribName ? string(color2AttribName) : string();
 }
 
 int C3DObjectProgram::GetUniformLocation(const char* uniformName) const

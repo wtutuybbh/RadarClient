@@ -76,9 +76,9 @@ void C3DObjectVBO::Reload()
 	}
 	
 	/// TODO: REMOVE
-	if (id == 1 && vertices->vertexCount == 2)
+	if (id == 3/*1 && vertices->vertexCount == 2*/)
 	{
-		LOG_INFO("CLineDebug", "C3DObjectVBO::Reload", "id=%d, p0=(%f, %f, %f), p1=(%f, %f, %f)"
+		LOG_INFO("CLineDebug", "C3DObjectVBO::Reload", "id=%d, p0=(%f, %f, %f), p1=(%f, %f, %f), ..."
 			, id
 			, vertices->vbuffer[0]
 			, vertices->vbuffer[1]

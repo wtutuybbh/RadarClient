@@ -48,7 +48,7 @@ public:
 	glm::vec3 GetGeoCoords() const;
 	void SetCartesianCoordinates(float x, float y, float z);
 	
-
+	GLenum DrawMode{ GL_POINTS };
 
 	CScene *Scene {nullptr};
 	glm::vec4 Color {glm::vec4()};
@@ -58,6 +58,7 @@ public:
 	C3DObjectModel();
 	virtual ~C3DObjectModel();
 	virtual void Draw(CViewPortControl* vpControl, GLenum mode);
+	virtual void Draw(CViewPortControl* vpControl);
 	virtual void BindUniforms(CViewPortControl* vpControl);
 	virtual glm::mat4 GetModelMatrix(int vpId);
 	virtual glm::mat4 GetScaleMatrix(int vpId);

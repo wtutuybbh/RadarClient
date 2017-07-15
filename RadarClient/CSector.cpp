@@ -20,6 +20,17 @@ float CSector::f1 = 0;
 float CSector::x2 = 0;
 float CSector::f2 = 0;
 
+CFlightPoint::CFlightPoint(double lon, double lat, int dir, int time) : lon(lon), lat(lat), dir(dir), time(time)
+{
+}
+
+void CSector::get_flight_point(DWORD t, double& lon, double& lat)
+{
+	auto t_ = t - flight_start_;
+
+
+}
+
 void CSector::RefreshColorSettings()
 {
 	x0 = CSettings::GetFloat(FloatAmp_00);

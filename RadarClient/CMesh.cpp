@@ -312,7 +312,7 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 		else
 		{
 			if (tex.at(Main))
-				tex.at(Main)->Reload(subimage);
+				tex.at(Main)->SetImage(subimage);
 		}
 	}
 	
@@ -320,7 +320,7 @@ void CMesh::LoadHeightmap(bool reload_textures, bool rescan_folder_for_textures,
 		vbo.insert_or_assign(Main, new C3DObjectVBO(clearAfter));
 	}
 	
-	
+	vbo.at(Main)->id = 2;
 
 	vbo.at(Main)->vertices = vertices;
 
@@ -407,6 +407,8 @@ CMesh::CMesh(bool clearAfter, glm::vec2 position, double max_range, int texsize,
 	UseTexture = 1;
 
 	heightMapLoader = new std::thread (&CMesh::LoadHeightmap, this, true, true, true, true, true);
+
+
 	//heightMapLoader->join();
 	//t.detach();
 }
@@ -747,7 +749,7 @@ void CMesh::InitMiniMap()
 		}
 		else
 		{
-			tex.at(MiniMap)->Reload(mmimage);
+			tex.at(MiniMap)->SetImage(mmimage);
 		}
 		scaleMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
 		rotateMatrix.insert_or_assign(MiniMap, glm::mat4(1.0f));
