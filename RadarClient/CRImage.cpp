@@ -59,6 +59,13 @@ void CRImage::_refresh_multipoints_2d(float azemuth, glm::vec4 origin, float mpp
 		auto d0 = glm::distance(p0, flight_point);
 		auto d1 = glm::distance(p1, flight_point);
 
+		int jx = -1;
+
+		if (d0 + d1 - d01 < 1 )
+		{
+			jx = int(info->NR * d0 / (d0 + d1));
+		}
+
 		LOG_INFO("flight_test", "CRImage::_refresh_multipoints_2d", "distance test result=%f", d0 + d1 - d01);
 
 		
@@ -70,7 +77,7 @@ void CRImage::_refresh_multipoints_2d(float azemuth, glm::vec4 origin, float mpp
 			if (px[i * info->NR + j] > maxAmp)
 			{
 				maxAmp = px[i * info->NR + j];
-				if (maxAmp > 4095) maxAmp = 4095;
+				//if (maxAmp > 4095) maxAmp = 4095;
 			}
 			if (px[i * info->NR + j] < minAmp)
 			{
@@ -83,6 +90,12 @@ void CRImage::_refresh_multipoints_2d(float azemuth, glm::vec4 origin, float mpp
 			color.a =  5 * float(paletteIndex) / paletteWidth;*/
 
 			color = GetColor(px[i * info->NR + j]);
+
+			if (jx > 0 && abs(j - jx) <= 5)
+			{
+				//color = GetColor(maxAmp);
+				color = glm::vec4(1, 1, 1, 1);
+			}
 
 			if (color.a > 1) color.a = 1;
 			if (CRImage_Refresh_Log) LOG_INFO_("CRImage_Refresh_Log", "color.a=%f", color.a);
