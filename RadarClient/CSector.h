@@ -41,7 +41,9 @@ public:
 	static DWORD		flight_start_;
 	static std::vector<CFlightPoint> flight_points_;
 	static int flight_time0;
-	void get_flight_point(DWORD t, double &lon, double &lat);
+	static void get_flight_point(DWORD t, double &lon, double &lat);
+	static void flight_start_stop(bool start);
+	static DWORD prev_image_tick_;
 
 
 	static void RefreshColorSettings();

@@ -12,6 +12,8 @@ float CRImage::maxAmp = 70;
 float CRImage::minAmp = 0;
 const std::string CRImage::requestID = "C3DObjectModel";
 
+//DWORD CSector::prev_image_tick_ = 0;
+
 void CRImage::_refresh_multipoints_2d(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL* rdrinit, RIMAGE* info, void* pixels)
 {
 	if (!vertices)
@@ -25,13 +27,46 @@ void CRImage::_refresh_multipoints_2d(float azemuth, glm::vec4 origin, float mpp
 	int paletteIndex;
 	RGBQUAD pixelcolor;
 	glm::vec4 color;
+
+	DWORD curr_image_tick_ = GetTickCount();
+	
+	DWORD ticks_per_scan_ = (curr_image_tick_ - prev_image_tick_) / info->N;
+	LOG_INFO("flight_test", "CRImage::_refresh_multipoints_2d", "ticks_per_scan=%d", ticks_per_scan_);
+
+	double lon = 0, lat = 0;
+	glm::vec3 flight_point, p0, p1;
+	double threshold = 0.1;
 	for (int i = 0; i < info->N; i++) //i - номер массива сканов по дальности
 	{
 		float a = rdrinit->begAzm + rdrinit->dAzm *(info->d1 + i * (info->d2 - info->d1) / info->N);
+
+		// test flight code. 
+		if (flight_start_)
+		{
+				auto t = prev_image_tick_+ i * ticks_per_scan_;
+				CSector::get_flight_point(t, lon, lat);
+				//LOG_INFO("flight_test", "CRImage::_refresh_multipoints_2d", "t=%d, lon=%f, lat=%f", t, lon, lat);
+				if (mesh) 
+				{
+					flight_point = glm::vec3(mesh->LLH2XYZT(glm::vec3(lon, lat, 0)));
+					//LOG_INFO("flight_test", "CRImage::_refresh_multipoints_2d", "flight_point={%f, %f, %f}", flight_point.x, flight_point.y, flight_point.z);
+				}
+		}
+		p0 = glm::vec3(origin) + glm::vec3(-rdrinit->minR * sin(a) * cos(e) / mpph, rdrinit->minR * sin(e) / mppv, rdrinit->minR * cos(a) * cos(e) / mpph);
+		p1 = glm::vec3(origin) + glm::vec3(-rdrinit->maxR * sin(a) * cos(e) / mpph, rdrinit->maxR * sin(e) / mppv, rdrinit->maxR * cos(a) * cos(e) / mpph);
+
+		auto d01 = glm::distance(p0, p1);
+		auto d0 = glm::distance(p0, flight_point);
+		auto d1 = glm::distance(p1, flight_point);
+
+		LOG_INFO("flight_test", "CRImage::_refresh_multipoints_2d", "distance test result=%f", d0 + d1 - d01);
+
+		
+
 		for (int j = 1; j < info->NR; j++) //j - номер отсчёта по дальности
 		{
 			//paletteIndex = min((int)(paletteWidth * ((px[i * info->NR + j] - minAmp) / (maxAmp - minAmp))), paletteWidth - 1);
-
+			
 			if (px[i * info->NR + j] > maxAmp)
 			{
 				maxAmp = px[i * info->NR + j];
@@ -58,6 +93,11 @@ void CRImage::_refresh_multipoints_2d(float azemuth, glm::vec4 origin, float mpp
 
 			cartesianCoords = glm::vec3(origin) + glm::vec3(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph); //we always add y_0 (height of the radar relative to sea level) to all cartesian coordinates 
 
+			
+			/*if (flight_start_)
+			{
+				LOG_INFO("flight_test", "CRImage::_refresh_multipoints_2d", "t=%f", glm::distance(flight_point, cartesianCoords));
+			}*/
 			vertices.get()->SetValues(v, glm::vec4(cartesianCoords, 1), glm::vec3(0, 0, 0), color, glm::vec2(0, 0));
 
 			v++;
@@ -75,6 +115,8 @@ void CRImage::_refresh_multipoints_2d(float azemuth, glm::vec4 origin, float mpp
 	vertices.get()->usesCount = 2;
 	vertices->needsReload = 2;
 	/*vbo.at(MiniMap)->NeedsReload = true;*/
+
+	prev_image_tick_ = curr_image_tick_;
 }
 
 void CRImage::_refresh_textured_2d(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL* rdrinit, RIMAGE* info, void* pixels)

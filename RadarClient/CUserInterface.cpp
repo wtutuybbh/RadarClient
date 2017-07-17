@@ -162,7 +162,11 @@ LRESULT CUserInterface::Button_CameraReset(HWND hwnd, UINT uMsg, WPARAM wParam, 
 LRESULT CUserInterface::Button_Test(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	const clock_t begin_time = clock();
-	
+
+//	boost::detail::win32::sleep(1000);
+
+	CSector::flight_start_stop(true);
+
 	LOG_INFO("Test", "Test", "Finished, time=%f", float(clock() - begin_time) / CLOCKS_PER_SEC);
 
 	return LRESULT();
@@ -1224,6 +1228,8 @@ CUserInterface::CUserInterface(HWND parentHWND, CViewPortControl *vpControl, CRC
 	
 		
 	Elements.insert({ IDC_BUTTON1, new InterfaceElement{ IDC_BUTTON1, NULL, _T("IDC_BUTTON1"), _T("IDC_BUTTON1"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Button_Reload } });
+
+	Elements.insert({ IDC_BUTTON5, new InterfaceElement{ IDC_BUTTON5, NULL, _T("IDC_BUTTON5"), _T("IDC_BUTTON5"), TBS_BOTH | TBS_NOTICKS | WS_TABSTOP, 0, 0, 0, 0, nullptr, &CUserInterface::Button_Test } });
 
 
 

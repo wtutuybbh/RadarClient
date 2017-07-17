@@ -213,7 +213,7 @@ int CRCSocket::Read()
 				if (CRCSocketReadLogEnabled) LOG_ERROR__("wrong sh at position [%d]: sh = (struct _sh*)(client->buff);", sh_offset);
 				return recev;
 			}
-			OutBuff = new char[sh->dlina];
+			OutBuff = new char[sh->dlina]; //TODO: possible leak!
 			memcpy(OutBuff, client->buff + sh_offset, sh->dlina);
 			PostMessage(hWnd, CM_POSTDATA, WPARAM(OutBuff), sh->dlina);
 			if (CRCSocketReadLogEnabled) LOG_INFO__("sent %d bytes to processing, sh->type=%d", sh->dlina, sh->type);

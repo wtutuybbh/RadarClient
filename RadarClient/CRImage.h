@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "CSector.h"
+#include "CMesh.h"
 struct RDR_INITCL;
 struct RIMAGE;
 class CRImage :
@@ -22,7 +23,8 @@ public:
 	CRImage(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels);
 	static bool InitPalette(std::string fileName);
 	void Refresh(float azemuth, glm::vec4 origin, float mpph, float mppv, RDR_INITCL * rdrinit, RIMAGE* info, void* pixels);
-
 	void BindUniforms(CViewPortControl* vpControl) override;
+
+	static CMesh * mesh;
 };
 

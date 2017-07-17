@@ -26,6 +26,7 @@
 #include "CUserInterface.h"
 #include "CRCLogger.h"
 #include "CRay.h"
+#include "CRImage.h"
 
 const std::string CScene::requestID = "CScene";
 
@@ -919,7 +920,7 @@ glm::vec3 CScene::GetGeographicCoordinates(glm::vec3 glCoords)
 {
 	return glm::vec3(position.x + glCoords.x * MPPh / cnvrt::londg2m(1, position.y), position.y + glCoords.z * MPPh / cnvrt::londg2m(1, position.y), glCoords.y);
 }
-
+CMesh * CRImage::mesh;
 void CScene::LoadMesh()
 {
 	if (CSettings::GetInt(IntLoadMesh) == 1) 
@@ -927,6 +928,8 @@ void CScene::LoadMesh()
 		CMesh *mesh = new CMesh(false, position, max_range, texsize, resolution, MPPh, MPPv);
 		waitingForMesh = true;
 		Mesh = mesh;
+
+		CRImage::mesh = mesh;
 	}
 }
 

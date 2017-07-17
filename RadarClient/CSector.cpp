@@ -26,9 +26,55 @@ CFlightPoint::CFlightPoint(double lon, double lat, int dir, int time) : lon(lon)
 
 void CSector::get_flight_point(DWORD t, double& lon, double& lat)
 {
-	auto t_ = t - flight_start_;
+	auto t_ = (t - flight_start_) / 1000.0f + flight_time0;
+	int i0=0, i1=0;
 
 
+	for (auto i=0; i<flight_points_.size(); i++)
+	{
+		if (flight_points_[i].time > t_)
+		{
+			i0 = i - 1;
+			i1 = i;
+			break;
+		}
+	}
+	auto p0_x = flight_points_[i0].lon;
+	auto p0_y = flight_points_[i0].lat;
+	auto p1_x = flight_points_[i1].lon;
+	auto p1_y = flight_points_[i1].lat;
+
+	auto m0_x = sin(2 * M_PI * flight_points_[i0].dir / 360.0);
+	auto m0_y = cos(2 * M_PI * flight_points_[i0].dir / 360.0);
+	auto m1_x = sin(2 * M_PI * flight_points_[i1].dir / 360.0);
+	auto m1_y = cos(2 * M_PI * flight_points_[i1].dir / 360.0);
+
+	auto sqrt01 = sqrt((p1_x - p0_x) * (p1_x - p0_x) + (p1_y - p0_y) * (p1_y - p0_y));
+
+	m0_x *= sqrt01;
+	m0_y *= sqrt01;
+	m1_x *= sqrt01;
+	m1_y *= sqrt01;
+
+	auto t__ = (t_ - flight_points_[i0].time) / (flight_points_[i1].time - flight_points_[i0].time);
+	auto t__2 = t__ * t__;
+	auto t__3 = t__2 * t__;
+
+	lon = (2 * t__3 - 3 * t__2 + 1)*p0_x + (t__3 - 2 * t__2 + t__)*m0_x + (-2 * t__3 + 3 * t__2)*p1_x + (t__3 - t__2)*m1_x;
+	lat = (2 * t__3 - 3 * t__2 + 1)*p0_y + (t__3 - 2 * t__2 + t__)*m0_y + (-2 * t__3 + 3 * t__2)*p1_y + (t__3 - t__2)*m1_y;
+}
+
+//DWORD CSector::flight_start_ = 0;
+void CSector::flight_start_stop(bool start)
+{
+	if (start)
+	{
+		flight_start_ = GetTickCount();
+	}
+	else
+	{
+		flight_start_ = 0;
+	}
 }
 
 void CSector::RefreshColorSettings()
