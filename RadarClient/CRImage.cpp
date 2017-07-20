@@ -29,12 +29,17 @@ void CRImage::_refresh_multipoints_2d(float azemuth, glm::vec4 origin, float mpp
 	glm::vec4 color;
 
 	DWORD curr_image_tick_ = GetTickCount();
+
+	float dist0 = 9, amp0 = 0;
+	float dist1 = 7, amp1 = CSettings::GetFloat(FloatAmp_01);
+	float dist2 = 5, amp2 = CSettings::GetFloat(FloatAmp_02);
+	float apsize = 0.000003;
 	
 	DWORD ticks_per_scan_ = (curr_image_tick_ - prev_image_tick_) / info->N;
 	LOG_INFO("flight_test", "CRImage::_refresh_multipoints_2d", "ticks_per_scan=%d", ticks_per_scan_);
 
-	double lon = 0, lat = 0;
-	glm::vec3 flight_point, p0, p1;
+	double lon = 0, lat = 0, dlon = 0, dlat=0;
+	glm::vec3 flight_point, p0, p1, flight_point_A, flight_point_B;
 	double threshold = 0.1;
 	for (int i = 0; i < info->N; i++) //i - номер массива сканов по дальности
 	{
@@ -44,11 +49,13 @@ void CRImage::_refresh_multipoints_2d(float azemuth, glm::vec4 origin, float mpp
 		if (flight_start_)
 		{
 				auto t = prev_image_tick_+ i * ticks_per_scan_;
-				CSector::get_flight_point(t, lon, lat);
+				CSector::get_flight_point(t, lon, lat, dlon, dlat);
 				//LOG_INFO("flight_test", "CRImage::_refresh_multipoints_2d", "t=%d, lon=%f, lat=%f", t, lon, lat);
 				if (mesh) 
 				{
 					flight_point = glm::vec3(mesh->LLH2XYZT(glm::vec3(lon, lat, 0)));
+					flight_point_A = glm::vec3(mesh->LLH2XYZT(glm::vec3(lon + apsize*dlon, lat + apsize*dlat, 0)));
+					flight_point_B = glm::vec3(mesh->LLH2XYZT(glm::vec3(lon - apsize*dlon, lat - apsize*dlat, 0)));
 					//LOG_INFO("flight_test", "CRImage::_refresh_multipoints_2d", "flight_point={%f, %f, %f}", flight_point.x, flight_point.y, flight_point.z);
 				}
 		}
@@ -88,23 +95,38 @@ void CRImage::_refresh_multipoints_2d(float azemuth, glm::vec4 origin, float mpp
 			color.g = pixelcolor.rgbGreen / 255.0;
 			color.b = pixelcolor.rgbBlue / 255.0;
 			color.a =  5 * float(paletteIndex) / paletteWidth;*/
+			float r = (rdrinit->minR + j*(rdrinit->maxR - rdrinit->minR) / info->NR) * rdrinit->dR;
 
-			color = GetColor(px[i * info->NR + j]);
+			cartesianCoords = glm::vec3(origin) + glm::vec3(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph); //we always add y_0 (height of the radar relative to sea level) to all cartesian coordinates 
 
-			if (jx > 0 && abs(j - jx) <= 5)
-			{
+			
+			auto pxj = px[i * info->NR + j];
+			//if (jx > 0 && abs(j - jx) <= 50)
+			//{
 				//color = GetColor(maxAmp);
-				color = glm::vec4(1, 1, 1, 1);
-			}
+				auto dist =  (glm::distance(cartesianCoords, flight_point_A) + glm::distance(cartesianCoords, flight_point_B)) / 2.0f;
+				if (dist < dist2)
+				{
+					//color = glm::vec4(1, 1, 1, 1);
+					pxj += amp2;
+				}
+				if (dist >= dist2 && dist < dist1)
+				{
+					pxj += (amp2 * (dist1 - dist) + amp1 * (dist - dist2)) / (dist1 - dist2) ;
+				}
+				if (dist >= dist1 && dist < dist0)
+				{
+					pxj += (amp1 * (dist0 - dist) + amp0 * (dist - dist1)) / (dist0 - dist1);
+				}
+			//}
+				color = GetColor(pxj);
 
 			if (color.a > 1) color.a = 1;
 			if (CRImage_Refresh_Log) LOG_INFO_("CRImage_Refresh_Log", "color.a=%f", color.a);
-			float r = (rdrinit->minR + j*(rdrinit->maxR - rdrinit->minR) / info->NR) * rdrinit->dR;
 			/*if (px[i * info->NR + j] == 0)
 			r = 0;*/
 #if defined(CRCPOINT_CONSTRUCTOR_USES_RADIANS)
 
-			cartesianCoords = glm::vec3(origin) + glm::vec3(-r * sin(a) * cos(e) / mpph, r * sin(e) / mppv, r * cos(a) * cos(e) / mpph); //we always add y_0 (height of the radar relative to sea level) to all cartesian coordinates 
 
 			
 			/*if (flight_start_)

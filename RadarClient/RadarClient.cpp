@@ -682,7 +682,7 @@ void fill_flight_points()
 	CSector::flight_points_.push_back(CFlightPoint(37.409904, 55.979473, 334, 5028));
 	CSector::flight_points_.push_back(CFlightPoint(37.409779, 55.979702, 334, 5040));
 
-	CSector::flight_time0 = 4505;
+	CSector::flight_time0 = 4550;
 	CSector::prev_image_tick_ = GetTickCount();
 }
 
@@ -705,9 +705,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	freopen("CONOUT$", "w", stdout);
 #endif
 
-	double lon, lat;
-	CSector::get_flight_point(3000, lon, lat);
-	LOG_INFO("flight_test", "WinMain", "%f %f", lon, lat);
+	//double lon, lat;
+//	CSector::get_flight_point(3000, lon, lat);
+	//LOG_INFO("flight_test", "WinMain", "%f %f", lon, lat);
 
 	string context = "WinMain";
 	

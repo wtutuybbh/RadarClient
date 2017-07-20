@@ -24,7 +24,7 @@ CFlightPoint::CFlightPoint(double lon, double lat, int dir, int time) : lon(lon)
 {
 }
 
-void CSector::get_flight_point(DWORD t, double& lon, double& lat)
+void CSector::get_flight_point(DWORD t, double& lon, double& lat, double& dlon, double& dlat)
 {
 	auto t_ = (t - flight_start_) / 1000.0f + flight_time0;
 	int i0=0, i1=0;
@@ -62,6 +62,9 @@ void CSector::get_flight_point(DWORD t, double& lon, double& lat)
 
 	lon = (2 * t__3 - 3 * t__2 + 1)*p0_x + (t__3 - 2 * t__2 + t__)*m0_x + (-2 * t__3 + 3 * t__2)*p1_x + (t__3 - t__2)*m1_x;
 	lat = (2 * t__3 - 3 * t__2 + 1)*p0_y + (t__3 - 2 * t__2 + t__)*m0_y + (-2 * t__3 + 3 * t__2)*p1_y + (t__3 - t__2)*m1_y;
+	
+	dlon = (6 * t__2 - 2 * t__) * p0_x + (3 * t__2 - 4 * t__) * m0_x + (-6 * t__2 + 6 * t__) * p1_x + (3 * t__2 - 2 * t__) * m1_x;
+	dlat = (6 * t__2 - 2 * t__) * p0_y + (3 * t__2 - 4 * t__) * m0_y + (-6 * t__2 + 6 * t__) * p1_y + (3 * t__2 - 2 * t__) * m1_y;
 }
 
 //DWORD CSector::flight_start_ = 0;
